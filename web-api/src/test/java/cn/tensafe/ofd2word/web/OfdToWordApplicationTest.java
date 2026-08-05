@@ -9,7 +9,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(properties = "ofd2word.data-root=target/test-data")
+@SpringBootTest(properties = {
+        "ofd2word.data-root=target/test-data",
+        "spring.main.banner-mode=off",
+        "logging.level.root=WARN",
+        "logging.level.cn.tensafe.ofd2word=WARN"
+})
 @AutoConfigureMockMvc
 class OfdToWordApplicationTest {
     @Autowired MockMvc mvc;
