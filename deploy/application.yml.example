@@ -1,0 +1,20 @@
+server:
+  port: 8080
+spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 250MB
+ofd2word:
+  data-root: ./data
+  concurrency: 2
+  queue-capacity: 20
+  timeout: 5m
+  result-ttl: 24h
+  max-file-size: 52428800
+  max-expanded-size: 209715200
+  max-entry-size: 41943040
+  max-entries: 10000
+  max-compression-ratio: 100
+  max-pages: 500
+

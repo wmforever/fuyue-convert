@@ -1,0 +1,39 @@
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  servlet:
+    context-path: /
+spring:
+  application:
+    name: ofd-to-word
+  servlet:
+    multipart:
+      max-file-size: ${MAX_UPLOAD_SIZE:50MB}
+      max-request-size: ${MAX_REQUEST_SIZE:250MB}
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+ofd2word:
+  data-root: ${OFD2WORD_DATA_ROOT:./data}
+  concurrency: ${OFD2WORD_CONCURRENCY:2}
+  queue-capacity: ${OFD2WORD_QUEUE_CAPACITY:20}
+  timeout: ${OFD2WORD_TIMEOUT:5m}
+  result-ttl: ${OFD2WORD_RESULT_TTL:24h}
+  max-file-size: ${OFD2WORD_MAX_FILE_BYTES:52428800}
+  max-expanded-size: ${OFD2WORD_MAX_EXPANDED_BYTES:209715200}
+  max-entry-size: ${OFD2WORD_MAX_ENTRY_BYTES:41943040}
+  max-entries: ${OFD2WORD_MAX_ENTRIES:10000}
+  max-compression-ratio: ${OFD2WORD_MAX_COMPRESSION_RATIO:100}
+  max-pages: ${OFD2WORD_MAX_PAGES:500}
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+  level:
+    root: INFO
+    cn.tensafe.ofd2word: INFO
+build:
+  version: "0.1.0-SNAPSHOT"
