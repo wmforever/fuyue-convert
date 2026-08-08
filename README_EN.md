@@ -25,7 +25,7 @@ Status legend:
 
 | Route | Status | Default strategy | Notes |
 | --- | --- | --- | --- |
-| OFD -> DOCX/TXT/PDF | beta | editability first | Text-based OFD can preserve text, tables, images, and seal appearance. Scanned OFD reports that OCR is required. |
+| OFD -> DOCX/TXT/PDF | beta | editability first | Text-based OFD can preserve text, tables, and images. Incompatible seal appearances produce an explicit warning while body content is retained; scanned OFD reports that OCR is required. |
 | CSV <-> XLSX | stable | data first | Covers strict CSV to XLSX and back-to-CSV data round trips. |
 | DOCX/XLSX/PPTX -> PDF | beta | layout first | Uses LibreOffice headless when available. Local fonts affect visual output. |
 | TXT -> DOCX/PDF | stable | content first | Useful for generating simple office documents from plain text. |
@@ -111,7 +111,7 @@ Run end-to-end QA:
 python3 qa-samples/run_qa.py
 ```
 
-The QA script starts a local service, uploads samples through HTTP, downloads converted outputs, renders them with LibreOffice/Poppler, and compares the results.
+The QA script starts a local service, uploads samples through HTTP, downloads converted outputs, renders them with LibreOffice/Poppler, and compares the results. `strictPass` is route-specific: direct-fidelity routes require identical rendered pixels, page-layer DOCX requires identical embedded page pixels, editable documents require normalized content equality, and spreadsheet routes require data equality. Cross-engine re-rendering is reported separately as `visualPass`.
 
 ## Modules
 

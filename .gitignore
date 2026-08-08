@@ -19,4 +19,5 @@ qa-samples/input/*
 qa-samples/output/
 qa-samples/work/
 qa-samples/runtime-data/
+qa-samples/debug-runtime*/
 qa-samples/report/

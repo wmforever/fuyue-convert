@@ -25,7 +25,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 
 | 路线 | 状态 | 默认策略 | 说明 |
 | --- | --- | --- | --- |
-| OFD -> DOCX/TXT/PDF | beta | 可编辑优先 | 文字型 OFD 可解析文字、表格、图片和签章外观；扫描型 OFD 会提示需要 OCR。 |
+| OFD -> DOCX/TXT/PDF | beta | 可编辑优先 | 文字型 OFD 可解析文字、表格和图片；签章外观不兼容时保留正文并明确告警，扫描型 OFD 会提示需要 OCR。 |
 | CSV <-> XLSX | stable | 数据优先 | 已覆盖 CSV 到 XLSX，再回到 CSV 的严格数据回环。 |
 | DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 headless 转换；本地字体会影响结果。 |
 | TXT -> DOCX/PDF | stable | 内容优先 | 适合纯文本生成基础办公文档。 |
@@ -125,7 +125,7 @@ mvn -DskipTests package
 python3 qa-samples/run_qa.py
 ```
 
-QA 会启动本地服务，通过 HTTP 上传样本、下载转换结果，再用 LibreOffice/Poppler 渲染并比较。视觉测试中 `strictPass=true` 表示零差异像素；数据测试中表示回环数据完全一致。
+QA 会启动本地服务，通过 HTTP 上传样本、下载转换结果，再用 LibreOffice/Poppler 渲染并比较。`strictPass` 按路线目标判定：直接保真路线要求渲染像素一致，页面图层 DOCX 要求内嵌页面像素一致，可编辑文档要求规范化内容一致，表格路线要求数据一致。跨引擎二次渲染差异另记为 `visualPass`，不会被严格内容检查掩盖。
 
 ## 模块结构
 

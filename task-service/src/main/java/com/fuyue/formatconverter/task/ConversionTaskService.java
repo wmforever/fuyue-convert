@@ -221,6 +221,10 @@ public final class ConversionTaskService implements AutoCloseable {
             update(record, TaskStatus.FAILED, TaskStage.FAILED, 100, "TASK_FAILED", safeError(e),
                     warnings, results, false, null);
             log.error("taskId={} failed at task level", record.id, e);
+        } catch (Error e) {
+            update(record, TaskStatus.FAILED, TaskStage.FAILED, 100, "CONVERTER_CRASHED",
+                    "转换组件异常终止：" + e.getClass().getSimpleName(), warnings, results, false, null);
+            log.error("taskId={} converter crashed", record.id, e);
         }
     }
 
@@ -261,7 +265,9 @@ public final class ConversionTaskService implements AutoCloseable {
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof Exception exception) throw exception;
-            if (cause instanceof Error error) throw error;
+            if (cause instanceof Error error) {
+                throw new IOException("转换组件异常终止：" + error.getClass().getSimpleName(), error);
+            }
             throw new RuntimeException(cause);
         } finally {
             single.shutdownNow();
@@ -461,7 +467,7 @@ public final class ConversionTaskService implements AutoCloseable {
     }
     private int progress(int index, int total, int withinFile) { return Math.min(94, (index * 90 + withinFile) / Math.max(1, total)); }
     private void checkDeadline(Instant deadline) throws TimeoutException { if (Instant.now().isAfter(deadline)) throw new TimeoutException("转换超时"); }
-    private String safeError(Exception e) { return e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage(); }
+    private String safeError(Throwable e) { return e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage(); }
     private ThreadFactory namedFactory(String prefix) {
         return new ThreadFactory() { private int count; public synchronized Thread newThread(Runnable r) { Thread t = new Thread(r, prefix + (++count)); t.setDaemon(true); return t; } };
     }

@@ -47,7 +47,15 @@ final class ConversionGuards {
         builder.redirectErrorStream(true);
         builder.redirectOutput(logFile.toFile());
         Process process = builder.start();
-        boolean finished = process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        boolean finished;
+        try {
+            finished = process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            process.destroyForcibly();
+            process.waitFor(5, TimeUnit.SECONDS);
+            Thread.currentThread().interrupt();
+            throw e;
+        }
         if (!finished) {
             process.destroyForcibly();
             process.waitFor(5, TimeUnit.SECONDS);
@@ -98,9 +106,27 @@ final class ConversionGuards {
 
     static void requireImageBounds(Path image, ParseLimits limits) throws IOException {
         ImageSize size = readImageSize(image);
-        long pixels = Math.multiplyExact((long) size.width(), (long) size.height());
-        long allowed = Math.min(MAX_IMAGE_PIXELS, Math.max(1L, limits.maxExpandedBytes() / 4L));
+        long pixels;
+        try {
+            pixels = Math.multiplyExact((long) size.width(), (long) size.height());
+        } catch (ArithmeticException e) {
+            throw new IOException("图片像素尺寸无效", e);
+        }
+        long allowed = allowedImagePixels(limits);
         if (pixels > allowed) throw new IOException("图片像素超过限制：" + pixels + " > " + allowed);
+    }
+
+    static void requireRenderBounds(double widthPoints, double heightPoints, double dpi,
+                                    ParseLimits limits) throws IOException {
+        if (!Double.isFinite(widthPoints) || !Double.isFinite(heightPoints) ||
+                widthPoints <= 0 || heightPoints <= 0 || !Double.isFinite(dpi) || dpi <= 0) {
+            throw new IOException("文档页面尺寸无效");
+        }
+        double pixels = Math.ceil(widthPoints * dpi / 72d) * Math.ceil(heightPoints * dpi / 72d);
+        long allowed = allowedImagePixels(limits);
+        if (!Double.isFinite(pixels) || pixels > allowed) {
+            throw new IOException("页面渲染像素超过限制：" + Math.round(pixels) + " > " + allowed);
+        }
     }
 
     static int requireSpreadsheetRow(int rowIndex, ParseLimits limits) throws IOException {
@@ -140,6 +166,10 @@ final class ConversionGuards {
                 reader.dispose();
             }
         }
+    }
+
+    private static long allowedImagePixels(ParseLimits limits) {
+        return Math.min(MAX_IMAGE_PIXELS, Math.max(1L, limits.maxExpandedBytes() / 4L));
     }
 
     private static String readSmall(Path logFile) throws IOException {

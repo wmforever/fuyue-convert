@@ -49,27 +49,42 @@ public final class OfdToTextConverter implements FileConverter {
         return new ConversionOutput(outputPath, outputFileName(input.displayName()), parsed.pages().size(), warnings);
     }
 
-    private String text(List<PageModel> pages) {
+    static String text(List<PageModel> pages) {
         StringBuilder out = new StringBuilder();
         for (int i = 0; i < pages.size(); i++) {
             PageModel page = pages.get(i);
             if (i > 0) out.append(System.lineSeparator()).append(System.lineSeparator());
             if (pages.size() > 1) out.append("第 ").append(page.pageNumber()).append(" 页").append(System.lineSeparator());
-            if (!page.paragraphs().isEmpty()) {
-                page.paragraphs().forEach(paragraph -> {
-                    String line = paragraph.runs().stream().map(TextBlock::text).reduce("", String::concat).strip();
-                    if (!line.isEmpty()) out.append(line).append(System.lineSeparator());
-                });
-            } else {
-                page.textBlocks().stream()
-                        .sorted(Comparator.comparingDouble(TextBlock::baselineY).thenComparingDouble(block -> block.box().x()))
-                        .map(TextBlock::text)
-                        .map(String::strip)
-                        .filter(line -> !line.isEmpty())
-                        .forEach(line -> out.append(line).append(System.lineSeparator()));
-            }
+            visualLines(page.textBlocks()).stream()
+                    .map(line -> line.stream().map(TextBlock::text).reduce("", String::concat).strip())
+                    .filter(line -> !line.isEmpty())
+                    .forEach(line -> out.append(line).append(System.lineSeparator()));
         }
         return out.toString();
+    }
+
+    private static List<List<TextBlock>> visualLines(List<TextBlock> blocks) {
+        List<TextBlock> ordered = blocks.stream()
+                .filter(block -> !block.text().isBlank())
+                .sorted(Comparator.comparingDouble(TextBlock::baselineY).thenComparingDouble(block -> block.box().x()))
+                .toList();
+        List<List<TextBlock>> lines = new ArrayList<>();
+        List<TextBlock> current = null;
+        for (TextBlock block : ordered) {
+            if (current == null || !sameVisualLine(current.get(0), block)) {
+                current = new ArrayList<>();
+                lines.add(current);
+            }
+            current.add(block);
+        }
+        lines.forEach(line -> line.sort(Comparator.comparingDouble(block -> block.box().x())));
+        return lines;
+    }
+
+    private static boolean sameVisualLine(TextBlock first, TextBlock second) {
+        double height = Math.max(1d, Math.min(first.box().height(), second.box().height()));
+        double tolerance = Math.max(0.6d, Math.min(1.5d, height * 0.3d));
+        return Math.abs(first.baselineY() - second.baselineY()) <= tolerance;
     }
 
     private String outputFileName(String input) {

@@ -26,8 +26,9 @@ FormatConverter 使用“路线质量等级 + 可复现 QA 证据”描述转换
 
 ## QA 结论字段
 
-- `strictPass`：视觉测试中零差异像素，或数据测试中回环数据完全一致。
-- `practicalPass`：视觉差异低于参考阈值，仅表示接近，不等同于严格通过。
+- `strictPass`：按路线目标执行严格检查。直接保真路线要求渲染像素一致；页面图层 DOCX 要求内嵌页面像素一致；可编辑文档要求规范化内容一致；表格路线要求数据一致；JPEG 使用声明的有损误差上限。
+- `visualPass`：源文件和目标文件经当前环境二次渲染后的差异低于参考阈值。它受字体和渲染引擎影响，与内容或内嵌页面是否严格一致分开记录。
+- `practicalPass`：视觉用例中等同于 `visualPass`；数据和内容用例中等同于 `strictPass`。
 - `diffRatio`：差异像素数除以总像素数。
 - `pageCountMatch`：源渲染页数和目标渲染页数一致。
 
@@ -45,28 +46,37 @@ FormatConverter 使用“路线质量等级 + 可复现 QA 证据”描述转换
 最近一次本地端到端 QA：
 
 ```text
-Total: 11
-Strict passed: 7
-Strict failed: 4
+Total: 13
+Strict passed: 13
+Strict failed: 0
+Visual threshold passed: 6
 Office available: true
 ```
 
-严格通过：
+路线级严格检查全部通过：
 
 - `DOCX -> PDF`
 - `XLSX -> PDF`
 - `PPTX -> PDF`
+- `WPS -> DOCX`：规范化文本一致。
+- `ET -> XLSX`：首个工作表 CSV 数据一致。
 - `DPS -> PPTX`
+- `UOF -> DOCX`：内嵌页面图像像素一致。
 - `PDF -> PNG`
+- `PDF -> JPEG`：平均绝对误差在声明阈值内。
+- `PDF -> DOCX`：内嵌页面图像像素一致。
 - `PNG -> PDF`
 - `CSV -> XLSX -> CSV`
+- `OFD -> DOCX`：忽略空白后，源 OFD 与 DOCX 的文字字符及数量一致（561/561）。
 
-严格失败但可运行：
+跨引擎二次渲染仍有差异的路线：
 
 - `WPS -> DOCX`：页数一致，存在小比例视觉差异。
 - `ET -> XLSX`：页数一致，存在小比例视觉差异。
-- `UOF -> DOCX`：已修复页数不一致，当前使用 PDF 图层兜底，仍存在明显视觉差异。
-- `PDF -> DOCX`：页数一致，当前为页面图层 DOCX，仍存在渲染差异。
+- `UOF -> DOCX`、`PDF -> DOCX`：内嵌页面与源渲染完全一致，但 DOCX 经 LibreOffice 再渲染时存在抗锯齿或页面定位差异。
+- `PDF -> JPEG`：有损编码导致大范围微小像素变化，平均绝对误差仍在阈值内。
+
+这些视觉差异不会被写成“完全一致”。本轮 13/13 表示每条路线声明的严格目标全部满足，不表示所有目标文件经任意办公软件再次渲染都能达到零像素差异。
 
 完整报告由 `python3 qa-samples/run_qa.py` 生成到 `qa-samples/report/qa-report.md`。
 

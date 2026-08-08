@@ -6,6 +6,9 @@ import com.fuyue.formatconverter.table.PageLayoutAnalyzer;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.ofdrw.layout.OFDDoc;
@@ -18,6 +21,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -291,6 +295,72 @@ class ConversionTaskServiceTest {
             assertEquals("jpeg-source.jpg", jpgFinished.downloadName());
             assertEquals(DocumentFormat.JPG, jpgFinished.targetFormat());
             assertNotNull(ImageIO.read(service.download(jpgTask.taskId()).path().toFile()));
+        }
+    }
+
+    @Test void convertsMixedSizePdfToDocxWithoutPoppler() throws Exception {
+        Path source = temp.resolve("mixed-pages.pdf");
+        try (PDDocument pdf = new PDDocument()) {
+            pdf.addPage(new PDPage(new PDRectangle(300, 400)));
+            pdf.addPage(new PDPage(new PDRectangle(500, 300)));
+            pdf.save(source.toFile());
+        }
+        Path output = temp.resolve("mixed-pages.docx");
+        ConversionOutput converted = new PdfToDocxConverter(null).convert(
+                new ConversionInput("mixed-pages.pdf", "application/pdf", Files.size(source), source),
+                temp.resolve("mixed-work"), output, ParseLimits.defaults(), (stage, progress) -> { });
+
+        assertEquals(2, converted.pageCount());
+        try (XWPFDocument word = new XWPFDocument(Files.newInputStream(output))) {
+            assertEquals(2, word.getParagraphs().size());
+            var firstSection = word.getParagraphs().get(0).getCTP().getPPr().getSectPr();
+            assertNotNull(firstSection);
+            assertEquals(BigInteger.valueOf(6000), firstSection.getPgSz().getW());
+            assertEquals(BigInteger.valueOf(8000), firstSection.getPgSz().getH());
+            assertEquals(BigInteger.valueOf(10000), word.getDocument().getBody().getSectPr().getPgSz().getW());
+            assertEquals(BigInteger.valueOf(6000), word.getDocument().getBody().getSectPr().getPgSz().getH());
+        }
+    }
+
+    @Test void rejectsOversizedPdfPageBeforePdfBoxRendering() throws Exception {
+        Path source = temp.resolve("oversized-page.pdf");
+        try (PDDocument pdf = new PDDocument()) {
+            pdf.addPage(new PDPage(new PDRectangle(20_000, 20_000)));
+            pdf.save(source.toFile());
+        }
+        ParseLimits limits = new ParseLimits(10_000_000, 10_000_000, 10_000_000,
+                10_000, 100d, 10);
+
+        IOException error = assertThrows(IOException.class, () -> new PdfToDocxConverter(null).convert(
+                new ConversionInput("oversized-page.pdf", "application/pdf", Files.size(source), source),
+                temp.resolve("oversized-work"), temp.resolve("oversized-page.docx"), limits,
+                (stage, progress) -> { }));
+
+        assertTrue(error.getMessage().contains("页面渲染像素超过限制"));
+    }
+
+    @Test void marksTaskFailedWhenConverterThrowsError() throws Exception {
+        FileConverter crashing = new FileConverter() {
+            @Override public ConversionRoute route() {
+                return ConversionRoute.of(DocumentFormat.TXT, DocumentFormat.DOCX, "test converter");
+            }
+
+            @Override
+            public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                            ParseLimits limits, ConversionProgress progress) {
+                throw new NoClassDefFoundError("missing-test-dependency");
+            }
+        };
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("crash-data"), 1, 2,
+                Duration.ofSeconds(5), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] text = "test".getBytes(StandardCharsets.UTF_8);
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(crashing))) {
+            TaskSnapshot created = service.createTask(List.of(new UploadPayload("test.txt", "text/plain", text.length,
+                    () -> new ByteArrayInputStream(text))), DocumentFormat.DOCX);
+            TaskSnapshot finished = await(service, created.taskId());
+            assertEquals(TaskStatus.FAILED, finished.status());
+            assertEquals("CONVERSION_FAILED", finished.files().get(0).errorCode());
+            assertTrue(finished.files().get(0).errorMessage().contains("NoClassDefFoundError"));
         }
     }
 

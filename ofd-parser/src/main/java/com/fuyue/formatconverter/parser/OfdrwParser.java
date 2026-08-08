@@ -26,12 +26,17 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 public final class OfdrwParser implements OfdParser {
+    private static final int MAX_PAGE_BLOCK_DEPTH = 128;
+    private static final int MAX_PATH_OPERATIONS = 100_000;
+
     @Override
     public DocumentModel parse(SafeOfdPackage source, String displayName, ParseLimits limits)
             throws OfdParseException {
@@ -51,9 +56,11 @@ public final class OfdrwParser implements OfdParser {
                 List<LineElement> lines = new ArrayList<>();
                 List<ImageBlock> images = new ArrayList<>();
                 List<ConversionWarning> pageWarnings = new ArrayList<>();
+                ParseTraversal traversal = new ParseTraversal(limits.maxEntries());
                 int z = 0;
                 for (CT_Layer layer : info.getAllLayer()) {
-                    z = parseBlocks(layer.getPageBlocks(), pageNumber, z, resources, texts, lines, images, pageWarnings);
+                    z = parseBlocks(layer.getPageBlocks(), pageNumber, z, resources, texts, lines, images,
+                            pageWarnings, traversal, 0);
                 }
                 String pageRef = info.getId() == null ? String.valueOf(reader.getPageObjectId(pageNumber)) : info.getId().toString();
                 for (StampImage stamp : stampsByPage.getOrDefault(pageRef, List.of())) {
@@ -79,13 +86,27 @@ public final class OfdrwParser implements OfdParser {
 
     private int parseBlocks(List<PageBlockType> blocks, int page, int z, ResourceManage resources,
                             List<TextBlock> texts, List<LineElement> lines, List<ImageBlock> images,
-                            List<ConversionWarning> warnings) {
+                            List<ConversionWarning> warnings, ParseTraversal traversal, int depth)
+            throws OfdParseException {
+        if (blocks == null || blocks.isEmpty()) return z;
+        if (depth > MAX_PAGE_BLOCK_DEPTH) {
+            warnings.add(ConversionWarning.of(WarningCode.UNSUPPORTED_OFD_ELEMENT,
+                    "OFD 页面对象嵌套超过安全限制，已跳过过深内容", page));
+            return z;
+        }
         for (PageBlockType block : blocks) {
+            if (block == null) continue;
+            if (!traversal.accept(block)) {
+                warnings.add(ConversionWarning.of(WarningCode.UNSUPPORTED_OFD_ELEMENT,
+                        "OFD 页面对象存在循环引用，已跳过重复对象", page));
+                continue;
+            }
             if (block instanceof TextObject text) parseText(text, page, z++, resources, texts, warnings);
             else if (block instanceof PathObject path) parsePath(path, page, z++, resources, lines, warnings);
             else if (block instanceof ImageObject image) parseImage(image, page, z++, resources, images, warnings);
             else if (block instanceof CT_PageBlock nested) {
-                z = parseBlocks(nested.getPageBlocks(), page, z, resources, texts, lines, images, warnings);
+                z = parseBlocks(nested.getPageBlocks(), page, z, resources, texts, lines, images, warnings,
+                        traversal, depth + 1);
             } else {
                 warnings.add(ConversionWarning.of(WarningCode.UNSUPPORTED_OFD_ELEMENT,
                         "暂不支持的 OFD 页面对象：" + block.getClass().getSimpleName(), page));
@@ -121,9 +142,16 @@ public final class OfdrwParser implements OfdParser {
             double sourceX = code.getX() == null ? cursorX : code.getX();
             double sourceY = code.getY() == null ? cursorY : code.getY();
             Point offset = transform.apply(new Point(sourceX, sourceY));
-            List<Double> advances = expandAdvances(code.getDeltaX()).stream()
-                    .map(delta -> signedLength(transform.applyVector(new Point(delta, 0)), delta))
-                    .toList();
+            List<Double> advances;
+            try {
+                advances = expandAdvances(code.getDeltaX(), content).stream()
+                        .map(delta -> signedLength(transform.applyVector(new Point(delta, 0)), delta))
+                        .toList();
+            } catch (RuntimeException e) {
+                advances = List.of();
+                warnings.add(ConversionWarning.of(WarningCode.UNSUPPORTED_OFD_ELEMENT,
+                        "文字字距数据无效或超过安全限制，已按默认字距处理", page));
+            }
             out.add(new TextBlock(object.getID() + "-" + codeIndex++, page, box, content,
                     box.y() + offset.y(), style, z, offset.x(), offset.y(), advances, transform));
 
@@ -164,7 +192,13 @@ public final class OfdrwParser implements OfdParser {
         Point current = null;
         Point subpathStart = null;
         int segment = 0;
+        int operationCount = 0;
         for (OptVal operation : object.getAbbreviatedDataEle().getRawOptVal()) {
+            if (++operationCount > MAX_PATH_OPERATIONS) {
+                warnings.add(ConversionWarning.of(WarningCode.UNSUPPORTED_OFD_ELEMENT,
+                        "路径操作数量超过安全限制，已截断", page));
+                break;
+            }
             double[] v = operation.getValues();
             switch (operation.getOpt()) {
                 case "S", "M" -> {
@@ -239,6 +273,9 @@ public final class OfdrwParser implements OfdParser {
         } catch (Exception e) {
             warnings.add(ConversionWarning.of(WarningCode.SIGNATURE_APPEARANCE_FAILED,
                     "数字签章外观提取失败：" + safeMessage(e), null));
+        } catch (LinkageError e) {
+            warnings.add(ConversionWarning.of(WarningCode.SIGNATURE_APPEARANCE_FAILED,
+                    "数字签章外观渲染组件不兼容，已保留正文并跳过签章外观：" + e.getClass().getSimpleName(), null));
         }
         return result;
     }
@@ -320,17 +357,23 @@ public final class OfdrwParser implements OfdParser {
     }
 
     private int clamp(int value) { return Math.max(0, Math.min(255, value)); }
-    private List<Double> expandAdvances(ST_Array encoded) {
+    private List<Double> expandAdvances(ST_Array encoded, String content) {
         if (encoded == null || encoded.size() == 0) return List.of();
         List<Double> result = new ArrayList<>();
         List<String> values = encoded.getArray();
+        int glyphs = content == null ? 0 : content.codePointCount(0, content.length());
+        int maxValues = Math.max(1024, glyphs * 4);
         for (int i = 0; i < values.size(); i++) {
             String token = values.get(i);
             if ("g".equalsIgnoreCase(token) && i + 2 < values.size()) {
                 int count = Integer.parseInt(values.get(++i));
                 double repeated = Double.parseDouble(values.get(++i));
+                if (count < 0 || result.size() + count > maxValues) {
+                    throw new IllegalArgumentException("DeltaX repeat exceeds limit");
+                }
                 for (int n = 0; n < count; n++) result.add(repeated);
             } else {
+                if (result.size() >= maxValues) throw new IllegalArgumentException("DeltaX exceeds limit");
                 result.add(Double.parseDouble(token));
             }
         }
@@ -352,4 +395,20 @@ public final class OfdrwParser implements OfdParser {
 
     private record StampImage(String id, Rect box, String mimeType, byte[] data) { }
     private record NormalizedImage(String mimeType, byte[] data) { }
+
+    private static final class ParseTraversal {
+        private final int maxObjects;
+        private final java.util.Set<PageBlockType> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        private int objects;
+
+        private ParseTraversal(int maxObjects) { this.maxObjects = Math.max(1, maxObjects); }
+
+        private boolean accept(PageBlockType block) throws OfdParseException {
+            if (!visited.add(block)) return false;
+            if (++objects > maxObjects) {
+                throw new OfdParseException("OFD_TOO_MANY_PAGE_OBJECTS", "OFD 页面对象数量超过限制");
+            }
+            return true;
+        }
+    }
 }

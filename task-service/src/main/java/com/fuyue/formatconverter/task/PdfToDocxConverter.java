@@ -1,6 +1,12 @@
 package com.fuyue.formatconverter.task;
 
 import com.fuyue.formatconverter.parser.ParseLimits;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.xwpf.usermodel.Document;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -28,8 +34,8 @@ public final class PdfToDocxConverter implements FileConverter {
     private static final double RENDER_DPI = 160d;
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.DOCX,
             "将 PDF 转换为版式优先 DOCX：每页以保真底图还原版面。",
-            QualityLevel.EXPERIMENTAL, ConversionStrategy.FIDELITY, List.of("pdftoppm"),
-            List.of("生成页面图层 DOCX，正文结构编辑能力有限"));
+            QualityLevel.EXPERIMENTAL, ConversionStrategy.FIDELITY, List.of(),
+            List.of("生成页面图层 DOCX，正文结构编辑能力有限", "有 Poppler 时优先使用，否则回退 PDFBox"));
     private final Path popplerBinary;
 
     public PdfToDocxConverter() {
@@ -45,24 +51,26 @@ public final class PdfToDocxConverter implements FileConverter {
     @Override
     public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
-        if (popplerBinary == null) throw new IOException("PDF 转 DOCX 版式保真模式需要 pdftoppm");
         Files.createDirectories(workDir);
         progress.update(TaskStage.PARSING, 20);
-        int expectedPages = ConversionGuards.requirePdfPageCount(input.path(), limits);
-        List<RenderedPage> pages = renderPages(input.path(), workDir, expectedPages, limits, progress);
+        List<PageGeometry> geometries = readPageGeometries(input.path(), limits);
+        for (PageGeometry geometry : geometries) {
+            ConversionGuards.requireRenderBounds(geometry.widthPoints(), geometry.heightPoints(), RENDER_DPI, limits);
+        }
+        List<RenderedPage> pages = renderPages(input.path(), workDir, geometries, limits, progress);
         if (pages.isEmpty()) throw new IOException("PDF 未渲染出任何页面");
         progress.update(TaskStage.RENDERING, 80);
         try (XWPFDocument document = new XWPFDocument()) {
             for (int i = 0; i < pages.size(); i++) {
-                if (i > 0) {
-                    XWPFParagraph breaker = document.createParagraph();
-                    configureMarker(breaker);
-                    breaker.setPageBreak(true);
-                }
                 XWPFParagraph paragraph = document.createParagraph();
                 configureMarker(paragraph);
                 XWPFRun run = paragraph.createRun();
                 addPageImage(run, pages.get(i));
+                if (i < pages.size() - 1) {
+                    CTPPr properties = paragraph.getCTP().isSetPPr()
+                            ? paragraph.getCTP().getPPr() : paragraph.getCTP().addNewPPr();
+                    configureSection(properties.addNewSectPr(), pages.get(i).geometry(), true);
+                }
             }
             configureFinalSection(document, pages.get(pages.size() - 1).geometry());
             try (var out = Files.newOutputStream(outputPath)) { document.write(out); }
@@ -71,8 +79,26 @@ public final class PdfToDocxConverter implements FileConverter {
         return new ConversionOutput(outputPath, input.displayName().replaceFirst("(?i)\\.pdf$", ".docx"), pages.size(), List.of());
     }
 
-    private List<RenderedPage> renderPages(Path pdf, Path workDir, int expectedPages, ParseLimits limits,
+    private List<PageGeometry> readPageGeometries(Path pdf, ParseLimits limits) throws IOException {
+        try (PDDocument document = Loader.loadPDF(pdf.toFile())) {
+            int pages = document.getNumberOfPages();
+            if (pages <= 0) throw new IOException("PDF 没有可转换页面");
+            if (pages > limits.maxPages()) throw new IOException("PDF 页数超过限制：" + pages + " > " + limits.maxPages());
+            List<PageGeometry> result = new ArrayList<>(pages);
+            for (PDPage page : document.getPages()) {
+                PDRectangle box = page.getCropBox();
+                int rotation = Math.floorMod(page.getRotation(), 360);
+                boolean sideways = rotation == 90 || rotation == 270;
+                result.add(new PageGeometry(sideways ? box.getHeight() : box.getWidth(),
+                        sideways ? box.getWidth() : box.getHeight()));
+            }
+            return result;
+        }
+    }
+
+    private List<RenderedPage> renderPages(Path pdf, Path workDir, List<PageGeometry> geometries, ParseLimits limits,
                                            ConversionProgress progress) throws Exception {
+        if (popplerBinary == null) return renderPagesWithPdfBox(pdf, workDir, geometries, limits, progress);
         Path renderDir = Files.createDirectories(workDir.resolve("pdf-pages"));
         Path prefix = renderDir.resolve("page");
         List<String> command = List.of(popplerBinary.toString(), "-r", Integer.toString((int) RENDER_DPI), "-png",
@@ -83,20 +109,35 @@ public final class PdfToDocxConverter implements FileConverter {
                     .filter(path -> path.getFileName().toString().matches("page-\\d+\\.png"))
                     .sorted(Comparator.comparingInt(this::pageNumber))
                     .toList();
-            if (images.size() != expectedPages) throw new IOException("PDF 渲染页数不一致：" + images.size() + " != " + expectedPages);
+            if (images.size() != geometries.size()) throw new IOException("PDF 渲染页数不一致：" + images.size() + " != " + geometries.size());
             ConversionGuards.requireTotalSize(images, limits, "PDF 页面渲染");
             List<RenderedPage> pages = new ArrayList<>();
-            for (Path image : images) pages.add(new RenderedPage(image, geometryFromImage(image)));
+            for (int i = 0; i < images.size(); i++) {
+                ConversionGuards.requireImageBounds(images.get(i), limits);
+                pages.add(new RenderedPage(images.get(i), geometries.get(i)));
+            }
             progress.update(TaskStage.RENDERING, 60);
             return pages;
         }
     }
 
-    private PageGeometry geometryFromImage(Path image) throws IOException {
-        BufferedImage bufferedImage = ImageIO.read(image.toFile());
-        if (bufferedImage == null) throw new IOException("无法读取 PDF 渲染页面：" + image.getFileName());
-        return new PageGeometry(bufferedImage.getWidth() * 72d / RENDER_DPI,
-                bufferedImage.getHeight() * 72d / RENDER_DPI);
+    private List<RenderedPage> renderPagesWithPdfBox(Path pdf, Path workDir, List<PageGeometry> geometries,
+                                                     ParseLimits limits, ConversionProgress progress) throws IOException {
+        Path renderDir = Files.createDirectories(workDir.resolve("pdfbox-pages"));
+        List<RenderedPage> pages = new ArrayList<>(geometries.size());
+        try (PDDocument document = Loader.loadPDF(pdf.toFile())) {
+            PDFRenderer renderer = new PDFRenderer(document);
+            for (int i = 0; i < geometries.size(); i++) {
+                Path image = renderDir.resolve("page-%04d.png".formatted(i + 1));
+                BufferedImage bitmap = renderer.renderImageWithDPI(i, (float) RENDER_DPI, ImageType.RGB);
+                if (!ImageIO.write(bitmap, "png", image.toFile())) throw new IOException("PDFBox 无法写出 PNG 页面");
+                ConversionGuards.requireImageBounds(image, limits);
+                pages.add(new RenderedPage(image, geometries.get(i)));
+                progress.update(TaskStage.RENDERING, 25 + (int) ((i + 1) * 35d / geometries.size()));
+            }
+        }
+        ConversionGuards.requireTotalSize(pages.stream().map(RenderedPage::image).toList(), limits, "PDF 页面渲染");
+        return pages;
     }
 
     private int pageNumber(Path path) {
@@ -162,18 +203,22 @@ public final class PdfToDocxConverter implements FileConverter {
         CTSpacing spacing = properties.isSetSpacing() ? properties.getSpacing() : properties.addNewSpacing();
         spacing.setBefore(BigInteger.ZERO);
         spacing.setAfter(BigInteger.ZERO);
-        spacing.setLine(BigInteger.valueOf(240));
-        spacing.setLineRule(STLineSpacingRule.AUTO);
+        spacing.setLine(BigInteger.ONE);
+        spacing.setLineRule(STLineSpacingRule.EXACT);
     }
 
     private void configureFinalSection(XWPFDocument document, PageGeometry page) {
         CTSectPr section = document.getDocument().getBody().isSetSectPr()
                 ? document.getDocument().getBody().getSectPr()
                 : document.getDocument().getBody().addNewSectPr();
-        configureSection(section, page);
+        configureSection(section, page, false);
     }
 
-    private void configureSection(CTSectPr section, PageGeometry page) {
+    private void configureSection(CTSectPr section, PageGeometry page, boolean nextPage) {
+        if (nextPage) {
+            CTSectType type = section.isSetType() ? section.getType() : section.addNewType();
+            type.setVal(STSectionMark.NEXT_PAGE);
+        }
         CTPageSz size = section.isSetPgSz() ? section.getPgSz() : section.addNewPgSz();
         size.setW(BigInteger.valueOf(twips(page.widthPoints())));
         size.setH(BigInteger.valueOf(twips(page.heightPoints())));
