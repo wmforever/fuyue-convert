@@ -83,7 +83,7 @@ bash scripts/package-runtime.sh
 - macOS/Linux：`fuyue-convert-<version>-<os>-<arch>.tar.gz`，解压后运行 `start.command` 或 `bin/start.sh`。
 - Windows：通过 GitHub Actions 或 Windows 本机运行 `scripts/package-runtime.ps1`。普通包解压后双击 `start.bat`；`*-exe.zip` 解压后双击 `FuyueConvert.exe`。
 
-GitHub Release 会在打包后自动执行 smoke test：macOS/Linux 会解压并启动服务检查 `/api/health`；Windows 会解压检查内置 Runtime、启动脚本和 `FuyueConvert.exe`。
+GitHub Release 会在打包后自动执行 smoke test：三个平台都会使用内置 Runtime 启动服务、检查 `/api/health`，再完成一次真实 `TXT -> DOCX` Worker 转换和下载内容校验；Windows 另外检查 `FuyueConvert.exe`。
 
 启动后访问：
 
@@ -110,6 +110,16 @@ AUTO_OPEN_BROWSER=false ./bin/start.sh
 ```bash
 java -jar app.jar --spring.config.additional-location=./application.yml
 ```
+
+默认每个文件会在独立 JVM Worker 中转换，主服务负责进度回传、硬超时和子进程清理。生产环境可调整：
+
+```bash
+FORMAT_CONVERTER_WORKER_ENABLED=true
+FORMAT_CONVERTER_WORKER_MAX_MEMORY_MB=768
+FORMAT_CONVERTER_WORKER_JAVA_BINARY=/path/to/java
+```
+
+Worker 内存限制仅限 JVM 堆；Docker/cgroup 或 systemd 的 CPU、总内存和进程数限制仍应在部署层设置。
 
 ## QA 验证
 

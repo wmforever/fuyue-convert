@@ -14,7 +14,7 @@ python3 qa-samples/run_qa.py
 
 结果：
 
-- Java 单元/集成测试：通过。
+- Java 单元/集成测试：49 个，通过 49 个，失败 0。
 - Spring Boot 可执行 JAR：生成成功。
 - 前端生产构建：通过并打入 JAR。
 - QA 样本总数：13。
@@ -56,6 +56,8 @@ python3 qa-samples/run_qa.py
 - DOCX：生成后重新打开，检查真实段落、真实表格、`gridSpan`、纵向 `vMerge` 和单元格内多段落统一对齐。
 - 任务服务：损坏文件失败不导致服务退出，任务删除生效。
 - 任务服务：转换器抛出 `Error` 时任务会进入失败态，不会永久停留在 `CONVERTING`。
+- Worker 隔离：真实独立 JVM 转换成功、无响应崩溃识别、硬超时和子进程终止。
+- 发布包：jlink 内置 Runtime 启动主服务后，再由同一 Runtime 启动 Worker，`TXT -> DOCX` 转换、下载和内容校验通过。
 - PDF：无 Poppler 时使用 PDFBox 兜底；混合页面尺寸按页写入独立 Word 分节。
 - OFD 文本：正文、表格和浮动文字全部参与输出，不因段落分析结果而漏字。
 - Web：Spring Boot 上下文和 `/api/health`。

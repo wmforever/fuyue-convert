@@ -4,7 +4,7 @@
 
 1. `status=available` 只表示路线可执行，不等于稳定质量承诺。
 2. 外部 Office 引擎、系统字体、Poppler 版本和操作系统都会影响视觉结果。
-3. 当前同 JVM 内的转换时限主要依赖阶段间检查；生产强化阶段应使用隔离 Worker 进程实现硬超时。
+3. 默认已使用独立 JVM Worker 实现硬超时和进程树清理；`worker-max-memory-mb` 只限制 Java 堆，CPU、总内存和外部 Office 进程的 OS 级限制需要 Docker/cgroup 或 systemd 配合。
 4. 批量任务中单个文件失败不会中断其他文件，调用方需要检查每个 `TaskFileResult`。
 
 ## OFD

@@ -1,0 +1,96 @@
+package com.fuyue.formatconverter.task;
+
+import com.fuyue.formatconverter.parser.ParseLimits;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class ForkedFileConverterTest {
+    @TempDir Path temp;
+
+    @Test void convertsInAnIndependentJvm() throws Exception {
+        Path input = temp.resolve("input.txt");
+        Files.writeString(input, "worker process text", StandardCharsets.UTF_8);
+        Path output = temp.resolve("output.docx");
+        ForkedFileConverter converter = new ForkedFileConverter(new TextToDocxConverter().route(),
+                workerCommand(ConversionWorkerMain.class), "", Duration.ofSeconds(10));
+
+        ConversionOutput converted = converter.convert(
+                new ConversionInput("input.txt", "text/plain", Files.size(input), input),
+                temp.resolve("work"), output, ParseLimits.defaults(), (stage, progress) -> { });
+
+        assertEquals("input.docx", converted.outputName());
+        assertTrue(Files.size(output) > 0);
+        try (XWPFDocument word = new XWPFDocument(Files.newInputStream(output))) {
+            assertTrue(word.getParagraphs().stream().anyMatch(p -> p.getText().contains("worker process text")));
+        }
+    }
+
+    @Test void reportsWorkerCrashWhenProcessExitsWithoutResponse() throws Exception {
+        Path input = temp.resolve("crash.txt");
+        Files.writeString(input, "crash", StandardCharsets.UTF_8);
+        ForkedFileConverter converter = new ForkedFileConverter(new TextToDocxConverter().route(),
+                workerCommand(ExitWithoutResponseMain.class), "", Duration.ofSeconds(10));
+
+        ConversionFailureException error = assertThrows(ConversionFailureException.class, () -> converter.convert(
+                new ConversionInput("crash.txt", "text/plain", Files.size(input), input),
+                temp.resolve("crash-work"), temp.resolve("crash.docx"), ParseLimits.defaults(),
+                (stage, progress) -> { }));
+
+        assertEquals("WORKER_CRASHED", error.code());
+        assertTrue(error.getMessage().contains("exit=17"));
+    }
+
+    @Test void taskTimeoutTerminatesWorkerAndReturnsDedicatedCode() throws Exception {
+        ForkedFileConverter converter = new ForkedFileConverter(new TextToDocxConverter().route(),
+                workerCommand(SleepingMain.class), "", Duration.ofSeconds(10));
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("timeout-data"), 1, 2,
+                Duration.ofSeconds(1), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] payload = "timeout".getBytes(StandardCharsets.UTF_8);
+        long started = System.nanoTime();
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(converter))) {
+            TaskSnapshot created = service.createTask(List.of(new UploadPayload("timeout.txt", "text/plain",
+                    payload.length, () -> new ByteArrayInputStream(payload))), DocumentFormat.DOCX);
+            TaskSnapshot finished = await(service, created.taskId());
+
+            assertEquals(TaskStatus.FAILED, finished.status());
+            assertEquals("CONVERSION_TIMEOUT", finished.files().get(0).errorCode());
+            assertTrue(Duration.ofNanos(System.nanoTime() - started).compareTo(Duration.ofSeconds(8)) < 0);
+        }
+    }
+
+    private List<String> workerCommand(Class<?> mainClass) {
+        Path java = Path.of(System.getProperty("java.home"), "bin",
+                System.getProperty("os.name", "").toLowerCase().contains("win") ? "java.exe" : "java");
+        return List.of(java.toString(), "-Xmx256m", "-cp", System.getProperty("java.class.path"), mainClass.getName());
+    }
+
+    private TaskSnapshot await(ConversionTaskService service, String taskId) throws Exception {
+        long deadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+        while (System.nanoTime() < deadline) {
+            TaskSnapshot current = service.get(taskId);
+            if (current.status() == TaskStatus.SUCCESS || current.status() == TaskStatus.FAILED) return current;
+            Thread.sleep(50);
+        }
+        fail("任务未在期限内结束");
+        return null;
+    }
+
+    public static final class ExitWithoutResponseMain {
+        public static void main(String[] args) { System.exit(17); }
+    }
+
+    public static final class SleepingMain {
+        public static void main(String[] args) throws Exception { Thread.sleep(60_000); }
+    }
+}

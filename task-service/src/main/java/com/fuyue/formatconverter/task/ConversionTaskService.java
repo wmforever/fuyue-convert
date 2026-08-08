@@ -187,7 +187,7 @@ public final class ConversionTaskService implements AutoCloseable {
                     results.add(new TaskFileResult(input.displayName, true, converted.outputName(), parsedPageCount, null, null,
                             record.route.sourceFormat(), record.route.targetFormat()));
                 } catch (Exception e) {
-                    String code = e instanceof OfdParseException parse ? parse.code() : "CONVERSION_FAILED";
+                    String code = failureCode(e);
                     results.add(new TaskFileResult(input.displayName, false, null, parsedPageCount, code, safeError(e),
                             record.route.sourceFormat(), record.route.targetFormat()));
                     log.warn("taskId={} fileIndex={} conversion failed code={}", record.id, i, code);
@@ -468,6 +468,12 @@ public final class ConversionTaskService implements AutoCloseable {
     private int progress(int index, int total, int withinFile) { return Math.min(94, (index * 90 + withinFile) / Math.max(1, total)); }
     private void checkDeadline(Instant deadline) throws TimeoutException { if (Instant.now().isAfter(deadline)) throw new TimeoutException("转换超时"); }
     private String safeError(Throwable e) { return e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage(); }
+    private String failureCode(Exception error) {
+        if (error instanceof OfdParseException parsed) return parsed.code();
+        if (error instanceof ConversionFailureException failure) return failure.code();
+        if (error instanceof TimeoutException) return "CONVERSION_TIMEOUT";
+        return "CONVERSION_FAILED";
+    }
     private ThreadFactory namedFactory(String prefix) {
         return new ThreadFactory() { private int count; public synchronized Thread newThread(Runnable r) { Thread t = new Thread(r, prefix + (++count)); t.setDaemon(true); return t; } };
     }

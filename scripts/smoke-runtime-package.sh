@@ -58,13 +58,43 @@ for _ in $(seq 1 45); do
     case "$HEALTH" in
       *'"status":"UP"'*)
         echo "$HEALTH"
-        exit 0
+        break
         ;;
     esac
   fi
   sleep 1
 done
 
-echo "等待健康检查超时:" >&2
-cat "$LOG_FILE" >&2
-exit 1
+if [[ "${HEALTH:-}" != *'"status":"UP"'* ]]; then
+  echo "等待健康检查超时:" >&2
+  cat "$LOG_FILE" >&2
+  exit 1
+fi
+
+INPUT_FILE="$WORK_DIR/worker-smoke.txt"
+OUTPUT_FILE="$WORK_DIR/worker-smoke.docx"
+printf 'runtime worker smoke' > "$INPUT_FILE"
+CREATED="$(curl -fsS -X POST -F "files=@$INPUT_FILE;type=text/plain" -F "targetFormat=docx" \
+  "http://127.0.0.1:$PORT/api/tasks")"
+TASK_ID="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["taskId"])' <<<"$CREATED")"
+TASK_STATUS=""
+for _ in $(seq 1 60); do
+  SNAPSHOT="$(curl -fsS "http://127.0.0.1:$PORT/api/tasks/$TASK_ID")"
+  TASK_STATUS="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])' <<<"$SNAPSHOT")"
+  if [[ "$TASK_STATUS" == "SUCCESS" || "$TASK_STATUS" == "FAILED" ]]; then break; fi
+  sleep 1
+done
+if [[ "$TASK_STATUS" != "SUCCESS" ]]; then
+  echo "发布包 Worker 转换失败: ${SNAPSHOT:-无任务响应}" >&2
+  cat "$LOG_FILE" >&2
+  exit 1
+fi
+curl -fsS "http://127.0.0.1:$PORT/api/tasks/$TASK_ID/download" -o "$OUTPUT_FILE"
+python3 - "$OUTPUT_FILE" <<'PY'
+import sys, zipfile
+with zipfile.ZipFile(sys.argv[1]) as archive:
+    xml = archive.read("word/document.xml").decode("utf-8")
+if "runtime worker smoke" not in xml:
+    raise SystemExit("发布包 DOCX 缺少预期文字")
+PY
+echo "发布包 Worker 转换通过: $TASK_ID"

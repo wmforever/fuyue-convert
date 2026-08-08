@@ -24,6 +24,9 @@ public class FormatConverterProperties {
     private Duration officeTimeout = Duration.ofMinutes(2);
     private String apiToken = "";
     private boolean autoOpenBrowser = false;
+    private boolean workerEnabled = true;
+    private int workerMaxMemoryMb = 768;
+    private String workerJavaBinary = "";
 
     public ParseLimits parseLimits() { return new ParseLimits(maxFileSize, maxExpandedSize, maxEntrySize, maxEntries, maxCompressionRatio, maxPages); }
     public Path getDataRoot() { return dataRoot; }
@@ -58,4 +61,13 @@ public class FormatConverterProperties {
     public void setApiToken(String apiToken) { this.apiToken = apiToken; }
     public boolean isAutoOpenBrowser() { return autoOpenBrowser; }
     public void setAutoOpenBrowser(boolean autoOpenBrowser) { this.autoOpenBrowser = autoOpenBrowser; }
+    public boolean isWorkerEnabled() { return workerEnabled; }
+    public void setWorkerEnabled(boolean workerEnabled) { this.workerEnabled = workerEnabled; }
+    public int getWorkerMaxMemoryMb() { return workerMaxMemoryMb; }
+    public void setWorkerMaxMemoryMb(int workerMaxMemoryMb) {
+        if (workerMaxMemoryMb < 128) throw new IllegalArgumentException("workerMaxMemoryMb 不能小于 128");
+        this.workerMaxMemoryMb = workerMaxMemoryMb;
+    }
+    public String getWorkerJavaBinary() { return workerJavaBinary; }
+    public void setWorkerJavaBinary(String workerJavaBinary) { this.workerJavaBinary = workerJavaBinary; }
 }

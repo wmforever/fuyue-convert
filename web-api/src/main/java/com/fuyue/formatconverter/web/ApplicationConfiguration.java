@@ -1,17 +1,14 @@
 package com.fuyue.formatconverter.web;
 
-import com.fuyue.formatconverter.docx.PoiDocxRenderer;
-import com.fuyue.formatconverter.parser.OfdrwParser;
-import com.fuyue.formatconverter.parser.SafeOfdExtractor;
-import com.fuyue.formatconverter.table.PageLayoutAnalyzer;
 import com.fuyue.formatconverter.task.*;
+import org.springframework.boot.system.ApplicationHome;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 
 import java.io.IOException;
+import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
@@ -38,55 +35,35 @@ public class ApplicationConfiguration {
                                                 OfficeEngineStatus officeEngineStatus) throws IOException {
         TaskServiceConfig config = new TaskServiceConfig(properties.getDataRoot(), properties.getConcurrency(),
                 properties.getQueueCapacity(), properties.getTimeout(), properties.getResultTtl(), properties.parseLimits());
-        SafeOfdExtractor extractor = new SafeOfdExtractor();
-        OfdrwParser parser = new OfdrwParser();
-        PageLayoutAnalyzer analyzer = new PageLayoutAnalyzer();
-        List<FileConverter> converters = new ArrayList<>();
-        converters.add(new OfdToDocxConverter(extractor, parser, analyzer, new PoiDocxRenderer()));
-        converters.add(new OfdToTextConverter(extractor, parser, analyzer));
-        converters.add(new OfdToPdfConverter(extractor, parser, analyzer));
-        converters.add(new CsvToXlsxConverter());
-        converters.add(new XlsxToCsvConverter());
-        converters.add(new TextToDocxConverter());
-        converters.add(new DocxToTextConverter());
-        converters.add(new TextToPdfConverter());
-        converters.add(new PdfToTextConverter());
-        converters.add(new PdfToDocxConverter());
-        converters.add(new PdfToPngConverter());
-        converters.add(new PdfToJpgConverter());
-
-        if (officeEngineStatus.available()) {
-            converters.addAll(officeConverters(Path.of(officeEngineStatus.binary()), properties));
-        }
-        if (!officeEngineStatus.available()) {
-            converters.add(new XlsxToPdfConverter());
-            converters.add(new DocxToPdfConverter());
-            converters.add(new ImageToPdfConverter(DocumentFormat.PNG));
-            converters.add(new ImageToPdfConverter(DocumentFormat.JPG));
+        Path officeBinary = officeEngineStatus.available() ? Path.of(officeEngineStatus.binary()) : null;
+        List<FileConverter> converters = DefaultConverterRegistry.create(officeBinary, properties.getOfficeTimeout());
+        if (properties.isWorkerEnabled()) {
+            List<String> command = workerCommand(properties);
+            String office = officeBinary == null ? "" : officeBinary.toAbsolutePath().normalize().toString();
+            converters = converters.stream()
+                    .map(converter -> (FileConverter) new ForkedFileConverter(
+                            converter.route(), command, office, properties.getOfficeTimeout()))
+                    .toList();
         }
         return new ConversionTaskService(config, converters);
     }
 
-    private List<FileConverter> officeConverters(Path binary, FormatConverterProperties properties) {
-        return List.of(
-                new LibreOfficeConverter(DocumentFormat.DOCX, DocumentFormat.PDF, binary, properties.getOfficeTimeout(),
-                        "使用 LibreOffice headless 将 DOCX 高保真导出为 PDF。"),
-                new LibreOfficeConverter(DocumentFormat.XLSX, DocumentFormat.PDF, binary, properties.getOfficeTimeout(),
-                        "使用 LibreOffice headless 将 XLSX 高保真导出为 PDF。"),
-                new LibreOfficeConverter(DocumentFormat.PPTX, DocumentFormat.PDF, binary, properties.getOfficeTimeout(),
-                        "使用 LibreOffice headless 将 PPTX 高保真导出为 PDF。"),
-                new LibreOfficeConverter(DocumentFormat.WPS, DocumentFormat.DOCX, binary, properties.getOfficeTimeout(),
-                        "使用 LibreOffice headless 将 WPS 文字文档转换为 DOCX。"),
-                new LibreOfficeConverter(DocumentFormat.ET, DocumentFormat.XLSX, binary, properties.getOfficeTimeout(),
-                        "使用 LibreOffice headless 将 WPS 表格 ET 转换为 XLSX。"),
-                new LibreOfficeConverter(DocumentFormat.DPS, DocumentFormat.PPTX, binary, properties.getOfficeTimeout(),
-                        "使用 LibreOffice headless 将 WPS 演示 DPS 转换为 PPTX。"),
-                new OfficeToPdfBackedDocxConverter(DocumentFormat.UOF, binary, properties.getOfficeTimeout(),
-                        "将 UOF 先渲染为 PDF，再生成保真优先 DOCX，避免 UOF 直接转 DOCX 时分页漂移。"),
-                new LibreOfficeConverter(DocumentFormat.PNG, DocumentFormat.PDF, binary, properties.getOfficeTimeout(),
-                        "使用 LibreOffice headless 将 PNG 图片转换为 PDF。"),
-                new LibreOfficeConverter(DocumentFormat.JPG, DocumentFormat.PDF, binary, properties.getOfficeTimeout(),
-                        "使用 LibreOffice headless 将 JPEG 图片转换为 PDF。")
-        );
+    private List<String> workerCommand(FormatConverterProperties properties) throws IOException {
+        Path java = properties.getWorkerJavaBinary() == null || properties.getWorkerJavaBinary().isBlank()
+                ? Path.of(System.getProperty("java.home"), "bin", isWindows() ? "java.exe" : "java")
+                : Path.of(properties.getWorkerJavaBinary());
+        if (!java.toFile().isFile()) throw new IOException("Worker Java 不存在：" + java);
+        String heap = "-Xmx" + properties.getWorkerMaxMemoryMb() + "m";
+        File source = new ApplicationHome(FormatConverterApplication.class).getSource();
+        if (source != null && source.isFile() && source.getName().endsWith(".jar")) {
+            return List.of(java.toString(), heap,
+                    "-Dloader.main=" + ConversionWorkerMain.class.getName(),
+                    "-cp", source.getAbsolutePath(),
+                    "org.springframework.boot.loader.launch.PropertiesLauncher");
+        }
+        return List.of(java.toString(), heap, "-cp", System.getProperty("java.class.path"),
+                ConversionWorkerMain.class.getName());
     }
+
+    private boolean isWindows() { return System.getProperty("os.name", "").toLowerCase().contains("win"); }
 }

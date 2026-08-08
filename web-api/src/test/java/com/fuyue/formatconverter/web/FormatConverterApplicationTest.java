@@ -57,6 +57,8 @@ class FormatConverterApplicationTest {
                 .andExpect(jsonPath("$.runtime.javaVersion").isNotEmpty())
                 .andExpect(jsonPath("$.office.available").isBoolean())
                 .andExpect(jsonPath("$.limits.maxFileSize").isNumber())
+                .andExpect(jsonPath("$.limits.workerEnabled").value(true))
+                .andExpect(jsonPath("$.limits.workerMaxMemoryMb").value(768))
                 .andExpect(jsonPath("$.routes[?(@.id=='ofd-to-docx')].status").value(contains("available")))
                 .andExpect(jsonPath("$.routes[?(@.id=='ofd-to-docx')].qualityLevel").value(contains("beta")))
                 .andExpect(jsonPath("$.apiToken").doesNotExist())

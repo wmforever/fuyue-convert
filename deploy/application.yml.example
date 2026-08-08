@@ -20,5 +20,10 @@ format-converter:
   office-enabled: true
   office-binary: ""
   office-timeout: 2m
+  # 每个文件使用独立 JVM Worker；硬超时时主服务会终止整棵子进程。
+  worker-enabled: true
+  worker-max-memory-mb: 768
+  # 留空时使用当前 Runtime 中的 java。
+  worker-java-binary: ""
   # 留空表示不启用 API Token。公网部署建议设置，并通过 X-Format-Converter-Token 或 Bearer Token 调用 /api/tasks。
   api-token: ""

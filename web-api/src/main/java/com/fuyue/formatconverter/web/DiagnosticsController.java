@@ -66,6 +66,8 @@ public class DiagnosticsController {
         limits.put("maxFileSize", properties.getMaxFileSize());
         limits.put("maxPages", properties.getMaxPages());
         limits.put("officeTimeout", properties.getOfficeTimeout().toString());
+        limits.put("workerEnabled", properties.isWorkerEnabled());
+        limits.put("workerMaxMemoryMb", properties.getWorkerMaxMemoryMb());
         return limits;
     }
 

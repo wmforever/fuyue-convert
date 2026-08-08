@@ -83,7 +83,7 @@ Generated files are placed under `dist/`:
 - macOS/Linux: `fuyue-convert-<version>-<os>-<arch>.tar.gz`, then run `start.command` or `bin/start.sh`.
 - Windows: run `scripts/package-runtime.ps1` on Windows or use GitHub Actions. The regular package starts with `start.bat`; the `*-exe.zip` package starts with `FuyueConvert.exe`.
 
-GitHub Release runs a smoke test after packaging. macOS/Linux packages are extracted and started, then `/api/health` is checked. Windows packages are extracted and checked for the bundled Runtime, launcher scripts, and `FuyueConvert.exe`.
+GitHub Release smoke tests all three platforms with the bundled Runtime: start the service, check `/api/health`, perform a real `TXT -> DOCX` worker conversion, download the result, and verify its content. Windows additionally checks `FuyueConvert.exe`.
 
 After startup, open:
 
@@ -96,6 +96,16 @@ Runtime packages open the browser by default. To disable it:
 ```bash
 AUTO_OPEN_BROWSER=false ./bin/start.sh
 ```
+
+Each file is converted in an independent JVM worker by default. The API process relays progress and enforces timeout and process-tree cleanup. Production settings:
+
+```bash
+FORMAT_CONVERTER_WORKER_ENABLED=true
+FORMAT_CONVERTER_WORKER_MAX_MEMORY_MB=768
+FORMAT_CONVERTER_WORKER_JAVA_BINARY=/path/to/java
+```
+
+The worker memory setting limits the JVM heap only. Apply CPU, total-memory, and process-count limits with Docker/cgroups or systemd at deployment time.
 
 ## QA
 

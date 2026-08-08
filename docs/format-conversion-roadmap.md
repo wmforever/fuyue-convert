@@ -14,6 +14,7 @@ FormatConverter 的路线图以“开源可验证”为原则。短期目标不�
 - 修复 CSV CR 换行导致行数错误的问题。
 - 修复 UOF XML 文件头校验。
 - 修复 UOF 直接转 DOCX 的页数漂移，改为 PDF 图层保真兜底。
+- 增加独立 JVM Worker，通过 JSON 协议回传进度和结果，支持硬超时、崩溃隔离、进程树清理和单 Worker 堆上限。
 
 ## 近期目标
 
@@ -60,7 +61,7 @@ mode=fidelity|editable
 
 ## 中长期方向
 
-- Worker 进程隔离：把外部命令和重型转换放入独立进程，支持硬超时和资源限制。
+- OS 级资源管理：为 Docker/cgroup、systemd 和 Windows Job Object 提供 CPU、总内存和进程数配置指南。
 - OCR 插件：接入 Tesseract 或其他本地 OCR，不调用云服务。
 - 字体诊断：转换前识别缺失字体并给出明确警告。
 - 多输出任务：支持 PDF 多页输出 PNG/JPEG ZIP。
