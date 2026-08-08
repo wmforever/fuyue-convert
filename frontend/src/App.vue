@@ -24,6 +24,7 @@ const uploadProgress = ref(0)
 const task = ref(null)
 const busy = ref(false)
 const message = ref('')
+const diagnosticMessage = ref('')
 let pollTimer
 
 const canSubmit = computed(() => files.value.length > 0 && !busy.value && selectedRoute.value?.status === 'available')
@@ -192,6 +193,32 @@ async function reset() {
   startNewBatch()
 }
 
+async function copyDiagnostics() {
+  diagnosticMessage.value = ''
+  try {
+    const response = await fetch('/api/diagnostics', { cache: 'no-store' })
+    if (!response.ok) throw new Error(`诊断信息获取失败（${response.status}）`)
+    const diagnostics = await response.json()
+    const text = JSON.stringify(diagnostics, null, 2)
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+    } else {
+      const area = document.createElement('textarea')
+      area.value = text
+      area.setAttribute('readonly', '')
+      area.style.position = 'fixed'
+      area.style.opacity = '0'
+      document.body.appendChild(area)
+      area.select()
+      document.execCommand('copy')
+      document.body.removeChild(area)
+    }
+    diagnosticMessage.value = '诊断信息已复制'
+  } catch (error) {
+    diagnosticMessage.value = error.message || '无法复制诊断信息'
+  }
+}
+
 onMounted(() => {
   loadCapabilities()
   document.addEventListener('click', onDocumentClick)
@@ -338,6 +365,8 @@ onBeforeUnmount(() => {
 
     <footer>
       <span>当前开放文档 / 表格 / PDF / 图片</span><span>国产格式已入矩阵</span><span>不经过外部服务</span>
+      <button type="button" class="diagnostic-button" @click="copyDiagnostics">复制诊断信息</button>
     </footer>
+    <p v-if="diagnosticMessage" class="diagnostic-message">{{ diagnosticMessage }}</p>
   </main>
 </template>
