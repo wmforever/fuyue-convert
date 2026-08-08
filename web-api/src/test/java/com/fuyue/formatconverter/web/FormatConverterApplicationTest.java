@@ -44,6 +44,7 @@ class FormatConverterApplicationTest {
                 .andExpect(jsonPath("$[4].id").value("xlsx-to-csv"))
                 .andExpect(jsonPath("$[?(@.id=='pdf-to-docx')].status").value(contains("available")))
                 .andExpect(jsonPath("$[?(@.id=='png-to-pdf')].status").value(contains("available")))
+                .andExpect(jsonPath("$[?(@.id=='pdf-to-jpg')].status").value(contains("available")))
                 .andExpect(jsonPath("$[?(@.id=='pdf-to-ofd')].status").value(contains("planned")));
     }
 

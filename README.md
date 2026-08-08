@@ -29,7 +29,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 headless 转换；本地字体会影响结果。 |
 | TXT -> DOCX/PDF | stable | 内容优先 | 适合纯文本生成基础办公文档。 |
 | DOCX -> TXT | stable | 内容提取 | 提取正文文本，不保留版式。 |
-| PDF -> TXT/PNG | stable | 提取/渲染 | PDF 到 PNG 使用 Poppler 时可做到测试样本零像素一致。 |
+| PDF -> TXT/PNG/JPG | stable | 提取/渲染 | PDF 到 PNG/JPEG 使用 Poppler 或 PDFBox 按页渲染；多页自动输出 ZIP。 |
 | PDF -> DOCX | experimental | 保真优先 | 当前生成页面图层 DOCX，版式比纯文本更稳，但结构编辑能力有限。 |
 | PNG/JPG -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 Office 引擎；无 Office 时回退 PDFBox。 |
 | WPS/ET/DPS/UOF | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 当前用 PDF 图层兜底避免分页漂移。 |
@@ -37,7 +37,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 外部依赖说明：
 
 - LibreOffice：用于 DOCX/XLSX/PPTX/WPS/ET/DPS/UOF 与 PDF 相关的 Office 引擎转换。
-- Poppler：用于 PDF 渲染为 PNG 和视觉回归比较。
+- Poppler：用于 PDF 渲染为 PNG/JPEG 和视觉回归比较。
 - 系统字体：影响 Office/PDF 输出的分页、行距和文字替换。
 
 质量标准见 [docs/quality-standard.md](docs/quality-standard.md)。最新本地 QA 报告见 `qa-samples/report/qa-report.md`。

@@ -68,6 +68,7 @@ public enum DocumentFormat {
     public static Optional<DocumentFormat> from(String value) {
         if (value == null || value.isBlank()) return Optional.empty();
         String normalized = value.trim().toLowerCase(Locale.ROOT).replaceFirst("^\\.", "");
+        if ("jpeg".equals(normalized)) return Optional.of(JPG);
         for (DocumentFormat format : values()) {
             if (format.id.equals(normalized) || format.name().equalsIgnoreCase(normalized) ||
                     format.extension.equals(normalized)) {

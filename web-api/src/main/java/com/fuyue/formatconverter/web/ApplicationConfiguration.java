@@ -53,6 +53,7 @@ public class ApplicationConfiguration {
         converters.add(new PdfToTextConverter());
         converters.add(new PdfToDocxConverter());
         converters.add(new PdfToPngConverter());
+        converters.add(new PdfToJpgConverter());
 
         if (officeEngineStatus.available()) {
             converters.addAll(officeConverters(Path.of(officeEngineStatus.binary()), properties));

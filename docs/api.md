@@ -24,7 +24,7 @@ Content-Type: multipart/form-data
 表单字段：
 
 - `files`：可重复上传一个或多个源文件；
-- `targetFormat`：目标格式，当前开放 `docx`、`txt`、`pdf`、`xlsx`、`csv`、`png`，未传时默认 `docx`。
+- `targetFormat`：目标格式，当前开放 `docx`、`txt`、`pdf`、`xlsx`、`csv`、`png`、`jpg`，其中 `jpeg` 会按 `jpg` 处理；未传时默认 `docx`。
 
 成功返回 HTTP 202 和任务快照。快照中包含 `sourceFormat`、`targetFormat`、任务状态、进度、警告和文件级结果。
 

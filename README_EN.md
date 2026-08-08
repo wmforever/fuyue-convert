@@ -29,7 +29,7 @@ Status legend:
 | DOCX/XLSX/PPTX -> PDF | beta | layout first | Uses LibreOffice headless when available. Local fonts affect visual output. |
 | TXT -> DOCX/PDF | stable | content first | Useful for generating simple office documents from plain text. |
 | DOCX -> TXT | stable | text extraction | Extracts body text without layout. |
-| PDF -> TXT/PNG | stable | extraction/rendering | PDF to PNG can reach zero pixel difference on tested samples when Poppler is available. |
+| PDF -> TXT/PNG/JPG | stable | extraction/rendering | PDF to PNG/JPEG uses Poppler or PDFBox page rendering. Multi-page PDFs are returned as ZIP files. |
 | PDF -> DOCX | experimental | fidelity first | Generates page-image DOCX. Layout is more stable than text-only extraction, but structural editing is limited. |
 | PNG/JPG -> PDF | beta | layout first | Uses the Office engine when available, with PDFBox fallback. |
 | WPS/ET/DPS/UOF | experimental | compatibility first | Depends on LibreOffice import support. UOF currently falls back through PDF-backed DOCX to avoid page drift. |
@@ -37,7 +37,7 @@ Status legend:
 External dependencies:
 
 - LibreOffice: used for Office-engine conversions involving DOCX/XLSX/PPTX/WPS/ET/DPS/UOF and PDF.
-- Poppler: used for PDF to PNG rendering and visual regression checks.
+- Poppler: used for PDF to PNG/JPEG rendering and visual regression checks.
 - System fonts: affect pagination, line spacing, and font substitution in Office/PDF output.
 
 See [docs/quality-standard.md](docs/quality-standard.md) for quality definitions.

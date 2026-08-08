@@ -87,6 +87,7 @@ class ConversionTaskServiceTest {
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("xlsx-to-csv") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-docx") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("png-to-pdf") && route.status() == RouteStatus.AVAILABLE));
+            assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-jpg") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("wps-to-docx") && route.status() == RouteStatus.PLANNED));
         }
     }
@@ -96,6 +97,12 @@ class ConversionTaskServiceTest {
         assertEquals(DocumentFormat.UOF, DocumentFormat.fromFileName("sample.uot").orElseThrow());
         assertEquals(DocumentFormat.UOF, DocumentFormat.fromFileName("sample.uos").orElseThrow());
         assertEquals(DocumentFormat.UOF, DocumentFormat.fromFileName("sample.uop").orElseThrow());
+    }
+
+    @Test void recognizesJpegAliasAsJpgFormat() {
+        assertEquals(DocumentFormat.JPG, DocumentFormat.from("jpeg").orElseThrow());
+        assertEquals(DocumentFormat.JPG, DocumentFormat.from(".jpeg").orElseThrow());
+        assertEquals(DocumentFormat.JPG, DocumentFormat.fromFileName("photo.jpeg").orElseThrow());
     }
 
     @Test void convertsOfdIntoPlainText() throws Exception {
@@ -259,6 +266,29 @@ class ConversionTaskServiceTest {
             assertEquals(TaskStatus.SUCCESS, finished.status(), finished.errorMessage());
             assertEquals("image.pdf", finished.downloadName());
             assertTrue(Files.size(service.download(created.taskId()).path()) > 0);
+        }
+    }
+
+    @Test void convertsPdfIntoJpeg() throws Exception {
+        byte[] text = "PDF 转 JPEG 测试".getBytes(StandardCharsets.UTF_8);
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("pdf-jpg-data"), 1, 4,
+                Duration.ofSeconds(20), Duration.ofHours(1), ParseLimits.defaults());
+
+        try (ConversionTaskService service = new ConversionTaskService(config, new SafeOfdExtractor(), new OfdrwParser(),
+                new PageLayoutAnalyzer(), new PoiDocxRenderer())) {
+            TaskSnapshot pdfTask = service.createTask(List.of(new UploadPayload("jpeg-source.txt", "text/plain", text.length,
+                    () -> new ByteArrayInputStream(text))), DocumentFormat.PDF);
+            TaskSnapshot pdfFinished = await(service, pdfTask.taskId());
+            assertEquals(TaskStatus.SUCCESS, pdfFinished.status(), pdfFinished.errorMessage());
+
+            byte[] pdf = Files.readAllBytes(service.download(pdfTask.taskId()).path());
+            TaskSnapshot jpgTask = service.createTask(List.of(new UploadPayload("jpeg-source.pdf", "application/pdf", pdf.length,
+                    () -> new ByteArrayInputStream(pdf))), DocumentFormat.JPG);
+            TaskSnapshot jpgFinished = await(service, jpgTask.taskId());
+            assertEquals(TaskStatus.SUCCESS, jpgFinished.status(), jpgFinished.errorMessage());
+            assertEquals("jpeg-source.jpg", jpgFinished.downloadName());
+            assertEquals(DocumentFormat.JPG, jpgFinished.targetFormat());
+            assertNotNull(ImageIO.read(service.download(jpgTask.taskId()).path().toFile()));
         }
     }
 
