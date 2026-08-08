@@ -1,5 +1,45 @@
 # 第一阶段测试报告
 
+## 2026-08-08 开源转换平台 QA
+
+本轮测试使用 `qa-samples/run_qa.py` 启动本地 Spring Boot JAR，通过 HTTP 创建任务、下载结果，并用 LibreOffice/Poppler 渲染后做像素级或数据级对比。
+
+执行命令：
+
+```bash
+mvn -Dskip.frontend=true test
+mvn -DskipTests package
+python3 qa-samples/run_qa.py
+```
+
+结果：
+
+- Java 单元/集成测试：通过。
+- Spring Boot 可执行 JAR：生成成功。
+- 前端生产构建：通过并打入 JAR。
+- QA 样本总数：11。
+- 严格通过：7。
+- 严格失败：4。
+
+严格通过路线：
+
+- `DOCX -> PDF`
+- `XLSX -> PDF`
+- `PPTX -> PDF`
+- `DPS -> PPTX`
+- `PDF -> PNG`
+- `PNG -> PDF`
+- `CSV -> XLSX -> CSV`
+
+严格失败但可运行路线：
+
+- `WPS -> DOCX`：页数一致，视觉差异 `0.00375444`。
+- `ET -> XLSX`：页数一致，视觉差异 `0.00434043`。
+- `UOF -> DOCX`：页数已从不一致修复为一致，当前视觉差异 `0.08600494`。
+- `PDF -> DOCX`：页数一致，视觉差异 `0.00214321`。
+
+结论：当前项目适合作为开源转换平台基础版。已具备可扩展转换器、端到端 QA 和失败透明能力，但不能宣称所有路线达到生产级严格保真。质量等级详见 `docs/quality-standard.md`。
+
 ## 自动化范围
 
 - 中间模型：矩形交集、合并和非法尺寸。

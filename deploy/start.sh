@@ -2,16 +2,16 @@
 set -euo pipefail
 
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
-PID_FILE="$APP_DIR/ofd-to-word.pid"
+PID_FILE="$APP_DIR/format-converter.pid"
 LOG_DIR="$APP_DIR/logs"
-JAR_FILE="${OFD2WORD_JAR:-$(find "$APP_DIR" -maxdepth 1 -name 'web-api-*.jar' ! -name '*.original' | head -n 1)}"
+JAR_FILE="${FORMAT_CONVERTER_JAR:-$(find "$APP_DIR" -maxdepth 1 -name 'web-api-*.jar' ! -name '*.original' | head -n 1)}"
 
 if [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
   echo "服务已运行，PID=$(cat "$PID_FILE")"
   exit 0
 fi
 if [[ -z "$JAR_FILE" || ! -f "$JAR_FILE" ]]; then
-  echo "未找到可运行 JAR，请设置 OFD2WORD_JAR"
+  echo "未找到可运行 JAR，请设置 FORMAT_CONVERTER_JAR"
   exit 1
 fi
 

@@ -5,7 +5,7 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 250MB
-ofd2word:
+format-converter:
   data-root: ./data
   concurrency: 2
   queue-capacity: 20
@@ -17,4 +17,8 @@ ofd2word:
   max-entries: 10000
   max-compression-ratio: 100
   max-pages: 500
-
+  office-enabled: true
+  office-binary: ""
+  office-timeout: 2m
+  # 留空表示不启用 API Token。公网部署建议设置，并通过 X-Format-Converter-Token 或 Bearer Token 调用 /api/tasks。
+  api-token: ""

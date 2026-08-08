@@ -1,47 +1,82 @@
-# OFD 转可编辑 Word
+# Fuyue Convert
 
-基于 Java 17、Spring Boot、OFDRW、Apache POI 和 Vue 3 的内网 OFD 转 DOCX 服务。主转换链路直接解析 OFD 的文字、Path 和图片，不经过 PDF，也不会把整页 OFD 作为图片写入 Word。
+[简体中文](README.md) | [English](README_EN.md)
 
-## 当前版本能力
+Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、可替换的开源组件完成常见办公文档、国产格式和版式文档之间的转换。
 
-- 浏览器单个/批量上传 `.ofd`；
-- 文件结构、安全解压、Zip Slip、压缩炸弹和危险 XML 防护；
-- 使用 OFDRW 2.3.9 按源顺序解析全部页面的文字、样式、文字 CTM/HScale、Path、普通图片和数字签章外观；
-- 使用混合语义渲染：普通文字生成为可连续编辑的 Word 段落，旋转、斜切或相互重叠的复杂版头才使用少量定位文本框；
-- 同尺寸页面使用普通分页，仅在纸张尺寸或横竖方向变化时建立新分节，保留源页数并避免分节符产生空白页；
-- 把规则有线表格转换为正文中的真实 Word 表格，不因局部表格改变整份文档的排版模式；
-- 支持横向、纵向合并模型及多行单元格；
-- 异步进度、警告、失败隔离、DOCX/ZIP 下载、任务删除和 TTL 清理；
-- 服务重启后遗留转换任务标记为失败，不误报正在转换；
-- 普通 JAR 和 Docker 两种部署方式。
+项目基于 Java 17、Spring Boot、Vue 3、Apache POI、PDFBox、Poppler、OFDRW 和 LibreOffice headless。它不会承诺所有格式都能做到“完全一致且完全可编辑”，而是把转换能力拆成明确的路线、质量等级和失败原因，让结果可以被自动验证，也方便社区逐步增强。
 
-多页 OFD 会完整转换，不再截断第一页。扫描页只返回 `OCR_REQUIRED`，不会调用云 OCR 或伪造文字。为满足安全要求，页数仍受 `ofd2word.max-pages` 配置限制，默认 500 页；在允许范围内要么全部成功，要么明确失败，不会静默少页。
+## 项目定位
 
-标准位图签章及签章内嵌 OFD 外观会作为可移动图片保留；遇到厂商私有、加密或损坏的签章外观时会给出明确警告，而不会让整份文档转换失败。任意复杂曲线、特殊字体替代以及依赖厂商私有扩展的效果仍可能存在兼容差异。
+- 开源优先：默认使用开源库和本机命令行工具，不依赖云服务。
+- 路线可扩展：每条转换能力都实现为独立 `FileConverter`。
+- 质量可验证：提供像素级视觉对比和数据回环 QA 脚本。
+- 失败透明：页数不一致、格式不支持、字体替代、图像层兜底等情况会通过错误或警告暴露。
+- 双目标并存：可编辑优先和保真优先是不同目标，项目会明确标注取舍。
 
-## 构建
+## 当前能力矩阵
 
-构建机需要 Maven 3.9+ 和 JDK 17。前端构建所需的 Node/npm 由 Maven 插件下载到 `web-api/target`，不会提交到源码。
+| 路线 | 状态 | 默认策略 | 说明 |
+| --- | --- | --- | --- |
+| OFD -> DOCX/TXT/PDF | beta | 可编辑优先 | 文字型 OFD 可解析文字、表格、图片和签章外观；扫描型 OFD 会提示需要 OCR。 |
+| CSV <-> XLSX | stable | 数据优先 | 已覆盖 CSV 到 XLSX，再回到 CSV 的严格数据回环。 |
+| DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 headless 转换；本地字体会影响结果。 |
+| TXT -> DOCX/PDF | stable | 内容优先 | 适合纯文本生成基础办公文档。 |
+| DOCX -> TXT | stable | 内容提取 | 提取正文文本，不保留版式。 |
+| PDF -> TXT/PNG | stable | 提取/渲染 | PDF 到 PNG 使用 Poppler 时可做到测试样本零像素一致。 |
+| PDF -> DOCX | experimental | 保真优先 | 当前生成页面图层 DOCX，版式比纯文本更稳，但结构编辑能力有限。 |
+| PNG/JPG -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 Office 引擎；无 Office 时回退 PDFBox。 |
+| WPS/ET/DPS/UOF | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 当前用 PDF 图层兜底避免分页漂移。 |
+
+质量标准见 [docs/quality-standard.md](docs/quality-standard.md)。最新本地 QA 报告见 `qa-samples/report/qa-report.md`。
+
+## 快速开始
+
+环境要求：
+
+- JDK 17
+- Maven 3.9+
+- 可选：LibreOffice 或 `soffice`
+- 可选：Poppler `pdftoppm`
+
+构建：
 
 ```bash
 mvn clean verify
 ```
 
-产物：
-
-```text
-web-api/target/web-api-0.1.0-SNAPSHOT.jar
-```
-
-## 运行
+运行：
 
 ```bash
 java -jar web-api/target/web-api-0.1.0-SNAPSHOT.jar
 ```
 
-访问：<http://127.0.0.1:8080>
+访问：
 
-生产部署可复制 JAR、`deploy/application.yml.example` 和三个管理脚本到同一目录，然后执行：
+```text
+http://127.0.0.1:8080
+```
+
+## 免 Java 发布包
+
+面向普通用户可以使用自带 Java Runtime 的发布包，解压后不需要单独安装 JDK/JRE：
+
+```bash
+bash scripts/package-runtime.sh
+```
+
+生成文件位于 `dist/`：
+
+- macOS/Linux：`fuyue-convert-<version>-<os>-<arch>.tar.gz`，解压后运行 `start.command` 或 `bin/start.sh`。
+- Windows：通过 GitHub Actions 或 Windows 本机运行 `scripts/package-runtime.ps1`。普通包解压后双击 `start.bat`；`*-exe.zip` 解压后双击 `FuyueConvert.exe`。
+
+启动后访问：
+
+```text
+http://127.0.0.1:8080
+```
+
+生产部署可复制 JAR、`deploy/application.yml.example` 和管理脚本到同一目录：
 
 ```bash
 ./start.sh
@@ -55,13 +90,49 @@ java -jar web-api/target/web-api-0.1.0-SNAPSHOT.jar
 java -jar app.jar --spring.config.additional-location=./application.yml
 ```
 
-## 模块
+## QA 验证
 
-- `layout-model`：与库无关的页面、文字、线、段落、表格/行/单元格和警告模型。
+先构建可执行 JAR：
+
+```bash
+mvn -DskipTests package
+```
+
+再运行端到端 QA：
+
+```bash
+python3 qa-samples/run_qa.py
+```
+
+QA 会启动本地服务，通过 HTTP 上传样本、下载转换结果，再用 LibreOffice/Poppler 渲染并比较。视觉测试中 `strictPass=true` 表示零差异像素；数据测试中表示回环数据完全一致。
+
+## 模块结构
+
+- `layout-model`：与库无关的页面、文字、线、段落、表格和警告模型。
 - `ofd-parser`：安全解压、`OfdParser`/`OcrEngine` SPI 和 OFDRW 适配器。
 - `table-recognizer`：线段归一化、网格、合并单元格和文字分配。
-- `docx-renderer`：POI/OOXML 页面、段落、真实表格和图片生成。
-- `task-service`：异步状态机、批量转换、ZIP、清理和重启恢复。
+- `docx-renderer`：基于 POI/OOXML 的 DOCX 页面、段落、真实表格和图片生成。
+- `task-service`：转换器注册、异步状态机、批量转换、ZIP、清理和重启恢复。
 - `web-api`：Spring Boot REST API 和打包后的 Vue 3 前端。
+- `qa-samples`：样本驱动的端到端 QA 脚本和本地测试样本。
 
-详细设计、接口和测试结果见 `docs/`。
+## 贡献
+
+欢迎贡献新的格式解析器、转换器、样本、字体兼容性报告和失败用例。新增路线前请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 和 [docs/quality-standard.md](docs/quality-standard.md)。
+
+## 赞助支持
+
+> 如果您觉得项目对您有帮助，欢迎赞助支持。
+
+[捐赠列表](docs/sponsors.md)
+
+<p>
+  <img src="docs/assets/sponsor-wechat.png" alt="微信赞助收款码" width="360">
+  <img src="docs/assets/sponsor-alipay.png" alt="支付宝赞助收款码" width="360">
+</p>
+
+扫码时请核对收款方信息。
+
+## 许可证
+
+本项目使用 Apache License 2.0，详见 [LICENSE](LICENSE)。

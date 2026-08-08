@@ -1,0 +1,47 @@
+package com.fuyue.formatconverter.web;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.hamcrest.Matchers.contains;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest(properties = {
+        "format-converter.data-root=target/test-data",
+        "spring.main.banner-mode=off",
+        "logging.level.root=WARN",
+        "logging.level.com.fuyue.formatconverter=WARN"
+})
+@AutoConfigureMockMvc
+class FormatConverterApplicationTest {
+    @Autowired MockMvc mvc;
+
+    @Test void healthEndpointReturnsVersionAndPlatform() throws Exception {
+        mvc.perform(get("/api/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.parser").value("OFDRW 2.3.9"))
+                .andExpect(jsonPath("$.arch").isNotEmpty());
+    }
+
+    @Test void capabilitiesEndpointReturnsRegisteredRoutes() throws Exception {
+        mvc.perform(get("/api/tasks/capabilities"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("ofd-to-docx"))
+                .andExpect(jsonPath("$[0].sourceFormat").value("ofd"))
+                .andExpect(jsonPath("$[0].targetFormat").value("docx"))
+                .andExpect(jsonPath("$[0].status").value("available"))
+                .andExpect(jsonPath("$[1].id").value("ofd-to-txt"))
+                .andExpect(jsonPath("$[1].targetFormat").value("txt"))
+                .andExpect(jsonPath("$[2].id").value("ofd-to-pdf"))
+                .andExpect(jsonPath("$[3].id").value("csv-to-xlsx"))
+                .andExpect(jsonPath("$[4].id").value("xlsx-to-csv"))
+                .andExpect(jsonPath("$[?(@.id=='pdf-to-docx')].status").value(contains("available")))
+                .andExpect(jsonPath("$[?(@.id=='png-to-pdf')].status").value(contains("available")))
+                .andExpect(jsonPath("$[?(@.id=='pdf-to-ofd')].status").value(contains("planned")));
+    }
+}

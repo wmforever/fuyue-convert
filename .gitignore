@@ -1,11 +1,22 @@
 target/
 **/target/
+target-release/
+dist/
 frontend/node_modules/
 frontend/dist/
 data/
 logs/
 *.log
+*.pyc
+__pycache__/
 .DS_Store
 .idea/
 *.iml
 
+qa-samples/generated/
+qa-samples/input/*
+!qa-samples/input/.gitkeep
+qa-samples/output/
+qa-samples/work/
+qa-samples/runtime-data/
+qa-samples/report/

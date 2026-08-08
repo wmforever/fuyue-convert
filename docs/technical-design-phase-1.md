@@ -1,4 +1,4 @@
-# 网页版 OFD 转可编辑 Word：技术设计（确认稿候选）
+# FormatConverter 技术设计（第一阶段）
 
 > 本文保留最初单页 MVP 的设计基线。项目已在 2026-08-04 升级为完整多页转换，当前实现边界见 `multi-page-upgrade.md` 和 `known-limitations.md`。
 
@@ -56,7 +56,7 @@ flowchart LR
 ## 3. 推荐目录结构
 
 ```text
-OfdToWordk/
+FormatConverter/
 ├── pom.xml                         # Maven 聚合与版本锁定
 ├── README.md
 ├── LICENSE

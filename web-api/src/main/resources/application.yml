@@ -5,7 +5,7 @@ server:
     context-path: /
 spring:
   application:
-    name: ofd-to-word
+    name: format-converter
   servlet:
     multipart:
       max-file-size: ${MAX_UPLOAD_SIZE:50MB}
@@ -17,23 +17,27 @@ management:
     web:
       exposure:
         include: health,info
-ofd2word:
-  data-root: ${OFD2WORD_DATA_ROOT:./data}
-  concurrency: ${OFD2WORD_CONCURRENCY:2}
-  queue-capacity: ${OFD2WORD_QUEUE_CAPACITY:20}
-  timeout: ${OFD2WORD_TIMEOUT:5m}
-  result-ttl: ${OFD2WORD_RESULT_TTL:24h}
-  max-file-size: ${OFD2WORD_MAX_FILE_BYTES:52428800}
-  max-expanded-size: ${OFD2WORD_MAX_EXPANDED_BYTES:209715200}
-  max-entry-size: ${OFD2WORD_MAX_ENTRY_BYTES:41943040}
-  max-entries: ${OFD2WORD_MAX_ENTRIES:10000}
-  max-compression-ratio: ${OFD2WORD_MAX_COMPRESSION_RATIO:100}
-  max-pages: ${OFD2WORD_MAX_PAGES:500}
+format-converter:
+  data-root: ${FORMAT_CONVERTER_DATA_ROOT:./data}
+  concurrency: ${FORMAT_CONVERTER_CONCURRENCY:2}
+  queue-capacity: ${FORMAT_CONVERTER_QUEUE_CAPACITY:20}
+  timeout: ${FORMAT_CONVERTER_TIMEOUT:5m}
+  result-ttl: ${FORMAT_CONVERTER_RESULT_TTL:24h}
+  max-file-size: ${FORMAT_CONVERTER_MAX_FILE_BYTES:52428800}
+  max-expanded-size: ${FORMAT_CONVERTER_MAX_EXPANDED_BYTES:209715200}
+  max-entry-size: ${FORMAT_CONVERTER_MAX_ENTRY_BYTES:41943040}
+  max-entries: ${FORMAT_CONVERTER_MAX_ENTRIES:10000}
+  max-compression-ratio: ${FORMAT_CONVERTER_MAX_COMPRESSION_RATIO:100}
+  max-pages: ${FORMAT_CONVERTER_MAX_PAGES:500}
+  office-enabled: ${FORMAT_CONVERTER_OFFICE_ENABLED:true}
+  office-binary: ${FORMAT_CONVERTER_OFFICE_BINARY:}
+  office-timeout: ${FORMAT_CONVERTER_OFFICE_TIMEOUT:2m}
+  api-token: ${FORMAT_CONVERTER_API_TOKEN:}
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
   level:
     root: INFO
-    cn.tensafe.ofd2word: INFO
+    com.fuyue.formatconverter: INFO
 build:
   version: "0.1.0-SNAPSHOT"

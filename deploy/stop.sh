@@ -2,7 +2,7 @@
 set -euo pipefail
 
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
-PID_FILE="$APP_DIR/ofd-to-word.pid"
+PID_FILE="$APP_DIR/format-converter.pid"
 if [[ ! -f "$PID_FILE" ]]; then echo "服务未运行"; exit 0; fi
 PID="$(cat "$PID_FILE")"
 if ! kill -0 "$PID" 2>/dev/null; then rm -f "$PID_FILE"; echo "服务未运行"; exit 0; fi

@@ -12,7 +12,7 @@
 - 每页表格仍是真实 Word Table；
 - 独立图片按元素写入，不创建整页截图。
 
-任务结果中的 `files[].pageCount` 返回实际完成转换的页数。若源页数超过安全配置 `ofd2word.max-pages`，任务返回 `OFD_TOO_MANY_PAGES`；不会只输出前若干页后伪报成功。
+任务结果中的 `files[].pageCount` 返回实际完成转换的页数。若源页数超过安全配置 `format-converter.max-pages`，任务返回 `OFD_TOO_MANY_PAGES`；不会只输出前若干页后伪报成功。
 
 ## 跨页表格边界
 

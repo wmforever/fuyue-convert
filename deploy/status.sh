@@ -2,7 +2,7 @@
 set -euo pipefail
 
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
-PID_FILE="$APP_DIR/ofd-to-word.pid"
+PID_FILE="$APP_DIR/format-converter.pid"
 if [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
   echo "服务运行中，PID=$(cat "$PID_FILE")"
   exit 0
