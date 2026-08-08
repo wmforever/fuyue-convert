@@ -24,7 +24,7 @@ BASE_URL = f"http://127.0.0.1:{PORT}"
 JAVA = os.environ.get("JAVA_BIN", "java")
 SOFFICE = os.environ.get("SOFFICE_BIN") or shutil.which("soffice")
 PDFTOPPM = os.environ.get("PDFTOPPM_BIN") or shutil.which("pdftoppm")
-JAR = ROOT / "web-api" / "target" / "web-api-0.1.0-SNAPSHOT.jar"
+JAR = ROOT / "web-api" / "target" / "web-api-0.1.1.jar"
 
 VISUAL_THRESHOLD = float(os.environ.get("FORMAT_QA_VISUAL_THRESHOLD", "0.001"))
 

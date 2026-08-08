@@ -48,7 +48,7 @@ mvn clean verify
 Run:
 
 ```bash
-java -jar web-api/target/web-api-0.1.0-SNAPSHOT.jar
+java -jar web-api/target/web-api-0.1.1.jar
 ```
 
 Open:

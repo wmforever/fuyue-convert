@@ -12,7 +12,7 @@ $DistDir = Join-Path $RootDir "dist"
 [xml]$pom = Get-Content (Join-Path $RootDir "pom.xml")
 $Version = $pom.project.version
 if (-not $Version) { $Version = "0.0.0" }
-$AppVersion = "0.1.0"
+$AppVersion = "0.1.1"
 if ($Version -match "^\d+(\.\d+){0,2}") { $AppVersion = $Matches[0] }
 
 $Arch = $env:PROCESSOR_ARCHITECTURE
@@ -37,7 +37,13 @@ if (-not $JpackageBin) {
 }
 
 Push-Location $RootDir
-$MavenArgList = $MavenArgs.Split(" ", [System.StringSplitOptions]::RemoveEmptyEntries)
+$EffectiveMavenArgs = if ($env:PACKAGE_MAVEN_ARGS) { $env:PACKAGE_MAVEN_ARGS } else { $MavenArgs }
+if (-not $EffectiveMavenArgs) {
+  $EffectiveMavenArgs = "-DskipTests"
+} elseif ($EffectiveMavenArgs -notmatch "-DskipTests" -and $EffectiveMavenArgs -notmatch "-Dmaven\.test\.skip") {
+  $EffectiveMavenArgs = "$EffectiveMavenArgs -DskipTests"
+}
+$MavenArgList = $EffectiveMavenArgs.Split(" ", [System.StringSplitOptions]::RemoveEmptyEntries)
 & $MavenBin @MavenArgList package
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
@@ -49,7 +55,7 @@ New-Item -ItemType Directory -Force `
   (Join-Path $PackageDir "data"), `
   (Join-Path $PackageDir "logs") | Out-Null
 
-Copy-Item (Join-Path $RootDir "web-api\target\web-api-*.jar") (Join-Path $PackageDir "app\fuyue-convert.jar")
+Copy-Item (Join-Path $RootDir "web-api\target\web-api-$Version.jar") (Join-Path $PackageDir "app\fuyue-convert.jar")
 Copy-Item (Join-Path $RootDir "deploy\application.yml.example") (Join-Path $PackageDir "application.yml")
 Copy-Item (Join-Path $RootDir "README.md") $PackageDir
 Copy-Item (Join-Path $RootDir "README_EN.md") $PackageDir

@@ -25,12 +25,18 @@ PACKAGE_DIR="$DIST_DIR/$PACKAGE_NAME"
 RUNTIME_DIR="$PACKAGE_DIR/runtime"
 
 cd "$ROOT_DIR"
-read -r -a MAVEN_ARGS_ARRAY <<< "${MAVEN_ARGS:--DskipTests}"
+MAVEN_ARGS_TEXT="${PACKAGE_MAVEN_ARGS:-${MAVEN_ARGS:-}}"
+if [[ -z "$MAVEN_ARGS_TEXT" ]]; then
+  MAVEN_ARGS_TEXT="-DskipTests"
+elif [[ "$MAVEN_ARGS_TEXT" != *"-DskipTests"* && "$MAVEN_ARGS_TEXT" != *"-Dmaven.test.skip"* ]]; then
+  MAVEN_ARGS_TEXT="$MAVEN_ARGS_TEXT -DskipTests"
+fi
+read -r -a MAVEN_ARGS_ARRAY <<< "$MAVEN_ARGS_TEXT"
 "$MAVEN_BIN" "${MAVEN_ARGS_ARRAY[@]}" package
 
 rm -rf "$PACKAGE_DIR"
 mkdir -p "$PACKAGE_DIR/app" "$PACKAGE_DIR/bin" "$PACKAGE_DIR/data" "$PACKAGE_DIR/logs"
-cp web-api/target/web-api-*.jar "$PACKAGE_DIR/app/fuyue-convert.jar"
+cp "web-api/target/web-api-$VERSION.jar" "$PACKAGE_DIR/app/fuyue-convert.jar"
 cp deploy/application.yml.example "$PACKAGE_DIR/application.yml"
 cp README.md README_EN.md LICENSE "$PACKAGE_DIR/"
 

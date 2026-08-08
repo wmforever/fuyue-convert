@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RestController
 public class HealthController {
-    @Value("${build.version:0.1.0-SNAPSHOT}") private String version;
+    @Value("${build.version:0.1.1}") private String version;
     private final OfficeEngineStatus officeEngineStatus;
 
     public HealthController(OfficeEngineStatus officeEngineStatus) {
