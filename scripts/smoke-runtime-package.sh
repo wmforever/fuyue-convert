@@ -45,7 +45,7 @@ fi
 
 "$PACKAGE_DIR/runtime/bin/java" -version >/dev/null
 
-SERVER_PORT="$PORT" "$PACKAGE_DIR/bin/start.sh" >"$LOG_FILE" 2>&1 &
+SERVER_PORT="$PORT" AUTO_OPEN_BROWSER=false "$PACKAGE_DIR/bin/start.sh" >"$LOG_FILE" 2>&1 &
 PID="$!"
 
 for _ in $(seq 1 45); do

@@ -90,6 +90,12 @@ GitHub Release 会在打包后自动执行 smoke test：macOS/Linux 会解压并
 http://127.0.0.1:8080
 ```
 
+发布包默认会自动打开浏览器。需要关闭时可设置：
+
+```bash
+AUTO_OPEN_BROWSER=false ./bin/start.sh
+```
+
 生产部署可复制 JAR、`deploy/application.yml.example` 和管理脚本到同一目录：
 
 ```bash

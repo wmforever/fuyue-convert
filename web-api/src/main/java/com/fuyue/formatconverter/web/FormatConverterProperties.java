@@ -23,6 +23,7 @@ public class FormatConverterProperties {
     private String officeBinary = "";
     private Duration officeTimeout = Duration.ofMinutes(2);
     private String apiToken = "";
+    private boolean autoOpenBrowser = false;
 
     public ParseLimits parseLimits() { return new ParseLimits(maxFileSize, maxExpandedSize, maxEntrySize, maxEntries, maxCompressionRatio, maxPages); }
     public Path getDataRoot() { return dataRoot; }
@@ -55,4 +56,6 @@ public class FormatConverterProperties {
     public void setOfficeTimeout(Duration officeTimeout) { this.officeTimeout = officeTimeout; }
     public String getApiToken() { return apiToken; }
     public void setApiToken(String apiToken) { this.apiToken = apiToken; }
+    public boolean isAutoOpenBrowser() { return autoOpenBrowser; }
+    public void setAutoOpenBrowser(boolean autoOpenBrowser) { this.autoOpenBrowser = autoOpenBrowser; }
 }

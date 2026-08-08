@@ -77,9 +77,10 @@ setlocal
 set APP_HOME=%~dp0..
 if "%SERVER_PORT%"=="" set SERVER_PORT=8080
 if "%JAVA_OPTS%"=="" set JAVA_OPTS=-Xms256m -Xmx1g -Djava.awt.headless=true
+if "%AUTO_OPEN_BROWSER%"=="" set AUTO_OPEN_BROWSER=true
 echo Fuyue Convert 正在启动...
 echo 浏览器地址: http://127.0.0.1:%SERVER_PORT%
-"%APP_HOME%\runtime\bin\java.exe" %JAVA_OPTS% -jar "%APP_HOME%\app\fuyue-convert.jar" --server.port=%SERVER_PORT% --spring.config.additional-location="%APP_HOME%\application.yml"
+"%APP_HOME%\runtime\bin\java.exe" %JAVA_OPTS% -jar "%APP_HOME%\app\fuyue-convert.jar" --server.port=%SERVER_PORT% --format-converter.auto-open-browser=%AUTO_OPEN_BROWSER% --spring.config.additional-location="%APP_HOME%\application.yml"
 pause
 '@ | Set-Content -Encoding UTF8 (Join-Path $PackageDir "start.bat")
 
@@ -87,10 +88,11 @@ pause
 $AppHome = Resolve-Path (Join-Path $PSScriptRoot ".")
 if (-not $env:SERVER_PORT) { $env:SERVER_PORT = "8080" }
 if (-not $env:JAVA_OPTS) { $env:JAVA_OPTS = "-Xms256m -Xmx1g -Djava.awt.headless=true" }
+if (-not $env:AUTO_OPEN_BROWSER) { $env:AUTO_OPEN_BROWSER = "true" }
 Write-Host "Fuyue Convert 正在启动..."
 Write-Host "浏览器地址: http://127.0.0.1:$env:SERVER_PORT"
 $JavaOptions = $env:JAVA_OPTS -split " "
-& "$AppHome\runtime\bin\java.exe" @JavaOptions -jar "$AppHome\app\fuyue-convert.jar" "--server.port=$env:SERVER_PORT" "--spring.config.additional-location=$AppHome\application.yml"
+& "$AppHome\runtime\bin\java.exe" @JavaOptions -jar "$AppHome\app\fuyue-convert.jar" "--server.port=$env:SERVER_PORT" "--format-converter.auto-open-browser=$env:AUTO_OPEN_BROWSER" "--spring.config.additional-location=$AppHome\application.yml"
 '@ | Set-Content -Encoding UTF8 (Join-Path $PackageDir "start.ps1")
 
 $ZipPath = Join-Path $DistDir "$PackageName.zip"
@@ -117,6 +119,7 @@ if ($JpackageCommand) {
     --vendor Fuyue `
     --description "Open-source document format conversion platform" `
     --win-console `
+    --arguments "--format-converter.auto-open-browser=true" `
     --java-options "-Xms256m" `
     --java-options "-Xmx1g" `
     --java-options "-Djava.awt.headless=true"

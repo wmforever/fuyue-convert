@@ -90,6 +90,12 @@ After startup, open:
 http://127.0.0.1:8080
 ```
 
+Runtime packages open the browser by default. To disable it:
+
+```bash
+AUTO_OPEN_BROWSER=false ./bin/start.sh
+```
+
 ## QA
 
 Build an executable JAR first:

@@ -61,11 +61,13 @@ APP_HOME="$(cd "$(dirname "$0")/.." && pwd)"
 JAVA_BIN="$APP_HOME/runtime/bin/java"
 JAVA_OPTS="${JAVA_OPTS:--Xms256m -Xmx1g -Djava.awt.headless=true}"
 URL="http://127.0.0.1:${SERVER_PORT:-8080}"
+AUTO_OPEN_BROWSER="${AUTO_OPEN_BROWSER:-true}"
 
 echo "Fuyue Convert 正在启动..."
 echo "浏览器地址: $URL"
 exec "$JAVA_BIN" $JAVA_OPTS -jar "$APP_HOME/app/fuyue-convert.jar" \
   "--server.port=${SERVER_PORT:-8080}" \
+  "--format-converter.auto-open-browser=$AUTO_OPEN_BROWSER" \
   "--spring.config.additional-location=$APP_HOME/application.yml"
 SH
 chmod +x "$PACKAGE_DIR/bin/start.sh"

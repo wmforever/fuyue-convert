@@ -1,0 +1,69 @@
+name: Bug report / 缺陷反馈
+description: Report an application error, crash, or unexpected behavior.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请尽量提供可复现信息，避免上传包含隐私或敏感内容的文件。
+  - type: textarea
+    id: summary
+    attributes:
+      label: 问题描述 / Summary
+      description: 简要说明发生了什么。
+      placeholder: 例如：上传 PDF 后任务一直停留在 RUNNING。
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      placeholder: |
+        1. 打开 ...
+        2. 选择转换路线 ...
+        3. 上传文件 ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望结果 / Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果 / Actual behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: package
+    attributes:
+      label: 使用方式 / Installation
+      options:
+        - Release Windows exe zip
+        - Release Windows zip
+        - Release macOS/Linux tar.gz
+        - Source build
+        - Docker/manual deployment
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本 / Version
+      placeholder: v0.1.1 或 /api/health 返回的 version
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境 / Environment
+      description: 操作系统、CPU 架构、Java 版本、LibreOffice/Poppler 是否安装。
+      placeholder: Windows 11 x64, Java bundled, LibreOffice 24.x
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志 / Logs
+      description: 粘贴关键错误日志，不要包含 token 或隐私信息。
+      render: text

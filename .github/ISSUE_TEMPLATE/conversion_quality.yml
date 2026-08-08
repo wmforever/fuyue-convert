@@ -1,0 +1,75 @@
+name: Conversion quality / 转换质量反馈
+description: Report layout, fidelity, editability, or data-loss issues for a conversion route.
+title: "[Quality] "
+labels: ["conversion-quality"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        这个模板用于反馈“转换结果不像原件、不可编辑、丢内容、分页漂移”等问题。
+        请只上传可公开分享或已脱敏的样本。
+  - type: dropdown
+    id: route
+    attributes:
+      label: 转换路线 / Route
+      options:
+        - OFD -> DOCX
+        - OFD -> PDF
+        - OFD -> TXT
+        - PDF -> DOCX
+        - PDF -> PNG
+        - PDF -> TXT
+        - DOCX -> PDF
+        - XLSX -> PDF
+        - PPTX -> PDF
+        - CSV -> XLSX
+        - XLSX -> CSV
+        - TXT -> DOCX
+        - TXT -> PDF
+        - PNG/JPEG -> PDF
+        - WPS/ET/DPS/UOF route
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: quality_goal
+    attributes:
+      label: 主要目标 / Primary goal
+      options:
+        - 视觉保真 / Visual fidelity
+        - 可编辑结构 / Editable structure
+        - 数据一致 / Data consistency
+        - 文本提取 / Text extraction
+        - 其他 / Other
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: 问题现象 / Problem
+      placeholder: 例如：第 2 页表格边框错位；PDF 转 DOCX 后只能看到图片层；中文字体替换导致分页变化。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望结果 / Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: 样本和对比材料 / Samples and evidence
+      description: 可上传源文件、输出文件、截图、渲染图或最小复现样本。请确认已脱敏。
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境 / Environment
+      description: 操作系统、版本、LibreOffice/Poppler、字体环境。
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 样本确认 / Sample confirmation
+      options:
+        - label: 我确认上传的样本可以公开分享，或已经移除隐私/敏感内容。
+          required: true

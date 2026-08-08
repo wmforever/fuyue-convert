@@ -33,6 +33,7 @@ format-converter:
   office-binary: ${FORMAT_CONVERTER_OFFICE_BINARY:}
   office-timeout: ${FORMAT_CONVERTER_OFFICE_TIMEOUT:2m}
   api-token: ${FORMAT_CONVERTER_API_TOKEN:}
+  auto-open-browser: ${FORMAT_CONVERTER_AUTO_OPEN_BROWSER:false}
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
