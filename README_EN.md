@@ -39,7 +39,7 @@ External dependencies:
 
 - LibreOffice: used for Office-engine conversions involving DOCX/XLSX/PPTX/WPS/ET/DPS/UOF and PDF.
 - Poppler: used for PDF to PNG/JPEG rendering and visual regression checks.
-- System fonts: affect pagination, line spacing, and font substitution in Office/PDF output.
+- System fonts: affect pagination, line spacing, and font substitution in Office output. Basic PDF text routes include fallback fonts, and a custom TrueType font can be selected with `FORMAT_CONVERTER_PDF_FONT`.
 
 See [docs/quality-standard.md](docs/quality-standard.md) for quality definitions.
 
@@ -152,4 +152,4 @@ Please verify the recipient information before scanning.
 
 ## License
 
-This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
+This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE). Licenses for bundled third-party components and fonts are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

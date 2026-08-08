@@ -200,8 +200,11 @@ public final class ConversionTaskService implements AutoCloseable {
             }
             if (outputs.isEmpty()) {
                 TaskFileResult first = results.get(0);
+                String message = first.errorMessage() == null || first.errorMessage().isBlank()
+                        ? "所有文件转换失败"
+                        : "所有文件转换失败：" + first.errorMessage();
                 update(record, TaskStatus.FAILED, TaskStage.FAILED, 100, first.errorCode(),
-                        "所有文件转换失败", warnings, results, false, null);
+                        message, warnings, results, false, null);
                 return;
             }
             update(record, TaskStatus.CONVERTING, TaskStage.PACKAGING, 95, null, null, warnings, results, false, null);

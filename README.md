@@ -39,7 +39,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 
 - LibreOffice：用于 DOCX/XLSX/PPTX/WPS/ET/DPS/UOF 与 PDF 相关的 Office 引擎转换。
 - Poppler：用于 PDF 渲染为 PNG/JPEG 和视觉回归比较。
-- 系统字体：影响 Office/PDF 输出的分页、行距和文字替换。
+- 系统字体：影响 Office 输出的分页、行距和文字替换；基础 PDF 文本路线内置中文回退字体，也可通过 `FORMAT_CONVERTER_PDF_FONT` 指定 TrueType 字体。
 
 质量标准见 [docs/quality-standard.md](docs/quality-standard.md)。最新本地 QA 报告见 `qa-samples/report/qa-report.md`。
 
@@ -166,4 +166,4 @@ QA 会启动本地服务，通过 HTTP 上传样本、下载转换结果，再�
 
 ## 许可证
 
-本项目使用 Apache License 2.0，详见 [LICENSE](LICENSE)。
+本项目使用 Apache License 2.0，详见 [LICENSE](LICENSE)。随应用分发的第三方组件和字体许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
