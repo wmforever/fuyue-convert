@@ -16,6 +16,12 @@ The project is built with Java 17, Spring Boot, Vue 3, Apache POI, PDFBox, Poppl
 
 ## Current Matrix
 
+Status legend:
+
+- `stable`: covered by automated tests with clear input boundaries.
+- `beta`: primary route works, but real documents may vary because of fonts, engines, or format-specific features.
+- `experimental`: route is wired in, but output quality and compatibility still need more samples.
+
 | Route | Status | Default strategy | Notes |
 | --- | --- | --- | --- |
 | OFD -> DOCX/TXT/PDF | beta | editability first | Text-based OFD can preserve text, tables, images, and seal appearance. Scanned OFD reports that OCR is required. |
@@ -27,6 +33,12 @@ The project is built with Java 17, Spring Boot, Vue 3, Apache POI, PDFBox, Poppl
 | PDF -> DOCX | experimental | fidelity first | Generates page-image DOCX. Layout is more stable than text-only extraction, but structural editing is limited. |
 | PNG/JPG -> PDF | beta | layout first | Uses the Office engine when available, with PDFBox fallback. |
 | WPS/ET/DPS/UOF | experimental | compatibility first | Depends on LibreOffice import support. UOF currently falls back through PDF-backed DOCX to avoid page drift. |
+
+External dependencies:
+
+- LibreOffice: used for Office-engine conversions involving DOCX/XLSX/PPTX/WPS/ET/DPS/UOF and PDF.
+- Poppler: used for PDF to PNG rendering and visual regression checks.
+- System fonts: affect pagination, line spacing, and font substitution in Office/PDF output.
 
 See [docs/quality-standard.md](docs/quality-standard.md) for quality definitions.
 
@@ -69,6 +81,8 @@ Generated files are placed under `dist/`:
 
 - macOS/Linux: `fuyue-convert-<version>-<os>-<arch>.tar.gz`, then run `start.command` or `bin/start.sh`.
 - Windows: run `scripts/package-runtime.ps1` on Windows or use GitHub Actions. The regular package starts with `start.bat`; the `*-exe.zip` package starts with `FuyueConvert.exe`.
+
+GitHub Release runs a smoke test after packaging. macOS/Linux packages are extracted and started, then `/api/health` is checked. Windows packages are extracted and checked for the bundled Runtime, launcher scripts, and `FuyueConvert.exe`.
 
 After startup, open:
 

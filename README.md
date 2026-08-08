@@ -16,6 +16,12 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 
 ## 当前能力矩阵
 
+状态说明：
+
+- `stable`：有自动化测试覆盖，输入边界明确，适合日常使用。
+- `beta`：主流程可用，真实文档里可能受字体、引擎或格式特性影响。
+- `experimental`：能力已接入，但输出质量和兼容范围仍需要更多样本验证。
+
 | 路线 | 状态 | 默认策略 | 说明 |
 | --- | --- | --- | --- |
 | OFD -> DOCX/TXT/PDF | beta | 可编辑优先 | 文字型 OFD 可解析文字、表格、图片和签章外观；扫描型 OFD 会提示需要 OCR。 |
@@ -27,6 +33,12 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | PDF -> DOCX | experimental | 保真优先 | 当前生成页面图层 DOCX，版式比纯文本更稳，但结构编辑能力有限。 |
 | PNG/JPG -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 Office 引擎；无 Office 时回退 PDFBox。 |
 | WPS/ET/DPS/UOF | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 当前用 PDF 图层兜底避免分页漂移。 |
+
+外部依赖说明：
+
+- LibreOffice：用于 DOCX/XLSX/PPTX/WPS/ET/DPS/UOF 与 PDF 相关的 Office 引擎转换。
+- Poppler：用于 PDF 渲染为 PNG 和视觉回归比较。
+- 系统字体：影响 Office/PDF 输出的分页、行距和文字替换。
 
 质量标准见 [docs/quality-standard.md](docs/quality-standard.md)。最新本地 QA 报告见 `qa-samples/report/qa-report.md`。
 
@@ -69,6 +81,8 @@ bash scripts/package-runtime.sh
 
 - macOS/Linux：`fuyue-convert-<version>-<os>-<arch>.tar.gz`，解压后运行 `start.command` 或 `bin/start.sh`。
 - Windows：通过 GitHub Actions 或 Windows 本机运行 `scripts/package-runtime.ps1`。普通包解压后双击 `start.bat`；`*-exe.zip` 解压后双击 `FuyueConvert.exe`。
+
+GitHub Release 会在打包后自动执行 smoke test：macOS/Linux 会解压并启动服务检查 `/api/health`；Windows 会解压检查内置 Runtime、启动脚本和 `FuyueConvert.exe`。
 
 启动后访问：
 

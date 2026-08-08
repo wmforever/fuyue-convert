@@ -27,15 +27,28 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          cache: maven
 
       - name: Package runtime bundle
         if: runner.os != 'Windows'
         run: bash scripts/package-runtime.sh
 
+      - name: Smoke runtime package
+        if: runner.os != 'Windows'
+        run: bash scripts/smoke-runtime-package.sh dist/*.tar.gz
+
       - name: Package runtime bundle
         if: runner.os == 'Windows'
         shell: pwsh
         run: .\scripts\package-runtime.ps1
+
+      - name: Smoke runtime package
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Get-ChildItem dist\*.zip | ForEach-Object {
+            .\scripts\smoke-runtime-package.ps1 -Archive $_.FullName
+          }
 
       - name: Upload package
         uses: actions/upload-artifact@v7
