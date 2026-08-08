@@ -11,7 +11,8 @@ import java.util.List;
 
 public final class PdfToTextConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.TXT,
-            "从文字型 PDF 提取文本为 UTF-8 TXT。");
+            "从文字型 PDF 提取文本为 UTF-8 TXT。",
+            QualityLevel.STABLE, ConversionStrategy.EXTRACTION, List.of(), List.of("扫描型 PDF 需要 OCR，当前不识别图片文字"));
 
     @Override public ConversionRoute route() { return route; }
 

@@ -16,7 +16,8 @@ public final class OfdToPdfConverter implements FileConverter {
     private final OfdParser parser;
     private final PageLayoutAnalyzer analyzer;
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.OFD, DocumentFormat.PDF,
-            "将文字型 OFD 文本内容导出为基础 PDF。");
+            "将文字型 OFD 文本内容导出为基础 PDF。",
+            QualityLevel.BETA, ConversionStrategy.CONTENT, List.of(), List.of("当前为基础文本 PDF，不是完整 OFD 版式渲染"));
 
     public OfdToPdfConverter(SafeOfdExtractor extractor, OfdParser parser, PageLayoutAnalyzer analyzer) {
         this.extractor = extractor;

@@ -20,7 +20,8 @@ public final class OfdToDocxConverter implements FileConverter {
     private final PageLayoutAnalyzer analyzer;
     private final DocxRenderer renderer;
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.OFD, DocumentFormat.DOCX,
-            "将文字型 OFD 转换为可编辑 Word 文档，保留段落、表格、图片和页面方向。");
+            "将文字型 OFD 转换为可编辑 Word 文档，保留段落、表格、图片和页面方向。",
+            QualityLevel.BETA, ConversionStrategy.EDITABLE, List.of(), List.of("复杂签章、扫描页和厂商私有扩展需要更多样本验证"));
 
     public OfdToDocxConverter(SafeOfdExtractor extractor, OfdParser parser,
                               PageLayoutAnalyzer analyzer, DocxRenderer renderer) {

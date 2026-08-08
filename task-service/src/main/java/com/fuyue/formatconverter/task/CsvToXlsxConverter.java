@@ -14,7 +14,8 @@ import java.util.List;
 
 public final class CsvToXlsxConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.CSV, DocumentFormat.XLSX,
-            "将 CSV 表格转换为 Excel XLSX 工作簿，保留单元格文本内容。");
+            "将 CSV 表格转换为 Excel XLSX 工作簿，保留单元格文本内容。",
+            QualityLevel.STABLE, ConversionStrategy.DATA, List.of(), List.of("仅生成基础工作表，不推断样式"));
 
     @Override public ConversionRoute route() { return route; }
 

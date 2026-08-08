@@ -12,7 +12,8 @@ import java.util.List;
 
 public final class XlsxToCsvConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.XLSX, DocumentFormat.CSV,
-            "将 Excel XLSX 第一个工作表导出为 UTF-8 CSV。");
+            "将 Excel XLSX 第一个工作表导出为 UTF-8 CSV。",
+            QualityLevel.STABLE, ConversionStrategy.DATA, List.of(), List.of("仅导出第一个工作表", "不保留单元格样式"));
 
     @Override public ConversionRoute route() { return route; }
 

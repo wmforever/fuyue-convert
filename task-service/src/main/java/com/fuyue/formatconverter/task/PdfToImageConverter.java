@@ -36,7 +36,8 @@ abstract class PdfToImageConverter implements FileConverter {
         if (targetFormat != DocumentFormat.PNG && targetFormat != DocumentFormat.JPG) {
             throw new IllegalArgumentException("PDF 渲染图片仅支持 PNG/JPEG");
         }
-        this.route = ConversionRoute.of(DocumentFormat.PDF, targetFormat, description);
+        this.route = ConversionRoute.of(DocumentFormat.PDF, targetFormat, description,
+                QualityLevel.STABLE, ConversionStrategy.FIDELITY, List.of(), List.of("多页 PDF 输出 ZIP"));
         this.targetFormat = targetFormat;
         this.imageFormat = imageFormat;
         this.popplerFlag = popplerFlag;

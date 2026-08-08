@@ -22,7 +22,8 @@ public final class OfdToTextConverter implements FileConverter {
     private final OfdParser parser;
     private final PageLayoutAnalyzer analyzer;
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.OFD, DocumentFormat.TXT,
-            "提取文字型 OFD 的可编辑文本，按页面和段落顺序输出 UTF-8 文本。");
+            "提取文字型 OFD 的可编辑文本，按页面和段落顺序输出 UTF-8 文本。",
+            QualityLevel.BETA, ConversionStrategy.EXTRACTION, List.of(), List.of("扫描型 OFD 需要 OCR，当前不识别图片文字"));
 
     public OfdToTextConverter(SafeOfdExtractor extractor, OfdParser parser, PageLayoutAnalyzer analyzer) {
         this.extractor = extractor;

@@ -10,6 +10,7 @@ The project is built with Java 17, Spring Boot, Vue 3, Apache POI, PDFBox, Poppl
 
 - Open-source first: use local open-source libraries and command line tools by default.
 - Extensible routes: each conversion capability is implemented as an independent `FileConverter`.
+- Transparent route quality: the capabilities API returns `stable`, `beta`, `experimental`, dependencies, and limitations.
 - Verifiable quality: provide visual comparison and data round-trip QA scripts.
 - Transparent failures: unsupported formats, page mismatches, font substitution, image fallbacks, and other limitations are surfaced as errors or warnings.
 - Clear trade-offs: editability-first and fidelity-first conversions are different goals and are marked explicitly.

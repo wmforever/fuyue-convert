@@ -18,7 +18,8 @@ public final class ImageToPdfConverter implements FileConverter {
             throw new IllegalArgumentException("图片转 PDF 仅支持 PNG/JPG");
         }
         this.route = ConversionRoute.of(sourceFormat, DocumentFormat.PDF,
-                "将图片按原始比例放入单页 PDF。");
+                "将图片按原始比例放入单页 PDF。",
+                QualityLevel.BETA, ConversionStrategy.FIDELITY, List.of(), List.of("每张图片生成单页 PDF"));
     }
 
     @Override public ConversionRoute route() { return route; }

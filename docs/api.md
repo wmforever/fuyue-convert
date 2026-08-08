@@ -49,12 +49,22 @@ GET /api/tasks/capabilities
     "inputExtension": ".ofd",
     "outputExtension": ".docx",
     "description": "将文字型 OFD 转换为可编辑 Word 文档，保留段落、表格、图片和页面方向。",
-    "status": "available"
+    "status": "available",
+    "qualityLevel": "beta",
+    "strategy": "editable",
+    "requires": [],
+    "limitations": ["复杂签章、扫描页和厂商私有扩展需要更多样本验证"]
   }
 ]
 ```
 
-`status=available` 表示当前服务可执行该路线，不代表该路线已经达到 `stable`。质量等级和已知限制以 [quality-standard.md](quality-standard.md) 和 README 能力矩阵为准。
+`status=available` 表示当前服务可执行该路线，不代表该路线已经达到 `stable`。
+
+`qualityLevel` 表示质量等级：`stable`、`beta`、`experimental`、`planned`。
+
+`strategy` 表示默认转换策略：`editable`、`fidelity`、`data`、`extraction`、`content`、`compatibility`、`planned`。
+
+`requires` 和 `limitations` 给出外部依赖和已知限制，调用方应在 UI 中明确展示。
 
 `status=planned` 表示路线只展示规划，不开放执行。
 

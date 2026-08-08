@@ -43,6 +43,8 @@ class FormatConverterApplicationTest {
                 .andExpect(jsonPath("$[3].id").value("csv-to-xlsx"))
                 .andExpect(jsonPath("$[4].id").value("xlsx-to-csv"))
                 .andExpect(jsonPath("$[?(@.id=='pdf-to-docx')].status").value(contains("available")))
+                .andExpect(jsonPath("$[?(@.id=='pdf-to-docx')].qualityLevel").value(contains("experimental")))
+                .andExpect(jsonPath("$[?(@.id=='csv-to-xlsx')].strategy").value(contains("data")))
                 .andExpect(jsonPath("$[?(@.id=='png-to-pdf')].status").value(contains("available")))
                 .andExpect(jsonPath("$[?(@.id=='pdf-to-jpg')].status").value(contains("available")))
                 .andExpect(jsonPath("$[?(@.id=='pdf-to-ofd')].status").value(contains("planned")));
@@ -56,6 +58,7 @@ class FormatConverterApplicationTest {
                 .andExpect(jsonPath("$.office.available").isBoolean())
                 .andExpect(jsonPath("$.limits.maxFileSize").isNumber())
                 .andExpect(jsonPath("$.routes[?(@.id=='ofd-to-docx')].status").value(contains("available")))
+                .andExpect(jsonPath("$.routes[?(@.id=='ofd-to-docx')].qualityLevel").value(contains("beta")))
                 .andExpect(jsonPath("$.apiToken").doesNotExist())
                 .andExpect(jsonPath("$.dataRoot").doesNotExist());
     }

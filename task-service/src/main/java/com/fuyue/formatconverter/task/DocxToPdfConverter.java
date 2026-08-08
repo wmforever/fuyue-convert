@@ -10,7 +10,8 @@ import java.util.List;
 
 public final class DocxToPdfConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.DOCX, DocumentFormat.PDF,
-            "将 Word DOCX 文本内容导出为基础 PDF。");
+            "将 Word DOCX 文本内容导出为基础 PDF。",
+            QualityLevel.BETA, ConversionStrategy.CONTENT, List.of(), List.of("Java 兜底路线仅导出文本内容，不保留复杂版式"));
 
     @Override public ConversionRoute route() { return route; }
 

@@ -11,7 +11,8 @@ import java.util.List;
 
 public final class XlsxToPdfConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.XLSX, DocumentFormat.PDF,
-            "将 Excel 第一个工作表导出为基础表格 PDF。");
+            "将 Excel 第一个工作表导出为基础表格 PDF。",
+            QualityLevel.BETA, ConversionStrategy.CONTENT, List.of(), List.of("Java 兜底路线仅导出第一个工作表文本"));
 
     @Override public ConversionRoute route() { return route; }
 

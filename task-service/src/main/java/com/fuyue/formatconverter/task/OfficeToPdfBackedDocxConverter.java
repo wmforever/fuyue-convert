@@ -20,7 +20,9 @@ public final class OfficeToPdfBackedDocxConverter implements FileConverter {
         if (sourceFormat == DocumentFormat.PDF) {
             throw new IllegalArgumentException("PDF 源格式应直接使用 PdfToDocxConverter");
         }
-        this.route = ConversionRoute.of(sourceFormat, DocumentFormat.DOCX, description);
+        this.route = ConversionRoute.of(sourceFormat, DocumentFormat.DOCX, description,
+                QualityLevel.EXPERIMENTAL, ConversionStrategy.COMPATIBILITY, List.of("libreoffice", "pdftoppm"),
+                List.of("通过 PDF 页面图层兜底，正文结构编辑能力有限"));
         this.officeToPdf = new LibreOfficeConverter(sourceFormat, DocumentFormat.PDF, officeBinary, timeout,
                 "先使用 LibreOffice headless 渲染为 PDF。");
         this.pdfToDocx = new PdfToDocxConverter();

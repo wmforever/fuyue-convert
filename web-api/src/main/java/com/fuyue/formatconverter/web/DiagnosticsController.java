@@ -75,6 +75,10 @@ public class DiagnosticsController {
         item.put("sourceFormat", route.sourceFormat());
         item.put("targetFormat", route.targetFormat());
         item.put("status", route.status());
+        item.put("qualityLevel", route.qualityLevel());
+        item.put("strategy", route.strategy());
+        item.put("requires", route.requires());
+        item.put("limitations", route.limitations());
         item.put("description", route.description());
         return item;
     }

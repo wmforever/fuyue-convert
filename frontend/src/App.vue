@@ -10,7 +10,11 @@ const fallbackConversions = [{
   inputExtension: '.ofd',
   outputExtension: '.docx',
   description: '将文字型 OFD 转换为可编辑 Word 文档',
-  status: 'available'
+  status: 'available',
+  qualityLevel: 'beta',
+  strategy: 'editable',
+  requires: [],
+  limitations: ['复杂签章、扫描页和厂商私有扩展需要更多样本验证']
 }]
 
 const files = ref([])
@@ -31,7 +35,8 @@ const canSubmit = computed(() => files.value.length > 0 && !busy.value && select
 const selectedRoute = computed(() => conversions.value.find(route => route.id === selectedRouteId.value) || conversions.value[0])
 const availableRoutes = computed(() => conversions.value.filter(route => route.status === 'available'))
 const acceptExtension = computed(() => selectedRoute.value?.inputExtension || '.ofd')
-const acceptType = computed(() => `${acceptExtension.value},application/${selectedRoute.value?.sourceFormat || 'ofd'}`)
+const acceptExtensions = computed(() => selectedRoute.value?.sourceFormat === 'jpg' ? ['.jpg', '.jpeg'] : [acceptExtension.value])
+const acceptType = computed(() => `${acceptExtensions.value.join(',')},application/${selectedRoute.value?.sourceFormat || 'ofd'}`)
 const statusLabel = computed(() => ({ WAITING: '等待转换', CONVERTING: '正在转换', SUCCESS: '转换完成', FAILED: '转换失败' })[task.value?.status] || '')
 const progress = computed(() => task.value?.progress ?? uploadProgress.value)
 const routeGroups = computed(() => {
@@ -49,6 +54,21 @@ const routeGroups = computed(() => {
 
 function formatRouteLabel(route) {
   return `${route.sourceLabel} → ${route.targetLabel}`
+}
+
+function routeBadge(route) {
+  if (route.status !== 'available') return '规划中'
+  return ({ stable: '稳定', beta: 'Beta', experimental: '实验' })[route.qualityLevel] || '可用'
+}
+
+function strategyLabel(route) {
+  return ({ editable: '可编辑优先', fidelity: '保真优先', data: '数据优先', extraction: '提取优先', content: '内容优先', compatibility: '兼容优先' })[route.strategy] || ''
+}
+
+function routeMeta(route) {
+  const values = [routeBadge(route), strategyLabel(route)].filter(Boolean)
+  if (Array.isArray(route.requires) && route.requires.length) values.push(`依赖 ${route.requires.join(' / ')}`)
+  return values.join(' · ')
 }
 
 function routeGroupLabel(route) {
@@ -115,12 +135,12 @@ function startNewBatch() {
 }
 
 function accept(selected) {
-  const extension = acceptExtension.value.toLowerCase()
-  const incoming = Array.from(selected || []).filter(file => file.name.toLowerCase().endsWith(extension))
+  const extensions = acceptExtensions.value.map(extension => extension.toLowerCase())
+  const incoming = Array.from(selected || []).filter(file => extensions.some(extension => file.name.toLowerCase().endsWith(extension)))
   if (incoming.length && task.value && !busy.value) startNewBatch()
   const known = new Set(files.value.map(file => `${file.name}:${file.size}`))
   for (const file of incoming) if (!known.has(`${file.name}:${file.size}`)) files.value.push(file)
-  if (incoming.length !== (selected?.length || 0)) message.value = `已忽略非 ${acceptExtension.value.toUpperCase()} 文件`
+  if (incoming.length !== (selected?.length || 0)) message.value = `已忽略非 ${acceptExtensions.value.join(' / ').toUpperCase()} 文件`
 }
 
 function drop(event) {
@@ -288,14 +308,16 @@ onBeforeUnmount(() => {
                   <span class="route-main">
                     <strong>{{ formatRouteLabel(route) }}</strong>
                     <small>{{ route.description }}</small>
+                    <em>{{ routeMeta(route) }}</em>
                   </span>
-                  <span class="route-badge">{{ route.status === 'available' ? '可用' : '规划中' }}</span>
+                  <span class="route-badge" :class="route.qualityLevel || route.status">{{ routeBadge(route) }}</span>
                 </button>
               </section>
             </div>
           </div>
         </div>
         <span class="route-description">{{ selectedRoute.description }}{{ selectedRoute.status === 'available' ? '' : '（暂未开放）' }}</span>
+        <span v-if="routeMeta(selectedRoute)" class="route-meta">{{ routeMeta(selectedRoute) }}</span>
       </div>
 
       <div

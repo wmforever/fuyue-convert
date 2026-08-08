@@ -10,7 +10,8 @@ import java.util.List;
 
 public final class DocxToTextConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.DOCX, DocumentFormat.TXT,
-            "从 Word DOCX 提取段落和表格文本为 UTF-8 TXT。");
+            "从 Word DOCX 提取段落和表格文本为 UTF-8 TXT。",
+            QualityLevel.STABLE, ConversionStrategy.EXTRACTION, List.of(), List.of("不保留版式和样式"));
 
     @Override public ConversionRoute route() { return route; }
 

@@ -86,6 +86,8 @@ class ConversionTaskServiceTest {
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("csv-to-xlsx") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("xlsx-to-csv") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-docx") && route.status() == RouteStatus.AVAILABLE));
+            assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-docx") && route.qualityLevel() == QualityLevel.EXPERIMENTAL));
+            assertTrue(routes.stream().anyMatch(route -> route.id().equals("csv-to-xlsx") && route.strategy() == ConversionStrategy.DATA));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("png-to-pdf") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-jpg") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("wps-to-docx") && route.status() == RouteStatus.PLANNED));

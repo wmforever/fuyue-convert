@@ -18,7 +18,7 @@ public final class LibreOfficeConverter implements FileConverter {
 
     public LibreOfficeConverter(DocumentFormat sourceFormat, DocumentFormat targetFormat,
                                 Path binary, Duration timeout, String description) {
-        this.route = ConversionRoute.of(sourceFormat, targetFormat, description);
+        this.route = route(sourceFormat, targetFormat, description);
         this.binary = binary.toAbsolutePath().normalize();
         this.timeout = timeout == null || timeout.isNegative() || timeout.isZero() ? Duration.ofMinutes(2) : timeout;
         this.convertTo = targetFormat.extension();
@@ -59,6 +59,18 @@ public final class LibreOfficeConverter implements FileConverter {
         int dot = file.lastIndexOf('.');
         String base = dot > 0 ? file.substring(0, dot) : file;
         return base + "." + route.targetFormat().extension();
+    }
+
+    private ConversionRoute route(DocumentFormat sourceFormat, DocumentFormat targetFormat, String description) {
+        boolean domestic = sourceFormat == DocumentFormat.WPS || sourceFormat == DocumentFormat.ET ||
+                sourceFormat == DocumentFormat.DPS || sourceFormat == DocumentFormat.UOF ||
+                targetFormat == DocumentFormat.WPS || targetFormat == DocumentFormat.ET ||
+                targetFormat == DocumentFormat.DPS || targetFormat == DocumentFormat.UOF;
+        return ConversionRoute.of(sourceFormat, targetFormat, description,
+                domestic ? QualityLevel.EXPERIMENTAL : QualityLevel.BETA,
+                domestic ? ConversionStrategy.COMPATIBILITY : ConversionStrategy.FIDELITY,
+                List.of("libreoffice"),
+                domestic ? List.of("依赖 LibreOffice 对国产格式的导入兼容性") : List.of("本机字体会影响分页和版式"));
     }
 
     public static Optional<Path> discover(String configuredBinary) {

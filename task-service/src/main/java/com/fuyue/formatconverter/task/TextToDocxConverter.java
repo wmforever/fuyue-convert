@@ -10,7 +10,8 @@ import java.util.List;
 
 public final class TextToDocxConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.TXT, DocumentFormat.DOCX,
-            "将 UTF-8 文本转换为可编辑 Word DOCX。");
+            "将 UTF-8 文本转换为可编辑 Word DOCX。",
+            QualityLevel.STABLE, ConversionStrategy.CONTENT, List.of(), List.of("仅生成基础段落样式"));
 
     @Override public ConversionRoute route() { return route; }
 

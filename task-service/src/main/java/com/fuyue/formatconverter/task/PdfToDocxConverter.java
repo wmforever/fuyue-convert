@@ -27,7 +27,9 @@ public final class PdfToDocxConverter implements FileConverter {
     private static final double EMU_PER_POINT = 12_700d;
     private static final double RENDER_DPI = 160d;
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.DOCX,
-            "将 PDF 转换为版式优先 DOCX：每页以保真底图还原版面。");
+            "将 PDF 转换为版式优先 DOCX：每页以保真底图还原版面。",
+            QualityLevel.EXPERIMENTAL, ConversionStrategy.FIDELITY, List.of("pdftoppm"),
+            List.of("生成页面图层 DOCX，正文结构编辑能力有限"));
     private final Path popplerBinary;
 
     public PdfToDocxConverter() {
