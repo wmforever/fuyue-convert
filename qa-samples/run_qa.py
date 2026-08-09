@@ -38,6 +38,7 @@ BASE_URL = f"http://127.0.0.1:{PORT}"
 JAVA = os.environ.get("JAVA_BIN", "java")
 SOFFICE = os.environ.get("SOFFICE_BIN") or shutil.which("soffice")
 PDFTOPPM = os.environ.get("PDFTOPPM_BIN") or shutil.which("pdftoppm")
+PDFINFO = os.environ.get("PDFINFO_BIN") or shutil.which("pdfinfo")
 JAR = ROOT / "web-api" / "target" / "web-api-0.1.1.jar"
 
 VISUAL_THRESHOLD = float(os.environ.get("FORMAT_QA_VISUAL_THRESHOLD", "0.001"))
@@ -199,6 +200,8 @@ def compare_image_values(expected, actual, diff_dir):
     different = 0
     total = 0
     for index, (left, right) in enumerate(zip(expected, actual), start=1):
+        left = white_rgb(left)
+        right = white_rgb(right)
         width = max(left.width, right.width)
         height = max(left.height, right.height)
         canvas_left = Image.new("RGB", (width, height), "white")
@@ -218,9 +221,16 @@ def compare_image_values(expected, actual, diff_dir):
 
 
 def compare_images(expected, actual, diff_dir):
-    left = [Image.open(path).convert("RGB") for path in expected]
-    right = [Image.open(path).convert("RGB") for path in actual]
+    left = [Image.open(path) for path in expected]
+    right = [Image.open(path) for path in actual]
     return compare_image_values(left, right, diff_dir)
+
+
+def white_rgb(image):
+    rgba = image.convert("RGBA")
+    background = Image.new("RGBA", rgba.size, "white")
+    background.alpha_composite(rgba)
+    return background.convert("RGB")
 
 
 def compare_docx_page_layers(expected, docx, diff_dir):
@@ -266,8 +276,8 @@ def image_mean_absolute_error(expected, actual):
     error = 0
     values = 0
     for left_path, right_path in zip(expected, actual):
-        left = Image.open(left_path).convert("RGB")
-        right = Image.open(right_path).convert("RGB")
+        left = white_rgb(Image.open(left_path))
+        right = white_rgb(Image.open(right_path))
         if left.size != right.size:
             return float("inf")
         histogram = ImageChops.difference(left, right).histogram()
@@ -340,10 +350,50 @@ def visual_case(name, source, target, source_pdf=None, exact_mode="visual"):
         result["exactCheck"] = "jpeg-mean-absolute-error"
         result["meanAbsoluteError"] = image_mean_absolute_error(expected, actual)
         result["strictPass"] = comparison["pageCountMatch"] and result["meanAbsoluteError"] <= 2.0
+    elif exact_mode == "raster":
+        result["exactCheck"] = "white-composited-cross-engine-raster-bound"
+        result["strictPass"] = comparison["pageCountMatch"] and comparison["diffRatio"] <= 0.001
     else:
         result["exactCheck"] = "rendered-pixels"
         result["strictPass"] = comparison["pageCountMatch"] and comparison["differentPixels"] == 0
     result["practicalPass"] = result["visualPass"]
+    return result
+
+
+def image_pdf_layout_case(source):
+    result = {"name": "png-to-pdf-physical-page", "source": source.name,
+              "target": "pdf", "type": "content-layout"}
+    task, output = upload_convert(source, "pdf")
+    result["taskStatus"] = task.get("status")
+    result["output"] = output.name if output else None
+    result["exactCheck"] = "embedded-dpi-to-physical-pdf-page-size"
+    if not output or not PDFINFO:
+        result["strictPass"] = False
+        result["error"] = task.get("errorMessage") or "pdfinfo not available"
+        return result
+    with Image.open(source) as image:
+        dpi = image.info.get("dpi", (96.0, 96.0))
+        dpi_x = float(dpi[0]) if 36 <= float(dpi[0]) <= 1200 else 96.0
+        dpi_y = float(dpi[1]) if 36 <= float(dpi[1]) <= 1200 else 96.0
+        expected_width = image.width * 72.0 / dpi_x
+        expected_height = image.height * 72.0 / dpi_y
+    info = run([PDFINFO, str(output)])
+    pages = re.search(r"^Pages:\s+(\d+)", info, re.MULTILINE)
+    size = re.search(r"^Page size:\s+([0-9.]+)\s+x\s+([0-9.]+)\s+pts", info, re.MULTILINE)
+    if not pages or not size:
+        result["strictPass"] = False
+        result["error"] = "pdfinfo did not report page count and size"
+        return result
+    actual_width, actual_height = float(size.group(1)), float(size.group(2))
+    result["pageCount"] = int(pages.group(1))
+    result["expectedPagePoints"] = [expected_width, expected_height]
+    result["actualPagePoints"] = [actual_width, actual_height]
+    result["strictPass"] = (int(pages.group(1)) == 1
+                            and abs(actual_width - expected_width) <= 0.05
+                            and abs(actual_height - expected_height) <= 0.05)
+    result["practicalPass"] = result["strictPass"]
+    result["visualPass"] = None
+    result["diffRatio"] = 0.0
     return result
 
 
@@ -681,7 +731,8 @@ def main():
             cases.append(visual_case("uof-to-docx-exact", INPUT / "libreoffice-generated-demo.uof", "docx",
                                      exact_mode="text"))
         cases.extend([
-                visual_case("pdf-to-png-exact", pdf_source, "png", source_pdf=pdf_reference),
+                visual_case("pdf-to-png-exact", pdf_source, "png", source_pdf=pdf_reference,
+                            exact_mode="raster"),
                 visual_case("pdf-to-jpeg-quality", pdf_source, "jpg", source_pdf=pdf_reference,
                             exact_mode="jpeg"),
                 pdf_txt_extraction_case(pdf_editable_source, pdf_editable_text),
@@ -689,7 +740,7 @@ def main():
                 pdf_docx_editable_case(pdf_editable_source),
                 pdf_docx_ocr_required_case(pdf_scanned_source),
                 pdf_ofd_fixed_case(pdf_editable_source),
-                visual_case("png-to-pdf-exact", INPUT / "w3c-home.png", "pdf", source_pdf=office_pdf(INPUT / "w3c-home.png", pdf_reference_dir / "png-source-pdf")),
+                image_pdf_layout_case(INPUT / "w3c-home.png"),
                 csv_round_trip_case(INPUT / "countries.csv"),
         ])
         if (INPUT / "ofdrw-invoice.ofd").is_file():

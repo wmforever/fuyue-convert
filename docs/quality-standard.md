@@ -35,6 +35,7 @@ FormatConverter 使用“路线质量等级 + 可复现 QA 证据”描述转换
 - TXT -> DOCX/PDF 的 stable 门禁要求 UTF-8 BOM、UTF-16 BOM 和 GB18030 中文内容守恒，换页符生成真实分页，PDF 自动分页受页面上限约束，DOCX 包含可编辑文字及明确的东亚字体声明；二进制控制内容必须严格失败。
 - CSV <-> XLSX 的 stable 门禁要求常见编码与分隔符识别、引号/换行字段解析、公式注入字符串不被写成公式、日期格式化值和公式缓存结果明确导出、多工作表按顺序完整打包，以及超过内存窗口的行集可由流式 XLSX 写入器完成；畸形引号和资源上限必须严格失败。
 - PNG/JPEG -> PDF 的 stable 门禁要求内嵌 DPI 转换为正确物理页尺寸、EXIF 方向 1-8 的矩阵应用、透明 PNG 的可见合成、缺失/异常 DPI 的明确警告，以及同格式多图按上传顺序合并且页数一致；超大像素和超出 PDF 安全页尺寸的输入必须失败。
+- HTTP QA 对 PNG/JPEG -> PDF 以源像素、可信 DPI 和 EXIF 方向推导 PDF 物理页尺寸，不把 LibreOffice 的 A4 图片排版当作格式标准。透明栅格比较必须先合成到白底；PDFBox 与 Poppler 的跨引擎抗锯齿允许 `0.001` 的差异像素比例，但页数、尺寸、元数据和透明语义仍需精确通过各自门禁。
 - PDF -> PNG/JPEG 的 stable 门禁要求配置 DPI 对应的像素尺寸与文件元数据一致、PNG 透明画布不被白色填平、CMYK 内容可输出为 RGB JPEG、多页 ZIP 顺序连续；CropBox/UserUnit 导致的超大位图必须在分配内存前失败，加密文件必须返回稳定错误码。
 - DOCX/XLSX/PPTX -> PDF 的 beta 门禁要求使用真实 LibreOffice headless 转换、输出可由 PDFBox 重新打开且页数一致，并能提取各源格式的拉丁与 CJK 测试文字。CI 在 Linux 安装 LibreOffice 和 Noto CJK 字体执行独立集成回归；生产部署应额外锁定引擎版本和字体镜像。
 - 外部进程门禁要求输出始终被主动排空但只保留有限字节，持久化日志与异常消息不得出现本地绝对路径；超时及线程中断必须终止父进程和已派生子进程，并由自动化测试验证子 PID 不再存活。
@@ -59,14 +60,14 @@ FormatConverter 使用“路线质量等级 + 可复现 QA 证据”描述转换
 2026-08-09 的 Java 自动化测试已覆盖 PDF -> DOCX 的中英文真实文本、不同 CropBox/页面旋转、旋转文字、零图片、扫描页失败、混合页失败和 Word 页面尺寸上限。完整端到端 QA 已按新的可编辑性标准运行：
 
 ```text
-Total: 14
-Strict passed: 13
+Total: 21
+Strict passed: 20
 Strict failed: 1
-Visual threshold passed: 6
+Visual threshold passed: 5
 Office available: true
 ```
 
-新的 `PDF -> DOCX` 纯文字多页样本通过：源 PDF 与 DOCX 均为 2210 个非空白字符、页数一致且 `word/media/` 为零；纯图片 PDF 按契约失败为 `OCR_REQUIRED` 且没有下载文件。唯一严格失败是 experimental 的 `UOF -> DOCX`：直接可编辑转换保留了真实文字和 4 个媒体对象，但复杂样本发生页数漂移，尾注罗马编号多出一个字符，因此不会记录为内容或视觉严格通过。
+新的 `PDF -> DOCX` 纯文字多页样本通过：源 PDF 与 DOCX 均为 2210 个非空白字符、页数一致且 `word/media/` 为零；纯图片 PDF 按契约失败为 `OCR_REQUIRED` 且没有下载文件。`PDF -> PNG` 白底合成后的 PDFBox/Poppler 跨引擎差异率为 `0.00068802`，低于 `0.001` 门禁；`PNG -> PDF` 的单页物理尺寸期望为 `54.0075 x 36.0050 pt`，实际为 `54.0075 x 36.005 pt`。唯一严格失败是 experimental 的 `UOF -> DOCX`：直接可编辑转换保留了真实文字和 4 个媒体对象，但复杂样本发生页数漂移，尾注罗马编号多出一个字符，因此不会记录为内容或视觉严格通过。
 
 `OFD -> PDF` 自动化测试进一步验证了不同页面尺寸、可提取真实文字、图片资源、线条颜色与毫米坐标；斜线不再被表格边线过滤逻辑丢弃，二次和三次贝塞尔路径会在安全上限内折线化。
 
