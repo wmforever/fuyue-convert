@@ -151,7 +151,7 @@ QA 会启动本地服务，通过 HTTP 上传样本、下载转换结果，再�
 - `ofd-parser`：安全解压、`OfdParser`/`OcrEngine` SPI 和 OFDRW 适配器。
 - `table-recognizer`：线段归一化、网格、合并单元格和文字分配。
 - `docx-renderer`：基于 POI/OOXML 的 DOCX 页面、段落、真实表格和图片生成。
-- `task-service`：转换器注册、异步状态机、批量转换、ZIP、清理和重启恢复。
+- `task-service`：转换器注册、异步状态机、批量转换、ZIP、可中断取消、失败重试、TTL 清理和重启恢复。
 - `web-api`：Spring Boot REST API 和打包后的 Vue 3 前端。
 - `qa-samples`：样本驱动的端到端 QA 脚本和本地测试样本。
 

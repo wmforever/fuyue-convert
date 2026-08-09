@@ -1,4 +1,3 @@
 package com.fuyue.formatconverter.task;
 
-public enum TaskStatus { WAITING, CONVERTING, SUCCESS, FAILED }
-
+public enum TaskStatus { WAITING, CONVERTING, SUCCESS, FAILED, CANCELLED }

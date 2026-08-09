@@ -30,6 +30,7 @@ const busy = ref(false)
 const message = ref('')
 const diagnosticMessage = ref('')
 let pollTimer
+let pollGeneration = 0
 
 const canSubmit = computed(() => files.value.length > 0 && !busy.value && selectedRoute.value?.status === 'available')
 const selectedRoute = computed(() => conversions.value.find(route => route.id === selectedRouteId.value) || conversions.value[0])
@@ -37,7 +38,7 @@ const availableRoutes = computed(() => conversions.value.filter(route => route.s
 const acceptExtension = computed(() => selectedRoute.value?.inputExtension || '.ofd')
 const acceptExtensions = computed(() => selectedRoute.value?.sourceFormat === 'jpg' ? ['.jpg', '.jpeg'] : [acceptExtension.value])
 const acceptType = computed(() => `${acceptExtensions.value.join(',')},application/${selectedRoute.value?.sourceFormat || 'ofd'}`)
-const statusLabel = computed(() => ({ WAITING: '等待转换', CONVERTING: '正在转换', SUCCESS: '转换完成', FAILED: '转换失败' })[task.value?.status] || '')
+const statusLabel = computed(() => ({ WAITING: '等待转换', CONVERTING: '正在转换', SUCCESS: '转换完成', FAILED: '转换失败', CANCELLED: '转换已取消' })[task.value?.status] || '')
 const progress = computed(() => task.value?.progress ?? uploadProgress.value)
 const routeGroups = computed(() => {
   const keyword = routeSearch.value.trim().toLowerCase()
@@ -124,6 +125,7 @@ async function loadCapabilities() {
 }
 
 function startNewBatch() {
+  pollGeneration++
   clearTimeout(pollTimer)
   const previousTaskId = task.value?.taskId
   files.value = []
@@ -195,19 +197,56 @@ function upload(data) {
 
 async function poll() {
   clearTimeout(pollTimer)
+  const generation = pollGeneration
   try {
     const response = await fetch(`/api/tasks/${task.value.taskId}`, { cache: 'no-store' })
     if (!response.ok) throw new Error('无法查询任务状态')
-    task.value = await response.json()
+    const snapshot = await response.json()
+    if (generation !== pollGeneration) return
+    task.value = snapshot
     if (task.value.status === 'WAITING' || task.value.status === 'CONVERTING') pollTimer = setTimeout(poll, 800)
     else busy.value = false
   } catch (error) {
+    if (generation !== pollGeneration) return
     message.value = error.message
     busy.value = false
   }
 }
 
 function download() { window.location.href = `/api/tasks/${task.value.taskId}/download` }
+
+async function taskAction(action) {
+  const response = await fetch(`/api/tasks/${task.value.taskId}/${action}`, { method: 'POST' })
+  let body = {}
+  try { body = await response.json() } catch (_) { /* ignore */ }
+  if (!response.ok) throw new Error(body.message || `任务操作失败（${response.status}）`)
+  return body
+}
+
+async function cancelTask() {
+  pollGeneration++
+  clearTimeout(pollTimer)
+  try {
+    task.value = await taskAction('cancel')
+    busy.value = false
+  } catch (error) {
+    message.value = error.message
+    if (task.value && ['WAITING', 'CONVERTING'].includes(task.value.status)) poll()
+  }
+}
+
+async function retryTask() {
+  pollGeneration++
+  message.value = ''
+  busy.value = true
+  try {
+    task.value = await taskAction('retry')
+    poll()
+  } catch (error) {
+    message.value = error.message
+    busy.value = false
+  }
+}
 
 async function reset() {
   startNewBatch()
@@ -379,8 +418,10 @@ onBeforeUnmount(() => {
       <p v-if="message" class="message">{{ message }}</p>
 
       <div class="actions">
-        <button v-if="!task?.downloadReady" class="primary" :disabled="!canSubmit" @click="submit">开始转换</button>
-        <button v-else class="primary" @click="download">下载 {{ task.downloadName }}</button>
+        <button v-if="!task" class="primary" :disabled="!canSubmit" @click="submit">开始转换</button>
+        <button v-if="task?.downloadReady" class="primary" @click="download">下载 {{ task.downloadName }}</button>
+        <button v-if="task && ['WAITING', 'CONVERTING'].includes(task.status)" class="secondary" @click="cancelTask">取消任务</button>
+        <button v-if="task && ['FAILED', 'CANCELLED'].includes(task.status)" class="secondary" @click="retryTask">重试</button>
         <button v-if="task" class="secondary" @click="reset">转换其他文件</button>
       </div>
     </section>

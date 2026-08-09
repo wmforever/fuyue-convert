@@ -36,6 +36,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -586,6 +588,83 @@ class ConversionTaskServiceTest {
         }
     }
 
+    @Test void cancelsRunningTaskWithoutPublishingAResult() throws Exception {
+        CountDownLatch started = new CountDownLatch(1);
+        CountDownLatch interrupted = new CountDownLatch(1);
+        FileConverter blocking = new FileConverter() {
+            @Override public ConversionRoute route() {
+                return ConversionRoute.of(DocumentFormat.TXT, DocumentFormat.DOCX, "blocking test converter");
+            }
+
+            @Override
+            public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                            ParseLimits limits, ConversionProgress progress) throws Exception {
+                started.countDown();
+                try {
+                    Thread.sleep(Duration.ofSeconds(30).toMillis());
+                } catch (InterruptedException e) {
+                    interrupted.countDown();
+                    throw e;
+                }
+                throw new AssertionError("cancel did not interrupt converter");
+            }
+        };
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("cancel-data"), 1, 2,
+                Duration.ofMinutes(1), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] text = "cancel me".getBytes(StandardCharsets.UTF_8);
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(blocking))) {
+            TaskSnapshot created = service.createTask(List.of(new UploadPayload("cancel.txt", "text/plain", text.length,
+                    () -> new ByteArrayInputStream(text))), DocumentFormat.DOCX);
+            assertTrue(started.await(5, TimeUnit.SECONDS));
+
+            TaskSnapshot cancelled = service.cancel(created.taskId());
+
+            assertEquals(TaskStatus.CANCELLED, cancelled.status());
+            assertEquals(TaskStage.CANCELLED, cancelled.stage());
+            assertEquals("TASK_CANCELLED", cancelled.errorCode());
+            assertFalse(cancelled.downloadReady());
+            assertTrue(interrupted.await(5, TimeUnit.SECONDS));
+            assertEquals(TaskStatus.CANCELLED, service.get(created.taskId()).status());
+        }
+    }
+
+    @Test void retriesFailedTaskFromRetainedOriginalUploadAfterRestart() throws Exception {
+        TextToDocxConverter delegate = new TextToDocxConverter();
+        FileConverter failing = new FileConverter() {
+            @Override public ConversionRoute route() { return delegate.route(); }
+
+            @Override
+            public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                            ParseLimits limits, ConversionProgress progress) throws Exception {
+                throw new ConversionFailureException("TRANSIENT_TEST_FAILURE", "temporary failure");
+            }
+        };
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("retry-data"), 1, 2,
+                Duration.ofSeconds(10), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] text = "retry retained input".getBytes(StandardCharsets.UTF_8);
+        String failedTaskId;
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(failing))) {
+            TaskSnapshot first = service.createTask(List.of(new UploadPayload("retry.txt", "text/plain", text.length,
+                    () -> new ByteArrayInputStream(text))), DocumentFormat.DOCX);
+            TaskSnapshot failed = await(service, first.taskId());
+            assertEquals(TaskStatus.FAILED, failed.status());
+            failedTaskId = first.taskId();
+        }
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(delegate))) {
+            assertEquals(TaskStatus.FAILED, service.get(failedTaskId).status());
+            TaskSnapshot retried = service.retry(failedTaskId);
+            assertNotEquals(failedTaskId, retried.taskId());
+            TaskSnapshot succeeded = await(service, retried.taskId());
+
+            assertEquals(TaskStatus.SUCCESS, succeeded.status(), succeeded.errorMessage());
+            assertTrue(succeeded.downloadReady());
+            try (XWPFDocument word = new XWPFDocument(Files.newInputStream(service.download(retried.taskId()).path()))) {
+                assertTrue(word.getParagraphs().stream().anyMatch(p -> p.getText().contains("retry retained input")));
+            }
+        }
+    }
+
     private VirtualPage page(double width, double height, String text) {
         Paragraph paragraph = new Paragraph(text, 5d);
         paragraph.setPosition(Position.Absolute).setBox(15d, 15d, width - 30d, 15d);
@@ -645,7 +724,8 @@ class ConversionTaskServiceTest {
     private TaskSnapshot await(ConversionTaskService service, String id) throws InterruptedException {
         for (int i = 0; i < 500; i++) {
             TaskSnapshot current = service.get(id);
-            if (current.status() == TaskStatus.SUCCESS || current.status() == TaskStatus.FAILED) return current;
+            if (current.status() == TaskStatus.SUCCESS || current.status() == TaskStatus.FAILED
+                    || current.status() == TaskStatus.CANCELLED) return current;
             Thread.sleep(20);
         }
         fail("task did not finish");

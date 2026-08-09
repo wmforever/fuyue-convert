@@ -129,7 +129,7 @@ public final class ConversionTaskService implements AutoCloseable {
         tasks.put(taskId, record);
         persist(record);
         try {
-            executor.execute(() -> convert(record));
+            record.execution = executor.submit(() -> convert(record));
         } catch (RejectedExecutionException e) {
             tasks.remove(taskId);
             deleteTree(taskDir);
@@ -147,6 +147,34 @@ public final class ConversionTaskService implements AutoCloseable {
 
     public TaskSnapshot get(String taskId) { return record(taskId).snapshot(); }
 
+    public TaskSnapshot cancel(String taskId) {
+        TaskRecord record = record(taskId);
+        TaskSnapshot current = record.snapshot();
+        if (isTerminal(current.status())) return current;
+        record.cancellationRequested.set(true);
+        update(record, TaskStatus.CANCELLED, TaskStage.CANCELLED, current.progress(), "TASK_CANCELLED",
+                "任务已取消", current.warnings(), current.files(), false, null);
+        Future<?> execution = record.execution;
+        if (execution != null) execution.cancel(true);
+        executor.purge();
+        return record.snapshot();
+    }
+
+    public TaskSnapshot retry(String taskId) throws IOException {
+        TaskRecord source = record(taskId);
+        TaskStatus status = source.snapshot().status();
+        if (status != TaskStatus.FAILED && status != TaskStatus.CANCELLED) {
+            throw new IllegalStateException("只有失败或已取消的任务可以重试");
+        }
+        if (source.inputs.isEmpty() || source.inputs.stream().anyMatch(input -> !Files.isRegularFile(input.path))) {
+            throw new IllegalStateException("原始上传文件已过期，无法重试");
+        }
+        List<UploadPayload> uploads = source.inputs.stream().map(input ->
+                new UploadPayload(input.displayName, input.contentType, input.size,
+                        () -> Files.newInputStream(input.path))).toList();
+        return createTask(uploads, source.route.targetFormat());
+    }
+
     public DownloadArtifact download(String taskId) {
         TaskRecord record = record(taskId);
         TaskSnapshot snapshot = record.snapshot();
@@ -161,18 +189,30 @@ public final class ConversionTaskService implements AutoCloseable {
     public void delete(String taskId) {
         TaskRecord record = tasks.remove(taskId);
         if (record == null) throw new TaskNotFoundException(taskId);
-        deleteTree(record.taskDir);
+        record.deleteRequested.set(true);
+        record.cancellationRequested.set(true);
+        Future<?> execution = record.execution;
+        if (execution != null && !execution.isDone()) {
+            execution.cancel(true);
+            executor.purge();
+        }
+        if (!record.executionStarted.get()) {
+            deleteTree(record.taskDir);
+        }
     }
 
     private void convert(TaskRecord record) {
+        record.executionStarted.set(true);
         Instant deadline = Instant.now().plus(config.timeout());
         List<TaskFileResult> results = new ArrayList<>();
         List<ConversionWarning> warnings = new ArrayList<>();
         List<Path> outputs = new ArrayList<>();
         try {
+            checkCancellation(record);
             update(record, TaskStatus.CONVERTING, TaskStage.VALIDATING, 2, null, null, warnings, results, false, null);
             for (int i = 0; i < record.inputs.size(); i++) {
                 int fileIndex = i;
+                checkCancellation(record);
                 checkDeadline(deadline);
                 InputFile input = record.inputs.get(i);
                 Path work = record.taskDir.resolve("work/file-%04d".formatted(i + 1));
@@ -186,12 +226,18 @@ public final class ConversionTaskService implements AutoCloseable {
                             update(record, TaskStatus.CONVERTING, stage, progress(fileIndex, record.inputs.size(), withinFile), null, null, warnings, results, false, null);
                         }
                     });
+                    checkCancellation(record);
                     parsedPageCount = converted.pageCount();
                     ConversionGuards.requireOutputFile(converted.path(), config.parseLimits(), "转换");
                     warnings.addAll(converted.warnings());
                     outputs.add(converted.path());
                     results.add(new TaskFileResult(input.displayName, true, converted.outputName(), parsedPageCount, null, null,
                             record.route.sourceFormat(), record.route.targetFormat()));
+                } catch (CancellationException e) {
+                    throw e;
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new CancellationException("任务已取消");
                 } catch (Exception e) {
                     String code = failureCode(e);
                     results.add(new TaskFileResult(input.displayName, false, null, parsedPageCount, code, safeError(e),
@@ -201,9 +247,9 @@ public final class ConversionTaskService implements AutoCloseable {
                 } finally {
                     fileActive.set(false);
                     deleteTree(work);
-                    try { Files.deleteIfExists(input.path); } catch (IOException ignored) { }
                 }
             }
+            checkCancellation(record);
             if (outputs.isEmpty()) {
                 TaskFileResult first = results.get(0);
                 String message = first.errorMessage() == null || first.errorMessage().isBlank()
@@ -241,6 +287,9 @@ public final class ConversionTaskService implements AutoCloseable {
                 update(record, TaskStatus.SUCCESS, TaskStage.COMPLETED, 100, null, null, warnings, results,
                         true, "converted-to-" + record.route.targetFormat().extension() + ".zip");
             }
+        } catch (CancellationException e) {
+            update(record, TaskStatus.CANCELLED, TaskStage.CANCELLED, record.snapshot().progress(),
+                    "TASK_CANCELLED", "任务已取消", warnings, results, false, null);
         } catch (Exception e) {
             update(record, TaskStatus.FAILED, TaskStage.FAILED, 100, "TASK_FAILED", safeError(e),
                     warnings, results, false, null);
@@ -249,6 +298,10 @@ public final class ConversionTaskService implements AutoCloseable {
             update(record, TaskStatus.FAILED, TaskStage.FAILED, 100, "CONVERTER_CRASHED",
                     "转换组件异常终止：" + e.getClass().getSimpleName(), warnings, results, false, null);
             log.error("taskId={} converter crashed", record.id, e);
+        } finally {
+            record.executionStarted.set(false);
+            if (record.deleteRequested.get()) deleteTree(record.taskDir);
+            else if (record.snapshot().status() == TaskStatus.SUCCESS) deleteInputs(record);
         }
     }
 
@@ -313,6 +366,8 @@ public final class ConversionTaskService implements AutoCloseable {
     private synchronized void update(TaskRecord record, TaskStatus status, TaskStage stage, int progress,
                                      String errorCode, String errorMessage, List<ConversionWarning> warnings,
                                      List<TaskFileResult> files, boolean ready, String downloadName) {
+        if (record.deleteRequested.get()) return;
+        if (record.cancellationRequested.get() && status != TaskStatus.CANCELLED) return;
         TaskSnapshot old = record.snapshot;
         record.snapshot = new TaskSnapshot(record.id, status, stage, Math.max(0, Math.min(100, progress)),
                 errorCode, errorMessage, List.copyOf(warnings), List.copyOf(files), ready, downloadName,
@@ -341,6 +396,10 @@ public final class ConversionTaskService implements AutoCloseable {
                 if (!Files.isRegularFile(manifest)) continue;
                 try {
                     TaskSnapshot snapshot = json.readValue(manifest.toFile(), TaskSnapshot.class);
+                    if (snapshot.expiresAt().isBefore(Instant.now())) {
+                        deleteTree(directory);
+                        continue;
+                    }
                     if (snapshot.status() == TaskStatus.WAITING || snapshot.status() == TaskStatus.CONVERTING) {
                         snapshot = new TaskSnapshot(snapshot.taskId(), TaskStatus.FAILED, TaskStage.FAILED, 100,
                                 "SERVICE_RESTARTED", "服务重启，原转换任务已终止", snapshot.warnings(), snapshot.files(),
@@ -348,8 +407,12 @@ public final class ConversionTaskService implements AutoCloseable {
                                 snapshot.createdAt(), Instant.now(), snapshot.expiresAt());
                         json.writeValue(manifest.toFile(), snapshot);
                     }
-                    ConversionRoute route = ConversionRoute.of(snapshot.sourceFormat(), snapshot.targetFormat(), "已恢复的历史任务");
-                    TaskRecord record = new TaskRecord(snapshot.taskId(), directory, List.of(), snapshot, null, route);
+                    FileConverter converter = converterByRoute.get(routeKey(snapshot.sourceFormat(), snapshot.targetFormat()));
+                    ConversionRoute route = converter == null
+                            ? ConversionRoute.of(snapshot.sourceFormat(), snapshot.targetFormat(), "已恢复的历史任务")
+                            : converter.route();
+                    TaskRecord record = new TaskRecord(snapshot.taskId(), directory,
+                            recoverInputs(directory, snapshot), snapshot, converter, route);
                     if (snapshot.downloadReady()) {
                         Path outputDir = directory.resolve("output");
                         String recoveredDownloadName = snapshot.downloadName();
@@ -370,12 +433,36 @@ public final class ConversionTaskService implements AutoCloseable {
         }
     }
 
+    private List<InputFile> recoverInputs(Path directory, TaskSnapshot snapshot) throws IOException {
+        Path inputDir = directory.resolve("input");
+        if (!Files.isDirectory(inputDir)) return List.of();
+        try (var files = Files.list(inputDir)) {
+            List<Path> paths = files.filter(Files::isRegularFile).sorted().toList();
+            List<InputFile> recovered = new ArrayList<>();
+            for (int index = 0; index < paths.size(); index++) {
+                Path path = paths.get(index);
+                String displayName = index < snapshot.files().size()
+                        ? snapshot.files().get(index).fileName()
+                        : "document-%d.%s".formatted(index + 1, snapshot.sourceFormat().extension());
+                recovered.add(new InputFile(displayName, snapshot.sourceFormat().contentType(), Files.size(path), path));
+            }
+            return List.copyOf(recovered);
+        }
+    }
+
     private void cleanupExpiredSafely() {
         try {
             Instant now = Instant.now();
             for (TaskRecord task : List.copyOf(tasks.values())) {
-                if (task.snapshot().expiresAt().isBefore(now) && tasks.remove(task.id, task)) deleteTree(task.taskDir);
+                if (task.snapshot().expiresAt().isBefore(now) && tasks.remove(task.id, task)) {
+                    task.deleteRequested.set(true);
+                    task.cancellationRequested.set(true);
+                    Future<?> execution = task.execution;
+                    if (execution != null && !execution.isDone()) execution.cancel(true);
+                    if (!task.executionStarted.get()) deleteTree(task.taskDir);
+                }
             }
+            executor.purge();
         } catch (Exception e) { log.error("Task cleanup failed", e); }
     }
 
@@ -504,6 +591,14 @@ public final class ConversionTaskService implements AutoCloseable {
         for (int i = 2; ; i++) { String candidate = base + "-" + i + ext; if (used.add(candidate)) return candidate; }
     }
     private int progress(int index, int total, int withinFile) { return Math.min(94, (index * 90 + withinFile) / Math.max(1, total)); }
+    private boolean isTerminal(TaskStatus status) {
+        return status == TaskStatus.SUCCESS || status == TaskStatus.FAILED || status == TaskStatus.CANCELLED;
+    }
+    private void checkCancellation(TaskRecord record) throws InterruptedException {
+        if (record.cancellationRequested.get() || Thread.currentThread().isInterrupted()) {
+            throw new InterruptedException("任务已取消");
+        }
+    }
     private void checkDeadline(Instant deadline) throws TimeoutException { if (Instant.now().isAfter(deadline)) throw new TimeoutException("转换超时"); }
     private String safeError(Throwable e) { return e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage(); }
     private String failureCode(Exception error) {
@@ -522,6 +617,13 @@ public final class ConversionTaskService implements AutoCloseable {
         } catch (IOException e) { log.warn("Could not clean task path {}", root.getFileName()); }
     }
 
+    private void deleteInputs(TaskRecord record) {
+        for (InputFile input : record.inputs) {
+            try { Files.deleteIfExists(input.path); }
+            catch (IOException e) { log.warn("taskId={} input cleanup failed", record.id); }
+        }
+    }
+
     @Override public void close() { cleaner.shutdownNow(); executor.shutdownNow(); }
 
     private record InputFile(String displayName, String contentType, long size, Path path) {}
@@ -534,6 +636,10 @@ public final class ConversionTaskService implements AutoCloseable {
         private final ConversionRoute route;
         private volatile TaskSnapshot snapshot;
         private volatile Path downloadPath;
+        private final AtomicBoolean cancellationRequested = new AtomicBoolean();
+        private final AtomicBoolean deleteRequested = new AtomicBoolean();
+        private final AtomicBoolean executionStarted = new AtomicBoolean();
+        private volatile Future<?> execution;
         private TaskRecord(String id, Path taskDir, List<InputFile> inputs, TaskSnapshot snapshot,
                            FileConverter converter, ConversionRoute route) {
             this.id = id; this.taskDir = taskDir; this.inputs = List.copyOf(inputs); this.snapshot = snapshot;

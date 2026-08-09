@@ -80,6 +80,7 @@ GET /api/tasks/{taskId}
 - `CONVERTING`
 - `SUCCESS`
 - `FAILED`
+- `CANCELLED`
 
 `stage` 提供内部阶段，`progress` 为 0 到 100。`warnings` 是非致命限制，例如字体替代、OCR 未配置或图像层保真兜底。`files` 给出每个文件的成功或失败结果；成功结果中的 `pageCount` 是目标文档实际写入页数。
 
@@ -91,13 +92,29 @@ GET /api/tasks/{taskId}/download
 
 单文件任务返回目标格式文件；批量任务返回 ZIP。任务未完成时返回 HTTP 400。
 
+## 取消任务
+
+```http
+POST /api/tasks/{taskId}/cancel
+```
+
+等待中或转换中的任务会进入 `CANCELLED`，正在执行的转换线程会被中断，且不会发布下载结果。已结束任务保持原状态并直接返回当前快照。
+
+## 重试任务
+
+```http
+POST /api/tasks/{taskId}/retry
+```
+
+仅允许重试 `FAILED` 或 `CANCELLED` 任务。服务使用保留的原始上传内容创建一个新的任务 ID 并返回 HTTP 202，不复用旧任务的工作目录或不完整输出。失败/取消任务的原始上传保留到 `result-ttl`，重启后仍可重试；成功任务会立即删除原始上传，过期或主动删除的任务不可重试。
+
 ## 删除任务
 
 ```http
 DELETE /api/tasks/{taskId}
 ```
 
-删除任务及其结果文件，成功返回 HTTP 204。
+删除任务及其输入、工作文件和结果文件，成功返回 HTTP 204。删除运行中任务会先请求取消，并由转换线程退出时完成目录清理，避免一边写入一边删除的竞态。
 
 ## 健康检查
 

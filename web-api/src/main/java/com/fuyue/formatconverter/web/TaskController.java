@@ -32,6 +32,14 @@ public class TaskController {
     @GetMapping("/{taskId}")
     public TaskSnapshot status(@PathVariable String taskId) { return tasks.get(taskId); }
 
+    @PostMapping("/{taskId}/cancel")
+    public TaskSnapshot cancel(@PathVariable String taskId) { return tasks.cancel(taskId); }
+
+    @PostMapping("/{taskId}/retry")
+    public ResponseEntity<TaskSnapshot> retry(@PathVariable String taskId) throws IOException {
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(tasks.retry(taskId));
+    }
+
     @GetMapping("/{taskId}/download")
     public ResponseEntity<FileSystemResource> download(@PathVariable String taskId) {
         DownloadArtifact artifact = tasks.download(taskId);
