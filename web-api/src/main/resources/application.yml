@@ -31,6 +31,7 @@ format-converter:
   max-pages: ${FORMAT_CONVERTER_MAX_PAGES:500}
   office-enabled: ${FORMAT_CONVERTER_OFFICE_ENABLED:true}
   office-binary: ${FORMAT_CONVERTER_OFFICE_BINARY:}
+  office-required-version: ${FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION:}
   office-timeout: ${FORMAT_CONVERTER_OFFICE_TIMEOUT:2m}
   api-token: ${FORMAT_CONVERTER_API_TOKEN:}
   auto-open-browser: ${FORMAT_CONVERTER_AUTO_OPEN_BROWSER:false}

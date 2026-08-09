@@ -45,3 +45,27 @@ jobs:
         run: |
           bash -n scripts/package-runtime.sh
           bash -n scripts/smoke-runtime-package.sh
+
+  office-integration:
+    name: LibreOffice PDF integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Install LibreOffice and CJK fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libreoffice-core libreoffice-writer libreoffice-calc libreoffice-impress fonts-noto-cjk
+          fc-cache -f
+
+      - name: Run real Office to PDF conversions
+        run: mvn -B -ntp -pl task-service -am -Dskip.frontend=true -Dtest=LibreOfficePdfConverterTest -Dsurefire.failIfNoSpecifiedTests=false test

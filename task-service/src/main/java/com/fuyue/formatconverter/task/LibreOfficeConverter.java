@@ -46,8 +46,8 @@ public final class LibreOfficeConverter implements FileConverter {
     public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
         Files.createDirectories(workDir);
-        Path outDir = Files.createDirectories(workDir.resolve("office-output"));
-        Path profileDir = Files.createDirectories(workDir.resolve("office-profile"));
+        Path outDir = Files.createTempDirectory(workDir, "office-output-");
+        Path profileDir = Files.createTempDirectory(workDir, "office-profile-");
         progress.update(TaskStage.RENDERING, 25);
         List<String> command = List.of(binary.toString(), "--headless", "--nologo", "--nodefault",
                 "--nofirststartwizard", "--nolockcheck",
@@ -56,38 +56,45 @@ public final class LibreOfficeConverter implements FileConverter {
         ConversionGuards.runProcess(command, workDir.resolve("libreoffice.log"), timeout, "LibreOffice 转换");
         progress.update(TaskStage.PACKAGING, 90);
         Path produced = findProducedFile(outDir, route.targetFormat());
+        ConversionGuards.requireNonEmptyOutputFile(produced, limits, "LibreOffice");
+        Integer pageCount = validateOutput(produced, route.targetFormat(), limits);
         Files.move(produced, outputPath, StandardCopyOption.REPLACE_EXISTING);
-        ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "LibreOffice");
-        validateOutput(outputPath, route.targetFormat(), limits);
         List<ConversionWarning> warnings = domesticFormat
                 ? List.of(ConversionWarning.of(WarningCode.OFFICE_COMPATIBILITY_LAYOUT,
                 "国产格式兼容转换已完成；字体、分页、自动编号和对象位置可能因 LibreOffice 兼容性发生变化，请复核内容与版式。", null))
                 : List.of();
-        return new ConversionOutput(outputPath, outputFileName(input.displayName()), null, warnings);
+        return new ConversionOutput(outputPath, outputFileName(input.displayName()), pageCount, warnings);
     }
 
-    private void validateOutput(Path output, DocumentFormat target, ParseLimits limits) throws IOException {
+    private Integer validateOutput(Path output, DocumentFormat target, ParseLimits limits) throws IOException {
         try {
-            switch (target) {
+            return switch (target) {
                 case PDF -> {
                     try (var document = Loader.loadPDF(output.toFile())) {
                         int pages = document.getNumberOfPages();
                         if (pages <= 0) throw new IOException("LibreOffice 生成的 PDF 没有页面");
                         if (pages > limits.maxPages()) throw new IOException("LibreOffice 生成的 PDF 页数超过限制");
+                        yield pages;
                     }
                 }
                 case DOCX -> {
                     try (var ignored = new XWPFDocument(Files.newInputStream(output))) { }
+                    yield null;
                 }
                 case XLSX -> {
                     try (var ignored = new XSSFWorkbook(Files.newInputStream(output))) { }
+                    yield null;
                 }
                 case PPTX -> {
                     try (var ignored = new XMLSlideShow(Files.newInputStream(output))) { }
+                    yield null;
                 }
-                case UOF -> validateUof(output);
-                default -> { }
-            }
+                case UOF -> {
+                    validateUof(output);
+                    yield null;
+                }
+                default -> null;
+            };
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {
@@ -121,10 +128,16 @@ public final class LibreOfficeConverter implements FileConverter {
 
     private Path findProducedFile(Path outDir, DocumentFormat targetFormat) throws IOException {
         try (var files = Files.list(outDir)) {
-            return files.filter(Files::isRegularFile)
+            List<Path> produced = files.filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
                     .filter(path -> targetFormat.acceptsFileName(path.getFileName().toString()))
-                    .findFirst()
-                    .orElseThrow(() -> new IOException("LibreOffice 未生成 ." + targetFormat.extension() + " 文件"));
+                    .toList();
+            if (produced.isEmpty()) {
+                throw new IOException("LibreOffice 未生成 ." + targetFormat.extension() + " 文件");
+            }
+            if (produced.size() != 1) {
+                throw new IOException("LibreOffice 生成了多个 ." + targetFormat.extension() + " 文件");
+            }
+            return produced.get(0);
         }
     }
 
@@ -170,17 +183,29 @@ public final class LibreOfficeConverter implements FileConverter {
         return Optional.empty();
     }
 
-    private static boolean probe(Path binary) {
+    public static Optional<String> version(Path binary) {
+        if (binary == null || !Files.isRegularFile(binary) || !Files.isExecutable(binary)) return Optional.empty();
         try {
             Process process = new ProcessBuilder(binary.toString(), "--version")
                     .redirectErrorStream(true)
-                    .redirectOutput(ProcessBuilder.Redirect.DISCARD)
                     .start();
             boolean finished = process.waitFor(10, TimeUnit.SECONDS);
-            if (!finished) process.destroyForcibly();
-            return finished && process.exitValue() == 0;
+            if (!finished) {
+                process.destroyForcibly();
+                process.waitFor(2, TimeUnit.SECONDS);
+                return Optional.empty();
+            }
+            byte[] bytes = process.getInputStream().readNBytes(2048);
+            if (process.exitValue() != 0) return Optional.empty();
+            String value = new String(bytes, java.nio.charset.StandardCharsets.UTF_8)
+                    .replaceAll("\\s+", " ").trim();
+            return value.isEmpty() ? Optional.empty() : Optional.of(value);
         } catch (Exception e) {
-            return false;
+            return Optional.empty();
         }
+    }
+
+    private static boolean probe(Path binary) {
+        return version(binary).isPresent();
     }
 }

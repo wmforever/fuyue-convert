@@ -36,6 +36,7 @@ FormatConverter 使用“路线质量等级 + 可复现 QA 证据”描述转换
 - CSV <-> XLSX 的 stable 门禁要求常见编码与分隔符识别、引号/换行字段解析、公式注入字符串不被写成公式、日期格式化值和公式缓存结果明确导出、多工作表按顺序完整打包，以及超过内存窗口的行集可由流式 XLSX 写入器完成；畸形引号和资源上限必须严格失败。
 - PNG/JPEG -> PDF 的 stable 门禁要求内嵌 DPI 转换为正确物理页尺寸、EXIF 方向 1-8 的矩阵应用、透明 PNG 的可见合成、缺失/异常 DPI 的明确警告，以及同格式多图按上传顺序合并且页数一致；超大像素和超出 PDF 安全页尺寸的输入必须失败。
 - PDF -> PNG/JPEG 的 stable 门禁要求配置 DPI 对应的像素尺寸与文件元数据一致、PNG 透明画布不被白色填平、CMYK 内容可输出为 RGB JPEG、多页 ZIP 顺序连续；CropBox/UserUnit 导致的超大位图必须在分配内存前失败，加密文件必须返回稳定错误码。
+- DOCX/XLSX/PPTX -> PDF 的 beta 门禁要求使用真实 LibreOffice headless 转换、输出可由 PDFBox 重新打开且页数一致，并能提取各源格式的拉丁与 CJK 测试文字。CI 在 Linux 安装 LibreOffice 和 Noto CJK 字体执行独立集成回归；生产部署应额外锁定引擎版本和字体镜像。
 - DOCX -> UOF 的 experimental 门禁要求输出是含 UOF 命名空间和 `uof:UOF` 根元素的真实 XML，并由 LibreOffice 重新打开为 DOCX 验证正文段落与表格单元格文字；仅生成文件或修改扩展名不算通过。WPS/ET/DPS 反向写出在没有真实过滤器和重开证据前保持 planned。
 - `visualPass`：源文件和目标文件经当前环境二次渲染后的差异低于参考阈值。它受字体和渲染引擎影响，与内容或内嵌页面是否严格一致分开记录。
 - `practicalPass`：视觉用例中等同于 `visualPass`；数据和内容用例中等同于 `strictPass`。

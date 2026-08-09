@@ -54,6 +54,7 @@ public class DiagnosticsController {
         office.put("enabled", officeEngineStatus.enabled());
         office.put("available", officeEngineStatus.available());
         office.put("binaryName", binaryName(officeEngineStatus.binary()));
+        office.put("version", officeEngineStatus.version());
         office.put("message", officeEngineStatus.message());
         return office;
     }

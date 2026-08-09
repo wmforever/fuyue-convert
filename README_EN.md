@@ -28,7 +28,7 @@ Status legend:
 | OFD -> DOCX/TXT/PDF/PNG/JPG | beta | structure/layout | DOCX and TXT use structured parsing; TXT supports multi-column reading order and table rows/columns. PDF/PNG/JPEG paint text, images, seal appearances, and paths at source coordinates. Images use 160 DPI and multi-page output is zipped. TXT fails with `OCR_REQUIRED` when a page contains scanned content. |
 | OFD -> XLSX | experimental | data first | Writes high-confidence bordered grid tables as real cells, per-page worksheets, and merged regions. It returns `NO_TABLE_FOUND` when no reliable table is found and `OCR_REQUIRED` for scanned pages. |
 | CSV <-> XLSX | stable | data first | CSV supports UTF-8, BOM-marked UTF-16, GB18030, and comma/TAB/semicolon/pipe detection. Inputs stay text to prevent formula injection. XLSX exports cached formula results, formatted dates, and multi-sheet CSV ZIPs. |
-| DOCX/XLSX/PPTX -> PDF | beta | layout first | Uses LibreOffice headless when available. Local fonts affect visual output. |
+| DOCX/XLSX/PPTX -> PDF | beta | layout first | Uses an isolated LibreOffice headless profile when available and validates the actual PDF page count. Local fonts affect visual output. |
 | TXT -> DOCX/PDF | stable | content first | Supports UTF-8, BOM-marked UTF-16, and strict GB18030 decoding. Form feeds create real page breaks, PDF wraps CJK by glyph width, and DOCX writes configurable Latin/CJK fonts. |
 | DOCX -> TXT | beta | text extraction | Extracts paragraphs and tables in body order, then labeled headers, footers, text boxes, footnotes, endnotes, comments, and tracked revisions; layout is not retained. |
 | PDF -> TXT | beta | extraction | Extracts text by page coordinates and multi-column reading order, preserving page boundaries with form feeds. Scanned pages or non-text content pages in mixed PDFs fail with `OCR_REQUIRED`. |
@@ -44,6 +44,7 @@ External dependencies:
 - LibreOffice: used for Office-engine conversions involving DOCX/XLSX/PPTX/WPS/ET/DPS/UOF and PDF. Image-to-PDF uses the built-in PDFBox route for deterministic DPI and EXIF handling.
 - Poppler: used for PDF to PNG/JPEG rendering and visual regression checks.
 - `FORMAT_CONVERTER_IMAGE_DPI`: PDF image-export resolution, default `160`, allowed range `36-600`; invalid configuration fails explicitly when the converter starts.
+- `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION`: optional LibreOffice version lock fragment such as `24.8`. A mismatching `--version` marks the Office engine unavailable; the detected version is exposed by `/api/health` and `/api/diagnostics`.
 - System fonts: affect pagination, line spacing, and font substitution in Office output. Basic PDF text routes include fallback fonts, and a custom TrueType font can be selected with `FORMAT_CONVERTER_PDF_FONT`. TXT -> DOCX font names can be configured with `FORMAT_CONVERTER_DOCX_FONT` and `FORMAT_CONVERTER_DOCX_CJK_FONT`.
 
 See [docs/quality-standard.md](docs/quality-standard.md) for quality definitions.

@@ -21,6 +21,7 @@ public class FormatConverterProperties {
     private int maxPages = 500;
     private boolean officeEnabled = true;
     private String officeBinary = "";
+    private String officeRequiredVersion = "";
     private Duration officeTimeout = Duration.ofMinutes(2);
     private String apiToken = "";
     private boolean autoOpenBrowser = false;
@@ -55,6 +56,8 @@ public class FormatConverterProperties {
     public void setOfficeEnabled(boolean officeEnabled) { this.officeEnabled = officeEnabled; }
     public String getOfficeBinary() { return officeBinary; }
     public void setOfficeBinary(String officeBinary) { this.officeBinary = officeBinary; }
+    public String getOfficeRequiredVersion() { return officeRequiredVersion; }
+    public void setOfficeRequiredVersion(String officeRequiredVersion) { this.officeRequiredVersion = officeRequiredVersion; }
     public Duration getOfficeTimeout() { return officeTimeout; }
     public void setOfficeTimeout(Duration officeTimeout) { this.officeTimeout = officeTimeout; }
     public String getApiToken() { return apiToken; }

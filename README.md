@@ -28,7 +28,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | OFD -> DOCX/TXT/PDF/PNG/JPG | beta | 结构/版式 | DOCX/TXT 使用结构化解析；TXT 支持多栏阅读顺序和表格行列。PDF/PNG/JPEG 按源坐标绘制文字、图片、签章和路径；图片固定为 160 DPI，多页输出 ZIP。TXT 遇到扫描内容页时严格返回 `OCR_REQUIRED`。 |
 | OFD -> XLSX | experimental | 数据优先 | 将高置信度有线规则表格写成真实单元格、分页工作表和合并区域；未识别到可靠表格返回 `NO_TABLE_FOUND`，扫描页返回 `OCR_REQUIRED`。 |
 | CSV <-> XLSX | stable | 数据优先 | CSV 支持 UTF-8/UTF-16 BOM/GB18030 与逗号、TAB、分号、竖线识别；输入统一写成文本以阻断公式注入。XLSX 公式导出缓存结果，日期按单元格格式输出，多工作表分别导出 CSV ZIP。 |
-| DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 headless 转换；本地字体会影响结果。 |
+| DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用隔离的 headless profile 转换，校验真实 PDF 页数；本地字体会影响结果。 |
 | TXT -> DOCX/PDF | stable | 内容优先 | 支持 UTF-8、带 BOM 的 UTF-16 和严格 GB18030 解码；换页符生成真实分页，PDF 按字形宽度进行 CJK 换行，DOCX 写入可配置中西文字体。 |
 | DOCX -> TXT | beta | 内容提取 | 按正文对象顺序提取段落和表格，并带标签追加页眉页脚、文本框、脚注尾注、批注及修订文字；不保留版式。 |
 | PDF -> TXT | beta | 内容提取 | 按页面坐标和多栏顺序提取文字，使用换页符保留页面边界；扫描页或混合文档中的无文字内容页严格返回 `OCR_REQUIRED`。 |
@@ -44,6 +44,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 - LibreOffice：用于 DOCX/XLSX/PPTX/WPS/ET/DPS/UOF 与 PDF 相关的 Office 引擎转换；图片转 PDF 使用内置 PDFBox 路线以稳定处理 DPI 和 EXIF。
 - Poppler：用于 PDF 渲染为 PNG/JPEG 和视觉回归比较。
 - `FORMAT_CONVERTER_IMAGE_DPI`：PDF 图片导出的渲染分辨率，默认 `160`，允许 `36-600`；异常配置会在启动转换器时明确失败。
+- `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION`：可选的 LibreOffice 版本锁定片段（如 `24.8`）；实际 `--version` 不匹配时 Office 引擎会标记为不可用，版本可在 `/api/health` 和 `/api/diagnostics` 查看。
 - 系统字体：影响 Office 输出的分页、行距和文字替换；基础 PDF 文本路线内置中文回退字体，也可通过 `FORMAT_CONVERTER_PDF_FONT` 指定 TrueType 字体。TXT -> DOCX 可通过 `FORMAT_CONVERTER_DOCX_FONT` 和 `FORMAT_CONVERTER_DOCX_CJK_FONT` 配置西文及东亚字体名。
 
 质量标准见 [docs/quality-standard.md](docs/quality-standard.md)。最新本地 QA 报告见 `qa-samples/report/qa-report.md`。

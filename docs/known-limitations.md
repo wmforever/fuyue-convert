@@ -28,7 +28,7 @@
 
 ## Office 与国产格式
 
-1. `DOCX/XLSX/PPTX -> PDF` 依赖 LibreOffice headless；缺失字体会造成视觉差异。
+1. `DOCX/XLSX/PPTX -> PDF` 依赖 LibreOffice headless；每次转换使用独立 profile/output 目录，输出会重新打开并校验真实页数。可通过 `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION` 锁定部署版本，但缺失字体仍会造成分页和视觉差异，生产环境应固定 LibreOffice 包及字体包镜像。
 2. `WPS/ET/DPS/UOF` 依赖 LibreOffice 对对应格式的兼容能力，当前标记为 experimental。
 3. `UOF -> DOCX` 当前由 LibreOffice 直接导入并输出可编辑 DOCX；能保留的对象取决于 LibreOffice 的 UOF 兼容性，分页、字体、脚注/尾注等自动编号和对象位置可能变化。
 4. WPS 官方命令行中的部分 PDF 转换能力可能需要登录或会员能力，不适合作为开源默认依赖。

@@ -25,9 +25,15 @@ public class ApplicationConfiguration {
     @Bean
     OfficeEngineStatus officeEngineStatus(FormatConverterProperties properties) {
         if (!properties.isOfficeEnabled()) return OfficeEngineStatus.disabled();
-        return LibreOfficeConverter.discover(properties.getOfficeBinary())
-                .map(path -> OfficeEngineStatus.available(path.toString()))
-                .orElseGet(OfficeEngineStatus::unavailable);
+        var discovered = LibreOfficeConverter.discover(properties.getOfficeBinary());
+        if (discovered.isEmpty()) return OfficeEngineStatus.unavailable();
+        Path binary = discovered.orElseThrow();
+        String version = LibreOfficeConverter.version(binary).orElse("unknown");
+        String required = properties.getOfficeRequiredVersion();
+        if (required != null && !required.isBlank() && !version.contains(required.strip())) {
+            return OfficeEngineStatus.incompatible(version, required.strip());
+        }
+        return OfficeEngineStatus.available(binary.toString(), version);
     }
 
     @Bean(destroyMethod = "close")
