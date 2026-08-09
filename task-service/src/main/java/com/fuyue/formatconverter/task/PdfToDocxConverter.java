@@ -16,19 +16,30 @@ public final class PdfToDocxConverter implements FileConverter {
     private final PdfLayoutParser parser;
     private final PageLayoutAnalyzer analyzer;
     private final DocxRenderer renderer;
-    private final ConversionRoute route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.DOCX,
-            "将文字型 PDF 转换为可编辑 Word，恢复文字、基础段落、页面尺寸和方向。",
-            QualityLevel.BETA, ConversionStrategy.EDITABLE, List.of(),
-            List.of("扫描型 PDF 需要 OCR", "嵌入图片、复杂矢量图形、字体替代、阅读顺序和复杂表格仍需更多样本验证"));
+    private final PdfOcrSupport ocr;
+    private final ConversionRoute route;
 
     public PdfToDocxConverter() {
-        this(new PdfLayoutParser(), new PageLayoutAnalyzer(), new PoiDocxRenderer());
+        this(new PdfLayoutParser(), new PageLayoutAnalyzer(), new PoiDocxRenderer(), null);
     }
 
     public PdfToDocxConverter(PdfLayoutParser parser, PageLayoutAnalyzer analyzer, DocxRenderer renderer) {
+        this(parser, analyzer, renderer, null);
+    }
+
+    PdfToDocxConverter(PdfLayoutParser parser, PageLayoutAnalyzer analyzer, DocxRenderer renderer,
+                       PdfOcrSupport ocr) {
         this.parser = java.util.Objects.requireNonNull(parser, "parser");
         this.analyzer = java.util.Objects.requireNonNull(analyzer, "analyzer");
         this.renderer = java.util.Objects.requireNonNull(renderer, "renderer");
+        this.ocr = ocr;
+        this.route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.DOCX,
+                ocr == null ? "将文字型 PDF 转换为可编辑 Word，恢复文字、基础段落、页面尺寸和方向。"
+                        : "恢复 PDF 真实文字，并以本地 Tesseract 将扫描页识别为可编辑 Word 文字。",
+                QualityLevel.BETA, ConversionStrategy.EDITABLE,
+                ocr == null ? List.of() : List.of("tesseract"),
+                List.of(ocr == null ? "扫描型 PDF 需要 OCR" : "OCR 页必须人工复核",
+                        "嵌入图片、复杂矢量图形、字体替代、阅读顺序和复杂表格仍需更多样本验证"));
     }
 
     @Override public ConversionRoute route() { return route; }
@@ -37,7 +48,12 @@ public final class PdfToDocxConverter implements FileConverter {
     public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
         progress.update(TaskStage.PARSING, 20);
-        DocumentModel parsed = parser.parse(input.path(), input.displayName(), limits);
+        DocumentModel parsed = ocr == null
+                ? parser.parse(input.path(), input.displayName(), limits)
+                : parser.parseForEditableOcr(input.path(), input.displayName(), limits);
+        if (ocr != null) {
+            parsed = ocr.recognizeMissingPages(input.path(), parsed, workDir.resolve("pdf-ocr"), limits, progress);
+        }
         progress.update(TaskStage.RECOGNIZING, 50);
         List<ConversionWarning> warnings = new ArrayList<>(parsed.warnings());
         List<PageModel> pages = parsed.pages().stream().map(analyzer::analyze).toList();

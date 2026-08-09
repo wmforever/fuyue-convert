@@ -13,16 +13,27 @@ import java.util.List;
 public final class PdfToTextConverter implements FileConverter {
     private final PdfLayoutParser parser;
     private final PageLayoutAnalyzer analyzer;
-    private final ConversionRoute route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.TXT,
-            "按页面坐标和多栏阅读顺序从文字型 PDF 提取 UTF-8 文本。",
-            QualityLevel.BETA, ConversionStrategy.EXTRACTION, List.of(),
-            List.of("扫描型或含无文字扫描页的 PDF 在未配置 OCR 时严格失败", "复杂旋转文字和无框表格阅读顺序仍需更多样本"));
+    private final PdfOcrSupport ocr;
+    private final ConversionRoute route;
 
-    public PdfToTextConverter() { this(new PdfLayoutParser(), new PageLayoutAnalyzer()); }
+    public PdfToTextConverter() { this(new PdfLayoutParser(), new PageLayoutAnalyzer(), null); }
 
     PdfToTextConverter(PdfLayoutParser parser, PageLayoutAnalyzer analyzer) {
+        this(parser, analyzer, null);
+    }
+
+    PdfToTextConverter(PdfLayoutParser parser, PageLayoutAnalyzer analyzer, PdfOcrSupport ocr) {
         this.parser = java.util.Objects.requireNonNull(parser, "parser");
         this.analyzer = java.util.Objects.requireNonNull(analyzer, "analyzer");
+        this.ocr = ocr;
+        this.route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.TXT,
+                ocr == null ? "按页面坐标和多栏阅读顺序从文字型 PDF 提取 UTF-8 文本。"
+                        : "提取 PDF 真实文字，并仅对无文字扫描页使用本地 Tesseract OCR。",
+                QualityLevel.BETA, ConversionStrategy.EXTRACTION,
+                ocr == null ? List.of() : List.of("tesseract"),
+                List.of(ocr == null ? "扫描型或含无文字扫描页的 PDF 在未配置 OCR 时严格失败"
+                                : "OCR 页返回警告且必须人工复核",
+                        "复杂旋转文字和无框表格阅读顺序仍需更多样本"));
     }
 
     @Override public ConversionRoute route() { return route; }
@@ -31,7 +42,12 @@ public final class PdfToTextConverter implements FileConverter {
     public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
         progress.update(TaskStage.PARSING, 30);
-        var parsed = parser.parseForTextExtraction(input.path(), input.displayName(), limits);
+        var parsed = ocr == null
+                ? parser.parseForTextExtraction(input.path(), input.displayName(), limits)
+                : parser.parseForFixedLayout(input.path(), input.displayName(), limits);
+        if (ocr != null) {
+            parsed = ocr.recognizeMissingPages(input.path(), parsed, workDir.resolve("pdf-ocr"), limits, progress);
+        }
         progress.update(TaskStage.RECOGNIZING, 60);
         var pages = parsed.pages().stream().map(analyzer::analyze).toList();
         List<ConversionWarning> warnings = new ArrayList<>(parsed.warnings());

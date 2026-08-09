@@ -31,9 +31,9 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用隔离的 headless profile 转换，校验真实 PDF 页数；本地字体会影响结果。 |
 | TXT -> DOCX/PDF | stable | 内容优先 | 支持 UTF-8、带 BOM 的 UTF-16 和严格 GB18030 解码；换页符生成真实分页，PDF 按字形宽度进行 CJK 换行，DOCX 写入可配置中西文字体。 |
 | DOCX -> TXT | beta | 内容提取 | 按正文对象顺序提取段落和表格，并带标签追加页眉页脚、文本框、脚注尾注、批注及修订文字；不保留版式。 |
-| PDF -> TXT | beta | 内容提取 | 按页面坐标和多栏顺序提取文字，使用换页符保留页面边界；扫描页或混合文档中的无文字内容页严格返回 `OCR_REQUIRED`。 |
+| PDF -> TXT | beta | 内容提取 | 按页面坐标和多栏顺序提取文字并保留换页；默认对扫描页返回 `OCR_REQUIRED`，显式配置本地 OCR 后仅识别缺少文字的内容页。 |
 | PDF -> PNG/JPG | stable | 版式渲染 | 默认 160 DPI（可配置 36-600）；PNG 保留透明画布，JPEG 转为 RGB 并使用 0.9 质量；多页自动输出 ZIP。 |
-| PDF -> DOCX | beta | 可编辑优先 | 文字型 PDF 恢复真实文字、基础段落、页面尺寸和方向；扫描页或纯图片页在未接入 OCR 时明确失败。 |
+| PDF -> DOCX | beta | 可编辑优先 | 恢复真实文字、基础段落、页面尺寸和方向；默认严格拒绝扫描页，显式配置本地 OCR 后把扫描页识别为带坐标的可编辑文字且不嵌入整页图。 |
 | PDF -> OFD | experimental | 版式优先 | 生成真实 OFD 包；144 DPI 页面图像层保留视觉，文字型 PDF 同时写入源坐标 OFD 文字对象。复杂对象尚未逐项结构化重建。 |
 | PNG/JPG -> PDF | stable | 版式优先 | 读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。同格式多图按上传顺序合并为多页 PDF。 |
 | PNG/JPG -> TXT | experimental/按配置 | OCR 提取 | 默认禁用；只有显式启用且本地 Tesseract 与所需语言包可用时开放，结果返回 `OCR_APPLIED` 并要求人工复核。 |

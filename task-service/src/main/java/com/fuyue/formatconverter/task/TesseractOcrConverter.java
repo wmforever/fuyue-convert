@@ -1,10 +1,15 @@
 package com.fuyue.formatconverter.task;
 
 import com.fuyue.formatconverter.model.ConversionWarning;
+import com.fuyue.formatconverter.model.FontStyle;
+import com.fuyue.formatconverter.model.Rect;
+import com.fuyue.formatconverter.model.TextBlock;
 import com.fuyue.formatconverter.model.WarningCode;
 import com.fuyue.formatconverter.parser.ParseLimits;
 
-import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -15,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.LinkedHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -66,6 +72,84 @@ public final class TesseractOcrConverter implements FileConverter {
         return new ConversionOutput(outputPath, replaceExtension(input.displayName(), "txt"), 1,
                 List.of(ConversionWarning.of(WarningCode.OCR_APPLIED,
                         "已使用本地 Tesseract（" + languages + "）执行 OCR；识别结果必须人工复核。", 1)));
+    }
+
+    List<TextBlock> recognizeLayout(Path image, Path workDir, int pageNumber,
+                                    Rect physicalBox, ParseLimits limits) throws Exception {
+        Files.createDirectories(workDir);
+        ConversionGuards.requireImageBounds(image, limits);
+        ImageDimensions dimensions = dimensions(image);
+        Path base = workDir.resolve("tesseract-page-%04d".formatted(pageNumber));
+        List<String> command = List.of(binary.toString(), image.toString(), base.toString(),
+                "-l", languages, "--psm", "3", "tsv");
+        ConversionGuards.runProcess(command, workDir.resolve("tesseract-page-%04d.log".formatted(pageNumber)),
+                timeout, "Tesseract OCR 第 " + pageNumber + " 页");
+        Path tsv = Path.of(base + ".tsv");
+        ConversionGuards.requireOutputFile(tsv, limits, "Tesseract OCR TSV");
+        return parseTsv(tsv, pageNumber, physicalBox, dimensions, limits);
+    }
+
+    private List<TextBlock> parseTsv(Path tsv, int pageNumber, Rect page,
+                                     ImageDimensions dimensions, ParseLimits limits) throws Exception {
+        LinkedHashMap<String, OcrLine> lines = new LinkedHashMap<>();
+        try (var input = Files.lines(tsv, java.nio.charset.StandardCharsets.UTF_8)) {
+            for (String row : input.skip(1).toList()) {
+                String[] columns = row.split("\\t", 12);
+                if (columns.length < 12 || !"5".equals(columns[0])) continue;
+                String text = columns[11].strip();
+                if (text.isEmpty()) continue;
+                double confidence = number(columns[10], -1d);
+                if (confidence < 0) continue;
+                int left = integer(columns[6]);
+                int top = integer(columns[7]);
+                int width = integer(columns[8]);
+                int height = integer(columns[9]);
+                if (width <= 0 || height <= 0) continue;
+                String key = columns[2] + ":" + columns[3] + ":" + columns[4];
+                lines.computeIfAbsent(key, ignored -> new OcrLine()).add(text, left, top, width, height);
+                if (lines.size() > limits.maxEntries()) {
+                    throw new java.io.IOException("OCR 行数超过限制：" + lines.size() + " > " + limits.maxEntries());
+                }
+            }
+        }
+        List<TextBlock> result = new ArrayList<>(lines.size());
+        int index = 0;
+        for (OcrLine line : lines.values()) {
+            double x = page.x() + line.left * page.width() / dimensions.width;
+            double y = page.y() + line.top * page.height() / dimensions.height;
+            double width = Math.max(0.5d, line.width() * page.width() / dimensions.width);
+            double height = Math.max(0.5d, line.height() * page.height() / dimensions.height);
+            double sizePt = Math.max(5d, Math.min(72d, height * 72d / 25.4d * 0.85d));
+            result.add(new TextBlock("ocr-p" + pageNumber + "-l" + (++index), pageNumber,
+                    new Rect(x, y, width, height), line.text(), y + height * 0.85d,
+                    new FontStyle("SimSun", sizePt, false, false, null), index));
+        }
+        return List.copyOf(result);
+    }
+
+    private ImageDimensions dimensions(Path image) throws Exception {
+        try (ImageInputStream stream = ImageIO.createImageInputStream(image.toFile())) {
+            if (stream == null) throw new java.io.IOException("无法读取 OCR 图片尺寸");
+            var readers = ImageIO.getImageReaders(stream);
+            if (!readers.hasNext()) throw new java.io.IOException("无法识别 OCR 图片格式");
+            ImageReader reader = readers.next();
+            try {
+                reader.setInput(stream, true, true);
+                return new ImageDimensions(reader.getWidth(0), reader.getHeight(0));
+            } finally {
+                reader.dispose();
+            }
+        }
+    }
+
+    private int integer(String value) {
+        try { return Integer.parseInt(value); }
+        catch (NumberFormatException e) { return 0; }
+    }
+
+    private double number(String value, double fallback) {
+        try { return Double.parseDouble(value); }
+        catch (NumberFormatException e) { return fallback; }
     }
 
     public static Optional<Settings> configuredSettings() {
@@ -169,5 +253,28 @@ public final class TesseractOcrConverter implements FileConverter {
             languages = normalizeLanguages(languages);
             version = version == null || version.isBlank() ? "unknown" : version;
         }
+    }
+
+    private record ImageDimensions(int width, int height) { }
+
+    private static final class OcrLine {
+        private final StringBuilder text = new StringBuilder();
+        private int left = Integer.MAX_VALUE;
+        private int top = Integer.MAX_VALUE;
+        private int right;
+        private int bottom;
+
+        void add(String word, int x, int y, int width, int height) {
+            if (!text.isEmpty()) text.append(' ');
+            text.append(word);
+            left = Math.min(left, x);
+            top = Math.min(top, y);
+            right = Math.max(right, x + width);
+            bottom = Math.max(bottom, y + height);
+        }
+
+        String text() { return text.toString(); }
+        int width() { return Math.max(1, right - left); }
+        int height() { return Math.max(1, bottom - top); }
     }
 }

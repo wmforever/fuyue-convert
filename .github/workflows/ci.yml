@@ -89,4 +89,4 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng
 
       - name: Run real image OCR
-        run: mvn -B -ntp -pl task-service -am -Dskip.frontend=true -Dtest=TesseractOcrConverterTest -Dsurefire.failIfNoSpecifiedTests=false test
+        run: mvn -B -ntp -pl task-service -am -Dskip.frontend=true -Dtest=TesseractOcrConverterTest,PdfOcrConverterTest -Dsurefire.failIfNoSpecifiedTests=false test

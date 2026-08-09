@@ -18,6 +18,8 @@ public final class DefaultConverterRegistry {
         OfdrwParser parser = new OfdrwParser();
         PageLayoutAnalyzer analyzer = new PageLayoutAnalyzer();
         PoiDocxRenderer renderer = new PoiDocxRenderer();
+        var ocrSettings = TesseractOcrConverter.configuredSettings();
+        PdfOcrSupport pdfOcr = ocrSettings.map(PdfOcrSupport::new).orElse(null);
         List<FileConverter> converters = new ArrayList<>();
         converters.add(new OfdToDocxConverter(extractor, parser, analyzer, renderer));
         converters.add(new OfdToTextConverter(extractor, parser, analyzer));
@@ -30,14 +32,14 @@ public final class DefaultConverterRegistry {
         converters.add(new TextToDocxConverter());
         converters.add(new DocxToTextConverter());
         converters.add(new TextToPdfConverter());
-        converters.add(new PdfToTextConverter());
-        converters.add(new PdfToDocxConverter(new PdfLayoutParser(), analyzer, renderer));
+        converters.add(new PdfToTextConverter(new PdfLayoutParser(), analyzer, pdfOcr));
+        converters.add(new PdfToDocxConverter(new PdfLayoutParser(), analyzer, renderer, pdfOcr));
         converters.add(new PdfToOfdConverter());
         converters.add(new PdfToPngConverter());
         converters.add(new PdfToJpgConverter());
         converters.add(new ImageToPdfConverter(DocumentFormat.PNG));
         converters.add(new ImageToPdfConverter(DocumentFormat.JPG));
-        TesseractOcrConverter.configuredSettings().ifPresent(settings -> {
+        ocrSettings.ifPresent(settings -> {
             converters.add(new TesseractOcrConverter(DocumentFormat.PNG, settings));
             converters.add(new TesseractOcrConverter(DocumentFormat.JPG, settings));
         });

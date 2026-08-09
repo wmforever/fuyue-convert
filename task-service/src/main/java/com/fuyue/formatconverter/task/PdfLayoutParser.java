@@ -54,6 +54,11 @@ public final class PdfLayoutParser {
         return parse(source, displayName, limits, ParseMode.TEXT_EXTRACTION);
     }
 
+    /** Parses editable page geometry while allowing an explicitly configured OCR engine to fill scanned pages. */
+    public DocumentModel parseForEditableOcr(Path source, String displayName, ParseLimits limits) throws IOException {
+        return parse(source, displayName, limits, ParseMode.EDITABLE_OCR);
+    }
+
     private DocumentModel parse(Path source, String displayName, ParseLimits limits,
                                 ParseMode mode) throws IOException {
         try (PDDocument document = Loader.loadPDF(source.toFile())) {
@@ -66,7 +71,7 @@ public final class PdfLayoutParser {
             List<PageState> states = new ArrayList<>(pageCount);
             for (int index = 0; index < pageCount; index++) {
                 PDPage page = document.getPage(index);
-                PageState state = pageState(page, index + 1, mode == ParseMode.EDITABLE_WORD);
+                PageState state = pageState(page, index + 1, mode.enforceWordPageLimit());
                 states.add(state);
             }
 
@@ -83,7 +88,7 @@ public final class PdfLayoutParser {
                             "PDF 第 " + state.pageNumber() + " 页未检测到可编辑文字，可能是扫描件或纯图片 PDF；请先接入 OCR。");
                 }
                 List<ConversionWarning> warnings = new ArrayList<>();
-                if (mode == ParseMode.EDITABLE_WORD && state.hasEditableText() && state.hasImageObjects()) {
+                if (mode.enforceWordPageLimit() && state.hasEditableText() && state.hasImageObjects()) {
                     warnings.add(ConversionWarning.of(WarningCode.IMAGE_EXTRACTION_FAILED,
                             "PDF 第 " + state.pageNumber() + " 页包含图片；当前可编辑路线仅恢复文字，图片尚未写入 Word。",
                             state.pageNumber()));
@@ -152,17 +157,21 @@ public final class PdfLayoutParser {
     }
 
     private enum ParseMode {
-        EDITABLE_WORD(true),
-        TEXT_EXTRACTION(true),
-        FIXED_LAYOUT(false);
+        EDITABLE_WORD(true, true),
+        EDITABLE_OCR(false, true),
+        TEXT_EXTRACTION(true, false),
+        FIXED_LAYOUT(false, false);
 
         private final boolean requiresExtractableText;
+        private final boolean enforceWordPageLimit;
 
-        ParseMode(boolean requiresExtractableText) {
+        ParseMode(boolean requiresExtractableText, boolean enforceWordPageLimit) {
             this.requiresExtractableText = requiresExtractableText;
+            this.enforceWordPageLimit = enforceWordPageLimit;
         }
 
         boolean requiresExtractableText() { return requiresExtractableText; }
+        boolean enforceWordPageLimit() { return enforceWordPageLimit; }
     }
 
     private static final class LayoutTextStripper extends PDFTextStripper {
