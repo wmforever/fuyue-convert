@@ -28,6 +28,7 @@ FormatConverter 的路线图以“开源可验证”为原则。短期目标不�
 - PDF -> PNG/JPEG 已支持 36-600 可配置 DPI、文件分辨率元数据、透明 PNG、CMYK 到 RGB JPEG、CropBox/UserUnit 超大页预检以及加密文件稳定失败。
 - Office -> PDF 已增加独立 LibreOffice profile/output、输出结构与页数校验、引擎版本诊断及可选版本锁定，并在 Linux CI 使用 CJK 字体执行 DOCX/XLSX/PPTX 真实转换。
 - 外部转换进程统一使用有界输出捕获和路径脱敏；超时或中断会清理已观察到的整棵进程树，避免 LibreOffice、Poppler 或 Worker 子进程残留。
+- 已建立默认关闭的本地 Tesseract OCR 契约，并开放显式配置的 PNG/JPEG -> TXT experimental 路线；引擎或语言包缺失时能力保持 planned，不允许隐式云调用。
 - DOCX -> UOF 在 LibreOffice 可用时开放 experimental：使用明确的 `UOF text` 导出过滤器写入真实 UOF XML，验证根命名空间，并通过正文和表格文字往返重开测试；WPS/ET/DPS 反向写出因无已验证过滤器继续禁用。
 - 增加独立 JVM Worker，通过 JSON 协议回传进度和结果，支持硬超时、崩溃隔离、进程树清理和单 Worker 堆上限。
 

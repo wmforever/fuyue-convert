@@ -69,3 +69,24 @@ jobs:
 
       - name: Run real Office to PDF conversions
         run: mvn -B -ntp -pl task-service -am -Dskip.frontend=true -Dtest=LibreOfficePdfConverterTest -Dsurefire.failIfNoSpecifiedTests=false test
+
+  ocr-integration:
+    name: Tesseract OCR integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Install Tesseract
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng
+
+      - name: Run real image OCR
+        run: mvn -B -ntp -pl task-service -am -Dskip.frontend=true -Dtest=TesseractOcrConverterTest -Dsurefire.failIfNoSpecifiedTests=false test

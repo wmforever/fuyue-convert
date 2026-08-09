@@ -37,6 +37,7 @@
 7. `CSV -> XLSX` 自动识别逗号、TAB、分号和竖线，所有值均写为文本以避免公式注入，因此不会猜测数值、日期或公式类型。`XLSX -> CSV` 使用工作簿中保存的公式缓存值，不执行或刷新公式；过期缓存需先由表格软件重新计算并保存。多工作表输出为 ZIP，每张表一个 UTF-8 CSV。CSV 不保留样式、合并区域和原始类型元数据。
 8. `PNG/JPEG -> PDF` 使用 36-1200 DPI 范围内的 PNG pHYs、JPEG JFIF 或 EXIF 分辨率；缺失或异常时固定按 96 DPI 并返回 `IMAGE_DPI_DEFAULTED`。支持 1-8 EXIF 方向和透明 PNG。同一批次目前要求全部是 PNG 或全部是 JPEG，不能混合两种扩展名；成功页面按上传顺序合并，部分失败时返回 `PARTIAL_BATCH_OUTPUT`。
 9. `DOCX -> UOF` 仅在 LibreOffice 提供 `UOF text` 导出过滤器时开放，输出是具有 `uof:UOF` 根元素和 UOF 命名空间的真实 XML，不是改扩展名。复杂绘图、嵌入对象、修订、域和字体仍可能在 LibreOffice 兼容转换中变化，因此保持 experimental。当前 LibreOffice 没有经本项目验证的 WPS/ET/DPS 写出过滤器，`DOCX -> WPS`、`XLSX -> ET`、`PPTX -> DPS` 继续保持 planned，禁止伪装支持。
+10. `PNG/JPEG -> TXT` 仅在显式启用本地 Tesseract 且全部语言包可用时开放。当前输出是纯文本，不包含置信度、坐标或版面结构；手写体、复杂表格、竖排、低分辨率、倾斜和噪声图像可能误识别，因此固定为 experimental 并返回 `OCR_APPLIED`。
 
 ## QA 样本
 

@@ -36,6 +36,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | PDF -> DOCX | beta | 可编辑优先 | 文字型 PDF 恢复真实文字、基础段落、页面尺寸和方向；扫描页或纯图片页在未接入 OCR 时明确失败。 |
 | PDF -> OFD | experimental | 版式优先 | 生成真实 OFD 包；144 DPI 页面图像层保留视觉，文字型 PDF 同时写入源坐标 OFD 文字对象。复杂对象尚未逐项结构化重建。 |
 | PNG/JPG -> PDF | stable | 版式优先 | 读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。同格式多图按上传顺序合并为多页 PDF。 |
+| PNG/JPG -> TXT | experimental/按配置 | OCR 提取 | 默认禁用；只有显式启用且本地 Tesseract 与所需语言包可用时开放，结果返回 `OCR_APPLIED` 并要求人工复核。 |
 | WPS/ET/DPS/UOF -> OOXML | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |
 | DOCX -> UOF | experimental | 兼容优先 | LibreOffice 可用时调用明确的 `UOF text` 导出过滤器写入真实 UOF XML，并验证 UOF 根元素；已覆盖正文和表格文字的 LibreOffice 往返打开。 |
 
@@ -45,6 +46,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 - Poppler：用于 PDF 渲染为 PNG/JPEG 和视觉回归比较。
 - `FORMAT_CONVERTER_IMAGE_DPI`：PDF 图片导出的渲染分辨率，默认 `160`，允许 `36-600`；异常配置会在启动转换器时明确失败。
 - `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION`：可选的 LibreOffice 版本锁定片段（如 `24.8`）；实际 `--version` 不匹配时 Office 引擎会标记为不可用，版本可在 `/api/health` 和 `/api/diagnostics` 查看。
+- 本地 OCR 默认关闭。设置 `FORMAT_CONVERTER_OCR_ENABLED=true` 后，使用 `FORMAT_CONVERTER_TESSERACT_BINARY` 指定 Tesseract（留空则从 `PATH` 查找），并以 `FORMAT_CONVERTER_OCR_LANGUAGES` 配置语言，默认 `chi_sim+eng`。缺少引擎或语言包时路线保持 planned，不会伪装成功或调用云服务。
 - 系统字体：影响 Office 输出的分页、行距和文字替换；基础 PDF 文本路线内置中文回退字体，也可通过 `FORMAT_CONVERTER_PDF_FONT` 指定 TrueType 字体。TXT -> DOCX 可通过 `FORMAT_CONVERTER_DOCX_FONT` 和 `FORMAT_CONVERTER_DOCX_CJK_FONT` 配置西文及东亚字体名。
 
 质量标准见 [docs/quality-standard.md](docs/quality-standard.md)。最新本地 QA 报告见 `qa-samples/report/qa-report.md`。

@@ -37,6 +37,10 @@ public final class DefaultConverterRegistry {
         converters.add(new PdfToJpgConverter());
         converters.add(new ImageToPdfConverter(DocumentFormat.PNG));
         converters.add(new ImageToPdfConverter(DocumentFormat.JPG));
+        TesseractOcrConverter.configuredSettings().ifPresent(settings -> {
+            converters.add(new TesseractOcrConverter(DocumentFormat.PNG, settings));
+            converters.add(new TesseractOcrConverter(DocumentFormat.JPG, settings));
+        });
 
         if (officeBinary != null) {
             Path binary = officeBinary.toAbsolutePath().normalize();

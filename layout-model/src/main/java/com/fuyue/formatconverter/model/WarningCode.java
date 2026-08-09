@@ -3,6 +3,7 @@ package com.fuyue.formatconverter.model;
 public enum WarningCode {
     MVP_FIRST_PAGE_ONLY,
     OCR_REQUIRED,
+    OCR_APPLIED,
     UNSUPPORTED_OFD_ELEMENT,
     FONT_SUBSTITUTED,
     TABLE_RECOGNITION_UNRELIABLE,
