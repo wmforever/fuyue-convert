@@ -114,6 +114,10 @@ class ConversionTaskServiceTest {
                     && route.status() == RouteStatus.AVAILABLE
                     && route.qualityLevel() == QualityLevel.BETA
                     && route.strategy() == ConversionStrategy.EXTRACTION));
+            assertTrue(routes.stream().anyMatch(route -> route.id().equals("docx-to-txt")
+                    && route.status() == RouteStatus.AVAILABLE
+                    && route.qualityLevel() == QualityLevel.BETA
+                    && route.strategy() == ConversionStrategy.EXTRACTION));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-docx")
                     && route.qualityLevel() == QualityLevel.BETA
                     && route.strategy() == ConversionStrategy.EDITABLE));

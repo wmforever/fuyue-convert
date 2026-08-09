@@ -30,7 +30,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | CSV <-> XLSX | stable | 数据优先 | 已覆盖 CSV 到 XLSX，再回到 CSV 的严格数据回环。 |
 | DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 headless 转换；本地字体会影响结果。 |
 | TXT -> DOCX/PDF | stable | 内容优先 | 适合纯文本生成基础办公文档。 |
-| DOCX -> TXT | stable | 内容提取 | 提取正文文本，不保留版式。 |
+| DOCX -> TXT | beta | 内容提取 | 按正文对象顺序提取段落和表格，并带标签追加页眉页脚、文本框、脚注尾注、批注及修订文字；不保留版式。 |
 | PDF -> TXT | beta | 内容提取 | 按页面坐标和多栏顺序提取文字，使用换页符保留页面边界；扫描页或混合文档中的无文字内容页严格返回 `OCR_REQUIRED`。 |
 | PDF -> PNG/JPG | stable | 版式渲染 | 使用 Poppler 或 PDFBox 按页渲染；多页自动输出 ZIP。 |
 | PDF -> DOCX | beta | 可编辑优先 | 文字型 PDF 恢复真实文字、基础段落、页面尺寸和方向；扫描页或纯图片页在未接入 OCR 时明确失败。 |

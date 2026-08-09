@@ -30,7 +30,7 @@ Status legend:
 | CSV <-> XLSX | stable | data first | Covers strict CSV to XLSX and back-to-CSV data round trips. |
 | DOCX/XLSX/PPTX -> PDF | beta | layout first | Uses LibreOffice headless when available. Local fonts affect visual output. |
 | TXT -> DOCX/PDF | stable | content first | Useful for generating simple office documents from plain text. |
-| DOCX -> TXT | stable | text extraction | Extracts body text without layout. |
+| DOCX -> TXT | beta | text extraction | Extracts paragraphs and tables in body order, then labeled headers, footers, text boxes, footnotes, endnotes, comments, and tracked revisions; layout is not retained. |
 | PDF -> TXT | beta | extraction | Extracts text by page coordinates and multi-column reading order, preserving page boundaries with form feeds. Scanned pages or non-text content pages in mixed PDFs fail with `OCR_REQUIRED`. |
 | PDF -> PNG/JPG | stable | rendering | Uses Poppler or PDFBox page rendering. Multi-page PDFs are returned as ZIP files. |
 | PDF -> DOCX | beta | editability first | Restores real text, basic paragraphs, page sizes, and orientation from text-based PDFs. Scanned or image-only pages fail explicitly until OCR is available. |
