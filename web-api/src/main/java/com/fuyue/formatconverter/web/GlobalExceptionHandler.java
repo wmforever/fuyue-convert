@@ -2,6 +2,7 @@ package com.fuyue.formatconverter.web;
 
 import com.fuyue.formatconverter.task.TaskNotFoundException;
 import com.fuyue.formatconverter.task.TaskQueueFullException;
+import com.fuyue.formatconverter.task.InsufficientStorageException;
 import org.springframework.http.*;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,6 +17,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TaskQueueFullException.class)
     ResponseEntity<ApiError> queueFull(TaskQueueFullException e) { return error(HttpStatus.TOO_MANY_REQUESTS, "TASK_QUEUE_FULL", e.getMessage()); }
+
+    @ExceptionHandler(InsufficientStorageException.class)
+    ResponseEntity<ApiError> insufficientStorage(InsufficientStorageException e) {
+        return error(HttpStatus.INSUFFICIENT_STORAGE, "INSUFFICIENT_STORAGE", e.getMessage());
+    }
 
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
     ResponseEntity<ApiError> badRequest(RuntimeException e) { return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", e.getMessage()); }

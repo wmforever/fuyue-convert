@@ -80,6 +80,9 @@ public class DiagnosticsController {
         limits.put("queueCapacity", properties.getQueueCapacity());
         limits.put("timeout", properties.getTimeout().toString());
         limits.put("maxFileSize", properties.getMaxFileSize());
+        limits.put("maxTaskUploadBytes", properties.getMaxTaskUploadBytes());
+        limits.put("minFreeDiskBytes", properties.getMinFreeDiskBytes());
+        limits.put("resultTtl", properties.getResultTtl().toString());
         limits.put("maxPages", properties.getMaxPages());
         limits.put("officeTimeout", properties.getOfficeTimeout().toString());
         limits.put("workerEnabled", properties.isWorkerEnabled());

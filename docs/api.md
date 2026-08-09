@@ -14,6 +14,8 @@ FormatConverter 的 API 以异步任务为中心：上传一个或多个文件�
 }
 ```
 
+队列满返回 HTTP 429 / `TASK_QUEUE_FULL`；数据盘低于配置水位返回 HTTP 507 / `INSUFFICIENT_STORAGE`；上传请求或单任务配额超限不会创建任务目录。
+
 ## 创建任务
 
 ```http

@@ -125,9 +125,12 @@ java -jar app.jar --spring.config.additional-location=./application.yml
 FORMAT_CONVERTER_WORKER_ENABLED=true
 FORMAT_CONVERTER_WORKER_MAX_MEMORY_MB=768
 FORMAT_CONVERTER_WORKER_JAVA_BINARY=/path/to/java
+FORMAT_CONVERTER_MAX_TASK_UPLOAD_BYTES=262144000
+FORMAT_CONVERTER_MIN_FREE_DISK_BYTES=536870912
+FORMAT_CONVERTER_RESULT_TTL=24h
 ```
 
-Worker 内存限制仅限 JVM 堆；Docker/cgroup 或 systemd 的 CPU、总内存和进程数限制仍应在部署层设置。
+服务会同时执行单文件、单任务总上传量和数据盘安全水位检查；失败/取消任务的输入只在 TTL 内保留以支持重试。Worker 内存限制仅限 JVM 堆；Docker/cgroup 或 systemd 的 CPU、总内存和进程数限制仍应在部署层设置。
 
 ## QA 验证
 

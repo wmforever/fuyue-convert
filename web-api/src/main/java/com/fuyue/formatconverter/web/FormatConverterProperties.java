@@ -14,6 +14,8 @@ public class FormatConverterProperties {
     private Duration timeout = Duration.ofMinutes(5);
     private Duration resultTtl = Duration.ofHours(24);
     private long maxFileSize = 50L * 1024 * 1024;
+    private long maxTaskUploadBytes = 250L * 1024 * 1024;
+    private long minFreeDiskBytes = 512L * 1024 * 1024;
     private long maxExpandedSize = 200L * 1024 * 1024;
     private long maxEntrySize = 40L * 1024 * 1024;
     private int maxEntries = 10_000;
@@ -42,6 +44,16 @@ public class FormatConverterProperties {
     public void setResultTtl(Duration resultTtl) { this.resultTtl = resultTtl; }
     public long getMaxFileSize() { return maxFileSize; }
     public void setMaxFileSize(long maxFileSize) { this.maxFileSize = maxFileSize; }
+    public long getMaxTaskUploadBytes() { return maxTaskUploadBytes; }
+    public void setMaxTaskUploadBytes(long maxTaskUploadBytes) {
+        if (maxTaskUploadBytes < 1) throw new IllegalArgumentException("maxTaskUploadBytes 必须大于 0");
+        this.maxTaskUploadBytes = maxTaskUploadBytes;
+    }
+    public long getMinFreeDiskBytes() { return minFreeDiskBytes; }
+    public void setMinFreeDiskBytes(long minFreeDiskBytes) {
+        if (minFreeDiskBytes < 0) throw new IllegalArgumentException("minFreeDiskBytes 不能小于 0");
+        this.minFreeDiskBytes = minFreeDiskBytes;
+    }
     public long getMaxExpandedSize() { return maxExpandedSize; }
     public void setMaxExpandedSize(long maxExpandedSize) { this.maxExpandedSize = maxExpandedSize; }
     public long getMaxEntrySize() { return maxEntrySize; }

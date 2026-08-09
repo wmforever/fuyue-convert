@@ -95,6 +95,8 @@ public final class ConversionTaskService implements AutoCloseable {
     public TaskSnapshot createTask(List<UploadPayload> uploads, DocumentFormat targetFormat) throws IOException {
         if (uploads == null || uploads.isEmpty()) throw new IllegalArgumentException("至少上传一个文件");
         if (targetFormat == null) throw new IllegalArgumentException("请选择目标格式");
+        long totalUploadBytes = totalUploadBytes(uploads);
+        ensureStorageCapacity(totalUploadBytes);
         TaskPlan plan = plan(uploads, targetFormat);
         String taskId = UUID.randomUUID().toString();
         Path taskDir = taskDir(taskId);
@@ -511,6 +513,28 @@ public final class ConversionTaskService implements AutoCloseable {
         }
         if (!sourceFormat.acceptsMimeType(upload.contentType())) {
             throw new IllegalArgumentException("上传文件 MIME 类型不是允许的 " + sourceFormat.label() + " 类型");
+        }
+    }
+    private long totalUploadBytes(List<UploadPayload> uploads) {
+        long total = 0;
+        for (UploadPayload upload : uploads) {
+            if (upload == null || upload.size() <= 0) throw new IllegalArgumentException("上传文件为空或超过限制");
+            try { total = Math.addExact(total, upload.size()); }
+            catch (ArithmeticException e) { throw new IllegalArgumentException("单任务上传总量超过限制"); }
+            if (total > config.maxTaskUploadBytes()) throw new IllegalArgumentException("单任务上传总量超过限制");
+        }
+        return total;
+    }
+    private void ensureStorageCapacity(long incomingBytes) {
+        try {
+            long usable = Files.getFileStore(config.dataRoot()).getUsableSpace();
+            if (usable < incomingBytes || usable - incomingBytes < config.minFreeDiskBytes()) {
+                throw new InsufficientStorageException("存储空间低于安全水位，请清理过期任务后重试");
+            }
+        } catch (InsufficientStorageException e) {
+            throw e;
+        } catch (IOException e) {
+            throw new InsufficientStorageException("无法确认任务存储空间，请检查数据盘状态");
         }
     }
     private void validateStoredFile(Path file, DocumentFormat sourceFormat) throws IOException {

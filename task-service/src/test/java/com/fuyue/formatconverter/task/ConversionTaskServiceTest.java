@@ -275,6 +275,35 @@ class ConversionTaskServiceTest {
         }
     }
 
+    @Test void rejectsBatchWhoseDeclaredTotalExceedsTaskQuota() throws Exception {
+        byte[] payload = "1234".getBytes(StandardCharsets.UTF_8);
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("task-quota-data"), 1, 2,
+                Duration.ofSeconds(10), Duration.ofHours(1), 7, 0,
+                new ParseLimits(10, 200, 100, 10, 100d, 10));
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(new TextToDocxConverter()))) {
+            IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> service.createTask(List.of(
+                    new UploadPayload("one.txt", "text/plain", payload.length, () -> new ByteArrayInputStream(payload)),
+                    new UploadPayload("two.txt", "text/plain", payload.length, () -> new ByteArrayInputStream(payload))
+            ), DocumentFormat.DOCX));
+            assertTrue(error.getMessage().contains("单任务上传总量"));
+        }
+    }
+
+    @Test void rejectsNewTaskWhenDiskIsBelowConfiguredWatermark() throws Exception {
+        byte[] payload = "disk".getBytes(StandardCharsets.UTF_8);
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("disk-watermark-data"), 1, 2,
+                Duration.ofSeconds(10), Duration.ofHours(1), 100, Long.MAX_VALUE,
+                new ParseLimits(100, 200, 100, 10, 100d, 10));
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(new TextToDocxConverter()))) {
+            InsufficientStorageException error = assertThrows(InsufficientStorageException.class,
+                    () -> service.createTask(List.of(new UploadPayload("disk.txt", "text/plain", payload.length,
+                            () -> new ByteArrayInputStream(payload))), DocumentFormat.DOCX));
+            assertTrue(error.getMessage().contains("安全水位"));
+        }
+    }
+
     @Test void failsCsvConversionWhenRowLimitIsExceeded() throws Exception {
         byte[] csv = "a,b\nc,d\n".getBytes(StandardCharsets.UTF_8);
         TaskServiceConfig config = new TaskServiceConfig(temp.resolve("csv-limit-data"), 1, 2,
