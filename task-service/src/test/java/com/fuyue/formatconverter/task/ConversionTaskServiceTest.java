@@ -136,6 +136,8 @@ class ConversionTaskServiceTest {
                     && route.strategy() == ConversionStrategy.FIDELITY));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-jpg") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("wps-to-docx") && route.status() == RouteStatus.PLANNED));
+            assertTrue(routes.stream().anyMatch(route -> route.id().equals("docx-to-wps") && route.status() == RouteStatus.PLANNED));
+            assertTrue(routes.stream().anyMatch(route -> route.id().equals("docx-to-uof") && route.status() == RouteStatus.PLANNED));
         }
     }
 
@@ -155,6 +157,17 @@ class ConversionTaskServiceTest {
         assertEquals(ConversionStrategy.COMPATIBILITY, converter.route().strategy());
         assertEquals(QualityLevel.EXPERIMENTAL, converter.route().qualityLevel());
         assertTrue(converter.route().description().contains("直接转换"));
+    }
+
+    @Test void registersRealDocxToUofExportOnlyWhenLibreOfficeRegistryIsUsed() {
+        FileConverter converter = DefaultConverterRegistry.create(temp.resolve("soffice"), Duration.ofSeconds(30))
+                .stream().filter(candidate -> candidate.route().id().equals("docx-to-uof"))
+                .findFirst().orElseThrow();
+
+        assertInstanceOf(LibreOfficeConverter.class, converter);
+        assertEquals(ConversionStrategy.COMPATIBILITY, converter.route().strategy());
+        assertEquals(QualityLevel.EXPERIMENTAL, converter.route().qualityLevel());
+        assertTrue(converter.route().description().contains("真实 UOF XML"));
     }
 
     @Test void recognizesJpegAliasAsJpgFormat() {

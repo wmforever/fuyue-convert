@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
 
 public final class LibreOfficeConverter implements FileConverter {
     private final ConversionRoute route;
@@ -25,10 +27,16 @@ public final class LibreOfficeConverter implements FileConverter {
 
     public LibreOfficeConverter(DocumentFormat sourceFormat, DocumentFormat targetFormat,
                                 Path binary, Duration timeout, String description) {
+        this(sourceFormat, targetFormat, binary, timeout, description, targetFormat.extension());
+    }
+
+    public LibreOfficeConverter(DocumentFormat sourceFormat, DocumentFormat targetFormat,
+                                Path binary, Duration timeout, String description, String convertTo) {
         this.route = route(sourceFormat, targetFormat, description);
         this.binary = binary.toAbsolutePath().normalize();
         this.timeout = timeout == null || timeout.isNegative() || timeout.isZero() ? Duration.ofMinutes(2) : timeout;
-        this.convertTo = targetFormat.extension();
+        if (convertTo == null || convertTo.isBlank()) throw new IllegalArgumentException("缺少 LibreOffice 导出过滤器");
+        this.convertTo = convertTo;
         this.domesticFormat = isDomestic(sourceFormat) || isDomestic(targetFormat);
     }
 
@@ -53,7 +61,7 @@ public final class LibreOfficeConverter implements FileConverter {
         validateOutput(outputPath, route.targetFormat(), limits);
         List<ConversionWarning> warnings = domesticFormat
                 ? List.of(ConversionWarning.of(WarningCode.OFFICE_COMPATIBILITY_LAYOUT,
-                "国产格式已转换为可编辑文档；字体、分页、自动编号和对象位置可能因 LibreOffice 兼容性发生变化，请复核内容与版式。", null))
+                "国产格式兼容转换已完成；字体、分页、自动编号和对象位置可能因 LibreOffice 兼容性发生变化，请复核内容与版式。", null))
                 : List.of();
         return new ConversionOutput(outputPath, outputFileName(input.displayName()), null, warnings);
     }
@@ -77,6 +85,7 @@ public final class LibreOfficeConverter implements FileConverter {
                 case PPTX -> {
                     try (var ignored = new XMLSlideShow(Files.newInputStream(output))) { }
                 }
+                case UOF -> validateUof(output);
                 default -> { }
             }
         } catch (IOException e) {
@@ -84,6 +93,30 @@ public final class LibreOfficeConverter implements FileConverter {
         } catch (Exception e) {
             throw new IOException("LibreOffice 生成的 " + target.label() + " 文件结构无效", e);
         }
+    }
+
+    private void validateUof(Path output) throws Exception {
+        XMLInputFactory factory = XMLInputFactory.newFactory();
+        factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        factory.setProperty("javax.xml.stream.isSupportingExternalEntities", false);
+        try (var input = Files.newInputStream(output)) {
+            var reader = factory.createXMLStreamReader(input);
+            try {
+                while (reader.hasNext()) {
+                    if (reader.next() == XMLStreamConstants.START_ELEMENT) {
+                        String namespace = reader.getNamespaceURI();
+                        if (!"UOF".equals(reader.getLocalName()) || namespace == null
+                                || !namespace.startsWith("http://schemas.uof.org/")) {
+                            throw new IOException("LibreOffice 生成的 UOF 根元素或命名空间无效");
+                        }
+                        return;
+                    }
+                }
+            } finally {
+                reader.close();
+            }
+        }
+        throw new IOException("LibreOffice 生成的 UOF 不含文档根元素");
     }
 
     private Path findProducedFile(Path outDir, DocumentFormat targetFormat) throws IOException {
@@ -108,7 +141,7 @@ public final class LibreOfficeConverter implements FileConverter {
                 domestic ? QualityLevel.EXPERIMENTAL : QualityLevel.BETA,
                 domestic ? ConversionStrategy.COMPATIBILITY : ConversionStrategy.FIDELITY,
                 List.of("libreoffice"),
-                domestic ? List.of("依赖 LibreOffice 对国产格式的导入兼容性") : List.of("本机字体会影响分页和版式"));
+                domestic ? List.of("依赖 LibreOffice 对国产格式的导入或导出兼容性") : List.of("本机字体会影响分页和版式"));
     }
 
     private boolean isDomestic(DocumentFormat format) {

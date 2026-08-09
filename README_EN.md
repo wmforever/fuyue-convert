@@ -36,7 +36,8 @@ Status legend:
 | PDF -> DOCX | beta | editability first | Restores real text, basic paragraphs, page sizes, and orientation from text-based PDFs. Scanned or image-only pages fail explicitly until OCR is available. |
 | PDF -> OFD | experimental | fidelity first | Produces a real OFD package. A 144-DPI page image preserves appearance, while text PDFs also receive source-positioned OFD text objects. Complex objects are not yet reconstructed individually. |
 | PNG/JPG -> PDF | stable | layout first | Reads PNG pHYs, JPEG JFIF/EXIF DPI, and EXIF orientation; transparent PNG composition is preserved. Missing DPI defaults to 96 with a warning. Same-format batches merge in upload order. |
-| WPS/ET/DPS/UOF | experimental | compatibility first | Depends on LibreOffice import support. UOF is converted directly to editable DOCX, so pagination and object positions may change. |
+| WPS/ET/DPS/UOF -> OOXML | experimental | compatibility first | Depends on LibreOffice import support. UOF is converted directly to editable DOCX, so pagination and object positions may change. |
+| DOCX -> UOF | experimental | compatibility first | When LibreOffice is available, uses the explicit `UOF text` export filter to write real UOF XML and validates the UOF root. Paragraph and table text are covered by a LibreOffice reopen round trip. |
 
 External dependencies:
 

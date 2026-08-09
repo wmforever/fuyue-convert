@@ -55,6 +55,8 @@ public final class DefaultConverterRegistry {
                     "使用 LibreOffice headless 将 WPS 演示 DPS 转换为 PPTX。"));
             converters.add(new LibreOfficeConverter(DocumentFormat.UOF, DocumentFormat.DOCX, binary, timeout,
                     "使用 LibreOffice headless 将 UOF 直接转换为可编辑 DOCX。"));
+            converters.add(new LibreOfficeConverter(DocumentFormat.DOCX, DocumentFormat.UOF, binary, timeout,
+                    "使用 LibreOffice UOF text 导出过滤器将 DOCX 写入真实 UOF XML。", "uof:UOF text"));
         } else {
             converters.add(new XlsxToPdfConverter());
             converters.add(new DocxToPdfConverter());

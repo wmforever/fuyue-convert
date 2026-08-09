@@ -36,7 +36,8 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | PDF -> DOCX | beta | 可编辑优先 | 文字型 PDF 恢复真实文字、基础段落、页面尺寸和方向；扫描页或纯图片页在未接入 OCR 时明确失败。 |
 | PDF -> OFD | experimental | 版式优先 | 生成真实 OFD 包；144 DPI 页面图像层保留视觉，文字型 PDF 同时写入源坐标 OFD 文字对象。复杂对象尚未逐项结构化重建。 |
 | PNG/JPG -> PDF | stable | 版式优先 | 读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。同格式多图按上传顺序合并为多页 PDF。 |
-| WPS/ET/DPS/UOF | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |
+| WPS/ET/DPS/UOF -> OOXML | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |
+| DOCX -> UOF | experimental | 兼容优先 | LibreOffice 可用时调用明确的 `UOF text` 导出过滤器写入真实 UOF XML，并验证 UOF 根元素；已覆盖正文和表格文字的 LibreOffice 往返打开。 |
 
 外部依赖说明：
 
