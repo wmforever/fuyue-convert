@@ -10,4 +10,9 @@ public final class PdfToPngConverter extends PdfToImageConverter {
     public PdfToPngConverter(Path popplerBinary) {
         super(DocumentFormat.PNG, "png", "-png", "将 PDF 按页渲染为 PNG；多页 PDF 自动打包 ZIP。", popplerBinary);
     }
+
+    PdfToPngConverter(Path popplerBinary, float dpi) {
+        super(DocumentFormat.PNG, "png", "-png", "将 PDF 按页渲染为 PNG；多页 PDF 自动打包 ZIP。",
+                popplerBinary, dpi);
+    }
 }

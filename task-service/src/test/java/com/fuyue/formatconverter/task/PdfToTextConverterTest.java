@@ -8,6 +8,8 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
+import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -104,6 +106,26 @@ class PdfToTextConverterTest {
         assertEquals(1, converted.pageCount());
         assertTrue(Files.exists(output));
         assertEquals("", Files.readString(output));
+    }
+
+    @Test
+    void passwordProtectedPdfReturnsStableErrorCode() throws Exception {
+        Path source = temp.resolve("protected.pdf");
+        try (PDDocument document = new PDDocument()) {
+            document.addPage(new PDPage(PDRectangle.A4));
+            StandardProtectionPolicy policy = new StandardProtectionPolicy("owner-secret", "user-secret",
+                    new AccessPermission());
+            policy.setEncryptionKeyLength(128);
+            document.protect(policy);
+            document.save(source.toFile());
+        }
+
+        ConversionFailureException failure = assertThrows(ConversionFailureException.class,
+                () -> converter().convert(input(source), temp.resolve("protected-work"),
+                        temp.resolve("protected.txt"), ParseLimits.defaults(), (stage, percent) -> { }));
+
+        assertEquals("PDF_PASSWORD_REQUIRED", failure.code());
+        assertFalse(Files.exists(temp.resolve("protected.txt")));
     }
 
     private void addText(PDDocument document, PDPage page, float x, float y, String value) throws Exception {

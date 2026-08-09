@@ -20,6 +20,7 @@ import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 
@@ -91,6 +92,9 @@ public final class PdfLayoutParser {
                         List.of(), List.of(), warnings));
             }
             return new DocumentModel(displayName, "PDFBox 3.0.8", pageCount, pages, List.of());
+        } catch (InvalidPasswordException e) {
+            throw new ConversionFailureException("PDF_PASSWORD_REQUIRED",
+                    "PDF 已加密，需要密码；当前任务 API 不接收密码。");
         }
     }
 

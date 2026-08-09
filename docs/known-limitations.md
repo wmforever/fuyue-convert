@@ -23,7 +23,8 @@
 2. 纯文字 PDF 不再嵌入整页图片；因此严格 QA 以字符守恒、页数和零图片为准，视觉差异仅作参考。
 3. 扫描型、纯图片型以及含无文字内容页的混合 PDF 在未接入 OCR 时严格返回 `OCR_REQUIRED`，不会生成伪成功 DOCX。
 4. `PDF -> OFD` 已生成符合包结构的真实 OFD：整页 144 DPI 图像层负责版式保真，文字型页面另含源坐标 OFD 文字对象。当前表格、路径、原始图片、透明混合和表单尚未逐项重建为独立对象，因此标记为 experimental，并返回 `FIDELITY_IMAGE_LAYER`。
-5. `PDF -> TXT` 已按坐标重建视觉行、多栏阅读顺序和换页边界；纯扫描页以及混合 PDF 中没有可提取文字的内容页会返回 `OCR_REQUIRED`，不再生成不完整 TXT。复杂旋转文字、无框表格、页眉页脚归类和带少量隐藏文字层的扫描页仍需扩充样本。
+5. `PDF -> PNG/JPEG` 默认 160 DPI，可通过 `FORMAT_CONVERTER_IMAGE_DPI` 配置为 36-600。PNG 由 PDFBox 以 ARGB 渲染并写入 pHYs，空白区域保留透明；JPEG 输出 RGB、JFIF DPI 和 0.9 质量，CMYK 内容会转换到显示 RGB。渲染前会按 CropBox、UserUnit 和 DPI 检查像素上限；需要非空密码的 PDF 返回 `PDF_PASSWORD_REQUIRED`，当前任务 API 不接收密码。
+6. `PDF -> TXT` 已按坐标重建视觉行、多栏阅读顺序和换页边界；纯扫描页以及混合 PDF 中没有可提取文字的内容页会返回 `OCR_REQUIRED`，不再生成不完整 TXT。复杂旋转文字、无框表格、页眉页脚归类和带少量隐藏文字层的扫描页仍需扩充样本。
 
 ## Office 与国产格式
 

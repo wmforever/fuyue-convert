@@ -25,6 +25,7 @@ FormatConverter 的路线图以“开源可验证”为原则。短期目标不�
 - CSV <-> XLSX 增加编码和常见分隔符识别、严格引号语法、公式注入防护、公式缓存/日期格式值导出、多工作表 ZIP 与流式 XLSX 写入。
 - PNG/JPEG -> PDF 使用内置固定版式路线处理 pHYs/JFIF/EXIF DPI、EXIF 方向和透明 PNG，并支持同格式多图按上传顺序合并。
 - 独立 Worker 输出契约允许转换器在预定输出目录内返回安全的 ZIP 兄弟文件，修复 PDF/OFD 多页图片在生产隔离模式下被误判失败的问题，同时拒绝符号链接和目录逃逸。
+- PDF -> PNG/JPEG 已支持 36-600 可配置 DPI、文件分辨率元数据、透明 PNG、CMYK 到 RGB JPEG、CropBox/UserUnit 超大页预检以及加密文件稳定失败。
 - DOCX -> UOF 在 LibreOffice 可用时开放 experimental：使用明确的 `UOF text` 导出过滤器写入真实 UOF XML，验证根命名空间，并通过正文和表格文字往返重开测试；WPS/ET/DPS 反向写出因无已验证过滤器继续禁用。
 - 增加独立 JVM Worker，通过 JSON 协议回传进度和结果，支持硬超时、崩溃隔离、进程树清理和单 Worker 堆上限。
 
