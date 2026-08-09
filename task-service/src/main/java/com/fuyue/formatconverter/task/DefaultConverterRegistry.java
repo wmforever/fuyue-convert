@@ -20,9 +20,10 @@ public final class DefaultConverterRegistry {
         PoiDocxRenderer renderer = new PoiDocxRenderer();
         var ocrSettings = TesseractOcrConverter.configuredSettings();
         PdfOcrSupport pdfOcr = ocrSettings.map(PdfOcrSupport::new).orElse(null);
+        OfdOcrSupport ofdOcr = ocrSettings.map(OfdOcrSupport::new).orElse(null);
         List<FileConverter> converters = new ArrayList<>();
-        converters.add(new OfdToDocxConverter(extractor, parser, analyzer, renderer));
-        converters.add(new OfdToTextConverter(extractor, parser, analyzer));
+        converters.add(new OfdToDocxConverter(extractor, parser, analyzer, renderer, ofdOcr));
+        converters.add(new OfdToTextConverter(extractor, parser, analyzer, ofdOcr));
         converters.add(new OfdToPdfConverter(extractor, parser, analyzer));
         converters.add(new OfdToPngConverter(extractor, parser));
         converters.add(new OfdToJpgConverter(extractor, parser));

@@ -28,15 +28,26 @@ public final class OfdToTextConverter implements FileConverter {
     private final SafeOfdExtractor extractor;
     private final OfdParser parser;
     private final PageLayoutAnalyzer analyzer;
-    private final ConversionRoute route = ConversionRoute.of(DocumentFormat.OFD, DocumentFormat.TXT,
-            "提取文字型 OFD 的可编辑文本，按页面、多栏阅读顺序和表格行列输出 UTF-8 文本。",
-            QualityLevel.BETA, ConversionStrategy.EXTRACTION, List.of(),
-            List.of("扫描型或含扫描内容页的 OFD 在未配置 OCR 时严格失败"));
+    private final OfdOcrSupport ocr;
+    private final ConversionRoute route;
 
     public OfdToTextConverter(SafeOfdExtractor extractor, OfdParser parser, PageLayoutAnalyzer analyzer) {
+        this(extractor, parser, analyzer, null);
+    }
+
+    OfdToTextConverter(SafeOfdExtractor extractor, OfdParser parser, PageLayoutAnalyzer analyzer,
+                       OfdOcrSupport ocr) {
         this.extractor = extractor;
         this.parser = parser;
         this.analyzer = analyzer;
+        this.ocr = ocr;
+        this.route = ConversionRoute.of(DocumentFormat.OFD, DocumentFormat.TXT,
+                ocr == null ? "提取文字型 OFD 的可编辑文本，按页面、多栏阅读顺序和表格行列输出 UTF-8 文本。"
+                        : "提取 OFD 结构化文字，并仅对扫描图像页使用本地 Tesseract OCR。",
+                QualityLevel.BETA, ConversionStrategy.EXTRACTION,
+                ocr == null ? List.of() : List.of("tesseract"),
+                List.of(ocr == null ? "扫描型或含扫描内容页的 OFD 在未配置 OCR 时严格失败"
+                        : "OCR 页返回警告且必须人工复核"));
     }
 
     @Override public ConversionRoute route() { return route; }
@@ -48,6 +59,9 @@ public final class OfdToTextConverter implements FileConverter {
         SafeOfdPackage safe = extractor.extract(input.path(), workDir, limits);
         progress.update(TaskStage.PARSING, 15);
         DocumentModel parsed = parser.parse(safe, input.displayName(), limits);
+        if (ocr != null) {
+            parsed = ocr.recognizeRequiredPages(parsed, workDir.resolve("ofd-ocr"), limits, progress);
+        }
         warnings.addAll(parsed.warnings());
         List<Integer> ocrPages = parsed.pages().stream()
                 .filter(page -> page.warnings().stream().anyMatch(warning -> warning.code() == WarningCode.OCR_REQUIRED))
