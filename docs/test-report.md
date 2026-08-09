@@ -1,4 +1,25 @@
-# 第一阶段测试报告
+# 测试报告
+
+## 2026-08-09 全量验证
+
+本轮以 Java 17 从干净构建目录执行：
+
+```bash
+mvn clean verify
+python3 qa-samples/run_qa.py
+```
+
+结果：
+
+- Java 单元/集成测试：113 个，通过 113 个，失败 0，错误 0，跳过 0。
+- Vue 生产构建：通过并打入 Spring Boot 可执行 JAR。
+- HTTP 端到端样本：21 条；严格通过 20，严格失败 1，视觉阈值通过 5。
+- PDF -> DOCX：纯文字多页样本文字可编辑、页数一致、零内嵌图片；扫描样本未配置 OCR 时严格返回 `OCR_REQUIRED`。
+- PDF -> PNG：透明语义先白底合成后跨 PDFBox/Poppler 的差异率为 `0.00068802`，通过 `0.001` 门禁。
+- PNG -> PDF：源图 DPI 推导尺寸期望 `54.0075 x 36.0050 pt`，实际 `54.0075 x 36.005 pt`，单页严格通过。
+- 唯一严格失败：experimental `UOF -> DOCX`。LibreOffice 可生成可编辑 DOCX，但复杂样本由 7 页变为 6 页，尾注罗马编号发生漂移，因此不宣称内容或视觉严格通过。
+
+本轮还覆盖取消、失败重试、重启恢复、TTL 清理、单任务上传配额、磁盘安全水位、进程树终止、Worker 输出边界及 Unix/Windows 绝对路径脱敏。完整机器可读报告由 `qa-samples/run_qa.py` 写入 `qa-samples/report/qa-report.json`。
 
 > 历史记录：本报告记录 2026-08-08 的页面图层 PDF -> DOCX 基线。2026-08-09 默认路线已改为可编辑文字并严格拒绝扫描页；当前验收标准与最新结果以 `docs/quality-standard.md` 和重新运行 `qa-samples/run_qa.py` 生成的报告为准。
 

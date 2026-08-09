@@ -38,7 +38,9 @@ rm -rf "$PACKAGE_DIR"
 mkdir -p "$PACKAGE_DIR/app" "$PACKAGE_DIR/bin" "$PACKAGE_DIR/data" "$PACKAGE_DIR/logs"
 cp "web-api/target/web-api-$VERSION.jar" "$PACKAGE_DIR/app/fuyue-convert.jar"
 cp deploy/application.yml.example "$PACKAGE_DIR/application.yml"
-cp README.md README_EN.md LICENSE "$PACKAGE_DIR/"
+cp README.md README_EN.md LICENSE THIRD_PARTY_NOTICES.md "$PACKAGE_DIR/"
+mkdir -p "$PACKAGE_DIR/docs"
+cp docs/known-limitations.md docs/test-report.md "$PACKAGE_DIR/docs/"
 
 if [[ -x "$JLINK_BIN" ]]; then
   "$JLINK_BIN" \

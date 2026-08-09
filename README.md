@@ -132,6 +132,8 @@ FORMAT_CONVERTER_RESULT_TTL=24h
 
 服务会同时执行单文件、单任务总上传量和数据盘安全水位检查；失败/取消任务的输入只在 TTL 内保留以支持重试。Worker 内存限制仅限 JVM 堆；Docker/cgroup 或 systemd 的 CPU、总内存和进程数限制仍应在部署层设置。
 
+正式 Release 除各平台内置 Java Runtime 的运行包外，还附带 Java/前端 CycloneDX SBOM、`SHA256SUMS`、第三方声明、已知限制和当前测试报告；发布工作流会在上传前重新校验 SBOM JSON 与全部 SHA-256。
+
 ## QA 验证
 
 先构建可执行 JAR：

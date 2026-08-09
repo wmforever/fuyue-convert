@@ -60,6 +60,10 @@ Copy-Item (Join-Path $RootDir "deploy\application.yml.example") (Join-Path $Pack
 Copy-Item (Join-Path $RootDir "README.md") $PackageDir
 Copy-Item (Join-Path $RootDir "README_EN.md") $PackageDir
 Copy-Item (Join-Path $RootDir "LICENSE") $PackageDir
+Copy-Item (Join-Path $RootDir "THIRD_PARTY_NOTICES.md") $PackageDir
+New-Item -ItemType Directory -Force (Join-Path $PackageDir "docs") | Out-Null
+Copy-Item (Join-Path $RootDir "docs\known-limitations.md") (Join-Path $PackageDir "docs")
+Copy-Item (Join-Path $RootDir "docs\test-report.md") (Join-Path $PackageDir "docs")
 
 & $JlinkBin `
   --add-modules java.base,java.compiler,java.desktop,java.instrument,java.logging,java.management,java.naming,java.net.http,java.prefs,java.security.jgss,java.sql,jdk.crypto.ec,jdk.unsupported `
@@ -128,6 +132,10 @@ if ($JpackageCommand) {
   Copy-Item (Join-Path $RootDir "README.md") (Join-Path $ExeImageRoot "FuyueConvert")
   Copy-Item (Join-Path $RootDir "README_EN.md") (Join-Path $ExeImageRoot "FuyueConvert")
   Copy-Item (Join-Path $RootDir "LICENSE") (Join-Path $ExeImageRoot "FuyueConvert")
+  Copy-Item (Join-Path $RootDir "THIRD_PARTY_NOTICES.md") (Join-Path $ExeImageRoot "FuyueConvert")
+  New-Item -ItemType Directory -Force (Join-Path $ExeImageRoot "FuyueConvert\docs") | Out-Null
+  Copy-Item (Join-Path $RootDir "docs\known-limitations.md") (Join-Path $ExeImageRoot "FuyueConvert\docs")
+  Copy-Item (Join-Path $RootDir "docs\test-report.md") (Join-Path $ExeImageRoot "FuyueConvert\docs")
   Compress-Archive -Path (Join-Path $ExeImageRoot "FuyueConvert") -DestinationPath $ExeZipPath
   Write-Host "已生成 $ExeZipPath"
 } else {

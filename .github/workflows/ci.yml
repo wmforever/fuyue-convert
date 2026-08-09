@@ -41,6 +41,16 @@ jobs:
           npm ci --no-audit --no-fund
           npm run build
 
+      - name: Generate and validate release SBOMs
+        run: |
+          mkdir -p target/release-metadata
+          mvn -B -ntp -DskipTests -Dskip.frontend=true org.cyclonedx:cyclonedx-maven-plugin:2.9.2:makeAggregateBom -DoutputFormat=json -DoutputName=fuyue-convert-java-sbom -DoutputDirectory="$GITHUB_WORKSPACE/target/release-metadata" -Dcyclonedx.skipAttach=true
+          cd frontend
+          npm sbom --package-lock-only --sbom-format cyclonedx --sbom-type application > ../target/release-metadata/fuyue-convert-frontend-sbom.json
+          cd ..
+          python3 -m json.tool target/release-metadata/fuyue-convert-java-sbom.json >/dev/null
+          python3 -m json.tool target/release-metadata/fuyue-convert-frontend-sbom.json >/dev/null
+
       - name: Script syntax
         run: |
           bash -n scripts/package-runtime.sh

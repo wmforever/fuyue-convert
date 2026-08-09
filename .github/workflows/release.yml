@@ -64,11 +64,41 @@ jobs:
     needs: package
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
       - name: Download packages
         uses: actions/download-artifact@v8
         with:
           path: dist-assets
           merge-multiple: true
+
+      - name: Generate release metadata and checksums
+        run: |
+          mvn -B -ntp -DskipTests -Dskip.frontend=true org.cyclonedx:cyclonedx-maven-plugin:2.9.2:makeAggregateBom -DoutputFormat=json -DoutputName=fuyue-convert-java-sbom -DoutputDirectory="$GITHUB_WORKSPACE/dist-assets" -Dcyclonedx.skipAttach=true
+          cd frontend
+          npm sbom --package-lock-only --sbom-format cyclonedx --sbom-type application > ../dist-assets/fuyue-convert-frontend-sbom.json
+          cd ..
+          cp docs/known-limitations.md dist-assets/KNOWN-LIMITATIONS.md
+          cp docs/test-report.md dist-assets/TEST-REPORT.md
+          cp THIRD_PARTY_NOTICES.md dist-assets/THIRD-PARTY-NOTICES.md
+          python3 -m json.tool dist-assets/fuyue-convert-java-sbom.json >/dev/null
+          python3 -m json.tool dist-assets/fuyue-convert-frontend-sbom.json >/dev/null
+          cd dist-assets
+          for file in *; do if [ -f "$file" ] && [ "$file" != SHA256SUMS ]; then sha256sum "$file"; fi; done > SHA256SUMS
+          sha256sum -c SHA256SUMS
 
       - name: Publish release
         env:
