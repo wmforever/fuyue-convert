@@ -35,6 +35,8 @@ public final class DefaultConverterRegistry {
         converters.add(new PdfToOfdConverter());
         converters.add(new PdfToPngConverter());
         converters.add(new PdfToJpgConverter());
+        converters.add(new ImageToPdfConverter(DocumentFormat.PNG));
+        converters.add(new ImageToPdfConverter(DocumentFormat.JPG));
 
         if (officeBinary != null) {
             Path binary = officeBinary.toAbsolutePath().normalize();
@@ -53,15 +55,9 @@ public final class DefaultConverterRegistry {
                     "使用 LibreOffice headless 将 WPS 演示 DPS 转换为 PPTX。"));
             converters.add(new LibreOfficeConverter(DocumentFormat.UOF, DocumentFormat.DOCX, binary, timeout,
                     "使用 LibreOffice headless 将 UOF 直接转换为可编辑 DOCX。"));
-            converters.add(new LibreOfficeConverter(DocumentFormat.PNG, DocumentFormat.PDF, binary, timeout,
-                    "使用 LibreOffice headless 将 PNG 图片转换为 PDF。"));
-            converters.add(new LibreOfficeConverter(DocumentFormat.JPG, DocumentFormat.PDF, binary, timeout,
-                    "使用 LibreOffice headless 将 JPEG 图片转换为 PDF。"));
         } else {
             converters.add(new XlsxToPdfConverter());
             converters.add(new DocxToPdfConverter());
-            converters.add(new ImageToPdfConverter(DocumentFormat.PNG));
-            converters.add(new ImageToPdfConverter(DocumentFormat.JPG));
         }
         return List.copyOf(converters);
     }

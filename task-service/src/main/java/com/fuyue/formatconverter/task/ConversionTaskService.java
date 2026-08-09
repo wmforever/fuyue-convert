@@ -6,6 +6,8 @@ import com.fuyue.formatconverter.parser.*;
 import com.fuyue.formatconverter.table.PageLayoutAnalyzer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -216,6 +218,21 @@ public final class ConversionTaskService implements AutoCloseable {
                 record.downloadPath = outputs.get(0);
                 update(record, TaskStatus.SUCCESS, TaskStage.COMPLETED, 100, null, null, warnings, results,
                         true, results.stream().filter(TaskFileResult::success).findFirst().orElseThrow().outputName());
+            } else if (isImageToPdf(record.route)) {
+                Path merged = record.taskDir.resolve("output/merged-images.pdf");
+                mergePdfs(outputs, merged);
+                int mergedPages = ConversionGuards.requirePdfPageCount(merged, config.parseLimits());
+                if (mergedPages != outputs.size()) {
+                    throw new IOException("图片合并 PDF 页数不一致：" + mergedPages + " != " + outputs.size());
+                }
+                if (outputs.size() != record.inputs.size()) {
+                    warnings.add(ConversionWarning.of(com.fuyue.formatconverter.model.WarningCode.PARTIAL_BATCH_OUTPUT,
+                            "部分图片转换失败；合并 PDF 仅包含成功的 " + outputs.size() + " / "
+                                    + record.inputs.size() + " 张图片。", null));
+                }
+                record.downloadPath = merged;
+                update(record, TaskStatus.SUCCESS, TaskStage.COMPLETED, 100, null, null, warnings, results,
+                        true, "merged-images.pdf");
             } else {
                 Path zip = record.taskDir.resolve("output/converted-to-" + record.route.targetFormat().extension() + ".zip");
                 packageZip(zip, outputs, results);
@@ -233,6 +250,18 @@ public final class ConversionTaskService implements AutoCloseable {
                     "转换组件异常终止：" + e.getClass().getSimpleName(), warnings, results, false, null);
             log.error("taskId={} converter crashed", record.id, e);
         }
+    }
+
+    private boolean isImageToPdf(ConversionRoute route) {
+        return route.targetFormat() == DocumentFormat.PDF
+                && (route.sourceFormat() == DocumentFormat.PNG || route.sourceFormat() == DocumentFormat.JPG);
+    }
+
+    private void mergePdfs(List<Path> sources, Path destination) throws IOException {
+        PDFMergerUtility merger = new PDFMergerUtility();
+        for (Path source : sources) merger.addSource(source.toFile());
+        merger.setDestinationFileName(destination.toString());
+        merger.mergeDocuments(IOUtils.createTempFileOnlyStreamCache());
     }
 
     private void packageZip(Path zip, List<Path> outputs, List<TaskFileResult> results) throws IOException {

@@ -56,6 +56,8 @@ class FormatConverterApplicationTest {
                 .andExpect(jsonPath("$[?(@.id=='docx-to-txt')].strategy").value(contains("extraction")))
                 .andExpect(jsonPath("$[?(@.id=='csv-to-xlsx')].strategy").value(contains("data")))
                 .andExpect(jsonPath("$[?(@.id=='png-to-pdf')].status").value(contains("available")))
+                .andExpect(jsonPath("$[?(@.id=='png-to-pdf')].qualityLevel").value(contains("stable")))
+                .andExpect(jsonPath("$[?(@.id=='png-to-pdf')].strategy").value(contains("fidelity")))
                 .andExpect(jsonPath("$[?(@.id=='pdf-to-jpg')].status").value(contains("available")))
                 .andExpect(jsonPath("$[?(@.id=='pdf-to-ofd')].status").value(contains("available")))
                 .andExpect(jsonPath("$[?(@.id=='pdf-to-ofd')].qualityLevel").value(contains("experimental")))

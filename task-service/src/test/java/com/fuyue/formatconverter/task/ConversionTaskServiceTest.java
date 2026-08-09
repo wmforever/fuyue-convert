@@ -130,7 +130,10 @@ class ConversionTaskServiceTest {
                     && route.qualityLevel() == QualityLevel.EXPERIMENTAL
                     && route.strategy() == ConversionStrategy.DATA));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("csv-to-xlsx") && route.strategy() == ConversionStrategy.DATA));
-            assertTrue(routes.stream().anyMatch(route -> route.id().equals("png-to-pdf") && route.status() == RouteStatus.AVAILABLE));
+            assertTrue(routes.stream().anyMatch(route -> route.id().equals("png-to-pdf")
+                    && route.status() == RouteStatus.AVAILABLE
+                    && route.qualityLevel() == QualityLevel.STABLE
+                    && route.strategy() == ConversionStrategy.FIDELITY));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-jpg") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("wps-to-docx") && route.status() == RouteStatus.PLANNED));
         }

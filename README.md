@@ -35,12 +35,12 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | PDF -> PNG/JPG | stable | 版式渲染 | 使用 Poppler 或 PDFBox 按页渲染；多页自动输出 ZIP。 |
 | PDF -> DOCX | beta | 可编辑优先 | 文字型 PDF 恢复真实文字、基础段落、页面尺寸和方向；扫描页或纯图片页在未接入 OCR 时明确失败。 |
 | PDF -> OFD | experimental | 版式优先 | 生成真实 OFD 包；144 DPI 页面图像层保留视觉，文字型 PDF 同时写入源坐标 OFD 文字对象。复杂对象尚未逐项结构化重建。 |
-| PNG/JPG -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 Office 引擎；无 Office 时回退 PDFBox。 |
+| PNG/JPG -> PDF | stable | 版式优先 | 读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。同格式多图按上传顺序合并为多页 PDF。 |
 | WPS/ET/DPS/UOF | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |
 
 外部依赖说明：
 
-- LibreOffice：用于 DOCX/XLSX/PPTX/WPS/ET/DPS/UOF 与 PDF 相关的 Office 引擎转换。
+- LibreOffice：用于 DOCX/XLSX/PPTX/WPS/ET/DPS/UOF 与 PDF 相关的 Office 引擎转换；图片转 PDF 使用内置 PDFBox 路线以稳定处理 DPI 和 EXIF。
 - Poppler：用于 PDF 渲染为 PNG/JPEG 和视觉回归比较。
 - 系统字体：影响 Office 输出的分页、行距和文字替换；基础 PDF 文本路线内置中文回退字体，也可通过 `FORMAT_CONVERTER_PDF_FONT` 指定 TrueType 字体。TXT -> DOCX 可通过 `FORMAT_CONVERTER_DOCX_FONT` 和 `FORMAT_CONVERTER_DOCX_CJK_FONT` 配置西文及东亚字体名。
 

@@ -35,12 +35,12 @@ Status legend:
 | PDF -> PNG/JPG | stable | rendering | Uses Poppler or PDFBox page rendering. Multi-page PDFs are returned as ZIP files. |
 | PDF -> DOCX | beta | editability first | Restores real text, basic paragraphs, page sizes, and orientation from text-based PDFs. Scanned or image-only pages fail explicitly until OCR is available. |
 | PDF -> OFD | experimental | fidelity first | Produces a real OFD package. A 144-DPI page image preserves appearance, while text PDFs also receive source-positioned OFD text objects. Complex objects are not yet reconstructed individually. |
-| PNG/JPG -> PDF | beta | layout first | Uses the Office engine when available, with PDFBox fallback. |
+| PNG/JPG -> PDF | stable | layout first | Reads PNG pHYs, JPEG JFIF/EXIF DPI, and EXIF orientation; transparent PNG composition is preserved. Missing DPI defaults to 96 with a warning. Same-format batches merge in upload order. |
 | WPS/ET/DPS/UOF | experimental | compatibility first | Depends on LibreOffice import support. UOF is converted directly to editable DOCX, so pagination and object positions may change. |
 
 External dependencies:
 
-- LibreOffice: used for Office-engine conversions involving DOCX/XLSX/PPTX/WPS/ET/DPS/UOF and PDF.
+- LibreOffice: used for Office-engine conversions involving DOCX/XLSX/PPTX/WPS/ET/DPS/UOF and PDF. Image-to-PDF uses the built-in PDFBox route for deterministic DPI and EXIF handling.
 - Poppler: used for PDF to PNG/JPEG rendering and visual regression checks.
 - System fonts: affect pagination, line spacing, and font substitution in Office output. Basic PDF text routes include fallback fonts, and a custom TrueType font can be selected with `FORMAT_CONVERTER_PDF_FONT`. TXT -> DOCX font names can be configured with `FORMAT_CONVERTER_DOCX_FONT` and `FORMAT_CONVERTER_DOCX_CJK_FONT`.
 
