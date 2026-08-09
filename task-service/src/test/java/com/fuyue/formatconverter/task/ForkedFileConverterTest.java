@@ -1,6 +1,8 @@
 package com.fuyue.formatconverter.task;
 
 import com.fuyue.formatconverter.parser.ParseLimits;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
@@ -50,6 +52,29 @@ class ForkedFileConverterTest {
 
         assertEquals("WORKER_CRASHED", error.code());
         assertTrue(error.getMessage().contains("exit=17"));
+    }
+
+    @Test void acceptsNumberedMultiPageZipFromIndependentJvmWithinOutputDirectory() throws Exception {
+        Path input = temp.resolve("pages.pdf");
+        try (PDDocument pdf = new PDDocument()) {
+            pdf.addPage(new PDPage());
+            pdf.addPage(new PDPage());
+            pdf.save(input.toFile());
+        }
+        Path requestedOutput = temp.resolve("pages.png");
+        ForkedFileConverter converter = new ForkedFileConverter(new PdfToPngConverter().route(),
+                workerCommand(ConversionWorkerMain.class), "", Duration.ofSeconds(20));
+
+        ConversionOutput converted = converter.convert(
+                new ConversionInput("pages.pdf", "application/pdf", Files.size(input), input),
+                temp.resolve("pdf-work"), requestedOutput, ParseLimits.defaults(), (stage, progress) -> { });
+
+        assertEquals("pages-pages.zip", converted.outputName());
+        assertEquals(requestedOutput.getParent(), converted.path().getParent());
+        assertNotEquals(requestedOutput, converted.path());
+        try (ZipFile zip = new ZipFile(converted.path().toFile(), StandardCharsets.UTF_8)) {
+            assertEquals(2, zip.size());
+        }
     }
 
     @Test void returnsMultiSheetCsvZipFromIndependentJvmAtExpectedWorkerPath() throws Exception {

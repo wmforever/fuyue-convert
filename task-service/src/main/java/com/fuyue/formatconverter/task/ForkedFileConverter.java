@@ -89,10 +89,11 @@ public final class ForkedFileConverter implements FileConverter {
         }
         Path actual = Path.of(response.outputPath()).toAbsolutePath().normalize();
         Path expected = outputPath.toAbsolutePath().normalize();
-        if (!actual.equals(expected) || !Files.isRegularFile(expected)) {
+        if (expected.getParent() == null || !expected.getParent().equals(actual.getParent())
+                || !Files.isRegularFile(actual, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
             throw new ConversionFailureException("WORKER_OUTPUT_INVALID", "转换 Worker 未生成预期输出文件");
         }
-        return new ConversionOutput(expected, response.outputName(), response.pageCount(), response.warnings());
+        return new ConversionOutput(actual, response.outputName(), response.pageCount(), response.warnings());
     }
 
     private WorkerResponse readResponse(Path responsePath) throws IOException {

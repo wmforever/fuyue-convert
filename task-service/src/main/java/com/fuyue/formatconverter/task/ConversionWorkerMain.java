@@ -50,9 +50,7 @@ public final class ConversionWorkerMain {
                     new ConversionInput(request.displayName(), request.contentType(), request.size(), input),
                     work, output, request.limits(),
                     (stage, progress) -> writeProgress(progressPath, new WorkerProgress(stage, progress)));
-            if (!converted.path().toAbsolutePath().normalize().equals(output)) {
-                throw new IllegalStateException("工作进程返回了非预期输出路径");
-            }
+            requireSafeOutputPath(converted.path(), output);
             writeAtomic(responsePath, WorkerResponse.success(converted));
             return 0;
         } catch (Throwable error) {
@@ -65,6 +63,15 @@ public final class ConversionWorkerMain {
                 System.err.println("Could not write worker failure: " + safeMessage(writeError));
             }
             return 2;
+        }
+    }
+
+    private static void requireSafeOutputPath(Path convertedPath, Path requestedPath) throws Exception {
+        Path actual = convertedPath.toAbsolutePath().normalize();
+        Path outputDirectory = requestedPath.toAbsolutePath().normalize().getParent();
+        if (outputDirectory == null || !outputDirectory.equals(actual.getParent())
+                || !Files.isRegularFile(actual, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            throw new IllegalStateException("工作进程返回了输出目录之外或无效的文件");
         }
     }
 
