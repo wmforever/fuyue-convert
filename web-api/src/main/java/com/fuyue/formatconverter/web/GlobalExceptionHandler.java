@@ -1,8 +1,9 @@
 package com.fuyue.formatconverter.web;
 
+import com.fuyue.formatconverter.task.ErrorMessageSanitizer;
+import com.fuyue.formatconverter.task.InsufficientStorageException;
 import com.fuyue.formatconverter.task.TaskNotFoundException;
 import com.fuyue.formatconverter.task.TaskQueueFullException;
-import com.fuyue.formatconverter.task.InsufficientStorageException;
 import org.springframework.http.*;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,7 +25,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
-    ResponseEntity<ApiError> badRequest(RuntimeException e) { return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", e.getMessage()); }
+    ResponseEntity<ApiError> badRequest(RuntimeException e) {
+        return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ErrorMessageSanitizer.from(e));
+    }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     ResponseEntity<ApiError> uploadTooLarge(MaxUploadSizeExceededException e) { return error(HttpStatus.PAYLOAD_TOO_LARGE, "UPLOAD_TOO_LARGE", "上传文件超过服务器限制"); }

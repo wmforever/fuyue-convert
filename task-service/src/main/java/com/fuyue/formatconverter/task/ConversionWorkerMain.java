@@ -95,7 +95,6 @@ public final class ConversionWorkerMain {
     }
 
     private static String safeMessage(Throwable error) {
-        String message = error.getMessage();
-        return message == null || message.isBlank() ? error.getClass().getSimpleName() : message;
+        return ErrorMessageSanitizer.from(error);
     }
 }

@@ -7,12 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /** Drains process output without allowing unbounded log files or local path disclosure. */
 final class ProcessOutputCapture {
-    private static final Pattern UNIX_PATH = Pattern.compile("(?<![A-Za-z0-9_.-])(?:file:)?/{1,3}[^\\s\\\"'<>]+");
-    private static final Pattern WINDOWS_PATH = Pattern.compile("(?i)(?<![A-Za-z0-9_.-])[A-Z]:[\\\\/][^\\s\\\"'<>]+");
     private final ByteArrayOutputStream captured = new ByteArrayOutputStream();
     private final List<String> command;
     private final int maxBytes;
@@ -41,7 +38,7 @@ final class ProcessOutputCapture {
         synchronized (captured) {
             value = captured.toString(StandardCharsets.UTF_8);
         }
-        value = redact(value).replaceAll("\\s+", " ").trim();
+        value = redact(value);
         if (truncated) value += value.isEmpty() ? "..." : " ...";
         if (value.length() > 500) value = value.substring(0, 500) + "...";
         Files.createDirectories(logFile.getParent());
@@ -72,8 +69,7 @@ final class ProcessOutputCapture {
             if (argument == null || argument.length() < 2) continue;
             if (looksLikePath(argument)) result = result.replace(argument, "<path>");
         }
-        result = WINDOWS_PATH.matcher(result).replaceAll("<path>");
-        return UNIX_PATH.matcher(result).replaceAll("<path>");
+        return ErrorMessageSanitizer.sanitize(result);
     }
 
     private boolean looksLikePath(String value) {

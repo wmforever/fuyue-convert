@@ -295,11 +295,12 @@ public final class ConversionTaskService implements AutoCloseable {
         } catch (Exception e) {
             update(record, TaskStatus.FAILED, TaskStage.FAILED, 100, "TASK_FAILED", safeError(e),
                     warnings, results, false, null);
-            log.error("taskId={} failed at task level", record.id, e);
+            log.error("taskId={} failed at task level type={} reason={}", record.id,
+                    e.getClass().getSimpleName(), safeError(e));
         } catch (Error e) {
             update(record, TaskStatus.FAILED, TaskStage.FAILED, 100, "CONVERTER_CRASHED",
                     "转换组件异常终止：" + e.getClass().getSimpleName(), warnings, results, false, null);
-            log.error("taskId={} converter crashed", record.id, e);
+            log.error("taskId={} converter crashed type={}", record.id, e.getClass().getSimpleName());
         } finally {
             record.executionStarted.set(false);
             if (record.deleteRequested.get()) deleteTree(record.taskDir);
@@ -386,7 +387,7 @@ public final class ConversionTaskService implements AutoCloseable {
             try { Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE); }
             catch (AtomicMoveNotSupportedException e) { Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING); }
         } catch (IOException e) {
-            log.error("taskId={} manifest persistence failed", record.id, e);
+            log.error("taskId={} manifest persistence failed reason={}", record.id, safeError(e));
         }
     }
 
@@ -465,7 +466,7 @@ public final class ConversionTaskService implements AutoCloseable {
                 }
             }
             executor.purge();
-        } catch (Exception e) { log.error("Task cleanup failed", e); }
+        } catch (Exception e) { log.error("Task cleanup failed reason={}", safeError(e)); }
     }
 
     private TaskRecord record(String taskId) {
@@ -624,7 +625,7 @@ public final class ConversionTaskService implements AutoCloseable {
         }
     }
     private void checkDeadline(Instant deadline) throws TimeoutException { if (Instant.now().isAfter(deadline)) throw new TimeoutException("转换超时"); }
-    private String safeError(Throwable e) { return e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage(); }
+    private String safeError(Throwable e) { return ErrorMessageSanitizer.from(e); }
     private String failureCode(Exception error) {
         if (error instanceof OfdParseException parsed) return parsed.code();
         if (error instanceof ConversionFailureException failure) return failure.code();

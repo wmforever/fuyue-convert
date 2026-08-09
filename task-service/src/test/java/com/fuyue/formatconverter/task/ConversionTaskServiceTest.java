@@ -617,6 +617,37 @@ class ConversionTaskServiceTest {
         }
     }
 
+    @Test void redactsAbsolutePathsFromTaskErrorsAndPersistedManifest() throws Exception {
+        FileConverter leaking = new FileConverter() {
+            @Override public ConversionRoute route() {
+                return ConversionRoute.of(DocumentFormat.TXT, DocumentFormat.DOCX, "path error test converter");
+            }
+
+            @Override
+            public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                            ParseLimits limits, ConversionProgress progress) throws Exception {
+                throw new IOException("failed at " + input.path() + " and C:\\Users\\alice\\secret.docx");
+            }
+        };
+        Path dataRoot = temp.resolve("redacted-error-data");
+        TaskServiceConfig config = new TaskServiceConfig(dataRoot, 1, 2,
+                Duration.ofSeconds(5), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] text = "private body".getBytes(StandardCharsets.UTF_8);
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(leaking))) {
+            TaskSnapshot created = service.createTask(List.of(new UploadPayload("private.txt", "text/plain", text.length,
+                    () -> new ByteArrayInputStream(text))), DocumentFormat.DOCX);
+            TaskSnapshot failed = await(service, created.taskId());
+
+            String error = failed.files().get(0).errorMessage();
+            assertTrue(error.contains("<path>"));
+            assertFalse(error.contains(temp.toString()));
+            assertFalse(error.contains("alice"));
+            String manifest = Files.readString(dataRoot.resolve("tasks").resolve(created.taskId()).resolve("manifest.json"));
+            assertFalse(manifest.contains(temp.toString()));
+            assertFalse(manifest.contains("alice"));
+        }
+    }
+
     @Test void cancelsRunningTaskWithoutPublishingAResult() throws Exception {
         CountDownLatch started = new CountDownLatch(1);
         CountDownLatch interrupted = new CountDownLatch(1);
