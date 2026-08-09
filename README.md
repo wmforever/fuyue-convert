@@ -89,7 +89,7 @@ bash scripts/package-runtime.sh
 生成文件位于 `dist/`：
 
 - macOS/Linux：`fuyue-convert-<version>-<os>-<arch>.tar.gz`，解压后运行 `start.command` 或 `bin/start.sh`。
-- Windows：通过 GitHub Actions 或 Windows 本机运行 `scripts/package-runtime.ps1`。普通包解压后双击 `start.bat`；`*-exe.zip` 解压后双击 `FuyueConvert.exe`。
+- Windows：通过 GitHub Actions 或 Windows 本机运行 `scripts/package-runtime.ps1`。Release 同时提供普通 ZIP、`*-exe.zip` 免安装程序、原生 `.exe` 安装器和 `.msi`；四者均内置 Java Runtime。安装器当前未做商业代码签名，Windows 可能显示 SmartScreen/未知发布者提示。
 
 GitHub Release 会在打包后自动执行 smoke test：三个平台都会使用内置 Runtime 启动服务、检查 `/api/health`，再完成一次真实 `TXT -> DOCX` Worker 转换和下载内容校验；Windows 另外检查 `FuyueConvert.exe`。
 

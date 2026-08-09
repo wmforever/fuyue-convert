@@ -89,7 +89,7 @@ bash scripts/package-runtime.sh
 Generated files are placed under `dist/`:
 
 - macOS/Linux: `fuyue-convert-<version>-<os>-<arch>.tar.gz`, then run `start.command` or `bin/start.sh`.
-- Windows: run `scripts/package-runtime.ps1` on Windows or use GitHub Actions. The regular package starts with `start.bat`; the `*-exe.zip` package starts with `FuyueConvert.exe`.
+- Windows: run `scripts/package-runtime.ps1` on Windows or use GitHub Actions. Releases include a regular ZIP, a portable `*-exe.zip`, and native `.exe` and `.msi` installers; all include a Java Runtime. Installers are currently unsigned, so Windows may show a SmartScreen or unknown-publisher warning.
 
 GitHub Release smoke tests all three platforms with the bundled Runtime: start the service, check `/api/health`, perform a real `TXT -> DOCX` worker conversion, download the result, and verify its content. Windows additionally checks `FuyueConvert.exe`.
 

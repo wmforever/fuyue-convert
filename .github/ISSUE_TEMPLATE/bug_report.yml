@@ -43,6 +43,8 @@ body:
       label: 使用方式 / Installation
       options:
         - Release Windows exe zip
+        - Release Windows EXE installer
+        - Release Windows MSI installer
         - Release Windows zip
         - Release macOS/Linux tar.gz
         - Source build

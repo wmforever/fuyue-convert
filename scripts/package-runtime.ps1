@@ -64,6 +64,10 @@ Copy-Item (Join-Path $RootDir "THIRD_PARTY_NOTICES.md") $PackageDir
 New-Item -ItemType Directory -Force (Join-Path $PackageDir "docs") | Out-Null
 Copy-Item (Join-Path $RootDir "docs\known-limitations.md") (Join-Path $PackageDir "docs")
 Copy-Item (Join-Path $RootDir "docs\test-report.md") (Join-Path $PackageDir "docs")
+New-Item -ItemType Directory -Force (Join-Path $PackageDir "app\docs") | Out-Null
+Copy-Item (Join-Path $RootDir "THIRD_PARTY_NOTICES.md") (Join-Path $PackageDir "app")
+Copy-Item (Join-Path $RootDir "docs\known-limitations.md") (Join-Path $PackageDir "app\docs")
+Copy-Item (Join-Path $RootDir "docs\test-report.md") (Join-Path $PackageDir "app\docs")
 
 & $JlinkBin `
   --add-modules java.base,java.compiler,java.desktop,java.instrument,java.logging,java.management,java.naming,java.net.http,java.prefs,java.security.jgss,java.sql,jdk.crypto.ec,jdk.unsupported `
@@ -123,7 +127,7 @@ if ($JpackageCommand) {
     --vendor Fuyue `
     --description "Open-source document format conversion platform" `
     --win-console `
-    --arguments "--format-converter.auto-open-browser=true" `
+    --arguments '--format-converter.auto-open-browser=true --format-converter.data-root=${user.home}/FuyueConvert/data' `
     --java-options "-Xms256m" `
     --java-options "-Xmx1g" `
     --java-options "-Djava.awt.headless=true"
@@ -138,8 +142,39 @@ if ($JpackageCommand) {
   Copy-Item (Join-Path $RootDir "docs\test-report.md") (Join-Path $ExeImageRoot "FuyueConvert\docs")
   Compress-Archive -Path (Join-Path $ExeImageRoot "FuyueConvert") -DestinationPath $ExeZipPath
   Write-Host "已生成 $ExeZipPath"
+
+  foreach ($InstallerType in @("exe", "msi")) {
+    $InstallerPath = Join-Path $DistDir "FuyueConvert-$AppVersion.$InstallerType"
+    Remove-Item -Force $InstallerPath -ErrorAction SilentlyContinue
+    & $JpackageBin `
+      --type $InstallerType `
+      --name FuyueConvert `
+      --dest $DistDir `
+      --input (Join-Path $PackageDir "app") `
+      --main-jar fuyue-convert.jar `
+      --main-class org.springframework.boot.loader.launch.JarLauncher `
+      --runtime-image $RuntimeDir `
+      --app-version $AppVersion `
+      --vendor Fuyue `
+      --description "Open-source document format conversion platform" `
+      --license-file (Join-Path $RootDir "LICENSE") `
+      --win-console `
+      --win-menu `
+      --win-menu-group "Fuyue Convert" `
+      --win-shortcut `
+      --win-dir-chooser `
+      --win-per-user-install `
+      --win-upgrade-uuid "3f1df18a-09de-4f90-a1d8-273df230f38b" `
+      --arguments '--format-converter.auto-open-browser=true --format-converter.data-root=${user.home}/FuyueConvert/data' `
+      --java-options "-Xms256m" `
+      --java-options "-Xmx1g" `
+      --java-options "-Djava.awt.headless=true"
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    if (-not (Test-Path $InstallerPath)) { throw "jpackage 未生成预期安装器: $InstallerPath" }
+    Write-Host "已生成 $InstallerPath"
+  }
 } else {
-  Write-Host "未找到 jpackage，已跳过 FuyueConvert.exe 版发布包。"
+  throw "未找到 jpackage，无法生成 Windows EXE/MSI 发布包"
 }
 Pop-Location
 

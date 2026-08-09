@@ -37,6 +37,16 @@ jobs:
         if: runner.os != 'Windows'
         run: bash scripts/smoke-runtime-package.sh dist/*.tar.gz
 
+      - name: Install WiX Toolset 3
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install wixtoolset --version=3.14.1.20250415 --yes --no-progress
+          $Candle = Get-ChildItem "${env:ProgramFiles(x86)}\WiX Toolset*" -Recurse -File -Filter candle.exe | Select-Object -First 1
+          if (-not $Candle) { $Candle = Get-ChildItem "$env:ChocolateyInstall\lib\wixtoolset\tools" -Recurse -File -Filter candle.exe | Select-Object -First 1 }
+          if (-not $Candle) { throw "WiX candle.exe not found" }
+          $Candle.Directory.FullName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
       - name: Package runtime bundle
         if: runner.os == 'Windows'
         shell: pwsh
@@ -57,6 +67,8 @@ jobs:
           path: |
             dist/*.tar.gz
             dist/*.zip
+            dist/*.exe
+            dist/*.msi
 
   release:
     name: Publish GitHub Release

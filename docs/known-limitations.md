@@ -6,6 +6,7 @@
 2. 外部 Office 引擎、系统字体、Poppler 版本和操作系统都会影响视觉结果。
 3. 默认已使用独立 JVM Worker 实现硬超时和进程树清理；`worker-max-memory-mb` 只限制 Java 堆，CPU、总内存和外部 Office 进程的 OS 级限制需要 Docker/cgroup 或 systemd 配合。
 4. 批量任务中单个文件失败不会中断其他文件，调用方需要检查每个 `TaskFileResult`。
+5. Windows Release 会用 JDK `jpackage` 和 WiX 3 生成内置 Runtime 的 `.exe`/`.msi` 安装器；当前开源发布流程未配置商业代码签名证书，SmartScreen 可能显示未知发布者，生产分发方应在自身安全环境中完成签名和时间戳。
 
 ## OFD
 
