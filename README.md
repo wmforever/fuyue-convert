@@ -29,7 +29,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | OFD -> XLSX | experimental | 数据优先 | 将高置信度有线规则表格写成真实单元格、分页工作表和合并区域；未识别到可靠表格返回 `NO_TABLE_FOUND`，扫描页返回 `OCR_REQUIRED`。 |
 | CSV <-> XLSX | stable | 数据优先 | 已覆盖 CSV 到 XLSX，再回到 CSV 的严格数据回环。 |
 | DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 headless 转换；本地字体会影响结果。 |
-| TXT -> DOCX/PDF | stable | 内容优先 | 适合纯文本生成基础办公文档。 |
+| TXT -> DOCX/PDF | stable | 内容优先 | 支持 UTF-8、带 BOM 的 UTF-16 和严格 GB18030 解码；换页符生成真实分页，PDF 按字形宽度进行 CJK 换行，DOCX 写入可配置中西文字体。 |
 | DOCX -> TXT | beta | 内容提取 | 按正文对象顺序提取段落和表格，并带标签追加页眉页脚、文本框、脚注尾注、批注及修订文字；不保留版式。 |
 | PDF -> TXT | beta | 内容提取 | 按页面坐标和多栏顺序提取文字，使用换页符保留页面边界；扫描页或混合文档中的无文字内容页严格返回 `OCR_REQUIRED`。 |
 | PDF -> PNG/JPG | stable | 版式渲染 | 使用 Poppler 或 PDFBox 按页渲染；多页自动输出 ZIP。 |
@@ -42,7 +42,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 
 - LibreOffice：用于 DOCX/XLSX/PPTX/WPS/ET/DPS/UOF 与 PDF 相关的 Office 引擎转换。
 - Poppler：用于 PDF 渲染为 PNG/JPEG 和视觉回归比较。
-- 系统字体：影响 Office 输出的分页、行距和文字替换；基础 PDF 文本路线内置中文回退字体，也可通过 `FORMAT_CONVERTER_PDF_FONT` 指定 TrueType 字体。
+- 系统字体：影响 Office 输出的分页、行距和文字替换；基础 PDF 文本路线内置中文回退字体，也可通过 `FORMAT_CONVERTER_PDF_FONT` 指定 TrueType 字体。TXT -> DOCX 可通过 `FORMAT_CONVERTER_DOCX_FONT` 和 `FORMAT_CONVERTER_DOCX_CJK_FONT` 配置西文及东亚字体名。
 
 质量标准见 [docs/quality-standard.md](docs/quality-standard.md)。最新本地 QA 报告见 `qa-samples/report/qa-report.md`。
 

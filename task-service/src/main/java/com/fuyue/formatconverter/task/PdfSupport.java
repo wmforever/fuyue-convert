@@ -25,32 +25,54 @@ final class PdfSupport {
     private PdfSupport() {}
 
     static void writeTextPdf(List<String> lines, Path outputPath) throws IOException {
+        writeTextPdfPages(List.of(lines), outputPath, Integer.MAX_VALUE);
+    }
+
+    static int writeTextPdfPages(List<List<String>> pages, Path outputPath, int maxPages) throws IOException {
         try (PDDocument document = new PDDocument()) {
             FontSet fonts = loadFonts(document);
-            PDPage page = new PDPage(PDRectangle.A4);
-            document.addPage(page);
-            PDPageContentStream content = beginPage(document, page, fonts.latin());
-            float y = page.getMediaBox().getHeight() - MARGIN;
-            for (String raw : lines) {
-                String cleaned = clean(raw == null ? "" : raw);
-                for (String line : wrap(cleaned, fonts, page.getMediaBox().getWidth() - (2 * MARGIN))) {
-                    if (y < MARGIN) {
-                        content.endText();
-                        content.close();
-                        page = new PDPage(PDRectangle.A4);
-                        document.addPage(page);
-                        content = beginPage(document, page, fonts.latin());
-                        y = page.getMediaBox().getHeight() - MARGIN;
+            PDPageContentStream content = null;
+            int pageCount = 0;
+            List<List<String>> logicalPages = pages.isEmpty() ? List.of(List.of("")) : pages;
+            for (List<String> lines : logicalPages) {
+                if (content != null) closePage(content);
+                PDPage page = addPage(document, ++pageCount, maxPages);
+                content = beginPage(document, page, fonts.latin());
+                float y = page.getMediaBox().getHeight() - MARGIN;
+                for (String raw : lines) {
+                    String cleaned = clean(raw == null ? "" : raw);
+                    for (String line : wrap(cleaned, fonts, page.getMediaBox().getWidth() - (2 * MARGIN))) {
+                        if (y < MARGIN) {
+                            closePage(content);
+                            page = addPage(document, ++pageCount, maxPages);
+                            content = beginPage(document, page, fonts.latin());
+                            y = page.getMediaBox().getHeight() - MARGIN;
+                        }
+                        showText(content, line, fonts);
+                        content.newLineAtOffset(0, -LEADING);
+                        y -= LEADING;
                     }
-                    showText(content, line, fonts);
-                    content.newLineAtOffset(0, -LEADING);
-                    y -= LEADING;
                 }
             }
-            content.endText();
-            content.close();
+            if (content != null) closePage(content);
             document.save(outputPath.toFile());
+            return pageCount;
         }
+    }
+
+    private static PDPage addPage(PDDocument document, int pageCount, int maxPages) throws IOException {
+        if (pageCount > maxPages) {
+            throw new ConversionFailureException("PAGE_LIMIT_EXCEEDED",
+                    "TXT 排版后的 PDF 页数超过限制：" + pageCount + " > " + maxPages);
+        }
+        PDPage page = new PDPage(PDRectangle.A4);
+        document.addPage(page);
+        return page;
+    }
+
+    private static void closePage(PDPageContentStream content) throws IOException {
+        content.endText();
+        content.close();
     }
 
     private static PDPageContentStream beginPage(PDDocument document, PDPage page, PDFont font) throws IOException {

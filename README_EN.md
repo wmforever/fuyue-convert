@@ -29,7 +29,7 @@ Status legend:
 | OFD -> XLSX | experimental | data first | Writes high-confidence bordered grid tables as real cells, per-page worksheets, and merged regions. It returns `NO_TABLE_FOUND` when no reliable table is found and `OCR_REQUIRED` for scanned pages. |
 | CSV <-> XLSX | stable | data first | Covers strict CSV to XLSX and back-to-CSV data round trips. |
 | DOCX/XLSX/PPTX -> PDF | beta | layout first | Uses LibreOffice headless when available. Local fonts affect visual output. |
-| TXT -> DOCX/PDF | stable | content first | Useful for generating simple office documents from plain text. |
+| TXT -> DOCX/PDF | stable | content first | Supports UTF-8, BOM-marked UTF-16, and strict GB18030 decoding. Form feeds create real page breaks, PDF wraps CJK by glyph width, and DOCX writes configurable Latin/CJK fonts. |
 | DOCX -> TXT | beta | text extraction | Extracts paragraphs and tables in body order, then labeled headers, footers, text boxes, footnotes, endnotes, comments, and tracked revisions; layout is not retained. |
 | PDF -> TXT | beta | extraction | Extracts text by page coordinates and multi-column reading order, preserving page boundaries with form feeds. Scanned pages or non-text content pages in mixed PDFs fail with `OCR_REQUIRED`. |
 | PDF -> PNG/JPG | stable | rendering | Uses Poppler or PDFBox page rendering. Multi-page PDFs are returned as ZIP files. |
@@ -42,7 +42,7 @@ External dependencies:
 
 - LibreOffice: used for Office-engine conversions involving DOCX/XLSX/PPTX/WPS/ET/DPS/UOF and PDF.
 - Poppler: used for PDF to PNG/JPEG rendering and visual regression checks.
-- System fonts: affect pagination, line spacing, and font substitution in Office output. Basic PDF text routes include fallback fonts, and a custom TrueType font can be selected with `FORMAT_CONVERTER_PDF_FONT`.
+- System fonts: affect pagination, line spacing, and font substitution in Office output. Basic PDF text routes include fallback fonts, and a custom TrueType font can be selected with `FORMAT_CONVERTER_PDF_FONT`. TXT -> DOCX font names can be configured with `FORMAT_CONVERTER_DOCX_FONT` and `FORMAT_CONVERTER_DOCX_CJK_FONT`.
 
 See [docs/quality-standard.md](docs/quality-standard.md) for quality definitions.
 
