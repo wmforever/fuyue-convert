@@ -2,6 +2,7 @@ package com.fuyue.formatconverter.task;
 
 import com.fuyue.formatconverter.parser.ParseLimits;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,6 +50,29 @@ class ForkedFileConverterTest {
 
         assertEquals("WORKER_CRASHED", error.code());
         assertTrue(error.getMessage().contains("exit=17"));
+    }
+
+    @Test void returnsMultiSheetCsvZipFromIndependentJvmAtExpectedWorkerPath() throws Exception {
+        Path input = temp.resolve("multi.xlsx");
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            workbook.createSheet("one").createRow(0).createCell(0).setCellValue("一");
+            workbook.createSheet("two").createRow(0).createCell(0).setCellValue("二");
+            try (var out = Files.newOutputStream(input)) { workbook.write(out); }
+        }
+        Path output = temp.resolve("output.csv");
+        ForkedFileConverter converter = new ForkedFileConverter(new XlsxToCsvConverter().route(),
+                workerCommand(ConversionWorkerMain.class), "", Duration.ofSeconds(15));
+
+        ConversionOutput converted = converter.convert(
+                new ConversionInput("multi.xlsx",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        Files.size(input), input),
+                temp.resolve("xlsx-work"), output, ParseLimits.defaults(), (stage, progress) -> { });
+
+        assertEquals("multi-sheets.zip", converted.outputName());
+        try (ZipFile zip = new ZipFile(output.toFile(), StandardCharsets.UTF_8)) {
+            assertEquals(2, zip.size());
+        }
     }
 
     @Test void taskTimeoutTerminatesWorkerAndReturnsDedicatedCode() throws Exception {

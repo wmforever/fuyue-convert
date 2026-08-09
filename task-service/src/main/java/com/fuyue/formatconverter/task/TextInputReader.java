@@ -20,33 +20,37 @@ final class TextInputReader {
     private TextInputReader() { }
 
     static DecodedText read(Path path, ParseLimits limits) throws Exception {
-        long declaredSize = Files.size(path);
-        if (declaredSize > limits.maxArchiveBytes()) {
-            throw new ConversionFailureException("TEXT_TOO_LARGE",
-                    "TXT 文件超过限制：" + declaredSize + " > " + limits.maxArchiveBytes());
-        }
-        byte[] bytes = Files.readAllBytes(path);
-        if (bytes.length > limits.maxArchiveBytes()) {
-            throw new ConversionFailureException("TEXT_TOO_LARGE",
-                    "TXT 文件超过限制：" + bytes.length + " > " + limits.maxArchiveBytes());
-        }
-
-        Decoded decoded = decode(bytes);
-        validateText(decoded.value());
-        String normalized = decoded.value().replace("\r\n", "\n").replace('\r', '\n');
-        String[] rawPages = normalized.split("\f", -1);
+        DecodedContent content = readContent(path, limits);
+        String[] rawPages = content.value().split("\f", -1);
         if (rawPages.length > limits.maxPages()) {
             throw new ConversionFailureException("PAGE_LIMIT_EXCEEDED",
                     "TXT 显式分页数超过限制：" + rawPages.length + " > " + limits.maxPages());
         }
         List<List<String>> pages = new ArrayList<>(rawPages.length);
         for (String page : rawPages) pages.add(List.of(page.split("\n", -1)));
+        return new DecodedText(List.copyOf(pages), content.charsetName(), content.warnings());
+    }
 
+    static DecodedContent readContent(Path path, ParseLimits limits) throws Exception {
+        long declaredSize = Files.size(path);
+        if (declaredSize > limits.maxArchiveBytes()) {
+            throw new ConversionFailureException("TEXT_TOO_LARGE",
+                    "文本文件超过限制：" + declaredSize + " > " + limits.maxArchiveBytes());
+        }
+        byte[] bytes = Files.readAllBytes(path);
+        if (bytes.length > limits.maxArchiveBytes()) {
+            throw new ConversionFailureException("TEXT_TOO_LARGE",
+                    "文本文件超过限制：" + bytes.length + " > " + limits.maxArchiveBytes());
+        }
+
+        Decoded decoded = decode(bytes);
+        validateText(decoded.value());
+        String normalized = decoded.value().replace("\r\n", "\n").replace('\r', '\n');
         List<ConversionWarning> warnings = decoded.guessed()
                 ? List.of(ConversionWarning.of(WarningCode.TEXT_ENCODING_GUESSED,
-                    "TXT 不符合 UTF-8，已按 GB18030 严格解码；请核对源文件编码。", null))
+                    "文本文件不符合 UTF-8，已按 GB18030 严格解码；请核对源文件编码。", null))
                 : List.of();
-        return new DecodedText(List.copyOf(pages), decoded.charset().name(), warnings);
+        return new DecodedContent(normalized, decoded.charset().name(), warnings);
     }
 
     private static Decoded decode(byte[] bytes) throws ConversionFailureException {
@@ -67,7 +71,7 @@ final class TextInputReader {
             }
         } catch (CharacterCodingException e) {
             throw new ConversionFailureException("TEXT_ENCODING_UNSUPPORTED",
-                    "TXT 编码无效；支持 UTF-8、带 BOM 的 UTF-16LE/UTF-16BE，以及可严格解码的 GB18030。");
+                    "文本文件编码无效；支持 UTF-8、带 BOM 的 UTF-16LE/UTF-16BE，以及可严格解码的 GB18030。");
         }
     }
 
@@ -84,7 +88,7 @@ final class TextInputReader {
             offset += Character.charCount(codePoint);
             if (codePoint == 0) {
                 throw new ConversionFailureException("TEXT_BINARY_CONTENT",
-                        "TXT 包含 NUL 二进制字符，已拒绝转换。");
+                        "文本文件包含 NUL 二进制字符，已拒绝转换。");
             }
             if (Character.isISOControl(codePoint)
                     && codePoint != '\n' && codePoint != '\r' && codePoint != '\t' && codePoint != '\f') {
@@ -93,7 +97,7 @@ final class TextInputReader {
         }
         if (disallowed > 4 && disallowed * 100L > Math.max(1, value.codePointCount(0, value.length()))) {
             throw new ConversionFailureException("TEXT_BINARY_CONTENT",
-                    "TXT 包含过多二进制控制字符，已拒绝转换。");
+                    "文本文件包含过多二进制控制字符，已拒绝转换。");
         }
     }
 
@@ -108,6 +112,12 @@ final class TextInputReader {
     record DecodedText(List<List<String>> pages, String charsetName, List<ConversionWarning> warnings) {
         DecodedText {
             pages = pages.stream().map(List::copyOf).toList();
+            warnings = List.copyOf(warnings);
+        }
+    }
+
+    record DecodedContent(String value, String charsetName, List<ConversionWarning> warnings) {
+        DecodedContent {
             warnings = List.copyOf(warnings);
         }
     }

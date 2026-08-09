@@ -1,21 +1,25 @@
 package com.fuyue.formatconverter.task;
 
+import com.fuyue.formatconverter.model.ConversionWarning;
+import com.fuyue.formatconverter.model.WarningCode;
 import com.fuyue.formatconverter.parser.ParseLimits;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class CsvToXlsxConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.CSV, DocumentFormat.XLSX,
-            "将 CSV 表格转换为 Excel XLSX 工作簿，保留单元格文本内容。",
-            QualityLevel.STABLE, ConversionStrategy.DATA, List.of(), List.of("仅生成基础工作表，不推断样式"));
+            "将 UTF-8、带 BOM 的 UTF-16 或 GB18030 CSV 转换为 XLSX，自动识别常见分隔符。",
+            QualityLevel.STABLE, ConversionStrategy.DATA, List.of(),
+            List.of("CSV 单元格统一写为文本，避免公式注入且不猜测日期和数值类型", "不推断样式"));
 
     @Override public ConversionRoute route() { return route; }
 
@@ -23,9 +27,19 @@ public final class CsvToXlsxConverter implements FileConverter {
     public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
         progress.update(TaskStage.PARSING, 25);
-        List<List<String>> rows = CsvSupport.parse(Files.readString(input.path(), StandardCharsets.UTF_8), limits);
+        TextInputReader.DecodedContent decoded = TextInputReader.readContent(input.path(), limits);
+        char delimiter = CsvSupport.detectDelimiter(decoded.value());
+        List<List<String>> rows = CsvSupport.parse(decoded.value(), delimiter, limits);
+        List<ConversionWarning> warnings = new ArrayList<>(decoded.warnings());
+        if (delimiter != ',') {
+            warnings.add(ConversionWarning.of(WarningCode.CSV_DELIMITER_DETECTED,
+                    "检测到 CSV 分隔符：" + CsvSupport.delimiterName(delimiter), null));
+        }
+
         progress.update(TaskStage.RENDERING, 75);
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+        SXSSFWorkbook workbook = new SXSSFWorkbook(100);
+        workbook.setCompressTempFiles(true);
+        try (workbook) {
             Sheet sheet = workbook.createSheet("Sheet1");
             for (int r = 0; r < rows.size(); r++) {
                 ConversionGuards.requireSpreadsheetRow(r, limits);
@@ -34,13 +48,17 @@ public final class CsvToXlsxConverter implements FileConverter {
                 for (int c = 0; c < values.size(); c++) {
                     ConversionGuards.requireSpreadsheetColumn(c);
                     ConversionGuards.requireCellText(values.get(c));
+                    // Always write CSV input as a shared string. Values beginning with =, +, - or @
+                    // must never become executable spreadsheet formulas implicitly.
                     row.createCell(c).setCellValue(values.get(c));
                 }
             }
             try (var out = Files.newOutputStream(outputPath)) { workbook.write(out); }
+        } finally {
+            workbook.dispose();
         }
         ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "CSV 转 XLSX");
-        return new ConversionOutput(outputPath, outputFileName(input.displayName()), null, List.of());
+        return new ConversionOutput(outputPath, outputFileName(input.displayName()), null, warnings);
     }
 
     private String outputFileName(String input) {
@@ -48,21 +66,30 @@ public final class CsvToXlsxConverter implements FileConverter {
     }
 
     static final class CsvSupport {
-        private CsvSupport() {}
+        private static final char[] DELIMITERS = {',', '\t', ';', '|'};
+
+        private CsvSupport() { }
 
         static List<List<String>> parse(String text) {
             try {
-                return parse(text, ParseLimits.defaults());
+                return parse(text, ',', ParseLimits.defaults());
             } catch (IOException e) {
                 throw new IllegalArgumentException(e.getMessage(), e);
             }
         }
 
         static List<List<String>> parse(String text, ParseLimits limits) throws IOException {
+            return parse(text, ',', limits);
+        }
+
+        static List<List<String>> parse(String text, char delimiter, ParseLimits limits) throws IOException {
+            text = text.replace("\r\n", "\n").replace('\r', '\n');
             List<List<String>> rows = new ArrayList<>();
             List<String> row = new ArrayList<>();
             StringBuilder cell = new StringBuilder();
             boolean quoted = false;
+            boolean quoteClosed = false;
+            boolean cellStarted = false;
             long cells = 0;
             for (int i = 0; i < text.length(); i++) {
                 char ch = text.charAt(i);
@@ -73,44 +100,108 @@ public final class CsvToXlsxConverter implements FileConverter {
                             i++;
                         } else {
                             quoted = false;
+                            quoteClosed = true;
                         }
                     } else {
                         cell.append(ch);
                     }
-                } else if (ch == '"') {
+                    continue;
+                }
+                if (quoteClosed && ch != delimiter && ch != '\n' && ch != ' ' && ch != '\t') {
+                    throw new IOException("CSV 引号字段结束后存在非法字符，位置 " + (i + 1));
+                }
+                if (quoteClosed && (ch == ' ' || ch == '\t') && ch != delimiter) continue;
+                if (ch == '"') {
+                    if (cellStarted || !cell.isEmpty()) {
+                        throw new IOException("CSV 未转义引号，位置 " + (i + 1));
+                    }
                     quoted = true;
-                } else if (ch == ',') {
-                    ConversionGuards.requireSpreadsheetColumn(row.size());
-                    ConversionGuards.requireCellText(cell.toString());
-                    row.add(cell.toString());
-                    cells++;
-                    ConversionGuards.requireSpreadsheetCellCount(cells, limits);
-                    cell.setLength(0);
-                } else if (ch == '\n' || ch == '\r') {
-                    ConversionGuards.requireSpreadsheetColumn(row.size());
-                    ConversionGuards.requireCellText(cell.toString());
-                    row.add(cell.toString());
-                    cells++;
-                    ConversionGuards.requireSpreadsheetCellCount(cells, limits);
-                    cell.setLength(0);
-                    ConversionGuards.requireSpreadsheetRow(rows.size(), limits);
-                    rows.add(row);
+                    cellStarted = true;
+                } else if (ch == delimiter) {
+                    cells = addCell(row, cell, cells, limits);
+                    cellStarted = false;
+                    quoteClosed = false;
+                } else if (ch == '\n') {
+                    cells = addCell(row, cell, cells, limits);
+                    addRow(rows, row, limits);
                     row = new ArrayList<>();
-                    if (ch == '\r' && i + 1 < text.length() && text.charAt(i + 1) == '\n') i++;
+                    cellStarted = false;
+                    quoteClosed = false;
                 } else {
                     cell.append(ch);
+                    cellStarted = true;
                 }
             }
-            if (!row.isEmpty() || cell.length() > 0 || text.endsWith(",")) {
-                ConversionGuards.requireSpreadsheetColumn(row.size());
-                ConversionGuards.requireCellText(cell.toString());
-                row.add(cell.toString());
-                cells++;
-                ConversionGuards.requireSpreadsheetCellCount(cells, limits);
-                ConversionGuards.requireSpreadsheetRow(rows.size(), limits);
-                rows.add(row);
+            if (quoted) throw new IOException("CSV 引号字段未闭合");
+            if (!row.isEmpty() || cellStarted || quoteClosed || (!text.isEmpty() && text.charAt(text.length() - 1) == delimiter)) {
+                addCell(row, cell, cells, limits);
+                addRow(rows, row, limits);
             }
             return rows;
+        }
+
+        private static long addCell(List<String> row, StringBuilder cell, long cells,
+                                    ParseLimits limits) throws IOException {
+            ConversionGuards.requireSpreadsheetColumn(row.size());
+            String value = cell.toString();
+            ConversionGuards.requireCellText(value);
+            row.add(value);
+            cell.setLength(0);
+            ConversionGuards.requireSpreadsheetCellCount(++cells, limits);
+            return cells;
+        }
+
+        private static void addRow(List<List<String>> rows, List<String> row,
+                                   ParseLimits limits) throws IOException {
+            ConversionGuards.requireSpreadsheetRow(rows.size(), limits);
+            rows.add(row);
+        }
+
+        static char detectDelimiter(String text) {
+            text = text.replace("\r\n", "\n").replace('\r', '\n');
+            char selected = ',';
+            long bestScore = -1;
+            for (char candidate : DELIMITERS) {
+                List<Integer> counts = delimiterCounts(text, candidate);
+                Map<Integer, Integer> frequencies = new HashMap<>();
+                for (int count : counts) if (count > 0) frequencies.merge(count, 1, Integer::sum);
+                int modeCount = 0;
+                int modeFrequency = 0;
+                for (var entry : frequencies.entrySet()) {
+                    if (entry.getValue() > modeFrequency
+                            || (entry.getValue() == modeFrequency && entry.getKey() > modeCount)) {
+                        modeCount = entry.getKey();
+                        modeFrequency = entry.getValue();
+                    }
+                }
+                long score = (long) modeFrequency * 1_000_000L + (long) modeCount * 1_000L
+                        + counts.stream().filter(value -> value > 0).count();
+                if (score > bestScore) {
+                    bestScore = score;
+                    selected = candidate;
+                }
+            }
+            return selected;
+        }
+
+        private static List<Integer> delimiterCounts(String text, char delimiter) {
+            List<Integer> result = new ArrayList<>();
+            boolean quoted = false;
+            int count = 0;
+            for (int i = 0; i < text.length() && result.size() < 32; i++) {
+                char ch = text.charAt(i);
+                if (ch == '"') {
+                    if (quoted && i + 1 < text.length() && text.charAt(i + 1) == '"') i++;
+                    else quoted = !quoted;
+                } else if (!quoted && ch == delimiter) {
+                    count++;
+                } else if (!quoted && ch == '\n') {
+                    result.add(count);
+                    count = 0;
+                }
+            }
+            if (result.size() < 32) result.add(count);
+            return result;
         }
 
         static String write(List<List<String>> rows) {
@@ -118,19 +209,23 @@ public final class CsvToXlsxConverter implements FileConverter {
             for (List<String> row : rows) {
                 for (int i = 0; i < row.size(); i++) {
                     if (i > 0) out.append(',');
-                    out.append(escape(row.get(i)));
+                    out.append(escape(row.get(i), ','));
                 }
-                out.append(System.lineSeparator());
+                out.append("\r\n");
             }
             return out.toString();
         }
 
-        private static String escape(String value) {
+        static String escape(String value, char delimiter) {
             String safe = value == null ? "" : value;
-            if (safe.contains(",") || safe.contains("\"") || safe.contains("\n") || safe.contains("\r")) {
+            if (safe.indexOf(delimiter) >= 0 || safe.contains("\"") || safe.contains("\n") || safe.contains("\r")) {
                 return "\"" + safe.replace("\"", "\"\"") + "\"";
             }
             return safe;
+        }
+
+        static String delimiterName(char delimiter) {
+            return delimiter == '\t' ? "TAB" : "'" + delimiter + "'";
         }
     }
 }
