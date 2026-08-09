@@ -40,16 +40,21 @@ public final class PdfLayoutParser {
     private static final double MAX_WORD_PAGE_POINTS = 22d * 72d;
 
     public DocumentModel parse(Path source, String displayName, ParseLimits limits) throws IOException {
-        return parse(source, displayName, limits, true);
+        return parse(source, displayName, limits, ParseMode.EDITABLE_WORD);
     }
 
     /** Parses page geometry and text without applying editable-Word OCR/page-size contracts. */
     public DocumentModel parseForFixedLayout(Path source, String displayName, ParseLimits limits) throws IOException {
-        return parse(source, displayName, limits, false);
+        return parse(source, displayName, limits, ParseMode.FIXED_LAYOUT);
+    }
+
+    /** Parses text for extraction without applying Word's 22-inch page-size limit. */
+    public DocumentModel parseForTextExtraction(Path source, String displayName, ParseLimits limits) throws IOException {
+        return parse(source, displayName, limits, ParseMode.TEXT_EXTRACTION);
     }
 
     private DocumentModel parse(Path source, String displayName, ParseLimits limits,
-                                boolean editableWordContract) throws IOException {
+                                ParseMode mode) throws IOException {
         try (PDDocument document = Loader.loadPDF(source.toFile())) {
             int pageCount = document.getNumberOfPages();
             if (pageCount < 1) throw new IOException("PDF 没有可转换页面");
@@ -60,7 +65,7 @@ public final class PdfLayoutParser {
             List<PageState> states = new ArrayList<>(pageCount);
             for (int index = 0; index < pageCount; index++) {
                 PDPage page = document.getPage(index);
-                PageState state = pageState(page, index + 1, editableWordContract);
+                PageState state = pageState(page, index + 1, mode == ParseMode.EDITABLE_WORD);
                 states.add(state);
             }
 
@@ -72,12 +77,12 @@ public final class PdfLayoutParser {
 
             List<PageModel> pages = new ArrayList<>(pageCount);
             for (PageState state : states) {
-                if (editableWordContract && !state.hasEditableText() && state.hasVisibleContent()) {
+                if (mode.requiresExtractableText() && !state.hasEditableText() && state.hasVisibleContent()) {
                     throw new ConversionFailureException("OCR_REQUIRED",
                             "PDF 第 " + state.pageNumber() + " 页未检测到可编辑文字，可能是扫描件或纯图片 PDF；请先接入 OCR。");
                 }
                 List<ConversionWarning> warnings = new ArrayList<>();
-                if (editableWordContract && state.hasEditableText() && state.hasImageObjects()) {
+                if (mode == ParseMode.EDITABLE_WORD && state.hasEditableText() && state.hasImageObjects()) {
                     warnings.add(ConversionWarning.of(WarningCode.IMAGE_EXTRACTION_FAILED,
                             "PDF 第 " + state.pageNumber() + " 页包含图片；当前可编辑路线仅恢复文字，图片尚未写入 Word。",
                             state.pageNumber()));
@@ -140,6 +145,20 @@ public final class PdfLayoutParser {
 
     private static double positive(double value, double fallback) {
         return Double.isFinite(value) && value > 0 ? value : fallback;
+    }
+
+    private enum ParseMode {
+        EDITABLE_WORD(true),
+        TEXT_EXTRACTION(true),
+        FIXED_LAYOUT(false);
+
+        private final boolean requiresExtractableText;
+
+        ParseMode(boolean requiresExtractableText) {
+            this.requiresExtractableText = requiresExtractableText;
+        }
+
+        boolean requiresExtractableText() { return requiresExtractableText; }
     }
 
     private static final class LayoutTextStripper extends PDFTextStripper {

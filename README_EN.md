@@ -25,13 +25,14 @@ Status legend:
 
 | Route | Status | Default strategy | Notes |
 | --- | --- | --- | --- |
-| OFD -> DOCX/TXT/PDF | beta | structure/layout | DOCX and TXT use structured parsing; TXT supports multi-column reading order and table rows/columns. PDF paints text, images, seal appearances, and paths at source coordinates. TXT fails with `OCR_REQUIRED` when a page contains scanned content. |
+| OFD -> DOCX/TXT/PDF/PNG/JPG | beta | structure/layout | DOCX and TXT use structured parsing; TXT supports multi-column reading order and table rows/columns. PDF/PNG/JPEG paint text, images, seal appearances, and paths at source coordinates. Images use 160 DPI and multi-page output is zipped. TXT fails with `OCR_REQUIRED` when a page contains scanned content. |
 | OFD -> XLSX | experimental | data first | Writes high-confidence bordered grid tables as real cells, per-page worksheets, and merged regions. It returns `NO_TABLE_FOUND` when no reliable table is found and `OCR_REQUIRED` for scanned pages. |
 | CSV <-> XLSX | stable | data first | Covers strict CSV to XLSX and back-to-CSV data round trips. |
 | DOCX/XLSX/PPTX -> PDF | beta | layout first | Uses LibreOffice headless when available. Local fonts affect visual output. |
 | TXT -> DOCX/PDF | stable | content first | Useful for generating simple office documents from plain text. |
 | DOCX -> TXT | stable | text extraction | Extracts body text without layout. |
-| PDF -> TXT/PNG/JPG | stable | extraction/rendering | PDF to PNG/JPEG uses Poppler or PDFBox page rendering. Multi-page PDFs are returned as ZIP files. |
+| PDF -> TXT | beta | extraction | Extracts text by page coordinates and multi-column reading order, preserving page boundaries with form feeds. Scanned pages or non-text content pages in mixed PDFs fail with `OCR_REQUIRED`. |
+| PDF -> PNG/JPG | stable | rendering | Uses Poppler or PDFBox page rendering. Multi-page PDFs are returned as ZIP files. |
 | PDF -> DOCX | beta | editability first | Restores real text, basic paragraphs, page sizes, and orientation from text-based PDFs. Scanned or image-only pages fail explicitly until OCR is available. |
 | PDF -> OFD | experimental | fidelity first | Produces a real OFD package. A 144-DPI page image preserves appearance, while text PDFs also receive source-positioned OFD text objects. Complex objects are not yet reconstructed individually. |
 | PNG/JPG -> PDF | beta | layout first | Uses the Office engine when available, with PDFBox fallback. |

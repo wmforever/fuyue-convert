@@ -22,6 +22,8 @@ public final class DefaultConverterRegistry {
         converters.add(new OfdToDocxConverter(extractor, parser, analyzer, renderer));
         converters.add(new OfdToTextConverter(extractor, parser, analyzer));
         converters.add(new OfdToPdfConverter(extractor, parser, analyzer));
+        converters.add(new OfdToPngConverter(extractor, parser));
+        converters.add(new OfdToJpgConverter(extractor, parser));
         converters.add(new OfdToXlsxConverter(extractor, parser, analyzer));
         converters.add(new CsvToXlsxConverter());
         converters.add(new XlsxToCsvConverter());

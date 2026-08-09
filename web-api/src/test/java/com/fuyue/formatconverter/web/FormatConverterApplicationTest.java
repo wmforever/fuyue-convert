@@ -40,12 +40,17 @@ class FormatConverterApplicationTest {
                 .andExpect(jsonPath("$[1].id").value("ofd-to-txt"))
                 .andExpect(jsonPath("$[1].targetFormat").value("txt"))
                 .andExpect(jsonPath("$[2].id").value("ofd-to-pdf"))
-                .andExpect(jsonPath("$[3].id").value("ofd-to-xlsx"))
-                .andExpect(jsonPath("$[4].id").value("csv-to-xlsx"))
-                .andExpect(jsonPath("$[5].id").value("xlsx-to-csv"))
+                .andExpect(jsonPath("$[3].id").value("ofd-to-png"))
+                .andExpect(jsonPath("$[4].id").value("ofd-to-jpg"))
+                .andExpect(jsonPath("$[5].id").value("ofd-to-xlsx"))
+                .andExpect(jsonPath("$[6].id").value("csv-to-xlsx"))
+                .andExpect(jsonPath("$[7].id").value("xlsx-to-csv"))
                 .andExpect(jsonPath("$[?(@.id=='pdf-to-docx')].status").value(contains("available")))
                 .andExpect(jsonPath("$[?(@.id=='pdf-to-docx')].qualityLevel").value(contains("beta")))
                 .andExpect(jsonPath("$[?(@.id=='pdf-to-docx')].strategy").value(contains("editable")))
+                .andExpect(jsonPath("$[?(@.id=='pdf-to-txt')].status").value(contains("available")))
+                .andExpect(jsonPath("$[?(@.id=='pdf-to-txt')].qualityLevel").value(contains("beta")))
+                .andExpect(jsonPath("$[?(@.id=='pdf-to-txt')].strategy").value(contains("extraction")))
                 .andExpect(jsonPath("$[?(@.id=='csv-to-xlsx')].strategy").value(contains("data")))
                 .andExpect(jsonPath("$[?(@.id=='png-to-pdf')].status").value(contains("available")))
                 .andExpect(jsonPath("$[?(@.id=='pdf-to-jpg')].status").value(contains("available")))
@@ -54,7 +59,11 @@ class FormatConverterApplicationTest {
                 .andExpect(jsonPath("$[?(@.id=='pdf-to-ofd')].strategy").value(contains("fidelity")))
                 .andExpect(jsonPath("$[?(@.id=='ofd-to-xlsx')].status").value(contains("available")))
                 .andExpect(jsonPath("$[?(@.id=='ofd-to-xlsx')].qualityLevel").value(contains("experimental")))
-                .andExpect(jsonPath("$[?(@.id=='ofd-to-xlsx')].strategy").value(contains("data")));
+                .andExpect(jsonPath("$[?(@.id=='ofd-to-xlsx')].strategy").value(contains("data")))
+                .andExpect(jsonPath("$[?(@.id=='ofd-to-png')].status").value(contains("available")))
+                .andExpect(jsonPath("$[?(@.id=='ofd-to-png')].qualityLevel").value(contains("beta")))
+                .andExpect(jsonPath("$[?(@.id=='ofd-to-jpg')].status").value(contains("available")))
+                .andExpect(jsonPath("$[?(@.id=='ofd-to-jpg')].qualityLevel").value(contains("beta")));
     }
 
     @Test void diagnosticsEndpointReturnsRedactedEnvironment() throws Exception {

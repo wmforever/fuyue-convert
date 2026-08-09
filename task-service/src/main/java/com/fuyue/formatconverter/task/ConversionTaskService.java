@@ -39,6 +39,8 @@ public final class ConversionTaskService implements AutoCloseable {
                 new OfdToDocxConverter(extractor, parser, analyzer, renderer),
                 new OfdToTextConverter(extractor, parser, analyzer),
                 new OfdToPdfConverter(extractor, parser, analyzer),
+                new OfdToPngConverter(extractor, parser),
+                new OfdToJpgConverter(extractor, parser),
                 new OfdToXlsxConverter(extractor, parser, analyzer),
                 new CsvToXlsxConverter(),
                 new XlsxToCsvConverter(),

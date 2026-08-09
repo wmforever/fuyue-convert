@@ -276,6 +276,24 @@ def image_mean_absolute_error(expected, actual):
     return error / values if values else 0.0
 
 
+def padded_image_mean_absolute_error(expected, actual):
+    if len(expected) != len(actual):
+        return float("inf")
+    error = 0
+    values = 0
+    for left, right in zip(expected, actual):
+        width = max(left.width, right.width)
+        height = max(left.height, right.height)
+        canvas_left = Image.new("RGB", (width, height), "white")
+        canvas_right = Image.new("RGB", (width, height), "white")
+        canvas_left.paste(left, (0, 0))
+        canvas_right.paste(right, (0, 0))
+        histogram = ImageChops.difference(canvas_left, canvas_right).histogram()
+        error += sum((index % 256) * count for index, count in enumerate(histogram))
+        values += width * height * 3
+    return error / values if values else 0.0
+
+
 def visual_case(name, source, target, source_pdf=None, exact_mode="visual"):
     result = {"name": name, "source": source.name, "target": target, "type": "visual"}
     task, converted = upload_convert(source, target)
@@ -384,6 +402,44 @@ def ofd_pdf_fixed_case(source):
     return result
 
 
+def ofd_image_fixed_case(source, target):
+    result = {"name": f"ofd-to-{target}-fixed-layout", "source": source.name,
+              "target": target, "type": "content-layout"}
+    pdf_task, reference_pdf = upload_convert(source, "pdf")
+    image_task, image_output = upload_convert(source, target)
+    result["taskStatus"] = image_task.get("status")
+    result["output"] = image_output.name if image_output else None
+    result["exactCheck"] = "page-count-dimensions-nonblank-and-raster-error"
+    if not reference_pdf or not image_output:
+        result["strictPass"] = False
+        result["error"] = pdf_task.get("errorMessage") or image_task.get("errorMessage")
+        return result
+    case_dir = WORK / result["name"]
+    expected_paths = render_pdf(reference_pdf, case_dir / "reference", "reference")
+    if image_output.suffix.lower() == ".zip":
+        actual_paths = unzip_images(image_output, case_dir / "actual")
+    else:
+        actual_paths = [image_output]
+    expected = [Image.open(path).convert("RGB") for path in expected_paths]
+    actual = [Image.open(path).convert("RGB") for path in actual_paths]
+    result["pageCountMatch"] = len(expected) == len(actual)
+    result["dimensionsMatch"] = result["pageCountMatch"] and all(
+        abs(left.width - right.width) <= 1 and abs(left.height - right.height) <= 1
+        for left, right in zip(expected, actual))
+    result["nonBlankPages"] = all(
+        ImageChops.difference(image, Image.new("RGB", image.size, "white")).getbbox() is not None
+        for image in actual)
+    result["meanAbsoluteError"] = padded_image_mean_absolute_error(expected, actual)
+    comparison = compare_image_values(expected, actual, REPORT / "diffs" / result["name"])
+    result["diffRatio"] = comparison["diffRatio"]
+    result["visualPass"] = (comparison["pageCountMatch"]
+                            and comparison["diffRatio"] <= VISUAL_THRESHOLD)
+    result["strictPass"] = (result["dimensionsMatch"] and result["nonBlankPages"]
+                            and result["meanAbsoluteError"] <= 8.0)
+    result["practicalPass"] = result["strictPass"]
+    return result
+
+
 def ofd_xlsx_table_case(source):
     result = {"name": "ofd-to-xlsx-real-table-data", "source": source.name,
               "target": "xlsx", "type": "data"}
@@ -474,6 +530,53 @@ def pdf_docx_ocr_required_case(source):
                             and output is None)
     result["practicalPass"] = result["strictPass"]
     result["visualPass"] = None
+    return result
+
+
+def pdf_txt_extraction_case(source, expected_text):
+    result = {"name": "pdf-to-txt-layout-extraction", "source": source.name,
+              "target": "txt", "type": "content"}
+    task, output = upload_convert(source, "txt")
+    result["taskStatus"] = task.get("status")
+    result["output"] = output.name if output else None
+    result["exactCheck"] = "source-character-content-and-page-boundaries"
+    if not output:
+        result["strictPass"] = False
+        result["error"] = task.get("errorMessage")
+        return result
+    expected = normalized_character_counts(expected_text.read_text(encoding="utf-8", errors="replace"))
+    extracted_value = output.read_text(encoding="utf-8", errors="replace")
+    actual = normalized_character_counts(extracted_value)
+    files = task.get("files") or []
+    page_count = files[0].get("pageCount") if files else None
+    result["sourceCharacterCount"] = sum(expected.values())
+    result["textCharacterCount"] = sum(actual.values())
+    result["pageCount"] = page_count
+    result["pageBoundaryCount"] = extracted_value.count("\f")
+    result["strictPass"] = (expected == actual and page_count is not None
+                            and result["pageBoundaryCount"] == max(0, page_count - 1))
+    result["practicalPass"] = result["strictPass"]
+    result["visualPass"] = None
+    result["diffRatio"] = 0.0
+    return result
+
+
+def pdf_txt_ocr_required_case(source):
+    result = {"name": "pdf-to-txt-ocr-required", "source": source.name,
+              "target": "txt", "type": "failure-contract"}
+    task, output = upload_convert(source, "txt")
+    files = task.get("files") or []
+    file_result = files[0] if files else {}
+    result["taskStatus"] = task.get("status")
+    result["errorCode"] = file_result.get("errorCode")
+    result["downloadProduced"] = output is not None
+    result["exactCheck"] = "image-only-pdf-must-fail-with-ocr-required"
+    result["strictPass"] = (task.get("status") == "FAILED"
+                            and result["errorCode"] == "OCR_REQUIRED"
+                            and output is None)
+    result["practicalPass"] = result["strictPass"]
+    result["visualPass"] = None
+    result["diffRatio"] = 0.0
     return result
 
 
@@ -581,6 +684,8 @@ def main():
                 visual_case("pdf-to-png-exact", pdf_source, "png", source_pdf=pdf_reference),
                 visual_case("pdf-to-jpeg-quality", pdf_source, "jpg", source_pdf=pdf_reference,
                             exact_mode="jpeg"),
+                pdf_txt_extraction_case(pdf_editable_source, pdf_editable_text),
+                pdf_txt_ocr_required_case(pdf_scanned_source),
                 pdf_docx_editable_case(pdf_editable_source),
                 pdf_docx_ocr_required_case(pdf_scanned_source),
                 pdf_ofd_fixed_case(pdf_editable_source),
@@ -590,13 +695,15 @@ def main():
         if (INPUT / "ofdrw-invoice.ofd").is_file():
             cases.append(ofd_docx_text_case(INPUT / "ofdrw-invoice.ofd"))
             cases.append(ofd_pdf_fixed_case(INPUT / "ofdrw-invoice.ofd"))
+            cases.append(ofd_image_fixed_case(INPUT / "ofdrw-invoice.ofd", "png"))
+            cases.append(ofd_image_fixed_case(INPUT / "ofdrw-invoice.ofd", "jpg"))
             cases.append(ofd_xlsx_table_case(INPUT / "ofdrw-invoice.ofd"))
         results.extend(cases)
     finally:
         if process:
             stop_service(process)
     report = {
-        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, normalized text for editable documents, and table data for spreadsheets. Editable PDF-to-DOCX additionally requires matching page count and no embedded media for a generated text-only source; an image-only PDF must fail with OCR_REQUIRED. PDF-to-OFD requires a real OFD package plus character and page-count preservation, while visual round-trip difference is reported separately. OFD-to-PDF requires character and declared/rendered page-count preservation. OFD-to-XLSX requires exact invoice cell and merge counts plus known text, while low-confidence grid candidates are excluded; generated fixtures additionally cover pages, cells, merges, NO_TABLE_FOUND, and OCR_REQUIRED. JPEG uses a declared lossy-error bound.",
+        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, normalized text for editable documents, and table data for spreadsheets. PDF-to-TXT requires source character preservation, correct page-boundary count, and OCR_REQUIRED for image-only input. Editable PDF-to-DOCX additionally requires matching page count and no embedded media for a generated text-only source; an image-only PDF must fail with OCR_REQUIRED. PDF-to-OFD requires a real OFD package plus character and page-count preservation, while visual round-trip difference is reported separately. OFD-to-PDF requires character and declared/rendered page-count preservation. OFD-to-PNG/JPEG require page-count, pixel-dimension, nonblank-content, and bounded raster-error checks. OFD-to-XLSX requires exact invoice cell and merge counts plus known text, while low-confidence grid candidates are excluded; generated fixtures additionally cover pages, cells, merges, NO_TABLE_FOUND, and OCR_REQUIRED. JPEG uses a declared lossy-error bound.",
         "visualThresholdForReferenceOnly": VISUAL_THRESHOLD,
         "health": sanitized_health(health),
         "results": results,

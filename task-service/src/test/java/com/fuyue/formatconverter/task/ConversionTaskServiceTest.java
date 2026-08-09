@@ -99,9 +99,21 @@ class ConversionTaskServiceTest {
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("ofd-to-pdf")
                     && route.status() == RouteStatus.AVAILABLE
                     && route.strategy() == ConversionStrategy.FIDELITY));
+            assertTrue(routes.stream().anyMatch(route -> route.id().equals("ofd-to-png")
+                    && route.status() == RouteStatus.AVAILABLE
+                    && route.qualityLevel() == QualityLevel.BETA
+                    && route.strategy() == ConversionStrategy.FIDELITY));
+            assertTrue(routes.stream().anyMatch(route -> route.id().equals("ofd-to-jpg")
+                    && route.status() == RouteStatus.AVAILABLE
+                    && route.qualityLevel() == QualityLevel.BETA
+                    && route.strategy() == ConversionStrategy.FIDELITY));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("csv-to-xlsx") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("xlsx-to-csv") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-docx") && route.status() == RouteStatus.AVAILABLE));
+            assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-txt")
+                    && route.status() == RouteStatus.AVAILABLE
+                    && route.qualityLevel() == QualityLevel.BETA
+                    && route.strategy() == ConversionStrategy.EXTRACTION));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-docx")
                     && route.qualityLevel() == QualityLevel.BETA
                     && route.strategy() == ConversionStrategy.EDITABLE));
