@@ -46,7 +46,7 @@ External dependencies:
 - Poppler: used for PDF to PNG/JPEG rendering and visual regression checks.
 - `FORMAT_CONVERTER_IMAGE_DPI`: PDF image-export resolution, default `160`, allowed range `36-600`; invalid configuration fails explicitly when the converter starts.
 - `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION`: optional LibreOffice version lock fragment such as `24.8`. A mismatching `--version` marks the Office engine unavailable; the detected version is exposed by `/api/health` and `/api/diagnostics`.
-- Local OCR is off by default. Set `FORMAT_CONVERTER_OCR_ENABLED=true`, optionally point `FORMAT_CONVERTER_TESSERACT_BINARY` at Tesseract, and set `FORMAT_CONVERTER_OCR_LANGUAGES` (default `chi_sim+eng`). Missing engines or language models leave OCR routes planned; the service never silently calls a cloud OCR API.
+- Local OCR is off by default. Set `FORMAT_CONVERTER_OCR_ENABLED=true`, optionally point `FORMAT_CONVERTER_TESSERACT_BINARY` at Tesseract, and set `FORMAT_CONVERTER_OCR_LANGUAGES` (default `chi_sim+eng`). Missing engines or models leave image OCR planned while PDF/OFD remain strict. `/api/health` and `/api/diagnostics` expose enablement, version, and languages without revealing absolute paths.
 - System fonts: affect pagination, line spacing, and font substitution in Office output. Basic PDF text routes include fallback fonts, and a custom TrueType font can be selected with `FORMAT_CONVERTER_PDF_FONT`. TXT -> DOCX font names can be configured with `FORMAT_CONVERTER_DOCX_FONT` and `FORMAT_CONVERTER_DOCX_CJK_FONT`.
 
 See [docs/quality-standard.md](docs/quality-standard.md) for quality definitions.

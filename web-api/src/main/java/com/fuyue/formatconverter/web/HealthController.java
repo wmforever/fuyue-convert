@@ -13,9 +13,11 @@ import java.util.Map;
 public class HealthController {
     @Value("${build.version:0.1.1}") private String version;
     private final OfficeEngineStatus officeEngineStatus;
+    private final OcrEngineStatus ocrEngineStatus;
 
-    public HealthController(OfficeEngineStatus officeEngineStatus) {
+    public HealthController(OfficeEngineStatus officeEngineStatus, OcrEngineStatus ocrEngineStatus) {
         this.officeEngineStatus = officeEngineStatus;
+        this.ocrEngineStatus = ocrEngineStatus;
     }
 
     @GetMapping("/api/health")
@@ -28,8 +30,20 @@ public class HealthController {
         result.put("os", System.getProperty("os.name"));
         result.put("arch", System.getProperty("os.arch"));
         result.put("office", office());
+        result.put("ocr", ocr());
         result.put("time", Instant.now());
         return result;
+    }
+
+    private Map<String, Object> ocr() {
+        Map<String, Object> ocr = new LinkedHashMap<>();
+        ocr.put("enabled", ocrEngineStatus.enabled());
+        ocr.put("available", ocrEngineStatus.available());
+        ocr.put("binaryName", ocrEngineStatus.binaryName());
+        ocr.put("version", ocrEngineStatus.version());
+        ocr.put("languages", ocrEngineStatus.languages());
+        ocr.put("message", ocrEngineStatus.message());
+        return ocr;
     }
 
     private Map<String, Object> office() {

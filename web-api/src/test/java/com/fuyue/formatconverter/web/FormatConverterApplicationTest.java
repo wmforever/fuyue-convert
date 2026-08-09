@@ -27,6 +27,9 @@ class FormatConverterApplicationTest {
                 .andExpect(jsonPath("$.parser").value("OFDRW 2.3.9"))
                 .andExpect(jsonPath("$.arch").isNotEmpty())
                 .andExpect(jsonPath("$.office.available").isBoolean())
+                .andExpect(jsonPath("$.ocr.enabled").isBoolean())
+                .andExpect(jsonPath("$.ocr.available").isBoolean())
+                .andExpect(jsonPath("$.ocr.binary").doesNotExist())
                 .andExpect(jsonPath("$.office.binary").doesNotExist());
     }
 
@@ -77,6 +80,8 @@ class FormatConverterApplicationTest {
                 .andExpect(jsonPath("$.version").value("0.1.1"))
                 .andExpect(jsonPath("$.runtime.javaVersion").isNotEmpty())
                 .andExpect(jsonPath("$.office.available").isBoolean())
+                .andExpect(jsonPath("$.ocr.enabled").isBoolean())
+                .andExpect(jsonPath("$.ocr.available").isBoolean())
                 .andExpect(jsonPath("$.limits.maxFileSize").isNumber())
                 .andExpect(jsonPath("$.limits.workerEnabled").value(true))
                 .andExpect(jsonPath("$.limits.workerMaxMemoryMb").value(768))

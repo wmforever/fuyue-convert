@@ -46,7 +46,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 - Poppler：用于 PDF 渲染为 PNG/JPEG 和视觉回归比较。
 - `FORMAT_CONVERTER_IMAGE_DPI`：PDF 图片导出的渲染分辨率，默认 `160`，允许 `36-600`；异常配置会在启动转换器时明确失败。
 - `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION`：可选的 LibreOffice 版本锁定片段（如 `24.8`）；实际 `--version` 不匹配时 Office 引擎会标记为不可用，版本可在 `/api/health` 和 `/api/diagnostics` 查看。
-- 本地 OCR 默认关闭。设置 `FORMAT_CONVERTER_OCR_ENABLED=true` 后，使用 `FORMAT_CONVERTER_TESSERACT_BINARY` 指定 Tesseract（留空则从 `PATH` 查找），并以 `FORMAT_CONVERTER_OCR_LANGUAGES` 配置语言，默认 `chi_sim+eng`。缺少引擎或语言包时路线保持 planned，不会伪装成功或调用云服务。
+- 本地 OCR 默认关闭。设置 `FORMAT_CONVERTER_OCR_ENABLED=true` 后，使用 `FORMAT_CONVERTER_TESSERACT_BINARY` 指定 Tesseract（留空则从 `PATH` 查找），并以 `FORMAT_CONVERTER_OCR_LANGUAGES` 配置语言，默认 `chi_sim+eng`。缺少引擎或语言包时图片 OCR 路线保持 planned，PDF/OFD 继续严格失败；启用、版本和语言状态可从 `/api/health` 或 `/api/diagnostics` 查看，接口不会暴露绝对路径。
 - 系统字体：影响 Office 输出的分页、行距和文字替换；基础 PDF 文本路线内置中文回退字体，也可通过 `FORMAT_CONVERTER_PDF_FONT` 指定 TrueType 字体。TXT -> DOCX 可通过 `FORMAT_CONVERTER_DOCX_FONT` 和 `FORMAT_CONVERTER_DOCX_CJK_FONT` 配置西文及东亚字体名。
 
 质量标准见 [docs/quality-standard.md](docs/quality-standard.md)。最新本地 QA 报告见 `qa-samples/report/qa-report.md`。

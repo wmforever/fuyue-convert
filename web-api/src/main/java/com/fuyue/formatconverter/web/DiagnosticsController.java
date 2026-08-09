@@ -17,13 +17,16 @@ public class DiagnosticsController {
     @Value("${build.version:0.1.1}") private String version;
     private final FormatConverterProperties properties;
     private final OfficeEngineStatus officeEngineStatus;
+    private final OcrEngineStatus ocrEngineStatus;
     private final ConversionTaskService tasks;
 
     public DiagnosticsController(FormatConverterProperties properties,
                                  OfficeEngineStatus officeEngineStatus,
+                                 OcrEngineStatus ocrEngineStatus,
                                  ConversionTaskService tasks) {
         this.properties = properties;
         this.officeEngineStatus = officeEngineStatus;
+        this.ocrEngineStatus = ocrEngineStatus;
         this.tasks = tasks;
     }
 
@@ -35,9 +38,21 @@ public class DiagnosticsController {
         result.put("time", Instant.now());
         result.put("runtime", runtime());
         result.put("office", office());
+        result.put("ocr", ocr());
         result.put("limits", limits());
         result.put("routes", routes.stream().map(this::route).toList());
         return result;
+    }
+
+    private Map<String, Object> ocr() {
+        Map<String, Object> ocr = new LinkedHashMap<>();
+        ocr.put("enabled", ocrEngineStatus.enabled());
+        ocr.put("available", ocrEngineStatus.available());
+        ocr.put("binaryName", ocrEngineStatus.binaryName());
+        ocr.put("version", ocrEngineStatus.version());
+        ocr.put("languages", ocrEngineStatus.languages());
+        ocr.put("message", ocrEngineStatus.message());
+        return ocr;
     }
 
     private Map<String, Object> runtime() {

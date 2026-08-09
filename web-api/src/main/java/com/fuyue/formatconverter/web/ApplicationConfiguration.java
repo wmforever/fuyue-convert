@@ -36,6 +36,11 @@ public class ApplicationConfiguration {
         return OfficeEngineStatus.available(binary.toString(), version);
     }
 
+    @Bean
+    OcrEngineStatus ocrEngineStatus() {
+        return OcrEngineStatus.detect();
+    }
+
     @Bean(destroyMethod = "close")
     ConversionTaskService conversionTaskService(FormatConverterProperties properties,
                                                 OfficeEngineStatus officeEngineStatus) throws IOException {
