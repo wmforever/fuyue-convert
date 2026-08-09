@@ -70,8 +70,7 @@ public final class OfdToTextConverter implements FileConverter {
         StringBuilder out = new StringBuilder();
         for (int i = 0; i < pages.size(); i++) {
             PageModel page = pages.get(i);
-            if (i > 0) out.append(System.lineSeparator()).append(System.lineSeparator());
-            if (pages.size() > 1) out.append("第 ").append(page.pageNumber()).append(" 页").append(System.lineSeparator());
+            if (i > 0) out.append(System.lineSeparator()).append('\f').append(System.lineSeparator());
             readingUnits(page).stream().flatMap(unit -> unit.lines().stream())
                     .map(String::stripTrailing)
                     .filter(line -> !line.isBlank())

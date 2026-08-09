@@ -105,6 +105,14 @@ class ConversionTaskServiceTest {
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-docx")
                     && route.qualityLevel() == QualityLevel.BETA
                     && route.strategy() == ConversionStrategy.EDITABLE));
+            assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-ofd")
+                    && route.status() == RouteStatus.AVAILABLE
+                    && route.qualityLevel() == QualityLevel.EXPERIMENTAL
+                    && route.strategy() == ConversionStrategy.FIDELITY));
+            assertTrue(routes.stream().anyMatch(route -> route.id().equals("ofd-to-xlsx")
+                    && route.status() == RouteStatus.AVAILABLE
+                    && route.qualityLevel() == QualityLevel.EXPERIMENTAL
+                    && route.strategy() == ConversionStrategy.DATA));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("csv-to-xlsx") && route.strategy() == ConversionStrategy.DATA));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("png-to-pdf") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-jpg") && route.status() == RouteStatus.AVAILABLE));

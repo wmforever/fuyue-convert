@@ -40,6 +40,16 @@ public final class PdfLayoutParser {
     private static final double MAX_WORD_PAGE_POINTS = 22d * 72d;
 
     public DocumentModel parse(Path source, String displayName, ParseLimits limits) throws IOException {
+        return parse(source, displayName, limits, true);
+    }
+
+    /** Parses page geometry and text without applying editable-Word OCR/page-size contracts. */
+    public DocumentModel parseForFixedLayout(Path source, String displayName, ParseLimits limits) throws IOException {
+        return parse(source, displayName, limits, false);
+    }
+
+    private DocumentModel parse(Path source, String displayName, ParseLimits limits,
+                                boolean editableWordContract) throws IOException {
         try (PDDocument document = Loader.loadPDF(source.toFile())) {
             int pageCount = document.getNumberOfPages();
             if (pageCount < 1) throw new IOException("PDF 没有可转换页面");
@@ -50,7 +60,7 @@ public final class PdfLayoutParser {
             List<PageState> states = new ArrayList<>(pageCount);
             for (int index = 0; index < pageCount; index++) {
                 PDPage page = document.getPage(index);
-                PageState state = pageState(page, index + 1);
+                PageState state = pageState(page, index + 1, editableWordContract);
                 states.add(state);
             }
 
@@ -62,12 +72,12 @@ public final class PdfLayoutParser {
 
             List<PageModel> pages = new ArrayList<>(pageCount);
             for (PageState state : states) {
-                if (!state.hasEditableText() && state.hasVisibleContent()) {
+                if (editableWordContract && !state.hasEditableText() && state.hasVisibleContent()) {
                     throw new ConversionFailureException("OCR_REQUIRED",
                             "PDF 第 " + state.pageNumber() + " 页未检测到可编辑文字，可能是扫描件或纯图片 PDF；请先接入 OCR。");
                 }
                 List<ConversionWarning> warnings = new ArrayList<>();
-                if (state.hasEditableText() && state.hasImageObjects()) {
+                if (editableWordContract && state.hasEditableText() && state.hasImageObjects()) {
                     warnings.add(ConversionWarning.of(WarningCode.IMAGE_EXTRACTION_FAILED,
                             "PDF 第 " + state.pageNumber() + " 页包含图片；当前可编辑路线仅恢复文字，图片尚未写入 Word。",
                             state.pageNumber()));
@@ -79,7 +89,7 @@ public final class PdfLayoutParser {
         }
     }
 
-    private PageState pageState(PDPage page, int pageNumber) throws IOException {
+    private PageState pageState(PDPage page, int pageNumber, boolean enforceWordPageLimit) throws IOException {
         PDRectangle crop = page.getCropBox();
         double userUnit = positive(page.getUserUnit(), 1d);
         int rotation = Math.floorMod(page.getRotation(), 360);
@@ -90,7 +100,7 @@ public final class PdfLayoutParser {
                 || widthPoints <= 0 || heightPoints <= 0) {
             throw new IOException("PDF 第 " + pageNumber + " 页尺寸无效");
         }
-        if (widthPoints > MAX_WORD_PAGE_POINTS || heightPoints > MAX_WORD_PAGE_POINTS) {
+        if (enforceWordPageLimit && (widthPoints > MAX_WORD_PAGE_POINTS || heightPoints > MAX_WORD_PAGE_POINTS)) {
             throw new ConversionFailureException("PAGE_SIZE_UNSUPPORTED",
                     "PDF 第 " + pageNumber + " 页尺寸超过 Word 支持的 22 英寸上限："
                             + formatPoints(widthPoints) + " × " + formatPoints(heightPoints) + " pt");

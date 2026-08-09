@@ -26,12 +26,14 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | 路线 | 状态 | 默认策略 | 说明 |
 | --- | --- | --- | --- |
 | OFD -> DOCX/TXT/PDF | beta | 结构/版式 | DOCX/TXT 使用结构化解析；TXT 支持多栏阅读顺序和表格行列。PDF 按源坐标绘制文字、图片、签章和路径。TXT 遇到扫描内容页时严格返回 `OCR_REQUIRED`。 |
+| OFD -> XLSX | experimental | 数据优先 | 将高置信度有线规则表格写成真实单元格、分页工作表和合并区域；未识别到可靠表格返回 `NO_TABLE_FOUND`，扫描页返回 `OCR_REQUIRED`。 |
 | CSV <-> XLSX | stable | 数据优先 | 已覆盖 CSV 到 XLSX，再回到 CSV 的严格数据回环。 |
 | DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 headless 转换；本地字体会影响结果。 |
 | TXT -> DOCX/PDF | stable | 内容优先 | 适合纯文本生成基础办公文档。 |
 | DOCX -> TXT | stable | 内容提取 | 提取正文文本，不保留版式。 |
 | PDF -> TXT/PNG/JPG | stable | 提取/渲染 | PDF 到 PNG/JPEG 使用 Poppler 或 PDFBox 按页渲染；多页自动输出 ZIP。 |
 | PDF -> DOCX | beta | 可编辑优先 | 文字型 PDF 恢复真实文字、基础段落、页面尺寸和方向；扫描页或纯图片页在未接入 OCR 时明确失败。 |
+| PDF -> OFD | experimental | 版式优先 | 生成真实 OFD 包；144 DPI 页面图像层保留视觉，文字型 PDF 同时写入源坐标 OFD 文字对象。复杂对象尚未逐项结构化重建。 |
 | PNG/JPG -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 Office 引擎；无 Office 时回退 PDFBox。 |
 | WPS/ET/DPS/UOF | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |
 

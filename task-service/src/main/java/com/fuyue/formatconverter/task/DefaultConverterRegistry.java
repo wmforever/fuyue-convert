@@ -22,6 +22,7 @@ public final class DefaultConverterRegistry {
         converters.add(new OfdToDocxConverter(extractor, parser, analyzer, renderer));
         converters.add(new OfdToTextConverter(extractor, parser, analyzer));
         converters.add(new OfdToPdfConverter(extractor, parser, analyzer));
+        converters.add(new OfdToXlsxConverter(extractor, parser, analyzer));
         converters.add(new CsvToXlsxConverter());
         converters.add(new XlsxToCsvConverter());
         converters.add(new TextToDocxConverter());
@@ -29,6 +30,7 @@ public final class DefaultConverterRegistry {
         converters.add(new TextToPdfConverter());
         converters.add(new PdfToTextConverter());
         converters.add(new PdfToDocxConverter(new PdfLayoutParser(), analyzer, renderer));
+        converters.add(new PdfToOfdConverter());
         converters.add(new PdfToPngConverter());
         converters.add(new PdfToJpgConverter());
 

@@ -384,6 +384,50 @@ def ofd_pdf_fixed_case(source):
     return result
 
 
+def ofd_xlsx_table_case(source):
+    result = {"name": "ofd-to-xlsx-real-table-data", "source": source.name,
+              "target": "xlsx", "type": "data"}
+    task, workbook = upload_convert(source, "xlsx")
+    result["taskStatus"] = task.get("status")
+    result["output"] = workbook.name if workbook else None
+    result["exactCheck"] = "invoice-cells-merges-and-known-text"
+    if not workbook:
+        result["strictPass"] = False
+        result["error"] = task.get("errorMessage")
+        return result
+    spreadsheet_namespace = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
+    with zipfile.ZipFile(workbook) as archive:
+        shared_strings = []
+        if "xl/sharedStrings.xml" in archive.namelist():
+            shared_root = ElementTree.fromstring(archive.read("xl/sharedStrings.xml"))
+            shared_strings = ["".join(node.text or "" for node in item.iter(
+                f"{spreadsheet_namespace}t")) for item in shared_root.iter(f"{spreadsheet_namespace}si")]
+        sheet_names = sorted(name for name in archive.namelist()
+                             if re.fullmatch(r"xl/worksheets/sheet\d+\.xml", name))
+        sheets = [ElementTree.fromstring(archive.read(name)) for name in sheet_names]
+    values = []
+    for sheet in sheets:
+        for cell in sheet.iter(f"{spreadsheet_namespace}c"):
+            node = cell.find(f"{spreadsheet_namespace}v")
+            value = "" if node is None or node.text is None else node.text
+            if cell.get("t") == "s" and value:
+                value = shared_strings[int(value)]
+            values.append(value)
+    result["worksheetCount"] = len(sheets)
+    result["cellCount"] = sum(len(list(sheet.iter(f"{spreadsheet_namespace}c"))) for sheet in sheets)
+    result["mergedRegionCount"] = sum(
+        len(list(sheet.iter(f"{spreadsheet_namespace}mergeCell"))) for sheet in sheets)
+    normalized_text = "".join("".join(value.split()) for value in values)
+    expected_fragments = ["购买方", "项目名称", "价税合计（大写）", "销售方"]
+    result["knownTextPreserved"] = all(fragment in normalized_text for fragment in expected_fragments)
+    result["strictPass"] = (result["worksheetCount"] == 1 and result["cellCount"] == 18
+                            and result["mergedRegionCount"] == 8 and result["knownTextPreserved"])
+    result["practicalPass"] = result["strictPass"]
+    result["visualPass"] = None
+    result["diffRatio"] = 0.0
+    return result
+
+
 def pdf_docx_editable_case(source):
     result = {"name": "pdf-to-docx-editable", "source": source.name, "target": "docx", "type": "content"}
     text_task, text_output = upload_convert(source, "txt")
@@ -430,6 +474,42 @@ def pdf_docx_ocr_required_case(source):
                             and output is None)
     result["practicalPass"] = result["strictPass"]
     result["visualPass"] = None
+    return result
+
+
+def pdf_ofd_fixed_case(source):
+    result = {"name": "pdf-to-ofd-fixed-layout", "source": source.name,
+              "target": "ofd", "type": "content-layout"}
+    source_task, source_text = upload_convert(source, "txt")
+    ofd_task, ofd_output = upload_convert(source, "ofd")
+    result["taskStatus"] = ofd_task.get("status")
+    result["output"] = ofd_output.name if ofd_output else None
+    result["exactCheck"] = "real-ofd-package-character-and-page-count-preservation"
+    if not source_text or not ofd_output:
+        result["strictPass"] = False
+        result["error"] = source_task.get("errorMessage") or ofd_task.get("errorMessage")
+        return result
+    with zipfile.ZipFile(ofd_output) as archive:
+        result["realOfdPackage"] = "OFD.xml" in archive.namelist()
+    text_task, ofd_text = upload_convert(ofd_output, "txt")
+    pdf_task, roundtrip_pdf = upload_convert(ofd_output, "pdf")
+    if not ofd_text or not roundtrip_pdf:
+        result["strictPass"] = False
+        result["error"] = text_task.get("errorMessage") or pdf_task.get("errorMessage")
+        return result
+    expected = normalized_character_counts(source_text.read_text(encoding="utf-8", errors="replace"))
+    actual = normalized_character_counts(ofd_text.read_text(encoding="utf-8", errors="replace"))
+    case_dir = WORK / result["name"]
+    source_pages = render_pdf(source, case_dir / "source-render", "source")
+    roundtrip_pages = render_pdf(roundtrip_pdf, case_dir / "roundtrip-render", "roundtrip")
+    comparison = compare_images(source_pages, roundtrip_pages, REPORT / "diffs" / result["name"])
+    result["sourceCharacterCount"] = sum(expected.values())
+    result["ofdCharacterCount"] = sum(actual.values())
+    result["pageCountMatch"] = comparison["pageCountMatch"]
+    result["diffRatio"] = comparison["diffRatio"]
+    result["visualPass"] = comparison["pageCountMatch"] and comparison["diffRatio"] <= VISUAL_THRESHOLD
+    result["strictPass"] = result["realOfdPackage"] and expected == actual and result["pageCountMatch"]
+    result["practicalPass"] = result["strictPass"]
     return result
 
 
@@ -503,18 +583,20 @@ def main():
                             exact_mode="jpeg"),
                 pdf_docx_editable_case(pdf_editable_source),
                 pdf_docx_ocr_required_case(pdf_scanned_source),
+                pdf_ofd_fixed_case(pdf_editable_source),
                 visual_case("png-to-pdf-exact", INPUT / "w3c-home.png", "pdf", source_pdf=office_pdf(INPUT / "w3c-home.png", pdf_reference_dir / "png-source-pdf")),
                 csv_round_trip_case(INPUT / "countries.csv"),
         ])
         if (INPUT / "ofdrw-invoice.ofd").is_file():
             cases.append(ofd_docx_text_case(INPUT / "ofdrw-invoice.ofd"))
             cases.append(ofd_pdf_fixed_case(INPUT / "ofdrw-invoice.ofd"))
+            cases.append(ofd_xlsx_table_case(INPUT / "ofdrw-invoice.ofd"))
         results.extend(cases)
     finally:
         if process:
             stop_service(process)
     report = {
-        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, normalized text for editable documents, and table data for spreadsheets. Editable PDF-to-DOCX additionally requires matching page count and no embedded media for a generated text-only source; an image-only PDF must fail with OCR_REQUIRED. OFD-to-PDF requires character and declared/rendered page-count preservation. JPEG uses a declared lossy-error bound.",
+        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, normalized text for editable documents, and table data for spreadsheets. Editable PDF-to-DOCX additionally requires matching page count and no embedded media for a generated text-only source; an image-only PDF must fail with OCR_REQUIRED. PDF-to-OFD requires a real OFD package plus character and page-count preservation, while visual round-trip difference is reported separately. OFD-to-PDF requires character and declared/rendered page-count preservation. OFD-to-XLSX requires exact invoice cell and merge counts plus known text, while low-confidence grid candidates are excluded; generated fixtures additionally cover pages, cells, merges, NO_TABLE_FOUND, and OCR_REQUIRED. JPEG uses a declared lossy-error bound.",
         "visualThresholdForReferenceOnly": VISUAL_THRESHOLD,
         "health": sanitized_health(health),
         "results": results,

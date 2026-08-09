@@ -79,6 +79,22 @@ class OfdToTextConverterTest {
     }
 
     @Test
+    void separatesPagesWithFormFeedWithoutInventingPageHeaderText() {
+        PageModel first = new PageModel(1, new Rect(0, 0, 100, 60),
+                List.of(text("p1", 10, 15, "第一页正文")), List.of(), List.of(), List.of(), List.of(), List.of());
+        TextBlock secondText = new TextBlock("p2", 2, new Rect(10, 11, 30, 5), "第二页正文", 15,
+                new FontStyle("SimSun", 10, false, false, ColorValue.BLACK), 0);
+        PageModel second = new PageModel(2, new Rect(0, 0, 100, 60),
+                List.of(secondText), List.of(), List.of(), List.of(), List.of(), List.of());
+
+        String extracted = normalizeLines(OfdToTextConverter.text(List.of(first, second)));
+
+        assertEquals("第一页正文\n\n\f\n第二页正文\n", extracted);
+        assertFalse(extracted.contains("第 1 页"));
+        assertFalse(extracted.contains("第 2 页"));
+    }
+
+    @Test
     void scannedOfdFailsWithOcrRequiredAndDoesNotCreateTxt() throws Exception {
         Path source = scannedOfd("scan.ofd", false);
         Path output = temp.resolve("scan.txt");
