@@ -4,13 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fuyue.formatconverter.parser.ParseLimits;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,28 +54,31 @@ public final class ForkedFileConverter implements FileConverter {
         Process process = new ProcessBuilder(command)
                 .directory(workDir.toFile())
                 .redirectErrorStream(true)
-                .redirectOutput(logPath.toFile())
                 .start();
+        ProcessOutputCapture capture = ProcessOutputCapture.start(process, command, MAX_LOG_BYTES);
         Set<ProcessHandle> observedDescendants = new HashSet<>();
         WorkerProgress lastProgress = null;
         try {
             while (!process.waitFor(200, TimeUnit.MILLISECONDS)) {
-                observeDescendants(process, observedDescendants);
+                ConversionGuards.observeDescendants(process, observedDescendants);
                 lastProgress = relayProgress(progressPath, progress, lastProgress);
             }
-            observeDescendants(process, observedDescendants);
+            ConversionGuards.observeDescendants(process, observedDescendants);
             relayProgress(progressPath, progress, lastProgress);
         } catch (InterruptedException e) {
-            terminateTree(process, observedDescendants);
+            ConversionGuards.terminateProcessTree(process, observedDescendants);
+            capture.finish(logPath);
             Thread.currentThread().interrupt();
             throw e;
         }
-        terminateAlive(observedDescendants);
+        ConversionGuards.terminateAlive(observedDescendants);
+        String workerLog = capture.finish(logPath);
 
         WorkerResponse response = readResponse(responsePath);
         if (response == null) {
             throw new ConversionFailureException("WORKER_CRASHED",
-                    "转换 Worker 异常退出（exit=" + process.exitValue() + "）：" + readSmall(logPath));
+                    "转换 Worker 异常退出（exit=" + process.exitValue() + "）：" +
+                            (workerLog.isBlank() ? "无 Worker 日志" : workerLog));
         }
         if (!response.success()) {
             throw new ConversionFailureException(response.errorCode(), response.errorMessage());
@@ -117,35 +117,4 @@ public final class ForkedFileConverter implements FileConverter {
         }
     }
 
-    private void observeDescendants(Process process, Set<ProcessHandle> observed) {
-        process.toHandle().descendants().forEach(observed::add);
-    }
-
-    private void terminateTree(Process process, Set<ProcessHandle> observed) {
-        observeDescendants(process, observed);
-        terminateAlive(observed);
-        process.destroyForcibly();
-        try {
-            process.waitFor(5, TimeUnit.SECONDS);
-        } catch (InterruptedException ignored) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    private void terminateAlive(Set<ProcessHandle> handles) {
-        handles.stream().filter(ProcessHandle::isAlive)
-                .sorted(Comparator.comparingLong(ProcessHandle::pid).reversed())
-                .forEach(ProcessHandle::destroyForcibly);
-    }
-
-    private String readSmall(Path logPath) {
-        if (!Files.isRegularFile(logPath)) return "无 Worker 日志";
-        try (InputStream in = Files.newInputStream(logPath)) {
-            String value = new String(in.readNBytes(MAX_LOG_BYTES), StandardCharsets.UTF_8)
-                    .replaceAll("\\s+", " ").trim();
-            return value.length() > 500 ? value.substring(0, 500) + "..." : value;
-        } catch (IOException e) {
-            return "Worker 日志不可读";
-        }
-    }
 }

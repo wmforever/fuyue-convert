@@ -9,12 +9,14 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 final class ConversionGuards {
@@ -45,23 +47,35 @@ final class ConversionGuards {
         Files.createDirectories(logFile.getParent());
         ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectErrorStream(true);
-        builder.redirectOutput(logFile.toFile());
         Process process = builder.start();
+        ProcessOutputCapture capture = ProcessOutputCapture.start(process, command, MAX_PROCESS_LOG_BYTES);
+        Set<ProcessHandle> observedDescendants = new HashSet<>();
         boolean finished;
         try {
-            finished = process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS);
+            long deadline = System.nanoTime() + timeout.toNanos();
+            finished = false;
+            while (System.nanoTime() < deadline) {
+                observeDescendants(process, observedDescendants);
+                long remainingMillis = Math.max(1L,
+                        TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime()));
+                if (process.waitFor(Math.min(200L, remainingMillis), TimeUnit.MILLISECONDS)) {
+                    finished = true;
+                    break;
+                }
+            }
         } catch (InterruptedException e) {
-            process.destroyForcibly();
-            process.waitFor(5, TimeUnit.SECONDS);
+            terminateProcessTree(process, observedDescendants);
+            capture.finish(logFile);
             Thread.currentThread().interrupt();
             throw e;
         }
         if (!finished) {
-            process.destroyForcibly();
-            process.waitFor(5, TimeUnit.SECONDS);
-            throw new IOException(label + "超时，输出：" + trim(readSmall(logFile)));
+            terminateProcessTree(process, observedDescendants);
+            throw new IOException(label + "超时，输出：" + capture.finish(logFile));
         }
-        String output = trim(readSmall(logFile));
+        observeDescendants(process, observedDescendants);
+        terminateAlive(observedDescendants);
+        String output = capture.finish(logFile);
         if (process.exitValue() != 0) {
             throw new IOException(label + "失败，exit=" + process.exitValue() + "，输出：" + output);
         }
@@ -172,24 +186,26 @@ final class ConversionGuards {
         return Math.min(MAX_IMAGE_PIXELS, Math.max(1L, limits.maxExpandedBytes() / 4L));
     }
 
-    private static String readSmall(Path logFile) throws IOException {
-        if (!Files.isRegularFile(logFile)) return "";
-        long size = Files.size(logFile);
-        byte[] data;
-        try (InputStream in = Files.newInputStream(logFile)) {
-            if (size <= MAX_PROCESS_LOG_BYTES) {
-                data = in.readAllBytes();
-            } else {
-                data = in.readNBytes(MAX_PROCESS_LOG_BYTES);
-            }
-        }
-        String text = new String(data, StandardCharsets.UTF_8);
-        return size > MAX_PROCESS_LOG_BYTES ? text + "..." : text;
+    static void observeDescendants(Process process, Set<ProcessHandle> observed) {
+        process.toHandle().descendants().forEach(observed::add);
     }
 
-    private static String trim(String output) {
-        String oneLine = output == null ? "" : output.replaceAll("\\s+", " ").trim();
-        return oneLine.length() > 500 ? oneLine.substring(0, 500) + "..." : oneLine;
+    static void terminateProcessTree(Process process, Set<ProcessHandle> observed) {
+        observeDescendants(process, observed);
+        terminateAlive(observed);
+        if (process.isAlive()) process.destroyForcibly();
+        try {
+            process.waitFor(5, TimeUnit.SECONDS);
+        } catch (InterruptedException ignored) {
+            Thread.currentThread().interrupt();
+        }
+        terminateAlive(observed);
+    }
+
+    static void terminateAlive(Set<ProcessHandle> handles) {
+        handles.stream().filter(ProcessHandle::isAlive)
+                .sorted(Comparator.comparingLong(ProcessHandle::pid).reversed())
+                .forEach(ProcessHandle::destroyForcibly);
     }
 
     private record ImageSize(int width, int height) {}
