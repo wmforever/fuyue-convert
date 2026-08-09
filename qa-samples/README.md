@@ -25,7 +25,7 @@ QA 脚本需要本机具备：
 - Poppler `pdftoppm`
 - Python Pillow
 
-`strictPass` 使用路线级判定：直接保真路线比较渲染像素，可编辑文档比较规范化内容，PDF -> DOCX 还要求生成的纯文字多页样本页数一致且不含任何 `word/media/` 图片，并要求纯图片 PDF 严格失败为 `OCR_REQUIRED`；OFD 会检查 TXT 与 DOCX 中非空白字符及出现次数守恒，表格比较数据，JPEG 使用有损误差上限。`visualPass` 单独表示当前 LibreOffice/Poppler 环境中的二次渲染差异是否低于参考阈值。
+`strictPass` 使用路线级判定：直接保真路线比较渲染像素，可编辑文档比较规范化内容，PDF -> DOCX 还要求生成的纯文字多页样本页数一致且不含任何 `word/media/` 图片，并要求纯图片 PDF 严格失败为 `OCR_REQUIRED`；OFD -> TXT 通过单元集成样本检查多栏、表格和纯扫描/混合扫描失败契约，OFD -> DOCX 检查 TXT 与 DOCX 的字符守恒，OFD -> PDF 检查字符和声明/渲染页数守恒；表格比较数据，JPEG 使用有损误差上限。`visualPass` 单独表示当前 LibreOffice/Poppler 环境中的二次渲染差异是否低于参考阈值。
 
 服务启动前会把可执行 JAR 复制并校验到 `runtime-data/`。因此并行 Maven 构建即使替换 `web-api/target` 下的 JAR，也不会破坏正在运行的 QA 服务。
 

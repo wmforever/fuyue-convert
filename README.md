@@ -25,7 +25,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 
 | 路线 | 状态 | 默认策略 | 说明 |
 | --- | --- | --- | --- |
-| OFD -> DOCX/TXT/PDF | beta | 可编辑优先 | 文字型 OFD 可解析文字、表格和图片；签章外观不兼容时保留正文并明确告警，扫描型 OFD 会提示需要 OCR。 |
+| OFD -> DOCX/TXT/PDF | beta | 结构/版式 | DOCX/TXT 使用结构化解析；TXT 支持多栏阅读顺序和表格行列。PDF 按源坐标绘制文字、图片、签章和路径。TXT 遇到扫描内容页时严格返回 `OCR_REQUIRED`。 |
 | CSV <-> XLSX | stable | 数据优先 | 已覆盖 CSV 到 XLSX，再回到 CSV 的严格数据回环。 |
 | DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 headless 转换；本地字体会影响结果。 |
 | TXT -> DOCX/PDF | stable | 内容优先 | 适合纯文本生成基础办公文档。 |

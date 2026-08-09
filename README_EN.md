@@ -25,7 +25,7 @@ Status legend:
 
 | Route | Status | Default strategy | Notes |
 | --- | --- | --- | --- |
-| OFD -> DOCX/TXT/PDF | beta | editability first | Text-based OFD can preserve text, tables, and images. Incompatible seal appearances produce an explicit warning while body content is retained; scanned OFD reports that OCR is required. |
+| OFD -> DOCX/TXT/PDF | beta | structure/layout | DOCX and TXT use structured parsing; TXT supports multi-column reading order and table rows/columns. PDF paints text, images, seal appearances, and paths at source coordinates. TXT fails with `OCR_REQUIRED` when a page contains scanned content. |
 | CSV <-> XLSX | stable | data first | Covers strict CSV to XLSX and back-to-CSV data round trips. |
 | DOCX/XLSX/PPTX -> PDF | beta | layout first | Uses LibreOffice headless when available. Local fonts affect visual output. |
 | TXT -> DOCX/PDF | stable | content first | Useful for generating simple office documents from plain text. |

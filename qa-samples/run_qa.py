@@ -351,6 +351,39 @@ def ofd_docx_text_case(source):
     return result
 
 
+def ofd_pdf_fixed_case(source):
+    result = {"name": "ofd-to-pdf-fixed-layout", "source": source.name,
+              "target": "pdf", "type": "content-layout"}
+    source_task, source_text = upload_convert(source, "txt")
+    pdf_task, pdf_output = upload_convert(source, "pdf")
+    result["taskStatus"] = pdf_task.get("status")
+    result["output"] = pdf_output.name if pdf_output else None
+    result["exactCheck"] = "ofd-vs-fixed-pdf-character-content-and-page-count"
+    if not source_text or not pdf_output:
+        result["strictPass"] = False
+        result["error"] = source_task.get("errorMessage") or pdf_task.get("errorMessage")
+        return result
+    extracted_task, extracted_text = upload_convert(pdf_output, "txt")
+    if not extracted_text:
+        result["strictPass"] = False
+        result["error"] = extracted_task.get("errorMessage")
+        return result
+    expected = normalized_character_counts(source_text.read_text(encoding="utf-8", errors="replace"))
+    actual = normalized_character_counts(extracted_text.read_text(encoding="utf-8", errors="replace"))
+    pages = render_pdf(pdf_output, WORK / result["name"] / "render", "page")
+    file_results = pdf_task.get("files") or []
+    declared_pages = file_results[0].get("pageCount") if file_results else None
+    result["sourceCharacterCount"] = sum(expected.values())
+    result["pdfCharacterCount"] = sum(actual.values())
+    result["declaredPageCount"] = declared_pages
+    result["renderedPageCount"] = len(pages)
+    result["pageCountMatch"] = declared_pages == len(pages)
+    result["strictPass"] = expected == actual and result["pageCountMatch"]
+    result["practicalPass"] = result["strictPass"]
+    result["visualPass"] = None
+    return result
+
+
 def pdf_docx_editable_case(source):
     result = {"name": "pdf-to-docx-editable", "source": source.name, "target": "docx", "type": "content"}
     text_task, text_output = upload_convert(source, "txt")
@@ -475,12 +508,13 @@ def main():
         ])
         if (INPUT / "ofdrw-invoice.ofd").is_file():
             cases.append(ofd_docx_text_case(INPUT / "ofdrw-invoice.ofd"))
+            cases.append(ofd_pdf_fixed_case(INPUT / "ofdrw-invoice.ofd"))
         results.extend(cases)
     finally:
         if process:
             stop_service(process)
     report = {
-        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, normalized text for editable documents, and table data for spreadsheets. Editable PDF-to-DOCX additionally requires matching page count and no embedded media for a generated text-only source; an image-only PDF must fail with OCR_REQUIRED. JPEG uses a declared lossy-error bound.",
+        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, normalized text for editable documents, and table data for spreadsheets. Editable PDF-to-DOCX additionally requires matching page count and no embedded media for a generated text-only source; an image-only PDF must fail with OCR_REQUIRED. OFD-to-PDF requires character and declared/rendered page-count preservation. JPEG uses a declared lossy-error bound.",
         "visualThresholdForReferenceOnly": VISUAL_THRESHOLD,
         "health": sanitized_health(health),
         "results": results,

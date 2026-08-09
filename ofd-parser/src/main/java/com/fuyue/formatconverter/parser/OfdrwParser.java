@@ -36,6 +36,9 @@ import java.util.Map;
 public final class OfdrwParser implements OfdParser {
     private static final int MAX_PAGE_BLOCK_DEPTH = 128;
     private static final int MAX_PATH_OPERATIONS = 100_000;
+    private static final int MAX_PATH_SEGMENTS = 100_000;
+    private static final int QUADRATIC_SEGMENTS = 8;
+    private static final int CUBIC_SEGMENTS = 12;
 
     @Override
     public DocumentModel parse(SafeOfdPackage source, String displayName, ParseLimits limits)
@@ -67,9 +70,9 @@ public final class OfdrwParser implements OfdParser {
                     images.add(new ImageBlock(stamp.id(), pageNumber, stamp.box(), stamp.mimeType(),
                             stamp.data(), "SIGNATURE", z++));
                 }
-                if (texts.stream().allMatch(t -> t.text().isBlank()) && !images.isEmpty()) {
+                if (requiresOcr(texts, images, pageBox)) {
                     pageWarnings.add(ConversionWarning.of(WarningCode.OCR_REQUIRED,
-                            "页面未发现可编辑文字对象，可能是扫描型 OFD", pageNumber));
+                            "页面包含无法可靠提取文字的图像内容，可能是扫描型或混合扫描型 OFD", pageNumber));
                 }
                 pages.add(new PageModel(pageNumber, pageBox, texts, lines, images,
                         List.of(), List.of(), pageWarnings));
@@ -83,6 +86,21 @@ public final class OfdrwParser implements OfdParser {
     }
 
     @Override public String name() { return "OFDRW 2.3.9"; }
+
+    private boolean requiresOcr(List<TextBlock> texts, List<ImageBlock> images, Rect pageBox) {
+        List<ImageBlock> contentImages = images.stream()
+                .filter(image -> !"SIGNATURE".equalsIgnoreCase(image.role()))
+                .toList();
+        if (contentImages.isEmpty()) return false;
+        int characters = texts.stream().map(TextBlock::text)
+                .mapToInt(value -> (int) value.codePoints().filter(codePoint -> !Character.isWhitespace(codePoint)).count())
+                .sum();
+        if (characters == 0) return true;
+        double pageArea = Math.max(1d, pageBox.width() * pageBox.height());
+        double largestCoverage = contentImages.stream().map(ImageBlock::box)
+                .mapToDouble(box -> box.intersectionArea(pageBox) / pageArea).max().orElse(0d);
+        return characters < 20 && largestCoverage >= 0.5d;
+    }
 
     private int parseBlocks(List<PageBlockType> blocks, int page, int z, ResourceManage resources,
                             List<TextBlock> texts, List<LineElement> lines, List<ImageBlock> images,
@@ -141,25 +159,72 @@ public final class OfdrwParser implements OfdParser {
             String content = code.getContent() == null ? "" : code.getContent();
             double sourceX = code.getX() == null ? cursorX : code.getX();
             double sourceY = code.getY() == null ? cursorY : code.getY();
-            Point offset = transform.apply(new Point(sourceX, sourceY));
-            List<Double> advances;
             try {
-                advances = expandAdvances(code.getDeltaX(), content).stream()
-                        .map(delta -> signedLength(transform.applyVector(new Point(delta, 0)), delta))
-                        .toList();
+                int[] codePoints = content.codePoints().toArray();
+                int gaps = Math.max(0, codePoints.length - 1);
+                List<Double> deltaX = expandDeltas(code.getDeltaX(), gaps);
+                List<Double> deltaY = expandDeltas(code.getDeltaY(), gaps);
+                double glyphX = sourceX;
+                double glyphY = sourceY;
+                double runX = glyphX;
+                double runY = glyphY;
+                StringBuilder run = new StringBuilder();
+                List<Double> advances = new ArrayList<>();
+                int runIndex = 0;
+                for (int glyph = 0; glyph < codePoints.length; glyph++) {
+                    run.appendCodePoint(codePoints[glyph]);
+                    if (glyph >= gaps) continue;
+                    double dx = deltaX.isEmpty() ? 0 : deltaX.get(glyph);
+                    double dy = deltaY.isEmpty() ? 0 : deltaY.get(glyph);
+                    if (Math.abs(dy) > 0.001d) {
+                        addTextRun(object, page, z, box, style, transform, codeIndex, runIndex++,
+                                runX, runY, run.toString(), advances, out);
+                        run.setLength(0);
+                        advances = new ArrayList<>();
+                        glyphX += dx;
+                        glyphY += dy;
+                        runX = glyphX;
+                        runY = glyphY;
+                    } else {
+                        if (!deltaX.isEmpty()) {
+                            advances.add(signedLength(transform.applyVector(new Point(dx, 0)), dx));
+                            glyphX += dx;
+                        }
+                    }
+                }
+                if (!run.isEmpty()) {
+                    addTextRun(object, page, z, box, style, transform, codeIndex, runIndex,
+                            runX, runY, run.toString(), advances, out);
+                }
+                double lastGlyph = (object.getSize() == null ? 3.7d : object.getSize());
+                cursorX = glyphX + lastGlyph;
+                cursorY = glyphY;
             } catch (RuntimeException e) {
-                advances = List.of();
                 warnings.add(ConversionWarning.of(WarningCode.UNSUPPORTED_OFD_ELEMENT,
                         "文字字距数据无效或超过安全限制，已按默认字距处理", page));
+                Point offset = transform.apply(new Point(sourceX, sourceY));
+                out.add(new TextBlock(textObjectId(object, page, z) + "-" + codeIndex, page, box, content,
+                        box.y() + offset.y(), style, z, offset.x(), offset.y(), List.of(), transform));
+                cursorX = sourceX + (object.getSize() == null ? 3.7d : object.getSize());
+                cursorY = sourceY;
             }
-            out.add(new TextBlock(object.getID() + "-" + codeIndex++, page, box, content,
-                    box.y() + offset.y(), style, z, offset.x(), offset.y(), advances, transform));
-
-            double advance = advances.stream().mapToDouble(Double::doubleValue).sum();
-            double lastGlyph = (object.getSize() == null ? 3.7d : object.getSize()) * transform.scaleX();
-            cursorX = sourceX + (advance + lastGlyph) / Math.max(0.01d, transform.scaleX());
-            cursorY = sourceY;
+            codeIndex++;
         }
+    }
+
+    private void addTextRun(TextObject object, int page, int z, Rect box, FontStyle style,
+                            Transform2D transform, int codeIndex, int runIndex,
+                            double sourceX, double sourceY, String text, List<Double> advances,
+                            List<TextBlock> out) {
+        if (text.isEmpty()) return;
+        Point offset = transform.apply(new Point(sourceX, sourceY));
+        out.add(new TextBlock(textObjectId(object, page, z) + "-" + codeIndex + "-" + runIndex,
+                page, box, text,
+                box.y() + offset.y(), style, z, offset.x(), offset.y(), advances, transform));
+    }
+
+    private String textObjectId(TextObject object, int page, int z) {
+        return object.getID() == null ? "p" + page + "-text-" + z : object.getID().toString();
     }
 
     private void parsePath(PathObject object, int page, int z, ResourceManage resources, List<LineElement> out,
@@ -184,13 +249,20 @@ public final class OfdrwParser implements OfdParser {
                         new Point(boundary.getWidth() / 2d, boundary.getHeight()));
                 out.add(new LineElement(object.getID() + "-fill", page,
                         start, end, boundary.getWidth() * transform(object.getCTM()).scaleX(), fillColor, z));
+            } else {
+                warnings.add(ConversionWarning.of(WarningCode.UNSUPPORTED_OFD_ELEMENT,
+                        "复杂填充路径暂未展开，已跳过该填充对象", page));
             }
             return;
         }
+        if (Boolean.TRUE.equals(object.getFill())) {
+            warnings.add(ConversionWarning.of(WarningCode.UNSUPPORTED_OFD_ELEMENT,
+                    "路径填充、渐变或透明度暂未完整保留，已保留路径边线", page));
+        }
         double ox = boundary.getTopLeftX();
         double oy = boundary.getTopLeftY();
-        Point current = null;
-        Point subpathStart = null;
+        Point currentLocal = null;
+        Point subpathStartLocal = null;
         int segment = 0;
         int operationCount = 0;
         for (OptVal operation : object.getAbbreviatedDataEle().getRawOptVal()) {
@@ -202,36 +274,113 @@ public final class OfdrwParser implements OfdParser {
             double[] v = operation.getValues();
             switch (operation.getOpt()) {
                 case "S", "M" -> {
-                    if (v.length >= 2) { current = transformLocal(object.getCTM(), ox, oy, new Point(v[0], v[1])); subpathStart = current; }
+                    if (v.length >= 2) {
+                        currentLocal = new Point(v[0], v[1]);
+                        subpathStartLocal = currentLocal;
+                    }
                 }
                 case "L" -> {
-                    if (current != null && v.length >= 2) {
-                        Point next = transformLocal(object.getCTM(), ox, oy, new Point(v[0], v[1]));
-                        addAxisLine(object, page, z, segment++, current, next, lineWidth, strokeColor, out);
-                        current = next;
+                    if (currentLocal != null && v.length >= 2) {
+                        Point nextLocal = new Point(v[0], v[1]);
+                        addLine(object, page, z, segment++, transformLocal(object.getCTM(), ox, oy, currentLocal),
+                                transformLocal(object.getCTM(), ox, oy, nextLocal), lineWidth, strokeColor, out);
+                        currentLocal = nextLocal;
+                    }
+                }
+                case "Q" -> {
+                    if (currentLocal != null && v.length >= 4) {
+                        Point control = new Point(v[0], v[1]);
+                        Point end = new Point(v[2], v[3]);
+                        segment = addQuadratic(object, page, z, segment, currentLocal, control, end,
+                                object.getCTM(), ox, oy, lineWidth, strokeColor, out);
+                        currentLocal = end;
+                    }
+                }
+                case "B" -> {
+                    if (currentLocal != null && v.length >= 6) {
+                        Point firstControl = new Point(v[0], v[1]);
+                        Point secondControl = new Point(v[2], v[3]);
+                        Point end = new Point(v[4], v[5]);
+                        segment = addCubic(object, page, z, segment, currentLocal, firstControl,
+                                secondControl, end, object.getCTM(), ox, oy, lineWidth, strokeColor, out);
+                        currentLocal = end;
+                    }
+                }
+                case "A" -> {
+                    if (currentLocal != null && v.length >= 7) {
+                        Point end = new Point(v[5], v[6]);
+                        addLine(object, page, z, segment++, transformLocal(object.getCTM(), ox, oy, currentLocal),
+                                transformLocal(object.getCTM(), ox, oy, end), lineWidth, strokeColor, out);
+                        currentLocal = end;
+                        warnings.add(ConversionWarning.of(WarningCode.UNSUPPORTED_OFD_ELEMENT,
+                                "弧线路径暂以端点连线近似，请复核版式", page));
                     }
                 }
                 case "C" -> {
-                    if (current != null && subpathStart != null) {
-                        addAxisLine(object, page, z, segment++, current, subpathStart, lineWidth, strokeColor, out);
-                        current = subpathStart;
+                    if (currentLocal != null && subpathStartLocal != null) {
+                        addLine(object, page, z, segment++, transformLocal(object.getCTM(), ox, oy, currentLocal),
+                                transformLocal(object.getCTM(), ox, oy, subpathStartLocal),
+                                lineWidth, strokeColor, out);
+                        currentLocal = subpathStartLocal;
                     }
                 }
                 case "CM" -> warnings.add(ConversionWarning.of(WarningCode.UNSUPPORTED_OFD_ELEMENT,
                         "Path 内部坐标变换 CM 暂未展开", page));
-                default -> { /* 曲线和圆弧不参与有线表格网格 */ }
+                default -> warnings.add(ConversionWarning.of(WarningCode.UNSUPPORTED_OFD_ELEMENT,
+                        "未知路径操作已跳过：" + operation.getOpt(), page));
+            }
+            if (segment >= MAX_PATH_SEGMENTS) {
+                warnings.add(ConversionWarning.of(WarningCode.UNSUPPORTED_OFD_ELEMENT,
+                        "路径线段数量超过安全限制，已截断", page));
+                break;
             }
         }
     }
 
-    private void addAxisLine(PathObject object, int page, int z, int segment, Point a, Point b,
-                             double lineWidth, ColorValue strokeColor,
+    private int addQuadratic(PathObject object, int page, int z, int segment,
+                             Point start, Point control, Point end, ST_Array ctm,
+                             double ox, double oy, double lineWidth, ColorValue color,
                              List<LineElement> out) {
-        double tolerance = 0.15;
-        if (Math.abs(a.x() - b.x()) <= tolerance || Math.abs(a.y() - b.y()) <= tolerance) {
-            out.add(new LineElement(object.getID() + "-" + segment, page, a, b,
-                    lineWidth, strokeColor, z));
+        Point previous = start;
+        for (int step = 1; step <= QUADRATIC_SEGMENTS && segment < MAX_PATH_SEGMENTS; step++) {
+            double t = step / (double) QUADRATIC_SEGMENTS;
+            double inverse = 1d - t;
+            Point next = new Point(inverse * inverse * start.x() + 2d * inverse * t * control.x() + t * t * end.x(),
+                    inverse * inverse * start.y() + 2d * inverse * t * control.y() + t * t * end.y());
+            addLine(object, page, z, segment++, transformLocal(ctm, ox, oy, previous),
+                    transformLocal(ctm, ox, oy, next), lineWidth, color, out);
+            previous = next;
         }
+        return segment;
+    }
+
+    private int addCubic(PathObject object, int page, int z, int segment,
+                         Point start, Point firstControl, Point secondControl, Point end,
+                         ST_Array ctm, double ox, double oy, double lineWidth, ColorValue color,
+                         List<LineElement> out) {
+        Point previous = start;
+        for (int step = 1; step <= CUBIC_SEGMENTS && segment < MAX_PATH_SEGMENTS; step++) {
+            double t = step / (double) CUBIC_SEGMENTS;
+            double inverse = 1d - t;
+            Point next = new Point(
+                    inverse * inverse * inverse * start.x()
+                            + 3d * inverse * inverse * t * firstControl.x()
+                            + 3d * inverse * t * t * secondControl.x() + t * t * t * end.x(),
+                    inverse * inverse * inverse * start.y()
+                            + 3d * inverse * inverse * t * firstControl.y()
+                            + 3d * inverse * t * t * secondControl.y() + t * t * t * end.y());
+            addLine(object, page, z, segment++, transformLocal(ctm, ox, oy, previous),
+                    transformLocal(ctm, ox, oy, next), lineWidth, color, out);
+            previous = next;
+        }
+        return segment;
+    }
+
+    private void addLine(PathObject object, int page, int z, int segment, Point a, Point b,
+                         double lineWidth, ColorValue strokeColor, List<LineElement> out) {
+        if (Math.hypot(a.x() - b.x(), a.y() - b.y()) <= 0.001d) return;
+        out.add(new LineElement(object.getID() + "-" + segment, page, a, b,
+                lineWidth, strokeColor, z));
     }
 
     private void parseImage(ImageObject object, int page, int z, ResourceManage resources,
@@ -357,12 +506,11 @@ public final class OfdrwParser implements OfdParser {
     }
 
     private int clamp(int value) { return Math.max(0, Math.min(255, value)); }
-    private List<Double> expandAdvances(ST_Array encoded, String content) {
-        if (encoded == null || encoded.size() == 0) return List.of();
+    private List<Double> expandDeltas(ST_Array encoded, int gaps) {
+        if (encoded == null || encoded.size() == 0 || gaps <= 0) return List.of();
         List<Double> result = new ArrayList<>();
         List<String> values = encoded.getArray();
-        int glyphs = content == null ? 0 : content.codePointCount(0, content.length());
-        int maxValues = Math.max(1024, glyphs * 4);
+        int maxValues = Math.max(1024, gaps * 4);
         for (int i = 0; i < values.size(); i++) {
             String token = values.get(i);
             if ("g".equalsIgnoreCase(token) && i + 2 < values.size()) {
@@ -376,6 +524,11 @@ public final class OfdrwParser implements OfdParser {
                 if (result.size() >= maxValues) throw new IllegalArgumentException("DeltaX exceeds limit");
                 result.add(Double.parseDouble(token));
             }
+        }
+        if (!result.isEmpty()) {
+            double repeated = result.get(result.size() - 1);
+            while (result.size() < gaps) result.add(repeated);
+            if (result.size() > gaps) result = new ArrayList<>(result.subList(0, gaps));
         }
         return result;
     }

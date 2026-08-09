@@ -15,6 +15,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.util.Matrix;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -95,6 +96,9 @@ class ConversionTaskServiceTest {
             List<ConversionRoute> routes = service.supportedConversions();
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("ofd-to-docx") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("ofd-to-txt") && route.status() == RouteStatus.AVAILABLE));
+            assertTrue(routes.stream().anyMatch(route -> route.id().equals("ofd-to-pdf")
+                    && route.status() == RouteStatus.AVAILABLE
+                    && route.strategy() == ConversionStrategy.FIDELITY));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("csv-to-xlsx") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("xlsx-to-csv") && route.status() == RouteStatus.AVAILABLE));
             assertTrue(routes.stream().anyMatch(route -> route.id().equals("pdf-to-docx") && route.status() == RouteStatus.AVAILABLE));
@@ -151,6 +155,33 @@ class ConversionTaskServiceTest {
             assertEquals(DocumentFormat.TXT, finished.targetFormat());
             String text = Files.readString(service.download(created.taskId()).path(), StandardCharsets.UTF_8);
             assertTrue(text.contains("可提取的文本内容"));
+        }
+    }
+
+    @Test void convertsOfdIntoFixedLayoutPdfWithOriginalPageSizes() throws Exception {
+        Path source = temp.resolve("fixed-layout.ofd");
+        try (OFDDoc document = new OFDDoc(source)) {
+            document.addVPage(page(120, 80, "第一页固定版式"));
+            document.addVPage(page(80, 120, "第二页固定版式"));
+        }
+        Path output = temp.resolve("fixed-layout.pdf");
+
+        ConversionOutput converted = new OfdToPdfConverter(new SafeOfdExtractor(), new OfdrwParser(),
+                new PageLayoutAnalyzer()).convert(
+                new ConversionInput("fixed-layout.ofd", "application/ofd", Files.size(source), source),
+                temp.resolve("fixed-layout-work"), output, ParseLimits.defaults(), (stage, progress) -> { });
+
+        assertEquals(2, converted.pageCount());
+        assertTrue(converted.warnings().stream().anyMatch(warning -> warning.code().name().equals("FONT_SUBSTITUTED")));
+        try (PDDocument pdf = org.apache.pdfbox.Loader.loadPDF(output.toFile())) {
+            assertEquals(2, pdf.getNumberOfPages());
+            assertEquals(120d * 72d / 25.4d, pdf.getPage(0).getMediaBox().getWidth(), 0.02d);
+            assertEquals(80d * 72d / 25.4d, pdf.getPage(0).getMediaBox().getHeight(), 0.02d);
+            assertEquals(80d * 72d / 25.4d, pdf.getPage(1).getMediaBox().getWidth(), 0.02d);
+            assertEquals(120d * 72d / 25.4d, pdf.getPage(1).getMediaBox().getHeight(), 0.02d);
+            String text = new PDFTextStripper().getText(pdf);
+            assertTrue(text.contains("第一页固定版式"), text);
+            assertTrue(text.contains("第二页固定版式"), text);
         }
     }
 
