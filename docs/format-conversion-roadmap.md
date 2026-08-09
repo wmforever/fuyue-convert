@@ -13,7 +13,7 @@ FormatConverter 的路线图以“开源可验证”为原则。短期目标不�
 - 转换路线增加 `qualityLevel`、`strategy`、`requires` 和 `limitations` 元数据，并在前端展示。
 - 修复 CSV CR 换行导致行数错误的问题。
 - 修复 UOF XML 文件头校验。
-- 修复 UOF 直接转 DOCX 的页数漂移，改为 PDF 图层保真兜底。
+- UOF -> DOCX 改为 LibreOffice 直接输出可编辑对象，并以 experimental 标记分页和对象位置兼容风险。
 - 增加独立 JVM Worker，通过 JSON 协议回传进度和结果，支持硬超时、崩溃隔离、进程树清理和单 Worker 堆上限。
 
 ## 近期目标
@@ -37,10 +37,11 @@ mode=fidelity|editable
 - 区分公开样本、生成样本和本地私有样本。
 - 为每条 stable/beta 路线至少保留一个公开可复现样本。
 
-### 3. PDF -> DOCX 双路线
+### 3. PDF -> DOCX 可编辑路线
 
-- 保真路线：继续完善页面图层 DOCX，重点解决二次渲染差异和多页尺寸问题。
-- 可编辑路线：基于 PDFBox 提取文本位置，逐步重建段落、标题和表格；扫描型 PDF 后续接入 OCR SPI。
+- 已基于 PDFBox 提取文本位置并复用布局模型和 DOCX 渲染器；默认路线不再生成整页图片。
+- 下一步提取原始图片、水平/垂直线和表格，完善多栏阅读顺序、字体映射及复杂文字变换。
+- 扫描型和混合 PDF 当前严格失败，后续接入本地 OCR SPI 后再实现逐页混合解析。
 
 ### 4. OFD 路线增强
 

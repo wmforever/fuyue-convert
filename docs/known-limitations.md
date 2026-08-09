@@ -17,15 +17,15 @@
 
 ## PDF
 
-1. `PDF -> DOCX` 当前是保真优先页面图层路线，不是完整结构化编辑路线。
-2. 页面图层 DOCX 在再次通过 LibreOffice 渲染为 PDF 时仍可能产生少量像素差异。
-3. 文本型 PDF 可提取 TXT；扫描型 PDF 需要后续接入 OCR。
+1. `PDF -> DOCX` 当前恢复真实文字、基础段落、页面尺寸和方向，但复杂阅读顺序、多栏、矢量图形、图片及复杂表格仍可能不完整。
+2. 纯文字 PDF 不再嵌入整页图片；因此严格 QA 以字符守恒、页数和零图片为准，视觉差异仅作参考。
+3. 扫描型、纯图片型以及含无文字内容页的混合 PDF 在未接入 OCR 时严格返回 `OCR_REQUIRED`，不会生成伪成功 DOCX。
 
 ## Office 与国产格式
 
 1. `DOCX/XLSX/PPTX -> PDF` 依赖 LibreOffice headless；缺失字体会造成视觉差异。
 2. `WPS/ET/DPS/UOF` 依赖 LibreOffice 对对应格式的兼容能力，当前标记为 experimental。
-3. `UOF -> DOCX` 当前使用 `UOF -> PDF -> 图像层 DOCX` 兜底，避免分页漂移，但正文结构编辑能力有限。
+3. `UOF -> DOCX` 当前由 LibreOffice 直接导入并输出可编辑 DOCX；能保留的对象取决于 LibreOffice 的 UOF 兼容性，分页、字体、脚注/尾注等自动编号和对象位置可能变化。
 4. WPS 官方命令行中的部分 PDF 转换能力可能需要登录或会员能力，不适合作为开源默认依赖。
 
 ## QA 样本

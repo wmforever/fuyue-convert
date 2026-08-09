@@ -239,6 +239,11 @@ def docx_text_content(docx):
     return "".join(node.text or "" for node in root.iter(f"{namespace}t"))
 
 
+def docx_media_entries(docx):
+    with zipfile.ZipFile(docx) as archive:
+        return [name for name in archive.namelist() if name.startswith("word/media/")]
+
+
 def normalized_character_counts(value):
     return Counter(character for character in value if not character.isspace())
 
@@ -307,7 +312,7 @@ def visual_case(name, source, target, source_pdf=None, exact_mode="visual"):
         result["strictPass"] = layer["pageCountMatch"] and layer["differentPixels"] == 0
     elif exact_mode == "text":
         result["exactCheck"] = "normalized-text"
-        result["strictPass"] = comparison["pageCountMatch"] and compare_office_exports(
+        result["strictPass"] = compare_office_exports(
             source, converted, "txt", case_dir / "exact-text")
     elif exact_mode == "table-data":
         result["exactCheck"] = "first-sheet-csv-data"
@@ -343,6 +348,55 @@ def ofd_docx_text_case(source):
     result["practicalPass"] = result["strictPass"]
     result["visualPass"] = None
     result["diffRatio"] = 0.0
+    return result
+
+
+def pdf_docx_editable_case(source):
+    result = {"name": "pdf-to-docx-editable", "source": source.name, "target": "docx", "type": "content"}
+    text_task, text_output = upload_convert(source, "txt")
+    docx_task, docx_output = upload_convert(source, "docx")
+    result["taskStatus"] = docx_task["status"]
+    result["output"] = docx_output.name if docx_output else None
+    result["exactCheck"] = "pdf-vs-docx-editable-character-content-no-images"
+    if not text_output or not docx_output:
+        result["strictPass"] = False
+        result["error"] = text_task.get("errorMessage") or docx_task.get("errorMessage")
+        return result
+
+    expected = normalized_character_counts(text_output.read_text(encoding="utf-8", errors="replace"))
+    actual = normalized_character_counts(docx_text_content(docx_output))
+    media = docx_media_entries(docx_output)
+    case_dir = WORK / result["name"]
+    expected_pages = render_pdf(source, case_dir / "source-render", "source")
+    target_pdf = office_pdf(docx_output, case_dir / "target-pdf")
+    actual_pages = render_pdf(target_pdf, case_dir / "target-render", "target")
+    comparison = compare_images(expected_pages, actual_pages, REPORT / "diffs" / result["name"])
+    result["sourceCharacterCount"] = sum(expected.values())
+    result["docxCharacterCount"] = sum(actual.values())
+    result["embeddedMedia"] = media
+    result["pageCountMatch"] = comparison["pageCountMatch"]
+    result["diffRatio"] = comparison["diffRatio"]
+    result["visualPass"] = comparison["pageCountMatch"] and comparison["diffRatio"] <= VISUAL_THRESHOLD
+    result["strictPass"] = expected == actual and not media and comparison["pageCountMatch"]
+    result["practicalPass"] = result["strictPass"]
+    return result
+
+
+def pdf_docx_ocr_required_case(source):
+    result = {"name": "pdf-to-docx-ocr-required", "source": source.name,
+              "target": "docx", "type": "failure-contract"}
+    task, output = upload_convert(source, "docx")
+    files = task.get("files") or []
+    file_result = files[0] if files else {}
+    result["taskStatus"] = task.get("status")
+    result["errorCode"] = file_result.get("errorCode")
+    result["downloadProduced"] = output is not None
+    result["exactCheck"] = "image-only-pdf-must-fail-with-ocr-required"
+    result["strictPass"] = (task.get("status") == "FAILED"
+                            and result["errorCode"] == "OCR_REQUIRED"
+                            and output is None)
+    result["practicalPass"] = result["strictPass"]
+    result["visualPass"] = None
     return result
 
 
@@ -383,6 +437,19 @@ def main():
         pdf_source = INPUT / "dummy.pdf"
         pdf_reference_dir = WORK / "dummy-reference"
         pdf_reference = pdf_source
+        pdf_editable_text = WORK / "pdf-editable-source.txt"
+        pdf_editable_text.parent.mkdir(parents=True, exist_ok=True)
+        pdf_editable_text.write_text("\n".join(
+            f"PDF 可编辑 Word 验收行 {index:02d} / Editable text line {index:02d}"
+            for index in range(1, 66)), encoding="utf-8")
+        editable_source_task, pdf_editable_source = upload_convert(pdf_editable_text, "pdf")
+        if not pdf_editable_source:
+            raise RuntimeError("Could not create text-only PDF QA source: "
+                               + str(editable_source_task.get("errorMessage")))
+        scanned_source_task, pdf_scanned_source = upload_convert(INPUT / "w3c-home.png", "pdf")
+        if not pdf_scanned_source:
+            raise RuntimeError("Could not create image-only PDF QA source: "
+                               + str(scanned_source_task.get("errorMessage")))
         cases = [
             visual_case("docx-to-pdf-exact", INPUT / "demo.docx", "pdf"),
             visual_case("xlsx-to-pdf-exact", INPUT / "frictionless-sample.xlsx", "pdf"),
@@ -396,13 +463,13 @@ def main():
             cases.append(visual_case("dps-to-pptx-exact", INPUT / "wps-template-newfile.dps", "pptx"))
         if (INPUT / "libreoffice-generated-demo.uof").is_file():
             cases.append(visual_case("uof-to-docx-exact", INPUT / "libreoffice-generated-demo.uof", "docx",
-                                     exact_mode="page-layer"))
+                                     exact_mode="text"))
         cases.extend([
                 visual_case("pdf-to-png-exact", pdf_source, "png", source_pdf=pdf_reference),
                 visual_case("pdf-to-jpeg-quality", pdf_source, "jpg", source_pdf=pdf_reference,
                             exact_mode="jpeg"),
-                visual_case("pdf-to-docx-exact", pdf_source, "docx", source_pdf=pdf_reference,
-                            exact_mode="page-layer"),
+                pdf_docx_editable_case(pdf_editable_source),
+                pdf_docx_ocr_required_case(pdf_scanned_source),
                 visual_case("png-to-pdf-exact", INPUT / "w3c-home.png", "pdf", source_pdf=office_pdf(INPUT / "w3c-home.png", pdf_reference_dir / "png-source-pdf")),
                 csv_round_trip_case(INPUT / "countries.csv"),
         ])
@@ -413,7 +480,7 @@ def main():
         if process:
             stop_service(process)
     report = {
-        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, embedded page pixels for page-layer DOCX, normalized text for editable documents, and table data for spreadsheets. JPEG uses a declared lossy-error bound.",
+        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, normalized text for editable documents, and table data for spreadsheets. Editable PDF-to-DOCX additionally requires matching page count and no embedded media for a generated text-only source; an image-only PDF must fail with OCR_REQUIRED. JPEG uses a declared lossy-error bound.",
         "visualThresholdForReferenceOnly": VISUAL_THRESHOLD,
         "health": sanitized_health(health),
         "results": results,

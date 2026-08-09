@@ -46,7 +46,7 @@ public final class ConversionTaskService implements AutoCloseable {
                 new DocxToTextConverter(),
                 new TextToPdfConverter(),
                 new PdfToTextConverter(),
-                new PdfToDocxConverter(),
+                new PdfToDocxConverter(new PdfLayoutParser(), analyzer, renderer),
                 new DocxToPdfConverter(),
                 new PdfToPngConverter(),
                 new PdfToJpgConverter(),

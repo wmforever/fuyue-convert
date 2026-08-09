@@ -53,7 +53,7 @@ public final class LibreOfficeConverter implements FileConverter {
         validateOutput(outputPath, route.targetFormat(), limits);
         List<ConversionWarning> warnings = domesticFormat
                 ? List.of(ConversionWarning.of(WarningCode.OFFICE_COMPATIBILITY_LAYOUT,
-                "国产格式已转换为可编辑文档；字体、分页和对象位置可能因 LibreOffice 兼容性发生变化，请复核版式。", null))
+                "国产格式已转换为可编辑文档；字体、分页、自动编号和对象位置可能因 LibreOffice 兼容性发生变化，请复核内容与版式。", null))
                 : List.of();
         return new ConversionOutput(outputPath, outputFileName(input.displayName()), null, warnings);
     }

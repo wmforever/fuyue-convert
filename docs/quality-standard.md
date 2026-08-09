@@ -26,7 +26,7 @@ FormatConverter 使用“路线质量等级 + 可复现 QA 证据”描述转换
 
 ## QA 结论字段
 
-- `strictPass`：按路线目标执行严格检查。直接保真路线要求渲染像素一致；页面图层 DOCX 要求内嵌页面像素一致；可编辑文档要求规范化内容一致；表格路线要求数据一致；JPEG 使用声明的有损误差上限。
+- `strictPass`：按路线目标执行严格检查。直接保真路线要求渲染像素一致；可编辑文档要求规范化内容一致；PDF -> DOCX 还要求纯文字多页样本页数一致、输出含真实文本节点且不含图片，并要求纯图片样本严格失败为 `OCR_REQUIRED`；表格路线要求数据一致；JPEG 使用声明的有损误差上限。
 - `visualPass`：源文件和目标文件经当前环境二次渲染后的差异低于参考阈值。它受字体和渲染引擎影响，与内容或内嵌页面是否严格一致分开记录。
 - `practicalPass`：视觉用例中等同于 `visualPass`；数据和内容用例中等同于 `strictPass`。
 - `diffRatio`：差异像素数除以总像素数。
@@ -41,9 +41,21 @@ FormatConverter 使用“路线质量等级 + 可复现 QA 证据”描述转换
 | experimental | 能运行，但样本覆盖不足、存在明显取舍或依赖不稳定外部能力。 | 面向贡献者和早期验证。 |
 | planned | 已规划但未开放执行。 | 仅展示路线方向。 |
 
-## 当前本地 QA 基线
+## 当前验证状态
 
-最近一次本地端到端 QA：
+2026-08-09 的 Java 自动化测试已覆盖 PDF -> DOCX 的中英文真实文本、不同 CropBox/页面旋转、旋转文字、零图片、扫描页失败、混合页失败和 Word 页面尺寸上限。完整端到端 QA 已按新的可编辑性标准运行：
+
+```text
+Total: 14
+Strict passed: 13
+Strict failed: 1
+Visual threshold passed: 6
+Office available: true
+```
+
+新的 `PDF -> DOCX` 纯文字多页样本通过：源 PDF 与 DOCX 均为 2210 个非空白字符、页数一致且 `word/media/` 为零；纯图片 PDF 按契约失败为 `OCR_REQUIRED` 且没有下载文件。唯一严格失败是 experimental 的 `UOF -> DOCX`：直接可编辑转换保留了真实文字和 4 个媒体对象，但复杂样本发生页数漂移，尾注罗马编号多出一个字符，因此不会记录为内容或视觉严格通过。
+
+最近一次完整本地端到端 QA 是 2026-08-08 的历史页面图层基线：
 
 ```text
 Total: 13
@@ -53,7 +65,7 @@ Visual threshold passed: 6
 Office available: true
 ```
 
-路线级严格检查全部通过：
+该次历史基线中以下路线级严格检查通过：
 
 - `DOCX -> PDF`
 - `XLSX -> PDF`
@@ -64,7 +76,7 @@ Office available: true
 - `UOF -> DOCX`：内嵌页面图像像素一致。
 - `PDF -> PNG`
 - `PDF -> JPEG`：平均绝对误差在声明阈值内。
-- `PDF -> DOCX`：内嵌页面图像像素一致。
+- `PDF -> DOCX`：当时仅验证内嵌页面图像；此结果不再作为当前可编辑路线的通过证据。
 - `PNG -> PDF`
 - `CSV -> XLSX -> CSV`
 - `OFD -> DOCX`：忽略空白后，源 OFD 与 DOCX 的文字字符及数量一致（561/561）。
@@ -73,10 +85,10 @@ Office available: true
 
 - `WPS -> DOCX`：页数一致，存在小比例视觉差异。
 - `ET -> XLSX`：页数一致，存在小比例视觉差异。
-- `UOF -> DOCX`、`PDF -> DOCX`：内嵌页面与源渲染完全一致，但 DOCX 经 LibreOffice 再渲染时存在抗锯齿或页面定位差异。
+- `UOF -> DOCX`：内嵌页面与源渲染完全一致，但 DOCX 经 LibreOffice 再渲染时存在抗锯齿或页面定位差异。
 - `PDF -> JPEG`：有损编码导致大范围微小像素变化，平均绝对误差仍在阈值内。
 
-这些视觉差异不会被写成“完全一致”。本轮 13/13 表示每条路线声明的严格目标全部满足，不表示所有目标文件经任意办公软件再次渲染都能达到零像素差异。
+这些视觉差异不会被写成“完全一致”。历史 13/13 不表示当前 PDF -> DOCX 实现已完成新的端到端样本门禁；当前路线以可编辑内容守恒、页数一致和纯文字样本零图片为严格标准，二次渲染视觉差异仅作为参考。
 
 完整报告由 `python3 qa-samples/run_qa.py` 生成到 `qa-samples/report/qa-report.md`。
 

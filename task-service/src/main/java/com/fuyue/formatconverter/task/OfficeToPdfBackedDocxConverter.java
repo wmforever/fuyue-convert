@@ -22,7 +22,8 @@ public final class OfficeToPdfBackedDocxConverter implements FileConverter {
         }
         this.route = ConversionRoute.of(sourceFormat, DocumentFormat.DOCX, description,
                 QualityLevel.EXPERIMENTAL, ConversionStrategy.COMPATIBILITY, List.of("libreoffice"),
-                List.of("通过 PDF 页面图层兜底，正文结构编辑能力有限", "有 Poppler 时优先使用，否则回退 PDFBox"));
+                List.of("先经 LibreOffice 转成 PDF，再恢复可编辑文字；复杂结构可能丢失",
+                        "扫描页或纯图片页需要 OCR"));
         this.officeToPdf = new LibreOfficeConverter(sourceFormat, DocumentFormat.PDF, officeBinary, timeout,
                 "先使用 LibreOffice headless 渲染为 PDF。");
         this.pdfToDocx = new PdfToDocxConverter();
@@ -45,8 +46,8 @@ public final class OfficeToPdfBackedDocxConverter implements FileConverter {
                 (stage, value) -> progress.update(stage, 60 + Math.min(35, value / 3)));
         List<ConversionWarning> warnings = new ArrayList<>(pdf.warnings());
         warnings.addAll(docx.warnings());
-        warnings.add(ConversionWarning.of(WarningCode.FIDELITY_IMAGE_LAYER,
-                "已使用 PDF 页面图生成保真优先 DOCX，正文结构编辑能力有限。", null));
+        warnings.add(ConversionWarning.of(WarningCode.OFFICE_COMPATIBILITY_LAYOUT,
+                "已先经 LibreOffice 转成 PDF，再恢复可编辑文字；复杂 Office 结构可能无法完整保留。", null));
         return new ConversionOutput(outputPath, replaceExtension(input.displayName(), "docx"),
                 docx.pageCount(), warnings);
     }

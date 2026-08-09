@@ -31,9 +31,9 @@ Status legend:
 | TXT -> DOCX/PDF | stable | content first | Useful for generating simple office documents from plain text. |
 | DOCX -> TXT | stable | text extraction | Extracts body text without layout. |
 | PDF -> TXT/PNG/JPG | stable | extraction/rendering | PDF to PNG/JPEG uses Poppler or PDFBox page rendering. Multi-page PDFs are returned as ZIP files. |
-| PDF -> DOCX | experimental | fidelity first | Generates page-image DOCX. Layout is more stable than text-only extraction, but structural editing is limited. |
+| PDF -> DOCX | beta | editability first | Restores real text, basic paragraphs, page sizes, and orientation from text-based PDFs. Scanned or image-only pages fail explicitly until OCR is available. |
 | PNG/JPG -> PDF | beta | layout first | Uses the Office engine when available, with PDFBox fallback. |
-| WPS/ET/DPS/UOF | experimental | compatibility first | Depends on LibreOffice import support. UOF currently falls back through PDF-backed DOCX to avoid page drift. |
+| WPS/ET/DPS/UOF | experimental | compatibility first | Depends on LibreOffice import support. UOF is converted directly to editable DOCX, so pagination and object positions may change. |
 
 External dependencies:
 
@@ -121,7 +121,7 @@ Run end-to-end QA:
 python3 qa-samples/run_qa.py
 ```
 
-The QA script starts a local service, uploads samples through HTTP, downloads converted outputs, renders them with LibreOffice/Poppler, and compares the results. `strictPass` is route-specific: direct-fidelity routes require identical rendered pixels, page-layer DOCX requires identical embedded page pixels, editable documents require normalized content equality, and spreadsheet routes require data equality. Cross-engine re-rendering is reported separately as `visualPass`.
+The QA script starts a local service, uploads samples through HTTP, downloads converted outputs, renders them with LibreOffice/Poppler, and compares the results. `strictPass` is route-specific: direct-fidelity routes require identical rendered pixels, editable documents require normalized content equality, and spreadsheet routes require data equality. Editable PDF-to-DOCX also requires matching page counts and zero embedded media for a generated text-only source, while an image-only PDF must fail with `OCR_REQUIRED`. Cross-engine re-rendering is reported separately as `visualPass`.
 
 ## Modules
 

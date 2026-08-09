@@ -31,9 +31,9 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | TXT -> DOCX/PDF | stable | 内容优先 | 适合纯文本生成基础办公文档。 |
 | DOCX -> TXT | stable | 内容提取 | 提取正文文本，不保留版式。 |
 | PDF -> TXT/PNG/JPG | stable | 提取/渲染 | PDF 到 PNG/JPEG 使用 Poppler 或 PDFBox 按页渲染；多页自动输出 ZIP。 |
-| PDF -> DOCX | experimental | 保真优先 | 当前生成页面图层 DOCX，版式比纯文本更稳，但结构编辑能力有限。 |
+| PDF -> DOCX | beta | 可编辑优先 | 文字型 PDF 恢复真实文字、基础段落、页面尺寸和方向；扫描页或纯图片页在未接入 OCR 时明确失败。 |
 | PNG/JPG -> PDF | beta | 版式优先 | 有 LibreOffice 时使用 Office 引擎；无 Office 时回退 PDFBox。 |
-| WPS/ET/DPS/UOF | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 当前用 PDF 图层兜底避免分页漂移。 |
+| WPS/ET/DPS/UOF | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |
 
 外部依赖说明：
 
@@ -135,7 +135,7 @@ mvn -DskipTests package
 python3 qa-samples/run_qa.py
 ```
 
-QA 会启动本地服务，通过 HTTP 上传样本、下载转换结果，再用 LibreOffice/Poppler 渲染并比较。`strictPass` 按路线目标判定：直接保真路线要求渲染像素一致，页面图层 DOCX 要求内嵌页面像素一致，可编辑文档要求规范化内容一致，表格路线要求数据一致。跨引擎二次渲染差异另记为 `visualPass`，不会被严格内容检查掩盖。
+QA 会启动本地服务，通过 HTTP 上传样本、下载转换结果，再用 LibreOffice/Poppler 渲染并比较。`strictPass` 按路线目标判定：直接保真路线要求渲染像素一致，可编辑文档要求规范化内容一致，表格路线要求数据一致；PDF -> DOCX 还要求纯文字多页样本页数一致、零内嵌图片，并要求纯图片 PDF 严格失败为 `OCR_REQUIRED`。跨引擎二次渲染差异另记为 `visualPass`，不会被严格内容检查掩盖。
 
 ## 模块结构
 
