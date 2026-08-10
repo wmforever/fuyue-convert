@@ -34,31 +34,92 @@ final class UofDocxCompatibilityFixer {
     private static final String WORD_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
     private static final String DOCUMENT_XML = "word/document.xml";
     private static final String NUMBERING_XML = "word/numbering.xml";
+    private static final String ENDNOTES_XML = "word/endnotes.xml";
 
     private UofDocxCompatibilityFixer() { }
 
-    static int repairContinuedLists(Path docx) throws IOException {
+    static RepairResult repair(Path docx) throws IOException {
         byte[] documentBytes;
         byte[] numberingBytes;
+        byte[] endnotesBytes;
         try (ZipFile archive = new ZipFile(docx.toFile())) {
             ZipEntry documentEntry = archive.getEntry(DOCUMENT_XML);
             ZipEntry numberingEntry = archive.getEntry(NUMBERING_XML);
-            if (documentEntry == null || numberingEntry == null) return 0;
-            try (var input = archive.getInputStream(documentEntry)) {
-                documentBytes = input.readAllBytes();
-            }
-            try (var input = archive.getInputStream(numberingEntry)) {
-                numberingBytes = input.readAllBytes();
-            }
+            ZipEntry endnotesEntry = archive.getEntry(ENDNOTES_XML);
+            if (documentEntry == null) return RepairResult.NONE;
+            documentBytes = readEntry(archive, documentEntry);
+            numberingBytes = numberingEntry == null ? null : readEntry(archive, numberingEntry);
+            endnotesBytes = endnotesEntry == null ? null : readEntry(archive, endnotesEntry);
         }
 
         Document document = parse(documentBytes);
-        NumberingDefinitions numbering = readNumbering(parse(numberingBytes));
-        int repairs = repairParagraphs(document, numbering);
-        if (repairs == 0) return 0;
+        int repairedLists = numberingBytes == null ? 0
+                : repairParagraphs(document, readNumbering(parse(numberingBytes)));
+        boolean endnotePageBreak = endnotesBytes != null && hasActualEndnotes(parse(endnotesBytes))
+                && ensureEndnotesStartOnNewPage(document);
+        RepairResult result = new RepairResult(repairedLists, endnotePageBreak);
+        if (!result.changed()) return result;
 
         rewriteDocumentEntry(docx, serialize(document));
-        return repairs;
+        return result;
+    }
+
+    static int repairContinuedLists(Path docx) throws IOException {
+        return repair(docx).continuedLists();
+    }
+
+    private static byte[] readEntry(ZipFile archive, ZipEntry entry) throws IOException {
+        try (var input = archive.getInputStream(entry)) {
+            return input.readAllBytes();
+        }
+    }
+
+    private static boolean hasActualEndnotes(Document endnotes) {
+        NodeList entries = endnotes.getElementsByTagNameNS(WORD_NS, "endnote");
+        for (int index = 0; index < entries.getLength(); index++) {
+            Element endnote = (Element) entries.item(index);
+            String type = value(endnote, "type");
+            String id = value(endnote, "id");
+            if (type.isBlank() && !"0".equals(id) && !"1".equals(id)) return true;
+        }
+        return false;
+    }
+
+    private static boolean ensureEndnotesStartOnNewPage(Document document) {
+        NodeList bodies = document.getElementsByTagNameNS(WORD_NS, "body");
+        if (bodies.getLength() != 1) return false;
+        Element body = (Element) bodies.item(0);
+        NodeList paragraphs = body.getElementsByTagNameNS(WORD_NS, "p");
+        for (int index = paragraphs.getLength() - 1; index >= 0; index--) {
+            Element paragraph = (Element) paragraphs.item(index);
+            if (!hasVisibleContent(paragraph)) continue;
+            if (hasPageBreak(paragraph)) return false;
+            Element run = document.createElementNS(WORD_NS, "w:r");
+            Element pageBreak = document.createElementNS(WORD_NS, "w:br");
+            pageBreak.setAttributeNS(WORD_NS, "w:type", "page");
+            run.appendChild(pageBreak);
+            paragraph.appendChild(run);
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean hasVisibleContent(Element paragraph) {
+        NodeList text = paragraph.getElementsByTagNameNS(WORD_NS, "t");
+        for (int index = 0; index < text.getLength(); index++) {
+            if (!text.item(index).getTextContent().isBlank()) return true;
+        }
+        return paragraph.getElementsByTagNameNS(WORD_NS, "drawing").getLength() > 0
+                || paragraph.getElementsByTagNameNS(WORD_NS, "object").getLength() > 0
+                || paragraph.getElementsByTagNameNS(WORD_NS, "pict").getLength() > 0;
+    }
+
+    private static boolean hasPageBreak(Element paragraph) {
+        NodeList breaks = paragraph.getElementsByTagNameNS(WORD_NS, "br");
+        for (int index = 0; index < breaks.getLength(); index++) {
+            if ("page".equals(value((Element) breaks.item(index), "type"))) return true;
+        }
+        return paragraph.getElementsByTagNameNS(WORD_NS, "pageBreakBefore").getLength() > 0;
     }
 
     private static int repairParagraphs(Document document, NumberingDefinitions numbering) {
@@ -260,5 +321,11 @@ final class UofDocxCompatibilityFixer {
             String abstractId = numToAbstract.get(numId);
             return abstractId == null ? null : signatures.get(key(abstractId, level));
         }
+    }
+
+    record RepairResult(int continuedLists, boolean endnotePageBreak) {
+        private static final RepairResult NONE = new RepairResult(0, false);
+
+        boolean changed() { return continuedLists > 0 || endnotePageBreak; }
     }
 }
