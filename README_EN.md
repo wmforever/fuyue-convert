@@ -63,6 +63,8 @@ Requirements:
 - Optional: Poppler `pdftoppm`
 - Optional for source/standalone JAR: Tesseract 5.x and models; official runtime bundles and Docker include them
 
+If `pdftoppm` is not on `PATH`, set `PDFTOPPM_BIN=/absolute/path/to/pdftoppm`. OFD image and PDF-to-JPEG routes prefer Poppler and fall back to PDFBox when it is unavailable; PDF-to-PNG always uses PDFBox to preserve transparency semantics.
+
 Build:
 
 ```bash

@@ -63,6 +63,8 @@ OCR 是否需要安装、不同运行方式的依赖责任和启用示例见 [do
 - 可选：Poppler `pdftoppm`
 - 源码/独立 JAR 可选：Tesseract 5.x 与所需语言包；官方运行包和 Docker 已内置
 
+如果 `pdftoppm` 不在 `PATH` 中，可通过 `PDFTOPPM_BIN=/绝对路径/pdftoppm` 指定。OFD 图片和 `PDF -> JPEG` 路线会优先使用 Poppler，并在不可用时回退到 PDFBox；`PDF -> PNG` 为保留透明语义固定使用 PDFBox。
+
 构建：
 
 ```bash

@@ -20,9 +20,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -37,9 +40,16 @@ abstract class OfdToImageConverter implements FileConverter {
     private final ConversionRoute route;
     private final DocumentFormat targetFormat;
     private final String imageFormat;
+    private final Path popplerBinary;
 
     protected OfdToImageConverter(DocumentFormat targetFormat, String imageFormat, String description,
                                   SafeOfdExtractor extractor, OfdParser parser) {
+        this(targetFormat, imageFormat, description, extractor, parser,
+                PdfToImageConverter.discoverPoppler().orElse(null));
+    }
+
+    protected OfdToImageConverter(DocumentFormat targetFormat, String imageFormat, String description,
+                                  SafeOfdExtractor extractor, OfdParser parser, Path popplerBinary) {
         if (targetFormat != DocumentFormat.PNG && targetFormat != DocumentFormat.JPG) {
             throw new IllegalArgumentException("OFD 渲染图片仅支持 PNG/JPEG");
         }
@@ -47,6 +57,7 @@ abstract class OfdToImageConverter implements FileConverter {
         this.imageFormat = imageFormat;
         this.extractor = java.util.Objects.requireNonNull(extractor, "extractor");
         this.parser = java.util.Objects.requireNonNull(parser, "parser");
+        this.popplerBinary = popplerBinary == null ? null : popplerBinary.toAbsolutePath().normalize();
         this.route = ConversionRoute.of(DocumentFormat.OFD, targetFormat, description,
                 QualityLevel.BETA, ConversionStrategy.FIDELITY, List.of(),
                 List.of("固定以 160 DPI 输出", "多页 OFD 输出 ZIP", "复杂填充、渐变、透明度和部分弧线路径仍受固定版式渲染器限制"));
@@ -97,7 +108,51 @@ abstract class OfdToImageConverter implements FileConverter {
     }
 
     private List<Path> renderPages(Path pdf, int expectedPages, Path workDir, ParseLimits limits,
-                                   ConversionProgress progress) throws IOException {
+                                   ConversionProgress progress) throws Exception {
+        if (popplerBinary != null) {
+            return renderPagesWithPoppler(pdf, expectedPages, workDir, limits, progress);
+        }
+        return renderPagesWithPdfBox(pdf, expectedPages, workDir, limits, progress);
+    }
+
+    private List<Path> renderPagesWithPoppler(Path pdf, int expectedPages, Path workDir, ParseLimits limits,
+                                              ConversionProgress progress) throws Exception {
+        Path renderDir = Files.createDirectories(workDir.resolve("poppler"));
+        Path prefix = renderDir.resolve("page");
+        List<String> command = new ArrayList<>(List.of(popplerBinary.toString(), "-r",
+                String.format(Locale.ROOT, "%.2f", RENDER_DPI),
+                targetFormat == DocumentFormat.JPG ? "-jpeg" : "-png"));
+        if (targetFormat == DocumentFormat.JPG) command.addAll(List.of("-jpegopt", "quality=90,optimize=y"));
+        command.add(pdf.toString());
+        command.add(prefix.toString());
+        ConversionGuards.runProcess(command, workDir.resolve("pdftoppm.log"), Duration.ofMinutes(2),
+                "OFD 图片 Poppler 渲染");
+
+        List<Path> generated;
+        try (var files = Files.list(renderDir)) {
+            generated = files.filter(Files::isRegularFile)
+                    .filter(path -> hasTargetExtension(path.getFileName().toString().toLowerCase(Locale.ROOT)))
+                    .sorted(Comparator.comparingInt(this::generatedPageNumber))
+                    .toList();
+        }
+        if (generated.size() != expectedPages) {
+            throw new IOException("OFD Poppler 渲染页数不一致：" + generated.size() + " != " + expectedPages);
+        }
+        List<Path> pages = new ArrayList<>(expectedPages);
+        for (int index = 0; index < generated.size(); index++) {
+            Path page = workDir.resolve(pageFileName(index + 1));
+            Files.move(generated.get(index), page, StandardCopyOption.REPLACE_EXISTING);
+            ConversionGuards.requireNonEmptyOutputFile(page, limits, "OFD 单页 " + targetFormat.label());
+            pages.add(page);
+            progress.update(TaskStage.RENDERING,
+                    40 + (int) Math.round((index + 1d) * 45d / expectedPages));
+        }
+        ConversionGuards.requireTotalSize(pages, limits, "OFD 渲染 " + targetFormat.label());
+        return pages;
+    }
+
+    private List<Path> renderPagesWithPdfBox(Path pdf, int expectedPages, Path workDir, ParseLimits limits,
+                                             ConversionProgress progress) throws IOException {
         List<Path> pages = new ArrayList<>(expectedPages);
         try (var document = Loader.loadPDF(pdf.toFile())) {
             if (document.getNumberOfPages() != expectedPages) {
@@ -120,6 +175,24 @@ abstract class OfdToImageConverter implements FileConverter {
         }
         ConversionGuards.requireTotalSize(pages, limits, "OFD 渲染 " + targetFormat.label());
         return pages;
+    }
+
+    private boolean hasTargetExtension(String name) {
+        return targetFormat == DocumentFormat.JPG
+                ? name.endsWith(".jpg") || name.endsWith(".jpeg")
+                : name.endsWith(".png");
+    }
+
+    private int generatedPageNumber(Path path) {
+        String name = path.getFileName().toString();
+        int dash = name.lastIndexOf('-');
+        int dot = name.lastIndexOf('.');
+        if (dash < 0 || dot <= dash + 1) return Integer.MAX_VALUE;
+        try {
+            return Integer.parseInt(name.substring(dash + 1, dot));
+        } catch (NumberFormatException e) {
+            return Integer.MAX_VALUE;
+        }
     }
 
     private void writeImage(BufferedImage image, Path output) throws IOException {

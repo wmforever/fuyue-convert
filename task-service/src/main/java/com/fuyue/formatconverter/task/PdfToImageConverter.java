@@ -265,8 +265,10 @@ abstract class PdfToImageConverter implements FileConverter {
         return "page-%04d.%s".formatted(page, targetFormat.extension());
     }
 
-    private static Optional<Path> discoverPoppler() {
+    static Optional<Path> discoverPoppler() {
         List<Path> candidates = new ArrayList<>();
+        String configured = System.getenv("PDFTOPPM_BIN");
+        if (configured != null && !configured.isBlank()) candidates.add(Path.of(configured));
         String path = System.getenv("PATH");
         if (path != null) {
             for (String dir : path.split(java.io.File.pathSeparator)) {
