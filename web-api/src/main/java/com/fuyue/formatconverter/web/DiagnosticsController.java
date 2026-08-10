@@ -86,8 +86,10 @@ public class DiagnosticsController {
         limits.put("concurrency", properties.getConcurrency());
         limits.put("queueCapacity", properties.getQueueCapacity());
         limits.put("timeout", properties.getTimeout().toString());
+        limits.put("maxFilesPerTask", properties.getMaxFilesPerTask());
         limits.put("maxFileSize", properties.getMaxFileSize());
         limits.put("maxTaskUploadBytes", properties.getMaxTaskUploadBytes());
+        limits.put("maxTaskOutputBytes", properties.getMaxTaskOutputBytes());
         limits.put("minFreeDiskBytes", properties.getMinFreeDiskBytes());
         limits.put("resultTtl", properties.getResultTtl().toString());
         limits.put("maxPages", properties.getMaxPages());

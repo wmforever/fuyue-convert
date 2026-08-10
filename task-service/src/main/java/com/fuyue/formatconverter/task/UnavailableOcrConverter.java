@@ -13,7 +13,7 @@ final class UnavailableOcrConverter implements FileConverter {
     UnavailableOcrConverter(DocumentFormat source, DocumentFormat target,
                             TesseractOcrConverter.Capability capability) {
         this.capability = capability;
-        this.route = ConversionRoute.of(source, target,
+        this.route = ConversionRoute.unavailable(source, target,
                 "图片 OCR 需要显式配置且能力检测通过的本地 Tesseract OCR。",
                 QualityLevel.EXPERIMENTAL, ConversionStrategy.EXTRACTION, List.of("tesseract"),
                 List.of(capability.message()));

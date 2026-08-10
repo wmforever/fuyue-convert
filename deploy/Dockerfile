@@ -16,5 +16,6 @@ USER appuser
 EXPOSE 8080
 ENV JAVA_OPTS="-Xms512m -Xmx2g -Djava.awt.headless=true"
 ENV FORMAT_CONVERTER_OCR_ENABLED="true" \
-    FORMAT_CONVERTER_OCR_LANGUAGES="chi_sim+eng"
+    FORMAT_CONVERTER_OCR_LANGUAGES="chi_sim+eng" \
+    SERVER_ADDRESS="0.0.0.0"
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]

@@ -128,12 +128,14 @@ java -jar app.jar --spring.config.additional-location=./application.yml
 FORMAT_CONVERTER_WORKER_ENABLED=true
 FORMAT_CONVERTER_WORKER_MAX_MEMORY_MB=768
 FORMAT_CONVERTER_WORKER_JAVA_BINARY=/path/to/java
+FORMAT_CONVERTER_MAX_FILES_PER_TASK=100
 FORMAT_CONVERTER_MAX_TASK_UPLOAD_BYTES=262144000
+FORMAT_CONVERTER_MAX_TASK_OUTPUT_BYTES=536870912
 FORMAT_CONVERTER_MIN_FREE_DISK_BYTES=536870912
 FORMAT_CONVERTER_RESULT_TTL=24h
 ```
 
-服务会同时执行单文件、单任务总上传量和数据盘安全水位检查；失败/取消任务的输入只在 TTL 内保留以支持重试。Worker 内存限制仅限 JVM 堆；Docker/cgroup 或 systemd 的 CPU、总内存和进程数限制仍应在部署层设置。
+服务默认只监听 `127.0.0.1`。远程部署需显式设置 `SERVER_ADDRESS=0.0.0.0`，并建议同时设置 `FORMAT_CONVERTER_API_TOKEN`；内置网页可在底部输入访问令牌。服务会同时执行文件数、单文件、单任务总上传量、总输出量和数据盘安全水位检查；失败/取消任务的输入从任务结束起只在 TTL 内保留以支持重试。Worker 内存限制仅限 JVM 堆；Docker/cgroup 或 systemd 的 CPU、总内存和进程数限制仍应在部署层设置。
 
 正式 Release 除各平台内置 Java Runtime 的运行包外，还附带 Java/前端 CycloneDX SBOM、`SHA256SUMS`、第三方声明、已知限制和当前测试报告；发布工作流会在上传前重新校验 SBOM JSON 与全部 SHA-256。
 

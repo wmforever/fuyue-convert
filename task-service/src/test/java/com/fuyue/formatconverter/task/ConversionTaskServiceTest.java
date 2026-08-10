@@ -38,6 +38,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -287,6 +288,62 @@ class ConversionTaskServiceTest {
                     new UploadPayload("two.txt", "text/plain", payload.length, () -> new ByteArrayInputStream(payload))
             ), DocumentFormat.DOCX));
             assertTrue(error.getMessage().contains("单任务上传总量"));
+        }
+    }
+
+    @Test void rejectsBatchWhoseFileCountExceedsTaskLimit() throws Exception {
+        byte[] payload = "x".getBytes(StandardCharsets.UTF_8);
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("file-count-data"), 1, 2,
+                Duration.ofSeconds(10), Duration.ofHours(1), 1,
+                100, 1_000, 0, new ParseLimits(100, 1_000, 1_000, 10, 100d, 10));
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(new TextToDocxConverter()))) {
+            IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> service.createTask(List.of(
+                    new UploadPayload("one.txt", "text/plain", payload.length, () -> new ByteArrayInputStream(payload)),
+                    new UploadPayload("two.txt", "text/plain", payload.length, () -> new ByteArrayInputStream(payload))
+            ), DocumentFormat.DOCX));
+            assertTrue(error.getMessage().contains("文件数量"));
+        }
+    }
+
+    @Test void failsFileThatWouldExceedTaskOutputQuota() throws Exception {
+        FileConverter converter = fixedTextConverter("123456");
+        byte[] payload = "input".getBytes(StandardCharsets.UTF_8);
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("output-quota-data"), 1, 2,
+                Duration.ofSeconds(10), Duration.ofHours(1), 10,
+                100, 5, 0, new ParseLimits(100, 1_000, 1_000, 10, 100d, 10));
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(converter))) {
+            TaskSnapshot created = service.createTask(List.of(new UploadPayload("input.txt", "text/plain", payload.length,
+                    () -> new ByteArrayInputStream(payload))), DocumentFormat.DOCX);
+            TaskSnapshot finished = await(service, created.taskId());
+
+            assertEquals(TaskStatus.FAILED, finished.status());
+            assertEquals("TASK_OUTPUT_LIMIT_EXCEEDED", finished.files().get(0).errorCode());
+            assertFalse(finished.downloadReady());
+        }
+    }
+
+    @Test void sanitizesPortablePathsBeforeWritingBatchZipEntries() throws Exception {
+        FileConverter converter = fixedTextConverter("result");
+        byte[] payload = "input".getBytes(StandardCharsets.UTF_8);
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("safe-name-data"), 1, 2,
+                Duration.ofSeconds(10), Duration.ofHours(1), ParseLimits.defaults());
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(converter))) {
+            TaskSnapshot created = service.createTask(List.of(
+                    new UploadPayload("..\\evil.txt", "text/plain", payload.length, () -> new ByteArrayInputStream(payload)),
+                    new UploadPayload("folder/good.txt", "text/plain", payload.length, () -> new ByteArrayInputStream(payload))
+            ), DocumentFormat.DOCX);
+            TaskSnapshot finished = await(service, created.taskId());
+
+            assertEquals(TaskStatus.SUCCESS, finished.status(), finished.errorMessage());
+            assertEquals(List.of("evil.txt", "good.txt"), finished.files().stream().map(TaskFileResult::fileName).toList());
+            try (ZipFile zip = new ZipFile(service.download(created.taskId()).path().toFile())) {
+                List<String> entries = zip.stream().map(entry -> entry.getName()).toList();
+                assertEquals(List.of("evil.docx", "good.docx"), entries);
+                assertTrue(entries.stream().noneMatch(name -> name.contains("..") || name.contains("/") || name.contains("\\")));
+            }
         }
     }
 
@@ -729,6 +786,22 @@ class ConversionTaskServiceTest {
         Paragraph paragraph = new Paragraph(text, 5d);
         paragraph.setPosition(Position.Absolute).setBox(15d, 15d, width - 30d, 15d);
         return new VirtualPage(width, height).add(paragraph);
+    }
+
+    private FileConverter fixedTextConverter(String outputContent) {
+        return new FileConverter() {
+            @Override public ConversionRoute route() {
+                return ConversionRoute.of(DocumentFormat.TXT, DocumentFormat.DOCX, "test converter");
+            }
+
+            @Override
+            public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                              ParseLimits limits, ConversionProgress progress) throws Exception {
+                Files.writeString(outputPath, outputContent, StandardCharsets.UTF_8);
+                return new ConversionOutput(outputPath,
+                        input.displayName().replaceFirst("(?i)\\.txt$", ".docx"), null, List.of());
+            }
+        };
     }
 
     private PDType0Font loadTestFont(PDDocument pdf, String resource) throws IOException {

@@ -1,4 +1,5 @@
 server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
   port: ${SERVER_PORT:8080}
   shutdown: graceful
   servlet:
@@ -23,8 +24,10 @@ format-converter:
   queue-capacity: ${FORMAT_CONVERTER_QUEUE_CAPACITY:20}
   timeout: ${FORMAT_CONVERTER_TIMEOUT:5m}
   result-ttl: ${FORMAT_CONVERTER_RESULT_TTL:24h}
+  max-files-per-task: ${FORMAT_CONVERTER_MAX_FILES_PER_TASK:100}
   max-file-size: ${FORMAT_CONVERTER_MAX_FILE_BYTES:52428800}
   max-task-upload-bytes: ${FORMAT_CONVERTER_MAX_TASK_UPLOAD_BYTES:262144000}
+  max-task-output-bytes: ${FORMAT_CONVERTER_MAX_TASK_OUTPUT_BYTES:536870912}
   min-free-disk-bytes: ${FORMAT_CONVERTER_MIN_FREE_DISK_BYTES:536870912}
   max-expanded-size: ${FORMAT_CONVERTER_MAX_EXPANDED_BYTES:209715200}
   max-entry-size: ${FORMAT_CONVERTER_MAX_ENTRY_BYTES:41943040}

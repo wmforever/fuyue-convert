@@ -114,9 +114,13 @@ Each file is converted in an independent JVM worker by default. The API process 
 FORMAT_CONVERTER_WORKER_ENABLED=true
 FORMAT_CONVERTER_WORKER_MAX_MEMORY_MB=768
 FORMAT_CONVERTER_WORKER_JAVA_BINARY=/path/to/java
+FORMAT_CONVERTER_MAX_FILES_PER_TASK=100
+FORMAT_CONVERTER_MAX_TASK_UPLOAD_BYTES=262144000
+FORMAT_CONVERTER_MAX_TASK_OUTPUT_BYTES=536870912
+FORMAT_CONVERTER_MIN_FREE_DISK_BYTES=536870912
 ```
 
-The worker memory setting limits the JVM heap only. Apply CPU, total-memory, and process-count limits with Docker/cgroups or systemd at deployment time.
+The service binds to `127.0.0.1` by default. Remote deployments must explicitly set `SERVER_ADDRESS=0.0.0.0` and should also configure `FORMAT_CONVERTER_API_TOKEN`; the bundled web UI accepts the token at the bottom of the page. File count, per-file size, total upload, total output, and free-disk watermarks are enforced. Failed and cancelled inputs are retained for the configured TTL starting when the task finishes. The worker memory setting limits the JVM heap only. Apply CPU, total-memory, and process-count limits with Docker/cgroups or systemd at deployment time.
 
 ## QA
 

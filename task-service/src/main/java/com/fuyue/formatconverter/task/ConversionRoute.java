@@ -32,4 +32,14 @@ public record ConversionRoute(String id, DocumentFormat sourceFormat, DocumentFo
                 "." + targetFormat.extension(), description, RouteStatus.PLANNED, QualityLevel.PLANNED,
                 ConversionStrategy.PLANNED, List.of(), List.of("尚未开放执行"));
     }
+
+    public static ConversionRoute unavailable(DocumentFormat sourceFormat, DocumentFormat targetFormat,
+                                              String description, QualityLevel qualityLevel,
+                                              ConversionStrategy strategy, List<String> requires,
+                                              List<String> limitations) {
+        return new ConversionRoute(sourceFormat.id() + "-to-" + targetFormat.id(), sourceFormat, targetFormat,
+                sourceFormat.label(), targetFormat.label(), "." + sourceFormat.extension(),
+                "." + targetFormat.extension(), description, RouteStatus.UNAVAILABLE, qualityLevel, strategy,
+                requires, limitations);
+    }
 }

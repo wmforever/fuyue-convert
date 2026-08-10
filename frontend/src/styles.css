@@ -42,6 +42,7 @@ h1 { margin: 0; font-size: clamp(27px, 4vw, 40px); letter-spacing: 0; }
 .route-option:hover:not(:disabled), .route-option.selected { background: #edf8f5; }
 .route-option.selected { box-shadow: inset 3px 0 0 #0a7569; }
 .route-option.planned { color: #8a9896; background: transparent; }
+.route-option.unavailable { color: #936052; background: #fffaf7; }
 .route-main { min-width: 0; display: grid; gap: 3px; }
 .route-main strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
 .route-main small { display: -webkit-box; overflow: hidden; color: #728885; font-size: 12px; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
@@ -50,6 +51,7 @@ h1 { margin: 0; font-size: clamp(27px, 4vw, 40px); letter-spacing: 0; }
 .route-badge.beta { color: #7a5b00; background: #fff4ce; }
 .route-badge.experimental { color: #944230; background: #ffeadf; }
 .route-badge.planned { color: #7f8d8b; background: #eef2f1; }
+.route-badge.unavailable { color: #944230; background: #ffeadf; }
 .route-option.planned .route-badge { color: #7f8d8b; background: #eef2f1; }
 .route-empty { margin: 12px; color: #718885; font-size: 13px; text-align: center; }
 .route-meta { display: block; margin-top: 4px; color: #7c6b35; font-size: 12px; font-weight: 800; }
@@ -98,6 +100,13 @@ h1 { margin: 0; font-size: clamp(27px, 4vw, 40px); letter-spacing: 0; }
 .actions .primary { min-width: 154px; }
 .secondary { color: #315d58; background: #edf4f2; }
 .secondary:hover { background: #e0ece9; }
+.access-panel { margin: 14px auto 0; padding: 11px 14px; border: 1px solid #cfe0dc; border-radius: 12px; color: #456864; background: rgba(255,255,255,.68); font-size: 12px; }
+.access-panel summary { cursor: pointer; font-weight: 800; }
+.access-panel summary span { margin-left: 8px; color: #718885; font-weight: 500; }
+.access-panel > div { display: grid; grid-template-columns: minmax(180px, 1fr) auto auto; gap: 8px; margin-top: 10px; }
+.access-panel input { min-width: 0; height: 34px; padding: 0 10px; border: 1px solid #c7dcd7; border-radius: 8px; color: #173f3b; background: #fff; outline: none; }
+.access-panel input:focus { border-color: #0a7569; box-shadow: 0 0 0 3px rgba(10,117,105,.1); }
+.access-panel small { display: block; margin-top: 8px; color: #718885; }
 footer { display: flex; justify-content: center; gap: 34px; padding-top: 22px; color: #6c827e; font-size: 12px; }
 footer span::before { content: "✓"; margin-right: 6px; color: #0a7569; font-weight: 900; }
 .diagnostic-button { min-height: 26px; padding: 0 10px; border: 1px solid #c7ddd8; border-radius: 8px; color: #315d58; background: rgba(255,255,255,.62); font-size: 12px; font-weight: 750; }
@@ -119,6 +128,8 @@ footer span::before { content: "✓"; margin-right: 6px; color: #0a7569; font-we
   .file-panel li { grid-template-columns: 28px 1fr 28px; padding: 11px 12px; }
   .file-size { display: none; }
   .actions { flex-direction: column; }
+  .access-panel > div { grid-template-columns: 1fr 1fr; }
+  .access-panel input { grid-column: 1 / -1; }
   footer { flex-wrap: wrap; gap: 10px 18px; }
   .diagnostic-button { width: 100%; max-width: 180px; }
 }

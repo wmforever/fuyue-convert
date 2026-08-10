@@ -14,6 +14,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class SafeOfdExtractorTest {
     @TempDir Path temp;
 
+    @Test void rejectsInvalidParseLimitsAtStartup() {
+        assertThrows(IllegalArgumentException.class, () -> new ParseLimits(1, 10, 11, 1, 100d, 1));
+        assertThrows(IllegalArgumentException.class, () -> new ParseLimits(1, 10, 1, 0, 100d, 1));
+        assertThrows(IllegalArgumentException.class, () -> new ParseLimits(1, 10, 1, 1, Double.NaN, 1));
+    }
+
     @Test void extractsMinimalSafeContainer() throws Exception {
         Path archive = zip("safe.ofd", "OFD.xml", "<ofd:OFD xmlns:ofd=\"http://www.ofdspec.org/2016\"/>");
         SafeOfdPackage result = new SafeOfdExtractor().extract(archive, temp.resolve("out"), ParseLimits.defaults());

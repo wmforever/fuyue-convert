@@ -94,6 +94,9 @@ public final class ConversionTaskService implements AutoCloseable {
 
     public TaskSnapshot createTask(List<UploadPayload> uploads, DocumentFormat targetFormat) throws IOException {
         if (uploads == null || uploads.isEmpty()) throw new IllegalArgumentException("至少上传一个文件");
+        if (uploads.size() > config.maxFilesPerTask()) {
+            throw new IllegalArgumentException("单任务文件数量超过限制：" + uploads.size() + " > " + config.maxFilesPerTask());
+        }
         if (targetFormat == null) throw new IllegalArgumentException("请选择目标格式");
         long totalUploadBytes = totalUploadBytes(uploads);
         ensureStorageCapacity(totalUploadBytes);
@@ -209,6 +212,7 @@ public final class ConversionTaskService implements AutoCloseable {
         List<TaskFileResult> results = new ArrayList<>();
         List<ConversionWarning> warnings = new ArrayList<>();
         List<Path> outputs = new ArrayList<>();
+        long taskOutputBytes = 0;
         try {
             checkCancellation(record);
             update(record, TaskStatus.CONVERTING, TaskStage.VALIDATING, 2, null, null, warnings, results, false, null);
@@ -219,10 +223,12 @@ public final class ConversionTaskService implements AutoCloseable {
                 InputFile input = record.inputs.get(i);
                 Path work = record.taskDir.resolve("work/file-%04d".formatted(i + 1));
                 Path output = record.taskDir.resolve("output/result-%04d.%s".formatted(i + 1, record.route.targetFormat().extension()));
+                Path produced = null;
                 Integer parsedPageCount = null;
                 AtomicBoolean fileActive = new AtomicBoolean(true);
                 try {
                     ConversionInput conversionInput = new ConversionInput(input.displayName, input.contentType, input.size, input.path);
+                    ensureStorageCapacity(0);
                     ConversionOutput converted = convertWithTimeout(record, conversionInput, work, output, deadline, (stage, withinFile) -> {
                         if (fileActive.get()) {
                             update(record, TaskStatus.CONVERTING, stage, progress(fileIndex, record.inputs.size(), withinFile), null, null, warnings, results, false, null);
@@ -231,9 +237,12 @@ public final class ConversionTaskService implements AutoCloseable {
                     checkCancellation(record);
                     parsedPageCount = converted.pageCount();
                     ConversionGuards.requireOutputFile(converted.path(), config.parseLimits(), "转换");
+                    produced = converted.path();
+                    taskOutputBytes = addTaskOutputBytes(taskOutputBytes, Files.size(produced));
                     warnings.addAll(converted.warnings());
-                    outputs.add(converted.path());
-                    results.add(new TaskFileResult(input.displayName, true, converted.outputName(), parsedPageCount, null, null,
+                    outputs.add(produced);
+                    String outputName = safeOutputName(converted.outputName(), input.displayName, record.route.targetFormat());
+                    results.add(new TaskFileResult(input.displayName, true, outputName, parsedPageCount, null, null,
                             record.route.sourceFormat(), record.route.targetFormat()));
                 } catch (CancellationException e) {
                     throw e;
@@ -245,6 +254,7 @@ public final class ConversionTaskService implements AutoCloseable {
                     results.add(new TaskFileResult(input.displayName, false, null, parsedPageCount, code, safeError(e),
                             record.route.sourceFormat(), record.route.targetFormat()));
                     log.warn("taskId={} fileIndex={} conversion failed code={}", record.id, i, code);
+                    if (produced != null) try { Files.deleteIfExists(produced); } catch (IOException ignored) { }
                     try { Files.deleteIfExists(output); } catch (IOException ignored) { }
                 } finally {
                     fileActive.set(false);
@@ -267,8 +277,10 @@ public final class ConversionTaskService implements AutoCloseable {
                 update(record, TaskStatus.SUCCESS, TaskStage.COMPLETED, 100, null, null, warnings, results,
                         true, results.stream().filter(TaskFileResult::success).findFirst().orElseThrow().outputName());
             } else if (isImageToPdf(record.route)) {
+                ensureStorageCapacity(taskOutputBytes);
                 Path merged = record.taskDir.resolve("output/merged-images.pdf");
                 mergePdfs(outputs, merged);
+                requireTaskOutputFile(merged, "图片合并 PDF");
                 int mergedPages = ConversionGuards.requirePdfPageCount(merged, config.parseLimits());
                 if (mergedPages != outputs.size()) {
                     throw new IOException("图片合并 PDF 页数不一致：" + mergedPages + " != " + outputs.size());
@@ -279,13 +291,16 @@ public final class ConversionTaskService implements AutoCloseable {
                                     + record.inputs.size() + " 张图片。", null));
                 }
                 record.downloadPath = merged;
+                deleteArtifactsExcept(outputs, merged);
                 update(record, TaskStatus.SUCCESS, TaskStage.COMPLETED, 100, null, null, warnings, results,
                         true, "merged-images.pdf");
             } else {
+                ensureStorageCapacity(taskOutputBytes);
                 Path zip = record.taskDir.resolve("output/converted-to-" + record.route.targetFormat().extension() + ".zip");
                 packageZip(zip, outputs, results);
-                ConversionGuards.requireNonEmptyOutputFile(zip, config.parseLimits(), "ZIP 打包");
+                requireTaskOutputFile(zip, "ZIP 打包");
                 record.downloadPath = zip;
+                deleteArtifactsExcept(outputs, zip);
                 update(record, TaskStatus.SUCCESS, TaskStage.COMPLETED, 100, null, null, warnings, results,
                         true, "converted-to-" + record.route.targetFormat().extension() + ".zip");
             }
@@ -293,7 +308,8 @@ public final class ConversionTaskService implements AutoCloseable {
             update(record, TaskStatus.CANCELLED, TaskStage.CANCELLED, record.snapshot().progress(),
                     "TASK_CANCELLED", "任务已取消", warnings, results, false, null);
         } catch (Exception e) {
-            update(record, TaskStatus.FAILED, TaskStage.FAILED, 100, "TASK_FAILED", safeError(e),
+            String code = e instanceof ConversionFailureException failure ? failure.code() : "TASK_FAILED";
+            update(record, TaskStatus.FAILED, TaskStage.FAILED, 100, code, safeError(e),
                     warnings, results, false, null);
             log.error("taskId={} failed at task level type={} reason={}", record.id,
                     e.getClass().getSimpleName(), safeError(e));
@@ -326,7 +342,7 @@ public final class ConversionTaskService implements AutoCloseable {
             int index = 0;
             for (TaskFileResult result : results) {
                 if (!result.success()) continue;
-                String name = uniqueName(result.outputName(), used);
+                String name = uniqueName(safeArchiveEntryName(result.outputName()), used);
                 out.putNextEntry(new ZipEntry(name));
                 Files.copy(outputs.get(index++), out);
                 out.closeEntry();
@@ -372,10 +388,12 @@ public final class ConversionTaskService implements AutoCloseable {
         if (record.deleteRequested.get()) return;
         if (record.cancellationRequested.get() && status != TaskStatus.CANCELLED) return;
         TaskSnapshot old = record.snapshot;
+        Instant updatedAt = Instant.now();
+        Instant expiresAt = isTerminal(status) ? updatedAt.plus(config.resultTtl()) : old.expiresAt();
         record.snapshot = new TaskSnapshot(record.id, status, stage, Math.max(0, Math.min(100, progress)),
                 errorCode, errorMessage, List.copyOf(warnings), List.copyOf(files), ready, downloadName,
                 old.sourceFormat(), old.targetFormat(),
-                old.createdAt(), Instant.now(), old.expiresAt());
+                old.createdAt(), updatedAt, expiresAt);
         persist(record);
     }
 
@@ -407,7 +425,7 @@ public final class ConversionTaskService implements AutoCloseable {
                         snapshot = new TaskSnapshot(snapshot.taskId(), TaskStatus.FAILED, TaskStage.FAILED, 100,
                                 "SERVICE_RESTARTED", "服务重启，原转换任务已终止", snapshot.warnings(), snapshot.files(),
                                 false, null, snapshot.sourceFormat(), snapshot.targetFormat(),
-                                snapshot.createdAt(), Instant.now(), snapshot.expiresAt());
+                                snapshot.createdAt(), Instant.now(), Instant.now().plus(config.resultTtl()));
                         json.writeValue(manifest.toFile(), snapshot);
                     }
                     FileConverter converter = converterByRoute.get(routeKey(snapshot.sourceFormat(), snapshot.targetFormat()));
@@ -457,7 +475,8 @@ public final class ConversionTaskService implements AutoCloseable {
         try {
             Instant now = Instant.now();
             for (TaskRecord task : List.copyOf(tasks.values())) {
-                if (task.snapshot().expiresAt().isBefore(now) && tasks.remove(task.id, task)) {
+                if (isTerminal(task.snapshot().status()) && task.snapshot().expiresAt().isBefore(now)
+                        && tasks.remove(task.id, task)) {
                     task.deleteRequested.set(true);
                     task.cancellationRequested.set(true);
                     Future<?> execution = task.execution;
@@ -538,6 +557,37 @@ public final class ConversionTaskService implements AutoCloseable {
             throw new InsufficientStorageException("无法确认任务存储空间，请检查数据盘状态");
         }
     }
+
+    private long addTaskOutputBytes(long current, long additional) throws ConversionFailureException {
+        long total;
+        try { total = Math.addExact(current, additional); }
+        catch (ArithmeticException e) {
+            throw new ConversionFailureException("TASK_OUTPUT_LIMIT_EXCEEDED", "单任务输出总量超过限制");
+        }
+        if (total > config.maxTaskOutputBytes()) {
+            throw new ConversionFailureException("TASK_OUTPUT_LIMIT_EXCEEDED",
+                    "单任务输出总量超过限制：" + total + " > " + config.maxTaskOutputBytes());
+        }
+        return total;
+    }
+
+    private void requireTaskOutputFile(Path path, String label) throws IOException {
+        if (!Files.isRegularFile(path) || Files.size(path) == 0) throw new IOException(label + "未生成有效输出文件");
+        long size = Files.size(path);
+        if (size > config.maxTaskOutputBytes()) {
+            throw new ConversionFailureException("TASK_OUTPUT_LIMIT_EXCEEDED",
+                    label + "超过单任务输出限制：" + size + " > " + config.maxTaskOutputBytes());
+        }
+    }
+
+    private void deleteArtifactsExcept(List<Path> artifacts, Path retained) {
+        Path keep = retained.toAbsolutePath().normalize();
+        for (Path artifact : artifacts) {
+            if (artifact == null || artifact.toAbsolutePath().normalize().equals(keep)) continue;
+            try { Files.deleteIfExists(artifact); }
+            catch (IOException e) { log.warn("Could not remove intermediate output {}", artifact.getFileName()); }
+        }
+    }
     private void validateStoredFile(Path file, DocumentFormat sourceFormat) throws IOException {
         byte[] header = readHeader(file, 16);
         boolean ok = switch (sourceFormat) {
@@ -578,11 +628,33 @@ public final class ConversionTaskService implements AutoCloseable {
     }
     private String safeDisplayName(String original, int index, DocumentFormat sourceFormat) {
         String fallback = "document-%d.%s".formatted(index + 1, sourceFormat.extension());
-        String file = original == null ? fallback : Paths.get(original).getFileName().toString();
-        file = file.replaceAll("[\\r\\n\\t\\x00-\\x1f]", "_");
-        return file.length() > 180 ? fallback : file;
+        String file = portableBaseName(original);
+        file = file.replaceAll("[\\\\/:*?\"<>|\\x00-\\x1f\\x7f]", "_").strip();
+        return file.isBlank() || file.equals(".") || file.equals("..") || file.length() > 180 ? fallback : file;
     }
-    private String safeName(String name) { return name == null || name.isBlank() ? "未知文件" : Paths.get(name).getFileName().toString(); }
+    private String safeName(String name) {
+        String file = portableBaseName(name).replaceAll("[\\x00-\\x1f\\x7f]", "_");
+        return file.isBlank() ? "未知文件" : file;
+    }
+    private String portableBaseName(String value) {
+        if (value == null || value.isBlank()) return "";
+        String normalized = value.replace('\\', '/');
+        int slash = normalized.lastIndexOf('/');
+        return slash >= 0 ? normalized.substring(slash + 1) : normalized;
+    }
+    private String safeOutputName(String proposed, String inputName, DocumentFormat targetFormat) {
+        String fallbackBase = portableBaseName(inputName);
+        int dot = fallbackBase.lastIndexOf('.');
+        if (dot > 0) fallbackBase = fallbackBase.substring(0, dot);
+        if (fallbackBase.isBlank()) fallbackBase = "result";
+        String fallback = fallbackBase + "." + targetFormat.extension();
+        String safe = portableBaseName(proposed).replaceAll("[\\\\/:*?\"<>|\\x00-\\x1f\\x7f]", "_").strip();
+        return safe.isBlank() || safe.equals(".") || safe.equals("..") || safe.length() > 180 ? fallback : safe;
+    }
+    private String safeArchiveEntryName(String proposed) {
+        String safe = portableBaseName(proposed).replaceAll("[\\\\/:*?\"<>|\\x00-\\x1f\\x7f]", "_").strip();
+        return safe.isBlank() || safe.equals(".") || safe.equals("..") ? "result" : safe;
+    }
     private String routeKey(DocumentFormat sourceFormat, DocumentFormat targetFormat) { return sourceFormat.id() + "->" + targetFormat.id(); }
     private static List<ConversionRoute> defaultPlannedRoutes() {
         return List.of(

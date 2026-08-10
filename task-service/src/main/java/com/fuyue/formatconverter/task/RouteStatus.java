@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum RouteStatus {
     AVAILABLE("available"),
+    UNAVAILABLE("unavailable"),
     PLANNED("planned");
 
     private final String id;

@@ -13,8 +13,10 @@ public class FormatConverterProperties {
     private int queueCapacity = 20;
     private Duration timeout = Duration.ofMinutes(5);
     private Duration resultTtl = Duration.ofHours(24);
+    private int maxFilesPerTask = 100;
     private long maxFileSize = 50L * 1024 * 1024;
     private long maxTaskUploadBytes = 250L * 1024 * 1024;
+    private long maxTaskOutputBytes = 512L * 1024 * 1024;
     private long minFreeDiskBytes = 512L * 1024 * 1024;
     private long maxExpandedSize = 200L * 1024 * 1024;
     private long maxEntrySize = 40L * 1024 * 1024;
@@ -42,12 +44,22 @@ public class FormatConverterProperties {
     public void setTimeout(Duration timeout) { this.timeout = timeout; }
     public Duration getResultTtl() { return resultTtl; }
     public void setResultTtl(Duration resultTtl) { this.resultTtl = resultTtl; }
+    public int getMaxFilesPerTask() { return maxFilesPerTask; }
+    public void setMaxFilesPerTask(int maxFilesPerTask) {
+        if (maxFilesPerTask < 1) throw new IllegalArgumentException("maxFilesPerTask 必须大于 0");
+        this.maxFilesPerTask = maxFilesPerTask;
+    }
     public long getMaxFileSize() { return maxFileSize; }
     public void setMaxFileSize(long maxFileSize) { this.maxFileSize = maxFileSize; }
     public long getMaxTaskUploadBytes() { return maxTaskUploadBytes; }
     public void setMaxTaskUploadBytes(long maxTaskUploadBytes) {
         if (maxTaskUploadBytes < 1) throw new IllegalArgumentException("maxTaskUploadBytes 必须大于 0");
         this.maxTaskUploadBytes = maxTaskUploadBytes;
+    }
+    public long getMaxTaskOutputBytes() { return maxTaskOutputBytes; }
+    public void setMaxTaskOutputBytes(long maxTaskOutputBytes) {
+        if (maxTaskOutputBytes < 1) throw new IllegalArgumentException("maxTaskOutputBytes 必须大于 0");
+        this.maxTaskOutputBytes = maxTaskOutputBytes;
     }
     public long getMinFreeDiskBytes() { return minFreeDiskBytes; }
     public void setMinFreeDiskBytes(long minFreeDiskBytes) {

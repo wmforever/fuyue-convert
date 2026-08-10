@@ -16,6 +16,17 @@ FormatConverter 的 API 以异步任务为中心：上传一个或多个文件�
 
 队列满返回 HTTP 429 / `TASK_QUEUE_FULL`；数据盘低于配置水位返回 HTTP 507 / `INSUFFICIENT_STORAGE`；上传请求或单任务配额超限不会创建任务目录。
 
+## 访问令牌与监听地址
+
+默认只监听 `127.0.0.1`。需要从其他主机访问时，显式设置 `SERVER_ADDRESS=0.0.0.0`，并建议同时配置 `FORMAT_CONVERTER_API_TOKEN`。启用后，所有 `/api/tasks` 请求都必须携带以下任一请求头：
+
+```http
+X-Format-Converter-Token: <token>
+Authorization: Bearer <token>
+```
+
+内置网页可在页面底部填写访问令牌；令牌仅保存在当前浏览器会话中。
+
 ## 创建任务
 
 ```http
@@ -60,7 +71,7 @@ GET /api/tasks/capabilities
 ]
 ```
 
-`status=available` 表示当前服务可执行该路线，不代表该路线已经达到 `stable`。
+`status=available` 表示当前服务可执行该路线，不代表该路线已经达到 `stable`；`status=unavailable` 表示路线已配置但当前依赖检测失败，`limitations` 会给出原因。
 
 `qualityLevel` 表示质量等级：`stable`、`beta`、`experimental`、`planned`。
 
@@ -69,6 +80,15 @@ GET /api/tasks/capabilities
 `requires` 和 `limitations` 给出外部依赖和已知限制，调用方应在 UI 中明确展示。
 
 `status=planned` 表示路线只展示规划，不开放执行。
+
+## 任务资源限制
+
+- `FORMAT_CONVERTER_MAX_FILES_PER_TASK`：单任务文件数，默认 100；
+- `FORMAT_CONVERTER_MAX_TASK_UPLOAD_BYTES`：单任务上传总量，默认 250 MiB；
+- `FORMAT_CONVERTER_MAX_TASK_OUTPUT_BYTES`：单任务成功输出总量，默认 512 MiB；
+- `FORMAT_CONVERTER_MIN_FREE_DISK_BYTES`：转换和打包时必须保留的磁盘安全水位，默认 512 MiB。
+
+批量结果会在打包前累计输出大小、再次检查可用磁盘，并在生成最终 ZIP/PDF 后清理单文件中间产物。
 
 ## 查询任务
 

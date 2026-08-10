@@ -29,8 +29,11 @@ const task = ref(null)
 const busy = ref(false)
 const message = ref('')
 const diagnosticMessage = ref('')
+const apiToken = ref(readStoredToken())
+const limits = ref({ maxFileSize: 50 * 1024 * 1024, maxFilesPerTask: 100, maxTaskUploadBytes: 250 * 1024 * 1024 })
 let pollTimer
 let pollGeneration = 0
+let pollFailures = 0
 
 const canSubmit = computed(() => files.value.length > 0 && !busy.value && selectedRoute.value?.status === 'available')
 const selectedRoute = computed(() => conversions.value.find(route => route.id === selectedRouteId.value) || conversions.value[0])
@@ -40,6 +43,7 @@ const acceptExtensions = computed(() => selectedRoute.value?.sourceFormat === 'j
 const acceptType = computed(() => `${acceptExtensions.value.join(',')},application/${selectedRoute.value?.sourceFormat || 'ofd'}`)
 const statusLabel = computed(() => ({ WAITING: '等待转换', CONVERTING: '正在转换', SUCCESS: '转换完成', FAILED: '转换失败', CANCELLED: '转换已取消' })[task.value?.status] || '')
 const progress = computed(() => task.value?.progress ?? uploadProgress.value)
+const uploadHint = computed(() => `最多 ${limits.value.maxFilesPerTask} 个文件，单文件最大 ${formatBytes(limits.value.maxFileSize)}，总计最大 ${formatBytes(limits.value.maxTaskUploadBytes)}`)
 const routeGroups = computed(() => {
   const keyword = routeSearch.value.trim().toLowerCase()
   const groups = new Map()
@@ -58,8 +62,54 @@ function formatRouteLabel(route) {
 }
 
 function routeBadge(route) {
+  if (route.status === 'unavailable') return '不可用'
   if (route.status !== 'available') return '规划中'
   return ({ stable: '稳定', beta: 'Beta', experimental: '实验' })[route.qualityLevel] || '可用'
+}
+
+function routeAvailability(route) {
+  if (route.status === 'unavailable') return '（当前环境不可用）'
+  if (route.status !== 'available') return '（暂未开放）'
+  return ''
+}
+
+function readStoredToken() {
+  try { return window.sessionStorage.getItem('format-converter-api-token') || '' } catch (_) { return '' }
+}
+
+function authHeaders(initial) {
+  const headers = new Headers(initial || {})
+  const token = apiToken.value.trim()
+  if (token) headers.set('X-Format-Converter-Token', token)
+  return headers
+}
+
+function apiFetch(url, options = {}) {
+  return fetch(url, { ...options, headers: authHeaders(options.headers) })
+}
+
+function responseError(response, fallback) {
+  const error = new Error(response.status === 401 ? '任务 API 需要有效的访问令牌' : fallback)
+  error.status = response.status
+  return error
+}
+
+function saveApiToken() {
+  const token = apiToken.value.trim()
+  apiToken.value = token
+  try {
+    if (token) window.sessionStorage.setItem('format-converter-api-token', token)
+    else window.sessionStorage.removeItem('format-converter-api-token')
+  } catch (_) { /* session storage can be disabled */ }
+  message.value = token ? '访问令牌已保存到当前浏览器会话' : '访问令牌已清除'
+  loadCapabilities()
+  if (task.value && ['WAITING', 'CONVERTING'].includes(task.value.status)) {
+    pollGeneration++
+    clearTimeout(pollTimer)
+    pollFailures = 0
+    busy.value = true
+    poll()
+  }
 }
 
 function strategyLabel(route) {
@@ -73,6 +123,7 @@ function routeMeta(route) {
 }
 
 function routeGroupLabel(route) {
+  if (route.status === 'unavailable') return '当前环境不可用'
   if (route.status !== 'available') return '规划路线'
   if (route.sourceFormat === 'ofd') return 'OFD'
   if (route.sourceFormat === 'pdf') return 'PDF'
@@ -94,6 +145,7 @@ function closeRoutePicker() {
 
 function selectRoute(route) {
   if (busy.value || route.status !== 'available') return
+  if (route.id !== selectedRouteId.value && (files.value.length || task.value)) startNewBatch()
   selectedRouteId.value = route.id
   routeSearch.value = ''
   closeRoutePicker()
@@ -109,8 +161,11 @@ function onRoutePickerKeydown(event) {
 
 async function loadCapabilities() {
   try {
-    const response = await fetch('/api/tasks/capabilities', { cache: 'no-store' })
-    if (!response.ok) return
+    const response = await apiFetch('/api/tasks/capabilities', { cache: 'no-store' })
+    if (!response.ok) {
+      if (response.status === 401) message.value = '任务 API 已启用访问令牌，请在页面底部输入后重试'
+      return
+    }
     const routes = await response.json()
     if (Array.isArray(routes) && routes.length) {
       conversions.value = routes
@@ -124,8 +179,21 @@ async function loadCapabilities() {
   }
 }
 
+async function loadLimits() {
+  try {
+    const response = await fetch('/api/diagnostics', { cache: 'no-store' })
+    if (!response.ok) return
+    const diagnostics = await response.json()
+    const configured = diagnostics?.limits || {}
+    if (Number.isFinite(configured.maxFileSize) && configured.maxFileSize > 0) limits.value.maxFileSize = configured.maxFileSize
+    if (Number.isInteger(configured.maxFilesPerTask) && configured.maxFilesPerTask > 0) limits.value.maxFilesPerTask = configured.maxFilesPerTask
+    if (Number.isFinite(configured.maxTaskUploadBytes) && configured.maxTaskUploadBytes > 0) limits.value.maxTaskUploadBytes = configured.maxTaskUploadBytes
+  } catch (_) { /* keep safe UI defaults */ }
+}
+
 function startNewBatch() {
   pollGeneration++
+  pollFailures = 0
   clearTimeout(pollTimer)
   const previousTaskId = task.value?.taskId
   files.value = []
@@ -133,16 +201,40 @@ function startNewBatch() {
   uploadProgress.value = 0
   busy.value = false
   message.value = ''
-  if (previousTaskId) fetch(`/api/tasks/${previousTaskId}`, { method: 'DELETE' }).catch(() => {})
+  if (previousTaskId) apiFetch(`/api/tasks/${previousTaskId}`, { method: 'DELETE' }).catch(() => {})
 }
 
 function accept(selected) {
   const extensions = acceptExtensions.value.map(extension => extension.toLowerCase())
-  const incoming = Array.from(selected || []).filter(file => extensions.some(extension => file.name.toLowerCase().endsWith(extension)))
+  const selectedFiles = Array.from(selected || [])
+  const matching = selectedFiles.filter(file => extensions.some(extension => file.name.toLowerCase().endsWith(extension)))
+  const incoming = matching.filter(file => file.size <= limits.value.maxFileSize)
   if (incoming.length && task.value && !busy.value) startNewBatch()
   const known = new Set(files.value.map(file => `${file.name}:${file.size}`))
-  for (const file of incoming) if (!known.has(`${file.name}:${file.size}`)) files.value.push(file)
-  if (incoming.length !== (selected?.length || 0)) message.value = `已忽略非 ${acceptExtensions.value.join(' / ').toUpperCase()} 文件`
+  let capacityRejected = 0
+  let quotaRejected = 0
+  let selectedBytes = files.value.reduce((total, file) => total + file.size, 0)
+  for (const file of incoming) {
+    const key = `${file.name}:${file.size}`
+    if (known.has(key)) continue
+    if (files.value.length >= limits.value.maxFilesPerTask) {
+      capacityRejected++
+      continue
+    }
+    if (selectedBytes + file.size > limits.value.maxTaskUploadBytes) {
+      quotaRejected++
+      continue
+    }
+    files.value.push(file)
+    selectedBytes += file.size
+    known.add(key)
+  }
+  const notices = []
+  if (matching.length !== selectedFiles.length) notices.push(`非 ${acceptExtensions.value.join(' / ').toUpperCase()} 文件`)
+  if (incoming.length !== matching.length) notices.push(`超过 ${formatBytes(limits.value.maxFileSize)} 的文件`)
+  if (capacityRejected) notices.push(`超出 ${limits.value.maxFilesPerTask} 个文件上限的部分`)
+  if (quotaRejected) notices.push(`超出 ${formatBytes(limits.value.maxTaskUploadBytes)} 总量上限的部分`)
+  message.value = notices.length ? `已忽略${notices.join('、')}` : ''
 }
 
 function drop(event) {
@@ -166,6 +258,7 @@ async function submit() {
   message.value = ''
   task.value = null
   uploadProgress.value = 0
+  pollFailures = 0
   const data = new FormData()
   files.value.forEach(file => data.append('files', file))
   data.append('targetFormat', selectedRoute.value.targetFormat)
@@ -183,14 +276,17 @@ function upload(data) {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest()
     request.open('POST', '/api/tasks')
+    if (apiToken.value.trim()) request.setRequestHeader('X-Format-Converter-Token', apiToken.value.trim())
     request.upload.onprogress = event => { if (event.lengthComputable) uploadProgress.value = Math.round(event.loaded / event.total * 100) }
     request.onload = () => {
       let body = {}
       try { body = JSON.parse(request.responseText) } catch (_) { /* ignore */ }
       if (request.status >= 200 && request.status < 300) resolve(body)
+      else if (request.status === 401) reject(new Error('任务 API 需要有效的访问令牌'))
       else reject(new Error(body.message || `上传失败（${request.status}）`))
     }
     request.onerror = () => reject(new Error('无法连接转换服务'))
+    request.onabort = () => reject(new Error('上传已取消'))
     request.send(data)
   })
 }
@@ -199,27 +295,56 @@ async function poll() {
   clearTimeout(pollTimer)
   const generation = pollGeneration
   try {
-    const response = await fetch(`/api/tasks/${task.value.taskId}`, { cache: 'no-store' })
-    if (!response.ok) throw new Error('无法查询任务状态')
+    const response = await apiFetch(`/api/tasks/${task.value.taskId}`, { cache: 'no-store' })
+    if (!response.ok) throw responseError(response, '无法查询任务状态')
     const snapshot = await response.json()
     if (generation !== pollGeneration) return
+    pollFailures = 0
+    message.value = ''
     task.value = snapshot
     if (task.value.status === 'WAITING' || task.value.status === 'CONVERTING') pollTimer = setTimeout(poll, 800)
     else busy.value = false
   } catch (error) {
     if (generation !== pollGeneration) return
+    if (error.status === 401) {
+      message.value = error.message
+      busy.value = false
+      return
+    }
+    pollFailures++
     message.value = error.message
-    busy.value = false
+    const delay = Math.min(10000, 800 * (2 ** Math.min(pollFailures, 4)))
+    pollTimer = setTimeout(poll, delay)
   }
 }
 
-function download() { window.location.href = `/api/tasks/${task.value.taskId}/download` }
+async function download() {
+  try {
+    const response = await apiFetch(`/api/tasks/${task.value.taskId}/download`)
+    if (!response.ok) throw responseError(response, `下载失败（${response.status}）`)
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = task.value.downloadName || 'converted-file'
+    document.body.appendChild(anchor)
+    anchor.click()
+    anchor.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 0)
+  } catch (error) {
+    message.value = error.message || '下载失败'
+  }
+}
 
 async function taskAction(action) {
-  const response = await fetch(`/api/tasks/${task.value.taskId}/${action}`, { method: 'POST' })
+  const response = await apiFetch(`/api/tasks/${task.value.taskId}/${action}`, { method: 'POST' })
   let body = {}
   try { body = await response.json() } catch (_) { /* ignore */ }
-  if (!response.ok) throw new Error(body.message || `任务操作失败（${response.status}）`)
+  if (!response.ok) {
+    const error = responseError(response, body.message || `任务操作失败（${response.status}）`)
+    if (body.message && response.status !== 401) error.message = body.message
+    throw error
+  }
   return body
 }
 
@@ -278,8 +403,14 @@ async function copyDiagnostics() {
   }
 }
 
+function successDescription(file) {
+  const pages = Number.isInteger(file.pageCount) ? `，共 ${file.pageCount} 页` : ''
+  return `已转换为 ${selectedRoute.value.targetLabel}${pages}`
+}
+
 onMounted(() => {
   loadCapabilities()
+  loadLimits()
   document.addEventListener('click', onDocumentClick)
 })
 onBeforeUnmount(() => {
@@ -338,7 +469,7 @@ onBeforeUnmount(() => {
                   :key="route.id"
                   type="button"
                   class="route-option"
-                  :class="{ selected: route.id === selectedRouteId, planned: route.status !== 'available' }"
+                  :class="{ selected: route.id === selectedRouteId, planned: route.status === 'planned', unavailable: route.status === 'unavailable' }"
                   :disabled="route.status !== 'available'"
                   role="option"
                   :aria-selected="route.id === selectedRouteId"
@@ -355,7 +486,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
         </div>
-        <span class="route-description">{{ selectedRoute.description }}{{ selectedRoute.status === 'available' ? '' : '（暂未开放）' }}</span>
+        <span class="route-description">{{ selectedRoute.description }}{{ routeAvailability(selectedRoute) }}</span>
         <span v-if="routeMeta(selectedRoute)" class="route-meta">{{ routeMeta(selectedRoute) }}</span>
       </div>
 
@@ -369,7 +500,7 @@ onBeforeUnmount(() => {
       >
         <div class="file-symbol">{{ selectedRoute.sourceLabel }}</div>
         <h2>拖放 {{ selectedRoute.sourceLabel }} 文件到这里</h2>
-        <p>支持单个或批量上传，单文件最大 50 MB</p>
+        <p>支持单个或批量上传，{{ uploadHint }}</p>
         <label class="select-button">
           选择文件
           <input type="file" :accept="acceptType" multiple :disabled="busy || selectedRoute.status !== 'available'" @change="accept($event.target.files); $event.target.value = ''" />
@@ -383,7 +514,7 @@ onBeforeUnmount(() => {
         </div>
         <ul>
           <li v-for="(file, index) in files" :key="`${file.name}:${file.size}`">
-            <span class="mini-icon">O</span>
+            <span class="mini-icon">{{ selectedRoute.sourceFormat.slice(0, 1).toUpperCase() }}</span>
             <span class="file-name">{{ file.name }}</span>
             <span class="file-size">{{ formatBytes(file.size) }}</span>
             <button class="remove" :disabled="busy" title="移除" @click="remove(index)">×</button>
@@ -405,7 +536,7 @@ onBeforeUnmount(() => {
         <div v-if="task?.files?.length" class="result-list">
           <div v-for="file in task.files" :key="file.fileName" :class="file.success ? 'ok' : 'error'">
             <span>{{ file.success ? '✓' : '!' }}</span>
-            <p><strong>{{ file.fileName }}</strong><small>{{ file.success ? `已完整转换 ${file.pageCount ?? 0} 页，生成 ${selectedRoute.targetLabel}` : `${file.errorCode}：${file.errorMessage}` }}</small></p>
+            <p><strong>{{ file.fileName }}</strong><small>{{ file.success ? successDescription(file) : `${file.errorCode}：${file.errorMessage}` }}</small></p>
           </div>
         </div>
 
@@ -425,6 +556,23 @@ onBeforeUnmount(() => {
         <button v-if="task" class="secondary" @click="reset">转换其他文件</button>
       </div>
     </section>
+
+    <details class="access-panel">
+      <summary>访问令牌 <span>{{ apiToken ? '已配置' : '未配置（仅受保护部署需要）' }}</span></summary>
+      <div>
+        <input
+          v-model="apiToken"
+          type="password"
+          autocomplete="off"
+          placeholder="X-Format-Converter-Token"
+          aria-label="API 访问令牌"
+          @keyup.enter="saveApiToken"
+        />
+        <button type="button" class="diagnostic-button" @click="saveApiToken">保存</button>
+        <button type="button" class="diagnostic-button" :disabled="!apiToken" @click="apiToken = ''; saveApiToken()">清除</button>
+      </div>
+      <small>令牌只保存在当前浏览器会话中，关闭标签页后自动清除。</small>
+    </details>
 
     <footer>
       <span>当前开放文档 / 表格 / PDF / 图片</span><span>国产格式已入矩阵</span><span>不经过外部服务</span>

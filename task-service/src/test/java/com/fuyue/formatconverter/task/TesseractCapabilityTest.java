@@ -73,6 +73,8 @@ class TesseractCapabilityTest {
         assertTrue(capability.enabled());
         assertFalse(capability.available());
         assertEquals("OCR_ENGINE_UNAVAILABLE", capability.errorCode());
+        assertEquals(RouteStatus.UNAVAILABLE,
+                new UnavailableOcrConverter(DocumentFormat.PNG, DocumentFormat.TXT, capability).route().status());
     }
 
     @Test
