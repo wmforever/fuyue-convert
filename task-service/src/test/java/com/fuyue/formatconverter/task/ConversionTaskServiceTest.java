@@ -514,6 +514,13 @@ class ConversionTaskServiceTest {
             assertEquals(BigInteger.valueOf(10000), word.getDocument().getBody().getSectPr().getPgSz().getW());
             assertEquals(BigInteger.valueOf(6000), word.getDocument().getBody().getSectPr().getPgSz().getH());
         }
+        try (ZipFile archive = new ZipFile(output.toFile())) {
+            assertNotNull(archive.getEntry("word/fontTable.xml"), "中文 DOCX 应包含字体表");
+            assertNotNull(archive.getEntry("word/fonts/DroidSansFallback.odttf"),
+                    "中文 DOCX 应嵌入许可的回退字体，避免换机后文字不可见");
+            assertTrue(archive.stream().noneMatch(entry -> entry.getName().startsWith("word/media/")),
+                    "字体部件不能被误记为页面图片");
+        }
     }
 
     @Test void preservesDisplayedCoordinatesForRotatedPagesAndRotatedText() throws Exception {

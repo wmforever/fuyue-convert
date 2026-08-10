@@ -20,8 +20,8 @@
 
 ## PDF
 
-1. `PDF -> DOCX` 当前恢复真实文字、基础段落、页面尺寸和方向，但复杂阅读顺序、多栏、矢量图形、图片及复杂表格仍可能不完整。
-2. 纯文字 PDF 不再嵌入整页图片；因此严格 QA 以字符守恒、页数和零图片为准，视觉差异仅作参考。
+1. `PDF -> DOCX` 当前恢复真实文字、基础段落、页面尺寸和方向，但复杂阅读顺序、多栏、矢量图形、图片及复杂表格仍可能不完整。含中日韩文字时会嵌入 Droid Sans Fallback，保证基本字形跨机器可见，但会增大文件且不等同于恢复源字体设计。
+2. 纯文字 PDF 不再嵌入整页图片；因此严格 QA 以字符守恒、页数、零图片和中日韩字体部件完整为准，视觉差异仅作参考。
 3. 扫描型、纯图片型以及含无文字内容页的混合 PDF 在未启用 OCR 时严格返回 `OCR_REQUIRED`。显式配置本地 Tesseract 后，只对无真实文字但有可见内容的页进行 300 DPI OCR，并把 TSV 行坐标转成可编辑 `TextBlock`；文字页保持 PDFBox 提取，空白页不 OCR。OCR 页返回 `OCR_APPLIED`，有内容但识别不到文字时返回 `OCR_NO_TEXT`。
 4. `PDF -> OFD` 已生成符合包结构的真实 OFD：整页 144 DPI 图像层负责版式保真，文字型页面另含源坐标 OFD 文字对象。当前表格、路径、原始图片、透明混合和表单尚未逐项重建为独立对象，因此标记为 experimental，并返回 `FIDELITY_IMAGE_LAYER`。
 5. `PDF -> PNG/JPEG` 默认 160 DPI，可通过 `FORMAT_CONVERTER_IMAGE_DPI` 配置为 36-600。PNG 由 PDFBox 以 ARGB 渲染并写入 pHYs，空白区域保留透明；JPEG 输出 RGB、JFIF DPI 和 0.9 质量，CMYK 内容会转换到显示 RGB。渲染前会按 CropBox、UserUnit 和 DPI 检查像素上限；需要非空密码的 PDF 返回 `PDF_PASSWORD_REQUIRED`，当前任务 API 不接收密码。
