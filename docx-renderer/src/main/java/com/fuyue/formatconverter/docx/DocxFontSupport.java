@@ -18,8 +18,8 @@ import java.util.Locale;
 import java.util.UUID;
 
 /** Embeds the licensed bundled CJK fallback so generated Word files remain portable. */
-final class DocxFontSupport {
-    static final String CJK_FAMILY = "Droid Sans Fallback";
+public final class DocxFontSupport {
+    public static final String CJK_FAMILY = "Droid Sans Fallback";
 
     private static final String CJK_RESOURCE = "/fonts/DroidSansFallback.ttf";
     private static final String FONT_RELATION =
@@ -29,6 +29,19 @@ final class DocxFontSupport {
     private static final byte[] BUNDLED_CJK_FONT = loadBundledCjkFont();
 
     private DocxFontSupport() { }
+
+    public static boolean hasBundledCjkFont() {
+        return BUNDLED_CJK_FONT.length > 0;
+    }
+
+    public static boolean containsCjkText(String value) {
+        return containsCjk(value);
+    }
+
+    public static void embedBundledCjkFont(XWPFDocument document, String text) throws IOException {
+        if (BUNDLED_CJK_FONT.length == 0 || !containsCjk(text)) return;
+        embedFont(document, BUNDLED_CJK_FONT, UUID.randomUUID());
+    }
 
     static String familyFor(TextBlock block) {
         return BUNDLED_CJK_FONT.length > 0 && containsCjk(block.text())
