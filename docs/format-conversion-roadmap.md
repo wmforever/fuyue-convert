@@ -28,7 +28,7 @@ FormatConverter 的路线图以“开源可验证”为原则。短期目标不�
 - PDF -> PNG/JPEG 已支持 36-600 可配置 DPI、文件分辨率元数据、透明 PNG、CMYK 到 RGB JPEG、CropBox/UserUnit 超大页预检以及加密文件稳定失败。
 - Office -> PDF 已增加独立 LibreOffice profile/output、输出结构与页数校验、引擎版本诊断及可选版本锁定，并在 Linux CI 使用 CJK 字体执行 DOCX/XLSX/PPTX 真实转换。
 - 外部转换进程统一使用有界输出捕获和路径脱敏；超时或中断会清理已观察到的整棵进程树，避免 LibreOffice、Poppler 或 Worker 子进程残留。
-- 已建立默认关闭的本地 Tesseract OCR 契约，并开放显式配置的 PNG/JPEG -> TXT experimental 路线；引擎或语言包缺失时能力保持 planned，不允许隐式云调用。
+- 已建立按需调用的本地 Tesseract OCR 契约；官方运行包自动发现内置引擎、动态库和模型，源码/JAR 模式保留显式系统引擎配置，且允许强制关闭。PNG/JPEG -> TXT/DOCX 保持 experimental，不允许隐式云调用。
 - PDF -> TXT/DOCX 已接入同一可选 OCR 引擎：保留文字页的 PDFBox 坐标对象，仅对无文字内容页做 300 DPI OCR，TSV 行恢复为坐标文字；OCR DOCX 不嵌入整页图片。
 - OFD -> TXT/DOCX 已对解析器标记的纯扫描和大图混合页接入本地 OCR：逐个非签章图像识别并映射回源坐标；未配置时两条可编辑/提取路线均严格返回 `OCR_REQUIRED`。
 - DOCX -> UOF 在 LibreOffice 可用时开放 experimental：使用明确的 `UOF text` 导出过滤器写入真实 UOF XML，验证根命名空间，并通过正文和表格文字往返重开测试；WPS/ET/DPS 反向写出因无已验证过滤器继续禁用。
@@ -59,7 +59,7 @@ mode=fidelity|editable
 
 - 已基于 PDFBox 提取文本位置并复用布局模型和 DOCX 渲染器；默认路线不再生成整页图片。
 - 下一步提取原始图片、水平/垂直线和表格，完善多栏阅读顺序、字体映射及复杂文字变换。
-- 扫描型和混合 PDF 当前严格失败，后续接入本地 OCR SPI 后再实现逐页混合解析。
+- 扫描型和混合 PDF 已实现逐页混合解析：未启用 OCR 时严格失败，启用后只补齐无原生文字的扫描内容页。
 
 ### 4. OFD 路线增强
 
@@ -84,7 +84,7 @@ mode=fidelity|editable
 ## 中长期方向
 
 - OS 级资源管理：为 Docker/cgroup、systemd 和 Windows Job Object 提供 CPU、总内存和进程数配置指南。
-- OCR 插件：接入 Tesseract 或其他本地 OCR，不调用云服务。
+- OCR 插件：当前稳定接入本地 Tesseract；后续可在同一能力和错误契约下增加 PaddleOCR，不调用云服务。
 - 字体诊断：转换前识别缺失字体并给出明确警告。
 - 多输出任务：支持 PDF 多页输出 PNG/JPEG ZIP。
 - 插件系统：允许社区贡献可选转换引擎，而不污染核心依赖。

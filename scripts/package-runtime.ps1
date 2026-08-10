@@ -64,6 +64,21 @@ Copy-Item (Join-Path $RootDir "THIRD_PARTY_NOTICES.md") $PackageDir
 New-Item -ItemType Directory -Force (Join-Path $PackageDir "docs") | Out-Null
 Copy-Item (Join-Path $RootDir "docs\known-limitations.md") (Join-Path $PackageDir "docs")
 Copy-Item (Join-Path $RootDir "docs\test-report.md") (Join-Path $PackageDir "docs")
+
+$BundleOcr = if ($env:FORMAT_CONVERTER_BUNDLE_OCR) { $env:FORMAT_CONVERTER_BUNDLE_OCR } else { "auto" }
+if ($BundleOcr -notin @("false", "0")) {
+  $Tesseract = Get-Command tesseract.exe -ErrorAction SilentlyContinue
+  if (-not $Tesseract) {
+    $Tesseract = Get-ChildItem "$env:ProgramFiles", "${env:ProgramFiles(x86)}" -Recurse -File -Filter tesseract.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+  }
+  if ($Tesseract) {
+    & (Join-Path $RootDir "scripts\prepare-ocr-runtime.ps1") -Destination (Join-Path $PackageDir "app\ocr")
+  } elseif ($BundleOcr -in @("true", "1")) {
+    throw "要求内置 OCR，但构建机未安装 Tesseract"
+  } else {
+    Write-Host "构建机未安装 Tesseract，本次运行包不含内置 OCR"
+  }
+}
 New-Item -ItemType Directory -Force (Join-Path $PackageDir "app\docs") | Out-Null
 Copy-Item (Join-Path $RootDir "THIRD_PARTY_NOTICES.md") (Join-Path $PackageDir "app")
 Copy-Item (Join-Path $RootDir "docs\known-limitations.md") (Join-Path $PackageDir "app\docs")
@@ -88,7 +103,7 @@ if "%JAVA_OPTS%"=="" set JAVA_OPTS=-Xms256m -Xmx1g -Djava.awt.headless=true
 if "%AUTO_OPEN_BROWSER%"=="" set AUTO_OPEN_BROWSER=true
 echo Fuyue Convert 正在启动...
 echo 浏览器地址: http://127.0.0.1:%SERVER_PORT%
-"%APP_HOME%\runtime\bin\java.exe" %JAVA_OPTS% -jar "%APP_HOME%\app\fuyue-convert.jar" --server.port=%SERVER_PORT% --format-converter.auto-open-browser=%AUTO_OPEN_BROWSER% --spring.config.additional-location="%APP_HOME%\application.yml"
+"%APP_HOME%\runtime\bin\java.exe" %JAVA_OPTS% -Dformat.converter.app.home="%APP_HOME%" -jar "%APP_HOME%\app\fuyue-convert.jar" --server.port=%SERVER_PORT% --format-converter.auto-open-browser=%AUTO_OPEN_BROWSER% --spring.config.additional-location="%APP_HOME%\application.yml"
 pause
 '@ | Set-Content -Encoding UTF8 (Join-Path $PackageDir "start.bat")
 
@@ -100,7 +115,7 @@ if (-not $env:AUTO_OPEN_BROWSER) { $env:AUTO_OPEN_BROWSER = "true" }
 Write-Host "Fuyue Convert 正在启动..."
 Write-Host "浏览器地址: http://127.0.0.1:$env:SERVER_PORT"
 $JavaOptions = $env:JAVA_OPTS -split " "
-& "$AppHome\runtime\bin\java.exe" @JavaOptions -jar "$AppHome\app\fuyue-convert.jar" "--server.port=$env:SERVER_PORT" "--format-converter.auto-open-browser=$env:AUTO_OPEN_BROWSER" "--spring.config.additional-location=$AppHome\application.yml"
+& "$AppHome\runtime\bin\java.exe" @JavaOptions "-Dformat.converter.app.home=$AppHome" -jar "$AppHome\app\fuyue-convert.jar" "--server.port=$env:SERVER_PORT" "--format-converter.auto-open-browser=$env:AUTO_OPEN_BROWSER" "--spring.config.additional-location=$AppHome\application.yml"
 '@ | Set-Content -Encoding UTF8 (Join-Path $PackageDir "start.ps1")
 
 $ZipPath = Join-Path $DistDir "$PackageName.zip"

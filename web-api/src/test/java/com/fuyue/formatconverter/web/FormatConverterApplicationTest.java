@@ -29,6 +29,8 @@ class FormatConverterApplicationTest {
                 .andExpect(jsonPath("$.office.available").isBoolean())
                 .andExpect(jsonPath("$.ocr.enabled").isBoolean())
                 .andExpect(jsonPath("$.ocr.available").isBoolean())
+                .andExpect(jsonPath("$.ocr.availableLanguages").isArray())
+                .andExpect(jsonPath("$.ocr.message").isNotEmpty())
                 .andExpect(jsonPath("$.ocr.binary").doesNotExist())
                 .andExpect(jsonPath("$.office.binary").doesNotExist());
     }
@@ -82,6 +84,8 @@ class FormatConverterApplicationTest {
                 .andExpect(jsonPath("$.office.available").isBoolean())
                 .andExpect(jsonPath("$.ocr.enabled").isBoolean())
                 .andExpect(jsonPath("$.ocr.available").isBoolean())
+                .andExpect(jsonPath("$.ocr.availableLanguages").isArray())
+                .andExpect(jsonPath("$.ocr.message").isNotEmpty())
                 .andExpect(jsonPath("$.limits.maxFileSize").isNumber())
                 .andExpect(jsonPath("$.limits.maxTaskUploadBytes").isNumber())
                 .andExpect(jsonPath("$.limits.minFreeDiskBytes").isNumber())

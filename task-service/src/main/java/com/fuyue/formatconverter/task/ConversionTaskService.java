@@ -594,6 +594,8 @@ public final class ConversionTaskService implements AutoCloseable {
                 ConversionRoute.planned(DocumentFormat.JPG, DocumentFormat.PDF, "将 JPEG 图片合成为 PDF。"),
                 ConversionRoute.planned(DocumentFormat.PNG, DocumentFormat.TXT, "使用显式配置的本地 OCR 提取 PNG 文字。"),
                 ConversionRoute.planned(DocumentFormat.JPG, DocumentFormat.TXT, "使用显式配置的本地 OCR 提取 JPEG 文字。"),
+                ConversionRoute.planned(DocumentFormat.PNG, DocumentFormat.DOCX, "使用显式配置的本地 OCR 生成可编辑 Word。"),
+                ConversionRoute.planned(DocumentFormat.JPG, DocumentFormat.DOCX, "使用显式配置的本地 OCR 生成可编辑 Word。"),
                 ConversionRoute.planned(DocumentFormat.OFD, DocumentFormat.PDF, "将 OFD 直接渲染为 PDF。"),
                 ConversionRoute.planned(DocumentFormat.PDF, DocumentFormat.OFD, "将 PDF 转为 OFD，需接入 OFD 生成器并明确版式保真策略。"),
                 ConversionRoute.planned(DocumentFormat.OFD, DocumentFormat.XLSX, "从 OFD 表格识别结果导出 Excel。"),

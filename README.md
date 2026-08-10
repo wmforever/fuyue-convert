@@ -36,7 +36,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | PDF -> DOCX | beta | 可编辑优先 | 恢复真实文字、基础段落、页面尺寸和方向；默认严格拒绝扫描页，显式配置本地 OCR 后把扫描页识别为带坐标的可编辑文字且不嵌入整页图。 |
 | PDF -> OFD | experimental | 版式优先 | 生成真实 OFD 包；144 DPI 页面图像层保留视觉，文字型 PDF 同时写入源坐标 OFD 文字对象。复杂对象尚未逐项结构化重建。 |
 | PNG/JPG -> PDF | stable | 版式优先 | 读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。同格式多图按上传顺序合并为多页 PDF。 |
-| PNG/JPG -> TXT | experimental/按配置 | OCR 提取 | 默认禁用；只有显式启用且本地 Tesseract 与所需语言包可用时开放，结果返回 `OCR_APPLIED` 并要求人工复核。 |
+| PNG/JPG -> TXT/DOCX | experimental/按需 | OCR 提取 | 官方运行包和 Docker 镜像内置 Tesseract；源码/JAR 模式也可使用显式配置的系统引擎。TXT 输出识别文字，DOCX 将坐标文字映射到 `DocumentModel` 后生成真实可编辑文本；两者均返回页级置信度和 OCR 警告。 |
 | WPS/ET/DPS/UOF -> OOXML | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |
 | DOCX -> UOF | experimental | 兼容优先 | LibreOffice 可用时调用明确的 `UOF text` 导出过滤器写入真实 UOF XML，并验证 UOF 根元素；已覆盖正文和表格文字的 LibreOffice 往返打开。 |
 
@@ -46,10 +46,12 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 - Poppler：用于 PDF 渲染为 PNG/JPEG 和视觉回归比较。
 - `FORMAT_CONVERTER_IMAGE_DPI`：PDF 图片导出的渲染分辨率，默认 `160`，允许 `36-600`；异常配置会在启动转换器时明确失败。
 - `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION`：可选的 LibreOffice 版本锁定片段（如 `24.8`）；实际 `--version` 不匹配时 Office 引擎会标记为不可用，版本可在 `/api/health` 和 `/api/diagnostics` 查看。
-- 本地 OCR 默认关闭。设置 `FORMAT_CONVERTER_OCR_ENABLED=true` 后，使用 `FORMAT_CONVERTER_TESSERACT_BINARY` 指定 Tesseract（留空则从 `PATH` 查找），并以 `FORMAT_CONVERTER_OCR_LANGUAGES` 配置语言，默认 `chi_sim+eng`。缺少引擎或语言包时图片 OCR 路线保持 planned，PDF/OFD 继续严格失败；启用、版本和语言状态可从 `/api/health` 或 `/api/diagnostics` 查看，接口不会暴露绝对路径。
+- 官方运行包会在 `app/ocr` 携带 Tesseract、动态库及 `eng`、`chi_sim`、`chi_sim_vert` 模型，并自动启用 OCR 能力；它仍只在图片 OCR 路线或检测出的扫描页上执行，不参与普通原生文字转换。设置 `FORMAT_CONVERTER_OCR_ENABLED=false` 可强制关闭。源码/独立 JAR 模式可设置 `FORMAT_CONVERTER_OCR_ENABLED=true`，用 `FORMAT_CONVERTER_TESSERACT_BINARY` 指定系统 Tesseract（留空则从 `PATH` 查找）。其余限制参数包括超时、跨 Worker 并发、像素上限和置信度阈值；状态接口通过 `ocr.bundled` 标识当前是否使用内置运行时。
+- OCR 不参与固定版式渲染，也不替换 PDF/OFD 原生文字解析。混合文档逐页处理：有原生文字的页保留原对象，只有扫描页进入 OCR；页面模型不连续时返回 `OCR_PAGE_MISSING`，无文字、低于最低置信度、超时和资源终止分别返回 `OCR_NO_TEXT`、`OCR_LOW_CONFIDENCE`、`OCR_TIMEOUT`、`OCR_RESOURCE_EXHAUSTED`，不会生成不完整结果。
 - 系统字体：影响 Office 输出的分页、行距和文字替换；基础 PDF 文本路线内置中文回退字体，也可通过 `FORMAT_CONVERTER_PDF_FONT` 指定 TrueType 字体。TXT -> DOCX 可通过 `FORMAT_CONVERTER_DOCX_FONT` 和 `FORMAT_CONVERTER_DOCX_CJK_FONT` 配置西文及东亚字体名。
 
 质量标准见 [docs/quality-standard.md](docs/quality-standard.md)。最新本地 QA 报告见 `qa-samples/report/qa-report.md`。
+OCR 是否需要安装、不同运行方式的依赖责任和启用示例见 [docs/ocr-deployment.md](docs/ocr-deployment.md)。
 
 ## 快速开始
 
@@ -59,6 +61,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 - Maven 3.9+
 - 可选：LibreOffice 或 `soffice`
 - 可选：Poppler `pdftoppm`
+- 源码/独立 JAR 可选：Tesseract 5.x 与所需语言包；官方运行包和 Docker 已内置
 
 构建：
 

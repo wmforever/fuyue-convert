@@ -42,6 +42,18 @@ cp README.md README_EN.md LICENSE THIRD_PARTY_NOTICES.md "$PACKAGE_DIR/"
 mkdir -p "$PACKAGE_DIR/docs"
 cp docs/known-limitations.md docs/test-report.md "$PACKAGE_DIR/docs/"
 
+BUNDLE_OCR="${FORMAT_CONVERTER_BUNDLE_OCR:-auto}"
+if [[ "$BUNDLE_OCR" != "false" && "$BUNDLE_OCR" != "0" ]]; then
+  if command -v tesseract >/dev/null 2>&1; then
+    "$ROOT_DIR/scripts/prepare-ocr-runtime.sh" "$PACKAGE_DIR/app/ocr"
+  elif [[ "$BUNDLE_OCR" == "true" || "$BUNDLE_OCR" == "1" ]]; then
+    echo "要求内置 OCR，但构建机未安装 Tesseract" >&2
+    exit 1
+  else
+    echo "构建机未安装 Tesseract，本次运行包不含内置 OCR"
+  fi
+fi
+
 if [[ -x "$JLINK_BIN" ]]; then
   "$JLINK_BIN" \
     --add-modules java.base,java.compiler,java.desktop,java.instrument,java.logging,java.management,java.naming,java.net.http,java.prefs,java.security.jgss,java.sql,jdk.crypto.ec,jdk.unsupported \
@@ -67,7 +79,7 @@ AUTO_OPEN_BROWSER="${AUTO_OPEN_BROWSER:-true}"
 
 echo "Fuyue Convert 正在启动..."
 echo "浏览器地址: $URL"
-exec "$JAVA_BIN" $JAVA_OPTS -jar "$APP_HOME/app/fuyue-convert.jar" \
+exec "$JAVA_BIN" $JAVA_OPTS -Dformat.converter.app.home="$APP_HOME" -jar "$APP_HOME/app/fuyue-convert.jar" \
   "--server.port=${SERVER_PORT:-8080}" \
   "--format-converter.auto-open-browser=$AUTO_OPEN_BROWSER" \
   "--spring.config.additional-location=$APP_HOME/application.yml"

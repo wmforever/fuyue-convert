@@ -18,9 +18,9 @@ public final class DefaultConverterRegistry {
         OfdrwParser parser = new OfdrwParser();
         PageLayoutAnalyzer analyzer = new PageLayoutAnalyzer();
         PoiDocxRenderer renderer = new PoiDocxRenderer();
-        var ocrSettings = TesseractOcrConverter.configuredSettings();
-        PdfOcrSupport pdfOcr = ocrSettings.map(PdfOcrSupport::new).orElse(null);
-        OfdOcrSupport ofdOcr = ocrSettings.map(OfdOcrSupport::new).orElse(null);
+        var ocrCapability = TesseractOcrConverter.detectConfigured();
+        PdfOcrSupport pdfOcr = ocrCapability.enabled() ? new PdfOcrSupport(ocrCapability) : null;
+        OfdOcrSupport ofdOcr = ocrCapability.enabled() ? new OfdOcrSupport(ocrCapability) : null;
         List<FileConverter> converters = new ArrayList<>();
         converters.add(new OfdToDocxConverter(extractor, parser, analyzer, renderer, ofdOcr));
         converters.add(new OfdToTextConverter(extractor, parser, analyzer, ofdOcr));
@@ -40,10 +40,17 @@ public final class DefaultConverterRegistry {
         converters.add(new PdfToJpgConverter());
         converters.add(new ImageToPdfConverter(DocumentFormat.PNG));
         converters.add(new ImageToPdfConverter(DocumentFormat.JPG));
-        ocrSettings.ifPresent(settings -> {
-            converters.add(new TesseractOcrConverter(DocumentFormat.PNG, settings));
-            converters.add(new TesseractOcrConverter(DocumentFormat.JPG, settings));
-        });
+        if (ocrCapability.available()) {
+            converters.add(new TesseractOcrConverter(DocumentFormat.PNG, ocrCapability.settings()));
+            converters.add(new TesseractOcrConverter(DocumentFormat.JPG, ocrCapability.settings()));
+            converters.add(new ImageOcrToDocxConverter(DocumentFormat.PNG, ocrCapability.settings(), analyzer, renderer));
+            converters.add(new ImageOcrToDocxConverter(DocumentFormat.JPG, ocrCapability.settings(), analyzer, renderer));
+        } else if (ocrCapability.enabled()) {
+            converters.add(new UnavailableOcrConverter(DocumentFormat.PNG, DocumentFormat.TXT, ocrCapability));
+            converters.add(new UnavailableOcrConverter(DocumentFormat.JPG, DocumentFormat.TXT, ocrCapability));
+            converters.add(new UnavailableOcrConverter(DocumentFormat.PNG, DocumentFormat.DOCX, ocrCapability));
+            converters.add(new UnavailableOcrConverter(DocumentFormat.JPG, DocumentFormat.DOCX, ocrCapability));
+        }
 
         if (officeBinary != null) {
             Path binary = officeBinary.toAbsolutePath().normalize();

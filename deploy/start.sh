@@ -19,10 +19,10 @@ mkdir -p "$LOG_DIR"
 JAVA_BIN="${JAVA_BIN:-java}"
 JAVA_OPTS="${JAVA_OPTS:--Xms512m -Xmx2g -Djava.awt.headless=true}"
 if [[ -f "$APP_DIR/application.yml" ]]; then
-  nohup "$JAVA_BIN" $JAVA_OPTS -jar "$JAR_FILE" \
+  nohup "$JAVA_BIN" $JAVA_OPTS -Dformat.converter.app.home="$APP_DIR" -jar "$JAR_FILE" \
     "--spring.config.additional-location=$APP_DIR/application.yml" >"$LOG_DIR/console.log" 2>&1 &
 else
-  nohup "$JAVA_BIN" $JAVA_OPTS -jar "$JAR_FILE" >"$LOG_DIR/console.log" 2>&1 &
+  nohup "$JAVA_BIN" $JAVA_OPTS -Dformat.converter.app.home="$APP_DIR" -jar "$JAR_FILE" >"$LOG_DIR/console.log" 2>&1 &
 fi
 echo $! > "$PID_FILE"
 echo "服务已启动，PID=$!，日志=$LOG_DIR/console.log"

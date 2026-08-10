@@ -57,6 +57,10 @@ try {
     Start-Sleep -Seconds 1
   }
   if (-not $Healthy) { throw "Windows 发布包健康检查失败" }
+  $OcrDirectory = Join-Path $Jar.Directory.FullName "ocr"
+  if ((Test-Path $OcrDirectory) -and -not $Health.ocr.bundled) {
+    throw "Windows 发布包内置 OCR 未被应用自动发现"
+  }
 
   $InputFile = Join-Path $WorkDir "worker-smoke.txt"
   $OutputFile = Join-Path $WorkDir "worker-smoke.docx"

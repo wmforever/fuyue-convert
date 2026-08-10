@@ -36,7 +36,7 @@ Status legend:
 | PDF -> DOCX | beta | editability first | Restores real text, basic paragraphs, page sizes, and orientation. Scanned pages fail by default; explicit local OCR converts them to positioned editable text without embedding full-page images. |
 | PDF -> OFD | experimental | fidelity first | Produces a real OFD package. A 144-DPI page image preserves appearance, while text PDFs also receive source-positioned OFD text objects. Complex objects are not yet reconstructed individually. |
 | PNG/JPG -> PDF | stable | layout first | Reads PNG pHYs, JPEG JFIF/EXIF DPI, and EXIF orientation; transparent PNG composition is preserved. Missing DPI defaults to 96 with a warning. Same-format batches merge in upload order. |
-| PNG/JPG -> TXT | experimental/configured | OCR extraction | Disabled by default. Available only when local Tesseract and every requested language model are explicitly configured; outputs carry `OCR_APPLIED` and require human review. |
+| PNG/JPG -> TXT/DOCX | experimental/on demand | OCR extraction | Official runtime bundles and the Docker image include Tesseract; source/JAR deployments can use an explicitly configured system engine. TXT emits recognized text; DOCX maps positioned OCR text through `DocumentModel` to real editable text. Both expose page confidence and OCR warnings. |
 | WPS/ET/DPS/UOF -> OOXML | experimental | compatibility first | Depends on LibreOffice import support. UOF is converted directly to editable DOCX, so pagination and object positions may change. |
 | DOCX -> UOF | experimental | compatibility first | When LibreOffice is available, uses the explicit `UOF text` export filter to write real UOF XML and validates the UOF root. Paragraph and table text are covered by a LibreOffice reopen round trip. |
 
@@ -46,10 +46,12 @@ External dependencies:
 - Poppler: used for PDF to PNG/JPEG rendering and visual regression checks.
 - `FORMAT_CONVERTER_IMAGE_DPI`: PDF image-export resolution, default `160`, allowed range `36-600`; invalid configuration fails explicitly when the converter starts.
 - `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION`: optional LibreOffice version lock fragment such as `24.8`. A mismatching `--version` marks the Office engine unavailable; the detected version is exposed by `/api/health` and `/api/diagnostics`.
-- Local OCR is off by default. Set `FORMAT_CONVERTER_OCR_ENABLED=true`, optionally point `FORMAT_CONVERTER_TESSERACT_BINARY` at Tesseract, and set `FORMAT_CONVERTER_OCR_LANGUAGES` (default `chi_sim+eng`). Missing engines or models leave image OCR planned while PDF/OFD remain strict. `/api/health` and `/api/diagnostics` expose enablement, version, and languages without revealing absolute paths.
+- Official runtime bundles carry Tesseract, its native libraries, and the `eng`, `chi_sim`, and `chi_sim_vert` models under `app/ocr`; the application detects and enables this capability automatically. OCR is still invoked only by explicit image OCR routes or detected scan pages. Set `FORMAT_CONVERTER_OCR_ENABLED=false` to disable it. Source/standalone-JAR deployments can set the value to `true` and optionally select a system binary. Health and diagnostics expose `ocr.bundled` along with version, models, limits, confidence thresholds, and capability errors.
+- OCR never replaces native PDF/OFD parsing and is not used for fixed-layout rendering. Mixed documents are processed page by page. Missing page models, no recognized text, confidence below the hard threshold, timeouts, and resource termination return `OCR_PAGE_MISSING`, `OCR_NO_TEXT`, `OCR_LOW_CONFIDENCE`, `OCR_TIMEOUT`, and `OCR_RESOURCE_EXHAUSTED` instead of publishing partial output.
 - System fonts: affect pagination, line spacing, and font substitution in Office output. Basic PDF text routes include fallback fonts, and a custom TrueType font can be selected with `FORMAT_CONVERTER_PDF_FONT`. TXT -> DOCX font names can be configured with `FORMAT_CONVERTER_DOCX_FONT` and `FORMAT_CONVERTER_DOCX_CJK_FONT`.
 
 See [docs/quality-standard.md](docs/quality-standard.md) for quality definitions.
+See [docs/ocr-deployment.md](docs/ocr-deployment.md) for the deployment ownership and enablement contract of the optional local OCR engine.
 
 ## Quick Start
 
@@ -59,6 +61,7 @@ Requirements:
 - Maven 3.9+
 - Optional: LibreOffice or `soffice`
 - Optional: Poppler `pdftoppm`
+- Optional for source/standalone JAR: Tesseract 5.x and models; official runtime bundles and Docker include them
 
 Build:
 

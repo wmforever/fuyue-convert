@@ -84,7 +84,7 @@ GET /api/tasks/{taskId}
 - `FAILED`
 - `CANCELLED`
 
-`stage` 提供内部阶段，`progress` 为 0 到 100。`warnings` 是非致命限制，例如字体替代、OCR 未配置或图像层保真兜底。`files` 给出每个文件的成功或失败结果；成功结果中的 `pageCount` 是目标文档实际写入页数。
+`stage` 提供内部阶段，`progress` 为 0 到 100。`warnings` 是非致命限制，例如字体替代、OCR 低置信度或图像层保真兜底。OCR 警告的 `confidence` 为 0-1 的页面平均置信度，非 OCR 警告为 `null`。`files` 给出每个文件的成功或失败结果；成功结果中的 `pageCount` 是目标文档实际写入页数。OCR 常见稳定失败码包括 `OCR_REQUIRED`、`OCR_ENGINE_UNAVAILABLE`、`OCR_LANGUAGE_MISSING`、`OCR_PAGE_MISSING`、`OCR_NO_TEXT`、`OCR_LOW_CONFIDENCE`、`OCR_TIMEOUT`、`OCR_CAPACITY_EXCEEDED`、`OCR_RESOURCE_EXHAUSTED` 和 `OCR_ENGINE_FAILED`。
 
 ## 下载
 
@@ -123,6 +123,8 @@ DELETE /api/tasks/{taskId}
 ```http
 GET /api/health
 ```
+
+`ocr` 节点返回 `enabled`、`available`、`bundled`、`binaryName`、`version`、`requestedLanguages`、`availableLanguages`、`timeoutSeconds`、`maxConcurrency`、`maxImagePixels`、`minimumConfidence`、`errorCode` 和脱敏后的 `message`。`bundled=true` 表示应用正在使用发布包内置运行时；健康接口只报告能力，不会因为 OCR 被强制关闭而把整个服务标记为 DOWN。
 
 返回服务版本、解析器、Java、操作系统、CPU 架构和 Office 引擎状态，不包含文件正文或敏感内容。
 

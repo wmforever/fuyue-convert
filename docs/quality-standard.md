@@ -39,7 +39,7 @@ FormatConverter 使用“路线质量等级 + 可复现 QA 证据”描述转换
 - PDF -> PNG/JPEG 的 stable 门禁要求配置 DPI 对应的像素尺寸与文件元数据一致、PNG 透明画布不被白色填平、CMYK 内容可输出为 RGB JPEG、多页 ZIP 顺序连续；CropBox/UserUnit 导致的超大位图必须在分配内存前失败，加密文件必须返回稳定错误码。
 - DOCX/XLSX/PPTX -> PDF 的 beta 门禁要求使用真实 LibreOffice headless 转换、输出可由 PDFBox 重新打开且页数一致，并能提取各源格式的拉丁与 CJK 测试文字。CI 在 Linux 安装 LibreOffice 和 Noto CJK 字体执行独立集成回归；生产部署应额外锁定引擎版本和字体镜像。
 - 外部进程门禁要求输出始终被主动排空但只保留有限字节，持久化日志与异常消息不得出现本地绝对路径；通用转换器、Worker 响应、任务 manifest 和 API 错误也必须统一清理 Unix/Windows 绝对路径、控制字符并限制长度。超时及线程中断必须终止父进程和已派生子进程，并由自动化测试验证子 PID 不再存活。
-- OCR 路线必须默认关闭、显式启用、校验本地引擎和全部语言包，且输出带 `OCR_APPLIED`。独立 Linux CI 安装真实 Tesseract，验证图片印刷体识别和命令参数安全；PDF 混合页要求文字页不重复 OCR、扫描页 TXT 内容可提取、DOCX 是可编辑文字且没有整页图片；OFD 混合页要求结构化文字不丢失、扫描图像文字可提取且 DOCX 同时保留原图保真层。未配置时 PDF/OFD 提取与可编辑路线必须返回 `OCR_REQUIRED`，有内容但 OCR 无文字必须返回 `OCR_NO_TEXT`。
+- OCR 路线必须按需调用、校验引擎和全部语言包，且输出带 `OCR_APPLIED`、0-1 页级平均置信度和必要的 `OCR_LOW_CONFIDENCE` 警告。官方发布包内置 OCR 时允许自动启用能力，但不能把 OCR 变成原生文字页或固定版式渲染的默认步骤，并必须允许通过 `FORMAT_CONVERTER_OCR_ENABLED=false` 强制关闭。独立 CI 验证内置运行时发现、动态库/模型自检、中英文、数字、标点、旋转图片、图片到可编辑 DOCX 和命令参数安全；PDF/OFD 混合页仍只补齐扫描页。未启用时扫描提取必须返回 `OCR_REQUIRED`；能力缺失、页面模型缺页、无文字、低于硬阈值、超时或资源终止必须返回对应稳定错误码且不发布不完整输出。
 - DOCX -> UOF 的 experimental 门禁要求输出是含 UOF 命名空间和 `uof:UOF` 根元素的真实 XML，并由 LibreOffice 重新打开为 DOCX 验证正文段落与表格单元格文字；仅生成文件或修改扩展名不算通过。WPS/ET/DPS 反向写出在没有真实过滤器和重开证据前保持 planned。
 - `visualPass`：源文件和目标文件经当前环境二次渲染后的差异低于参考阈值。它受字体和渲染引擎影响，与内容或内嵌页面是否严格一致分开记录。
 - `practicalPass`：视觉用例中等同于 `visualPass`；数据和内容用例中等同于 `strictPass`。
