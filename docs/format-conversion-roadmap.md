@@ -16,7 +16,7 @@ FormatConverter 的路线图以“开源可验证”为原则。短期目标不�
 - UOF -> DOCX 改为 LibreOffice 直接输出可编辑对象，并以 experimental 标记分页和对象位置兼容风险。
 - OFD -> PDF 改为基于统一布局模型的固定版式渲染，保留页面尺寸、文字坐标、图片、签章和路径线条。
 - OFD -> TXT 增加多栏阅读顺序、表格行列输出，以及纯扫描/混合扫描页面的 `OCR_REQUIRED` 严格失败契约。
-- PDF -> OFD 开放 experimental 固定版式路线，写入真实 OFD 包、逐页尺寸、保真图像层和文字对象层。
+- PDF -> OFD 开放 experimental 固定版式路线，写入真实 OFD 包、逐页尺寸、160 DPI 保真图像层和文字对象层；图像层优先使用 Poppler，并保留 PDFBox 回退。
 - OFD -> XLSX 开放 experimental 数据路线，将有线规则表格写入真实单元格、分页工作表和合并区域，并对无表格与扫描件严格失败。
 - OFD -> PNG/JPEG 开放 beta 固定版式路线，160 DPI 逐页渲染，单页返回图片、多页按顺序打包 ZIP，并覆盖扫描图像页。
 - PDF -> TXT 接入坐标布局模型、多栏阅读顺序和换页边界，并对纯扫描页及混合文档中的无文字内容页严格返回 `OCR_REQUIRED`。

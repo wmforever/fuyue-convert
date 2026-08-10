@@ -34,7 +34,7 @@ Status legend:
 | PDF -> TXT | beta | extraction | Extracts text by page coordinates and multi-column reading order with page boundaries. Scanned pages fail with `OCR_REQUIRED` by default; explicit local OCR fills only content pages that have no real text. |
 | PDF -> PNG/JPG | stable | rendering | Defaults to 160 DPI (configurable from 36-600); PNG preserves a transparent canvas, JPEG converts to RGB at 0.9 quality, and multi-page output is zipped. |
 | PDF -> DOCX | beta | editability first | Restores real text, basic paragraphs, page sizes, and orientation. Scanned pages fail by default; explicit local OCR converts them to positioned editable text without embedding full-page images. |
-| PDF -> OFD | experimental | fidelity first | Produces a real OFD package. A 144-DPI page image preserves appearance, while text PDFs also receive source-positioned OFD text objects. Complex objects are not yet reconstructed individually. |
+| PDF -> OFD | experimental | fidelity first | Produces a real OFD package. A 160-DPI page image preserves appearance, while text PDFs also receive source-positioned OFD text objects. Poppler is preferred with a PDFBox fallback; complex objects are not yet reconstructed individually. |
 | PNG/JPG -> PDF | stable | layout first | Reads PNG pHYs, JPEG JFIF/EXIF DPI, and EXIF orientation; transparent PNG composition is preserved. Missing DPI defaults to 96 with a warning. Same-format batches merge in upload order. |
 | PNG/JPG -> TXT/DOCX | experimental/on demand | OCR extraction | Official runtime bundles and the Docker image include Tesseract; source/JAR deployments can use an explicitly configured system engine. TXT emits recognized text; DOCX maps positioned OCR text through `DocumentModel` to real editable text. Both expose page confidence and OCR warnings. |
 | WPS/ET/DPS/UOF -> OOXML | experimental | compatibility first | Depends on LibreOffice import support. UOF is converted directly to editable DOCX, so pagination and object positions may change. |
@@ -63,7 +63,7 @@ Requirements:
 - Optional: Poppler `pdftoppm`
 - Optional for source/standalone JAR: Tesseract 5.x and models; official runtime bundles and Docker include them
 
-If `pdftoppm` is not on `PATH`, set `PDFTOPPM_BIN=/absolute/path/to/pdftoppm`. OFD image and PDF-to-JPEG routes prefer Poppler and fall back to PDFBox when it is unavailable; PDF-to-PNG always uses PDFBox to preserve transparency semantics.
+If `pdftoppm` is not on `PATH`, set `PDFTOPPM_BIN=/absolute/path/to/pdftoppm`. OFD image, PDF-to-OFD, and PDF-to-JPEG routes prefer Poppler and fall back to PDFBox when it is unavailable; PDF-to-PNG always uses PDFBox to preserve transparency semantics.
 
 Build:
 

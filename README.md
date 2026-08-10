@@ -34,7 +34,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | PDF -> TXT | beta | 内容提取 | 按页面坐标和多栏顺序提取文字并保留换页；默认对扫描页返回 `OCR_REQUIRED`，显式配置本地 OCR 后仅识别缺少文字的内容页。 |
 | PDF -> PNG/JPG | stable | 版式渲染 | 默认 160 DPI（可配置 36-600）；PNG 保留透明画布，JPEG 转为 RGB 并使用 0.9 质量；多页自动输出 ZIP。 |
 | PDF -> DOCX | beta | 可编辑优先 | 恢复真实文字、基础段落、页面尺寸和方向；默认严格拒绝扫描页，显式配置本地 OCR 后把扫描页识别为带坐标的可编辑文字且不嵌入整页图。 |
-| PDF -> OFD | experimental | 版式优先 | 生成真实 OFD 包；144 DPI 页面图像层保留视觉，文字型 PDF 同时写入源坐标 OFD 文字对象。复杂对象尚未逐项结构化重建。 |
+| PDF -> OFD | experimental | 版式优先 | 生成真实 OFD 包；160 DPI 页面图像层保留视觉，文字型 PDF 同时写入源坐标 OFD 文字对象。优先使用 Poppler 并保留 PDFBox 回退；复杂对象尚未逐项结构化重建。 |
 | PNG/JPG -> PDF | stable | 版式优先 | 读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。同格式多图按上传顺序合并为多页 PDF。 |
 | PNG/JPG -> TXT/DOCX | experimental/按需 | OCR 提取 | 官方运行包和 Docker 镜像内置 Tesseract；源码/JAR 模式也可使用显式配置的系统引擎。TXT 输出识别文字，DOCX 将坐标文字映射到 `DocumentModel` 后生成真实可编辑文本；两者均返回页级置信度和 OCR 警告。 |
 | WPS/ET/DPS/UOF -> OOXML | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |
@@ -63,7 +63,7 @@ OCR 是否需要安装、不同运行方式的依赖责任和启用示例见 [do
 - 可选：Poppler `pdftoppm`
 - 源码/独立 JAR 可选：Tesseract 5.x 与所需语言包；官方运行包和 Docker 已内置
 
-如果 `pdftoppm` 不在 `PATH` 中，可通过 `PDFTOPPM_BIN=/绝对路径/pdftoppm` 指定。OFD 图片和 `PDF -> JPEG` 路线会优先使用 Poppler，并在不可用时回退到 PDFBox；`PDF -> PNG` 为保留透明语义固定使用 PDFBox。
+如果 `pdftoppm` 不在 `PATH` 中，可通过 `PDFTOPPM_BIN=/绝对路径/pdftoppm` 指定。OFD 图片、`PDF -> OFD` 和 `PDF -> JPEG` 路线会优先使用 Poppler，并在不可用时回退到 PDFBox；`PDF -> PNG` 为保留透明语义固定使用 PDFBox。
 
 构建：
 
