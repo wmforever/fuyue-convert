@@ -25,7 +25,7 @@ X-Format-Converter-Token: <token>
 Authorization: Bearer <token>
 ```
 
-内置网页可在页面底部填写访问令牌；令牌仅保存在当前浏览器会话中。
+内置网页不提供令牌输入；启用令牌的部署请使用 API 请求头调用受保护接口。
 
 ## 创建任务
 

@@ -56,6 +56,10 @@ public final class ConversionTaskService implements AutoCloseable {
                 new DocxToPdfConverter(),
                 new PdfToPngConverter(),
                 new PdfToJpgConverter(),
+                new PdfMergeInputConverter(),
+                new PdfSplitConverter(),
+                new PdfWatermarkConverter(),
+                new PdfCompressConverter(),
                 new ImageToPdfConverter(DocumentFormat.PNG),
                 new ImageToPdfConverter(DocumentFormat.JPG)
         ), defaultPlannedRoutes());
@@ -276,14 +280,18 @@ public final class ConversionTaskService implements AutoCloseable {
                 record.downloadPath = outputs.get(0);
                 update(record, TaskStatus.SUCCESS, TaskStage.COMPLETED, 100, null, null, warnings, results,
                         true, results.stream().filter(TaskFileResult::success).findFirst().orElseThrow().outputName());
-            } else if (isImageToPdf(record.route)) {
+            } else if (isImageToPdf(record.route) || isPdfMerge(record.route)) {
                 ensureStorageCapacity(taskOutputBytes);
-                Path merged = record.taskDir.resolve("output/merged-images.pdf");
+                Path merged = record.taskDir.resolve("output/" + (isPdfMerge(record.route) ? "merged.pdf" : "merged-images.pdf"));
                 mergePdfs(outputs, merged);
-                requireTaskOutputFile(merged, "图片合并 PDF");
+                requireTaskOutputFile(merged, isPdfMerge(record.route) ? "PDF 合并" : "图片合并 PDF");
                 int mergedPages = ConversionGuards.requirePdfPageCount(merged, config.parseLimits());
-                if (mergedPages != outputs.size()) {
-                    throw new IOException("图片合并 PDF 页数不一致：" + mergedPages + " != " + outputs.size());
+                int expectedPages = isPdfMerge(record.route)
+                        ? results.stream().filter(TaskFileResult::success)
+                                .map(TaskFileResult::pageCount).filter(Objects::nonNull).mapToInt(Integer::intValue).sum()
+                        : outputs.size();
+                if (mergedPages != expectedPages) {
+                    throw new IOException("合并 PDF 页数不一致：" + mergedPages + " != " + expectedPages);
                 }
                 if (outputs.size() != record.inputs.size()) {
                     warnings.add(ConversionWarning.of(com.fuyue.formatconverter.model.WarningCode.PARTIAL_BATCH_OUTPUT,
@@ -293,7 +301,7 @@ public final class ConversionTaskService implements AutoCloseable {
                 record.downloadPath = merged;
                 deleteArtifactsExcept(outputs, merged);
                 update(record, TaskStatus.SUCCESS, TaskStage.COMPLETED, 100, null, null, warnings, results,
-                        true, "merged-images.pdf");
+                        true, isPdfMerge(record.route) ? "merged.pdf" : "merged-images.pdf");
             } else {
                 ensureStorageCapacity(taskOutputBytes);
                 Path zip = record.taskDir.resolve("output/converted-to-" + record.route.targetFormat().extension() + ".zip");
@@ -327,6 +335,10 @@ public final class ConversionTaskService implements AutoCloseable {
     private boolean isImageToPdf(ConversionRoute route) {
         return route.targetFormat() == DocumentFormat.PDF
                 && (route.sourceFormat() == DocumentFormat.PNG || route.sourceFormat() == DocumentFormat.JPG);
+    }
+
+    private boolean isPdfMerge(ConversionRoute route) {
+        return route.targetFormat() == DocumentFormat.PDF_MERGED;
     }
 
     private void mergePdfs(List<Path> sources, Path destination) throws IOException {
@@ -501,6 +513,13 @@ public final class ConversionTaskService implements AutoCloseable {
         return target;
     }
     private TaskPlan plan(List<UploadPayload> uploads, DocumentFormat targetFormat) {
+        if ((targetFormat == DocumentFormat.PDF_SPLIT || targetFormat == DocumentFormat.PDF_WATERMARKED
+                || targetFormat == DocumentFormat.PDF_COMPRESSED) && uploads.size() != 1) {
+            throw new IllegalArgumentException("该 PDF 工具一次只支持处理一个文件");
+        }
+        if (targetFormat == DocumentFormat.PDF_MERGED && uploads.size() < 2) {
+            throw new IllegalArgumentException("PDF 合并至少需要上传两个文件");
+        }
         TaskPlan plan = null;
         for (UploadPayload upload : uploads) {
             String name = upload == null ? null : upload.originalName();
@@ -598,6 +617,7 @@ public final class ConversionTaskService implements AutoCloseable {
             case UOF -> isZip(header) || looksLikeXml(file);
             case WPS, ET, DPS -> isOle(header) || isZip(header);
             case TXT, CSV, HTML -> looksLikeText(file);
+            case PDF_MERGED, PDF_SPLIT, PDF_WATERMARKED, PDF_COMPRESSED -> false;
         };
         if (!ok) throw new IllegalArgumentException(sourceFormat.label() + " 文件头校验失败，请确认文件未损坏且格式真实");
     }

@@ -38,6 +38,10 @@ public final class DefaultConverterRegistry {
         converters.add(new PdfToOfdConverter());
         converters.add(new PdfToPngConverter());
         converters.add(new PdfToJpgConverter());
+        converters.add(new PdfMergeInputConverter());
+        converters.add(new PdfSplitConverter());
+        converters.add(new PdfWatermarkConverter());
+        converters.add(new PdfCompressConverter());
         converters.add(new ImageToPdfConverter(DocumentFormat.PNG));
         converters.add(new ImageToPdfConverter(DocumentFormat.JPG));
         if (ocrCapability.available()) {

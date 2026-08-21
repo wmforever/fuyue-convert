@@ -4,6 +4,7 @@ import com.fuyue.formatconverter.docx.PoiDocxRenderer;
 import com.fuyue.formatconverter.model.DocumentModel;
 import com.fuyue.formatconverter.model.Rect;
 import com.fuyue.formatconverter.model.TextBlock;
+import com.fuyue.formatconverter.model.WarningCode;
 import com.fuyue.formatconverter.parser.*;
 import com.fuyue.formatconverter.table.PageLayoutAnalyzer;
 import org.apache.poi.ss.usermodel.Row;
@@ -571,7 +572,7 @@ class ConversionTaskServiceTest {
         assertEquals(300d * 25.4d / 72d, textRotationBounds.bottom(), 1.5d);
     }
 
-    @Test void rejectsPdfPagesLargerThanWordSupports() throws Exception {
+    @Test void scalesPdfPagesLargerThanWordSupports() throws Exception {
         Path source = temp.resolve("oversized-page.pdf");
         try (PDDocument pdf = new PDDocument()) {
             pdf.addPage(new PDPage(new PDRectangle(20_000, 400)));
@@ -579,15 +580,15 @@ class ConversionTaskServiceTest {
         }
         Path output = temp.resolve("oversized-page.docx");
 
-        ConversionFailureException error = assertThrows(ConversionFailureException.class,
-                () -> new PdfToDocxConverter().convert(
-                        new ConversionInput("oversized-page.pdf", "application/pdf", Files.size(source), source),
-                        temp.resolve("oversized-work"), output, ParseLimits.defaults(),
-                        (stage, progress) -> { }));
+        ConversionOutput converted = new PdfToDocxConverter().convert(
+                new ConversionInput("oversized-page.pdf", "application/pdf", Files.size(source), source),
+                temp.resolve("oversized-work"), output, ParseLimits.defaults(),
+                (stage, progress) -> { });
 
-        assertEquals("PAGE_SIZE_UNSUPPORTED", error.code());
-        assertTrue(error.getMessage().contains("第 1 页"));
-        assertFalse(Files.exists(output));
+        assertTrue(Files.size(output) > 0);
+        assertTrue(converted.warnings().stream().anyMatch(warning ->
+                warning.code() == WarningCode.OFFICE_COMPATIBILITY_LAYOUT
+                        && warning.message().contains("等比缩小")));
     }
 
     @Test void scannedPdfFailsWithOcrRequiredInsteadOfReturningImageDocx() throws Exception {

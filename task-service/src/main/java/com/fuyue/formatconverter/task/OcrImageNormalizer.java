@@ -4,6 +4,8 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.image.BufferedImage;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -71,6 +73,28 @@ final class OcrImageNormalizer {
             }
         }
         return oriented;
+    }
+
+    /** Downscales large embedded PDF images before OCR while retaining their layout mapping. */
+    static Path downscaleForOcr(Path source, Path destination, int maxEdge) throws IOException {
+        int[] size = dimensions(source);
+        if (Math.max(size[0], size[1]) <= maxEdge) return source;
+        BufferedImage original = ImageIO.read(source.toFile());
+        if (original == null) throw new IOException("无法解码 OCR 图片");
+        double scale = maxEdge / (double) Math.max(original.getWidth(), original.getHeight());
+        int width = Math.max(1, (int) Math.round(original.getWidth() * scale));
+        int height = Math.max(1, (int) Math.round(original.getHeight() * scale));
+        BufferedImage scaled = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = scaled.createGraphics();
+        try {
+            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            graphics.drawImage(original, 0, 0, width, height, null);
+        } finally {
+            graphics.dispose();
+        }
+        Files.createDirectories(destination.toAbsolutePath().getParent());
+        if (!ImageIO.write(scaled, "png", destination.toFile())) throw new IOException("无法写入 OCR 缩放图片");
+        return destination;
     }
 
     record Prepared(Path path, int width, int height, ImageMetadataReader.ImageMetadata metadata,

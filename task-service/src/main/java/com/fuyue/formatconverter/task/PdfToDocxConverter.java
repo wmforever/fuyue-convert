@@ -53,6 +53,9 @@ public final class PdfToDocxConverter implements FileConverter {
                 : parser.parseForEditableOcr(input.path(), input.displayName(), limits);
         if (ocr != null) {
             parsed = ocr.recognizeMissingPages(input.path(), parsed, workDir.resolve("pdf-ocr"), limits, progress);
+            // OCR uses extracted images as input only. Do not write them back into the
+            // DOCX, otherwise a text-backed PDF still looks like an image document.
+            parsed = withoutSourceImages(parsed);
         }
         progress.update(TaskStage.RECOGNIZING, 50);
         List<ConversionWarning> warnings = new ArrayList<>(parsed.warnings());
@@ -68,5 +71,14 @@ public final class PdfToDocxConverter implements FileConverter {
 
     private String outputFileName(String input) {
         return input.replaceFirst("(?i)\\.pdf$", "") + ".docx";
+    }
+
+    private DocumentModel withoutSourceImages(DocumentModel document) {
+        List<PageModel> pages = document.pages().stream()
+                .map(page -> new PageModel(page.pageNumber(), page.physicalBox(), page.textBlocks(), page.lines(),
+                        List.of(), page.paragraphs(), page.tables(), page.warnings()))
+                .toList();
+        return new DocumentModel(document.sourceName(), document.parserName(), document.sourcePageCount(),
+                pages, document.warnings());
     }
 }

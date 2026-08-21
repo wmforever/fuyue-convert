@@ -29,21 +29,28 @@ const task = ref(null)
 const busy = ref(false)
 const message = ref('')
 const diagnosticMessage = ref('')
-const apiToken = ref(readStoredToken())
 const limits = ref({ maxFileSize: 50 * 1024 * 1024, maxFilesPerTask: 100, maxTaskUploadBytes: 250 * 1024 * 1024 })
 let pollTimer
 let pollGeneration = 0
 let pollFailures = 0
 
-const canSubmit = computed(() => files.value.length > 0 && !busy.value && selectedRoute.value?.status === 'available')
 const selectedRoute = computed(() => conversions.value.find(route => route.id === selectedRouteId.value) || conversions.value[0])
+const isPdfMergeRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-merge')
+const isSinglePdfTool = computed(() => ['pdf-split', 'pdf-watermark', 'pdf-compress'].includes(selectedRoute.value?.targetFormat))
+const routeFileLimit = computed(() => isSinglePdfTool.value ? 1 : limits.value.maxFilesPerTask)
+const canSubmit = computed(() => files.value.length >= (isPdfMergeRoute.value ? 2 : 1)
+  && !busy.value && selectedRoute.value?.status === 'available')
 const availableRoutes = computed(() => conversions.value.filter(route => route.status === 'available'))
 const acceptExtension = computed(() => selectedRoute.value?.inputExtension || '.ofd')
 const acceptExtensions = computed(() => selectedRoute.value?.sourceFormat === 'jpg' ? ['.jpg', '.jpeg'] : [acceptExtension.value])
 const acceptType = computed(() => `${acceptExtensions.value.join(',')},application/${selectedRoute.value?.sourceFormat || 'ofd'}`)
 const statusLabel = computed(() => ({ WAITING: '等待转换', CONVERTING: '正在转换', SUCCESS: '转换完成', FAILED: '转换失败', CANCELLED: '转换已取消' })[task.value?.status] || '')
 const progress = computed(() => task.value?.progress ?? uploadProgress.value)
-const uploadHint = computed(() => `最多 ${limits.value.maxFilesPerTask} 个文件，单文件最大 ${formatBytes(limits.value.maxFileSize)}，总计最大 ${formatBytes(limits.value.maxTaskUploadBytes)}`)
+const uploadHint = computed(() => {
+  if (isPdfMergeRoute.value) return `至少 2 个 PDF，按上传顺序合并；单文件最大 ${formatBytes(limits.value.maxFileSize)}`
+  if (isSinglePdfTool.value) return `一次处理 1 个 PDF，单文件最大 ${formatBytes(limits.value.maxFileSize)}`
+  return `最多 ${limits.value.maxFilesPerTask} 个文件，单文件最大 ${formatBytes(limits.value.maxFileSize)}，总计最大 ${formatBytes(limits.value.maxTaskUploadBytes)}`
+})
 const routeGroups = computed(() => {
   const keyword = routeSearch.value.trim().toLowerCase()
   const groups = new Map()
@@ -73,43 +80,10 @@ function routeAvailability(route) {
   return ''
 }
 
-function readStoredToken() {
-  try { return window.sessionStorage.getItem('format-converter-api-token') || '' } catch (_) { return '' }
-}
-
-function authHeaders(initial) {
-  const headers = new Headers(initial || {})
-  const token = apiToken.value.trim()
-  if (token) headers.set('X-Format-Converter-Token', token)
-  return headers
-}
-
-function apiFetch(url, options = {}) {
-  return fetch(url, { ...options, headers: authHeaders(options.headers) })
-}
-
 function responseError(response, fallback) {
   const error = new Error(response.status === 401 ? '任务 API 需要有效的访问令牌' : fallback)
   error.status = response.status
   return error
-}
-
-function saveApiToken() {
-  const token = apiToken.value.trim()
-  apiToken.value = token
-  try {
-    if (token) window.sessionStorage.setItem('format-converter-api-token', token)
-    else window.sessionStorage.removeItem('format-converter-api-token')
-  } catch (_) { /* session storage can be disabled */ }
-  message.value = token ? '访问令牌已保存到当前浏览器会话' : '访问令牌已清除'
-  loadCapabilities()
-  if (task.value && ['WAITING', 'CONVERTING'].includes(task.value.status)) {
-    pollGeneration++
-    clearTimeout(pollTimer)
-    pollFailures = 0
-    busy.value = true
-    poll()
-  }
 }
 
 function strategyLabel(route) {
@@ -161,9 +135,9 @@ function onRoutePickerKeydown(event) {
 
 async function loadCapabilities() {
   try {
-    const response = await apiFetch('/api/tasks/capabilities', { cache: 'no-store' })
+    const response = await fetch('/api/tasks/capabilities', { cache: 'no-store' })
     if (!response.ok) {
-      if (response.status === 401) message.value = '任务 API 已启用访问令牌，请在页面底部输入后重试'
+      if (response.status === 401) message.value = '当前部署启用了访问令牌，内置页面不可用'
       return
     }
     const routes = await response.json()
@@ -201,7 +175,7 @@ function startNewBatch() {
   uploadProgress.value = 0
   busy.value = false
   message.value = ''
-  if (previousTaskId) apiFetch(`/api/tasks/${previousTaskId}`, { method: 'DELETE' }).catch(() => {})
+  if (previousTaskId) fetch(`/api/tasks/${previousTaskId}`, { method: 'DELETE' }).catch(() => {})
 }
 
 function accept(selected) {
@@ -217,7 +191,7 @@ function accept(selected) {
   for (const file of incoming) {
     const key = `${file.name}:${file.size}`
     if (known.has(key)) continue
-    if (files.value.length >= limits.value.maxFilesPerTask) {
+    if (files.value.length >= routeFileLimit.value) {
       capacityRejected++
       continue
     }
@@ -232,7 +206,7 @@ function accept(selected) {
   const notices = []
   if (matching.length !== selectedFiles.length) notices.push(`非 ${acceptExtensions.value.join(' / ').toUpperCase()} 文件`)
   if (incoming.length !== matching.length) notices.push(`超过 ${formatBytes(limits.value.maxFileSize)} 的文件`)
-  if (capacityRejected) notices.push(`超出 ${limits.value.maxFilesPerTask} 个文件上限的部分`)
+  if (capacityRejected) notices.push(`超出 ${routeFileLimit.value} 个文件上限的部分`)
   if (quotaRejected) notices.push(`超出 ${formatBytes(limits.value.maxTaskUploadBytes)} 总量上限的部分`)
   message.value = notices.length ? `已忽略${notices.join('、')}` : ''
 }
@@ -276,7 +250,6 @@ function upload(data) {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest()
     request.open('POST', '/api/tasks')
-    if (apiToken.value.trim()) request.setRequestHeader('X-Format-Converter-Token', apiToken.value.trim())
     request.upload.onprogress = event => { if (event.lengthComputable) uploadProgress.value = Math.round(event.loaded / event.total * 100) }
     request.onload = () => {
       let body = {}
@@ -295,7 +268,7 @@ async function poll() {
   clearTimeout(pollTimer)
   const generation = pollGeneration
   try {
-    const response = await apiFetch(`/api/tasks/${task.value.taskId}`, { cache: 'no-store' })
+    const response = await fetch(`/api/tasks/${task.value.taskId}`, { cache: 'no-store' })
     if (!response.ok) throw responseError(response, '无法查询任务状态')
     const snapshot = await response.json()
     if (generation !== pollGeneration) return
@@ -320,7 +293,7 @@ async function poll() {
 
 async function download() {
   try {
-    const response = await apiFetch(`/api/tasks/${task.value.taskId}/download`)
+    const response = await fetch(`/api/tasks/${task.value.taskId}/download`)
     if (!response.ok) throw responseError(response, `下载失败（${response.status}）`)
     const blob = await response.blob()
     const url = URL.createObjectURL(blob)
@@ -337,7 +310,7 @@ async function download() {
 }
 
 async function taskAction(action) {
-  const response = await apiFetch(`/api/tasks/${task.value.taskId}/${action}`, { method: 'POST' })
+  const response = await fetch(`/api/tasks/${task.value.taskId}/${action}`, { method: 'POST' })
   let body = {}
   try { body = await response.json() } catch (_) { /* ignore */ }
   if (!response.ok) {
@@ -556,23 +529,6 @@ onBeforeUnmount(() => {
         <button v-if="task" class="secondary" @click="reset">转换其他文件</button>
       </div>
     </section>
-
-    <details class="access-panel">
-      <summary>访问令牌 <span>{{ apiToken ? '已配置' : '未配置（仅受保护部署需要）' }}</span></summary>
-      <div>
-        <input
-          v-model="apiToken"
-          type="password"
-          autocomplete="off"
-          placeholder="X-Format-Converter-Token"
-          aria-label="API 访问令牌"
-          @keyup.enter="saveApiToken"
-        />
-        <button type="button" class="diagnostic-button" @click="saveApiToken">保存</button>
-        <button type="button" class="diagnostic-button" :disabled="!apiToken" @click="apiToken = ''; saveApiToken()">清除</button>
-      </div>
-      <small>令牌只保存在当前浏览器会话中，关闭标签页后自动清除。</small>
-    </details>
 
     <footer>
       <span>当前开放文档 / 表格 / PDF / 图片</span><span>国产格式已入矩阵</span><span>不经过外部服务</span>
