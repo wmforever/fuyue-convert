@@ -1,5 +1,6 @@
 package com.fuyue.formatconverter.task;
 
+import com.fuyue.formatconverter.docx.DocxFontSupport;
 import com.fuyue.formatconverter.parser.ParseLimits;
 import org.apache.poi.xwpf.usermodel.BreakType;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -26,18 +27,29 @@ public final class TextToDocxConverter implements FileConverter {
         progress.update(TaskStage.PARSING, 25);
         TextInputReader.DecodedText decoded = TextInputReader.read(input.path(), limits);
         progress.update(TaskStage.RENDERING, 75);
+        String configuredCjk = System.getenv(DOCX_CJK_FONT_ENV);
+        boolean useBundledCjk = (configuredCjk == null || configuredCjk.isBlank())
+                && DocxFontSupport.hasBundledCjkFont();
+        String cjkFont = useBundledCjk
+                ? DocxFontSupport.CJK_FAMILY
+                : configuredFont(DOCX_CJK_FONT_ENV, "Microsoft YaHei");
         try (XWPFDocument document = new XWPFDocument()) {
             for (int pageIndex = 0; pageIndex < decoded.pages().size(); pageIndex++) {
                 if (pageIndex > 0) {
                     XWPFRun pageBreak = document.createParagraph().createRun();
-                    configureFonts(pageBreak);
+                    configureFonts(pageBreak, cjkFont);
                     pageBreak.addBreak(BreakType.PAGE);
                 }
                 for (String line : decoded.pages().get(pageIndex)) {
                     XWPFRun run = document.createParagraph().createRun();
-                    configureFonts(run);
+                    configureFonts(run, cjkFont);
                     run.setText(line);
                 }
+            }
+            if (useBundledCjk) {
+                String text = decoded.pages().stream().flatMap(List::stream)
+                        .filter(DocxFontSupport::containsCjkText).findFirst().orElse("");
+                DocxFontSupport.embedBundledCjkFont(document, text);
             }
             try (var out = Files.newOutputStream(outputPath)) { document.write(out); }
         }
@@ -46,9 +58,8 @@ public final class TextToDocxConverter implements FileConverter {
                 null, decoded.warnings());
     }
 
-    private static void configureFonts(XWPFRun run) {
+    private static void configureFonts(XWPFRun run, String cjk) {
         String latin = configuredFont(DOCX_FONT_ENV, "Arial");
-        String cjk = configuredFont(DOCX_CJK_FONT_ENV, "Microsoft YaHei");
         run.setFontFamily(latin, XWPFRun.FontCharRange.ascii);
         run.setFontFamily(latin, XWPFRun.FontCharRange.hAnsi);
         run.setFontFamily(cjk, XWPFRun.FontCharRange.eastAsia);

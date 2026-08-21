@@ -11,6 +11,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -41,6 +42,10 @@ class TextOutputConverterTest {
             XWPFRun cjkRun = document.getParagraphs().get(0).getRuns().get(0);
             assertNotNull(cjkRun.getFontFamily(XWPFRun.FontCharRange.ascii));
             assertNotNull(cjkRun.getFontFamily(XWPFRun.FontCharRange.eastAsia));
+        }
+        try (ZipFile archive = new ZipFile(output.toFile())) {
+            assertNotNull(archive.getEntry("word/fontTable.xml"));
+            assertNotNull(archive.getEntry("word/fonts/DroidSansFallback.odttf"));
         }
     }
 

@@ -9,7 +9,10 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STSectionMark;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,6 +44,35 @@ class PoiDocxRendererTest {
             assertTrue(xml.contains("gridSpan"));
             assertFalse(xml.contains("txbxContent"));
             assertEquals(1, reopened.getTables().size(), "规则表格应是正文中的真实 Word 表格");
+        }
+    }
+
+    @Test void embedsAnObfuscatedFontPartWithMatchingRelationships() throws Exception {
+        byte[] font = new byte[96];
+        for (int index = 0; index < font.length; index++) font[index] = (byte) index;
+        UUID key = UUID.fromString("00112233-4455-6677-8899-aabbccddeeff");
+        Path output = temp.resolve("embedded-font.docx");
+
+        try (XWPFDocument document = new XWPFDocument()) {
+            document.createParagraph().createRun().setText("font");
+            DocxFontSupport.embedFont(document, font, key);
+            try (var stream = Files.newOutputStream(output)) {
+                document.write(stream);
+            }
+        }
+
+        try (ZipFile archive = new ZipFile(output.toFile())) {
+            assertNotNull(archive.getEntry("word/fontTable.xml"));
+            assertNotNull(archive.getEntry("word/fonts/DroidSansFallback.odttf"));
+            assertNotNull(archive.getEntry("word/_rels/fontTable.xml.rels"));
+            String table = new String(archive.getInputStream(archive.getEntry("word/fontTable.xml")).readAllBytes());
+            assertTrue(table.contains("Droid Sans Fallback"));
+            assertTrue(table.contains("{00112233-4455-6677-8899-AABBCCDDEEFF}"));
+            byte[] obfuscated = archive.getInputStream(
+                    archive.getEntry("word/fonts/DroidSansFallback.odttf")).readAllBytes();
+            assertFalse(Arrays.equals(font, obfuscated));
+            assertArrayEquals(font, DocxFontSupport.obfuscate(obfuscated, key),
+                    "OOXML 字体混淆再次异或同一 GUID 后应恢复原始字体");
         }
     }
 

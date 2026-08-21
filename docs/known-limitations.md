@@ -16,12 +16,12 @@
 4. 未启用 OCR 时，`OFD -> TXT/DOCX` 对纯扫描页以及文字极少但大幅图像覆盖的混合扫描页严格返回 `OCR_REQUIRED`，不生成不完整 TXT 或图片伪装的可编辑 DOCX。显式配置本地 Tesseract 后，会对触发扫描检测的非签章图像执行 OCR、按图像坐标合并真实文字，并保留原扫描图作为 DOCX 保真层；识别结果返回 `OCR_APPLIED`。无法解码图像或识别不到文字时返回 `OCR_NO_TEXT`。
 5. 加密 OFD、私有厂商扩展和部分数字签章外观可能无法解析；系统会失败或给出警告。固定版式 PDF 使用内置字体替代源字体，字形宽度可能存在小幅差异。
 6. `OFD -> XLSX` 仅导出置信度不低于 0.85 的水平/垂直矢量线规则表格，保留文本、分页工作表和矩形合并区域；无线表格、嵌套表格、公式、日期和数值类型推断尚未实现，当前统一写入字符串。未识别到可靠表格时返回 `NO_TABLE_FOUND`，扫描页返回 `OCR_REQUIRED`，不会生成空工作簿或低置信度数据伪装成功。
-7. `OFD -> PNG/JPEG` 固定使用 160 DPI RGB 栅格化，单页直接返回图片，多页返回按 `page-0001` 顺序命名的 ZIP。它与 `OFD -> PDF` 共享固定版式绘制限制；JPEG 使用 0.9 压缩质量，属于有损输出。扫描型 OFD 可以直接渲染，不需要 OCR。
+7. `OFD -> PNG/JPEG` 固定使用 160 DPI RGB 栅格化，单页直接返回图片，多页返回按 `page-0001` 顺序命名的 ZIP。它与 `OFD -> PDF` 共享固定版式绘制限制；优先使用 Poppler，并在不可用时回退到 PDFBox。JPEG 使用 0.9 压缩质量，属于有损输出。扫描型 OFD 可以直接渲染，不需要 OCR。
 
 ## PDF
 
-1. `PDF -> DOCX` 当前恢复真实文字、基础段落、页面尺寸和方向，但复杂阅读顺序、多栏、矢量图形、图片及复杂表格仍可能不完整。
-2. 纯文字 PDF 不再嵌入整页图片；因此严格 QA 以字符守恒、页数和零图片为准，视觉差异仅作参考。
+1. `PDF -> DOCX` 当前恢复真实文字、基础段落、页面尺寸和方向，但复杂阅读顺序、多栏、矢量图形、图片及复杂表格仍可能不完整。含中日韩文字时会嵌入 Droid Sans Fallback，保证基本字形跨机器可见，但会增大文件且不等同于恢复源字体设计。
+2. 纯文字 PDF 不再嵌入整页图片；因此严格 QA 以字符守恒、页数、零图片和中日韩字体部件完整为准，视觉差异仅作参考。
 3. 扫描型、纯图片型以及含无文字内容页的混合 PDF 在未启用 OCR 时严格返回 `OCR_REQUIRED`。显式配置本地 Tesseract 后，只对无真实文字但有可见内容的页进行 300 DPI OCR，并把 TSV 行坐标转成可编辑 `TextBlock`；文字页保持 PDFBox 提取，空白页不 OCR。OCR 页返回 `OCR_APPLIED`，有内容但识别不到文字时返回 `OCR_NO_TEXT`。
 4. `PDF -> OFD` 已生成符合包结构的真实 OFD：整页 144 DPI 图像层负责版式保真，文字型页面另含源坐标 OFD 文字对象。当前表格、路径、原始图片、透明混合和表单尚未逐项重建为独立对象，因此标记为 experimental，并返回 `FIDELITY_IMAGE_LAYER`。
 5. `PDF -> PNG/JPEG` 默认 160 DPI，可通过 `FORMAT_CONVERTER_IMAGE_DPI` 配置为 36-600。PNG 由 PDFBox 以 ARGB 渲染并写入 pHYs，空白区域保留透明；JPEG 输出 RGB、JFIF DPI 和 0.9 质量，CMYK 内容会转换到显示 RGB。渲染前会按 CropBox、UserUnit 和 DPI 检查像素上限；需要非空密码的 PDF 返回 `PDF_PASSWORD_REQUIRED`，当前任务 API 不接收密码。
@@ -38,7 +38,7 @@
 7. `CSV -> XLSX` 自动识别逗号、TAB、分号和竖线，所有值均写为文本以避免公式注入，因此不会猜测数值、日期或公式类型。`XLSX -> CSV` 使用工作簿中保存的公式缓存值，不执行或刷新公式；过期缓存需先由表格软件重新计算并保存。多工作表输出为 ZIP，每张表一个 UTF-8 CSV。CSV 不保留样式、合并区域和原始类型元数据。
 8. `PNG/JPEG -> PDF` 使用 36-1200 DPI 范围内的 PNG pHYs、JPEG JFIF 或 EXIF 分辨率；缺失或异常时固定按 96 DPI 并返回 `IMAGE_DPI_DEFAULTED`。支持 1-8 EXIF 方向和透明 PNG。同一批次目前要求全部是 PNG 或全部是 JPEG，不能混合两种扩展名；成功页面按上传顺序合并，部分失败时返回 `PARTIAL_BATCH_OUTPUT`。
 9. `DOCX -> UOF` 仅在 LibreOffice 提供 `UOF text` 导出过滤器时开放，输出是具有 `uof:UOF` 根元素和 UOF 命名空间的真实 XML，不是改扩展名。复杂绘图、嵌入对象、修订、域和字体仍可能在 LibreOffice 兼容转换中变化，因此保持 experimental。当前 LibreOffice 没有经本项目验证的 WPS/ET/DPS 写出过滤器，`DOCX -> WPS`、`XLSX -> ET`、`PPTX -> DPS` 继续保持 planned，禁止伪装支持。
-10. `PNG/JPEG -> TXT` 仅在显式启用本地 Tesseract 且全部语言包可用时开放。当前输出是纯文本，不包含置信度、坐标或版面结构；手写体、复杂表格、竖排、低分辨率、倾斜和噪声图像可能误识别，因此固定为 experimental 并返回 `OCR_APPLIED`。
+10. `PNG/JPEG -> TXT/DOCX` 仅在 OCR 能力可用时开放：官方运行包自动使用内置 Tesseract，源码/独立 JAR 使用系统 Tesseract 时需显式启用。TXT 输出纯文本；DOCX 将 OCR 坐标映射回 `DocumentModel` 并复用布局分析和 Word 渲染，生成真实文本框架而非整页图片。任务警告提供页级平均置信度；低于复核阈值返回 `OCR_LOW_CONFIDENCE` 警告，低于最低阈值则以同名错误码失败。印刷体中英文、数字、标点和 EXIF 旋转已纳入自动化测试。竖排需配置对应 `*_vert` 语言包并自动使用竖排分割模式；当前跨版本金样门禁为字符召回率至少 50%，不代表逐字可靠。手写体、复杂表格、倾斜和噪声图片仍可能误识别，因此保持 experimental。
 
 ## QA 样本
 

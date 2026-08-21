@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -70,6 +71,31 @@ class PdfOcrConverterTest {
                 .filter(warning -> warning.code() == WarningCode.OCR_APPLIED).count());
     }
 
+    @Test
+    void unavailableLanguageDoesNotBlockNativeTextButFailsOnScannedPageWithStableCode() throws Exception {
+        var capability = new TesseractOcrConverter.Capability(true, false, null,
+                "OCR_LANGUAGE_MISSING", "缺少 OCR 语言包：chi_sim", "tesseract", "chi_sim",
+                java.util.Set.of("eng"), "fake");
+        PdfOcrSupport unavailable = new PdfOcrSupport(capability);
+        PageLayoutAnalyzer analyzer = new PageLayoutAnalyzer();
+        Path textOnly = createTextOnlyPdf();
+        Path textOutput = temp.resolve("native.txt");
+
+        ConversionOutput nativeResult = new PdfToTextConverter(new PdfLayoutParser(), analyzer, unavailable)
+                .convert(input(textOnly), temp.resolve("native-work"), textOutput,
+                        ParseLimits.defaults(), (stage, percent) -> { });
+
+        assertEquals(1, nativeResult.pageCount());
+        assertTrue(Files.readString(textOutput).contains("NATIVE TEXT"));
+
+        Path mixed = createMixedPdf();
+        ConversionFailureException failure = assertThrows(ConversionFailureException.class,
+                () -> new PdfToTextConverter(new PdfLayoutParser(), analyzer, unavailable)
+                        .convert(input(mixed), temp.resolve("missing-lang-work"), temp.resolve("missing.txt"),
+                                ParseLimits.defaults(), (stage, percent) -> { }));
+        assertEquals("OCR_LANGUAGE_MISSING", failure.code());
+    }
+
     private Path createMixedPdf() throws Exception {
         Path source = temp.resolve("mixed-ocr.pdf");
         try (PDDocument pdf = new PDDocument()) {
@@ -98,6 +124,23 @@ class PdfOcrConverterTest {
             var image = LosslessFactory.createFromImage(pdf, scan);
             try (PDPageContentStream content = new PDPageContentStream(pdf, scannedPage)) {
                 content.drawImage(image, 40, 300, 515, 172);
+            }
+            pdf.save(source.toFile());
+        }
+        return source;
+    }
+
+    private Path createTextOnlyPdf() throws Exception {
+        Path source = temp.resolve("text-only.pdf");
+        try (PDDocument pdf = new PDDocument()) {
+            PDPage page = new PDPage(PDRectangle.A4);
+            pdf.addPage(page);
+            try (PDPageContentStream content = new PDPageContentStream(pdf, page)) {
+                content.beginText();
+                content.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 18);
+                content.newLineAtOffset(70, 720);
+                content.showText("NATIVE TEXT");
+                content.endText();
             }
             pdf.save(source.toFile());
         }

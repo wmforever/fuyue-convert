@@ -46,7 +46,8 @@ public class ApplicationConfiguration {
                                                 OfficeEngineStatus officeEngineStatus) throws IOException {
         TaskServiceConfig config = new TaskServiceConfig(properties.getDataRoot(), properties.getConcurrency(),
                 properties.getQueueCapacity(), properties.getTimeout(), properties.getResultTtl(),
-                properties.getMaxTaskUploadBytes(), properties.getMinFreeDiskBytes(), properties.parseLimits());
+                properties.getMaxFilesPerTask(), properties.getMaxTaskUploadBytes(),
+                properties.getMaxTaskOutputBytes(), properties.getMinFreeDiskBytes(), properties.parseLimits());
         Path officeBinary = officeEngineStatus.available() ? Path.of(officeEngineStatus.binary()) : null;
         List<FileConverter> converters = DefaultConverterRegistry.create(officeBinary, properties.getOfficeTimeout());
         if (properties.isWorkerEnabled()) {

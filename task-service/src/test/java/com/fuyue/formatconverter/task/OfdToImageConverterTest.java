@@ -115,11 +115,11 @@ class OfdToImageConverterTest {
     }
 
     private OfdToPngConverter pngConverter() {
-        return new OfdToPngConverter(new SafeOfdExtractor(), new OfdrwParser());
+        return new OfdToPngConverter(new SafeOfdExtractor(), new OfdrwParser(), null);
     }
 
     private OfdToJpgConverter jpgConverter() {
-        return new OfdToJpgConverter(new SafeOfdExtractor(), new OfdrwParser());
+        return new OfdToJpgConverter(new SafeOfdExtractor(), new OfdrwParser(), null);
     }
 
     private ConversionInput input(Path source) throws Exception {

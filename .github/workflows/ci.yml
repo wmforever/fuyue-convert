@@ -54,6 +54,7 @@ jobs:
       - name: Script syntax
         run: |
           bash -n scripts/package-runtime.sh
+          bash -n scripts/prepare-ocr-runtime.sh
           bash -n scripts/smoke-runtime-package.sh
 
   office-integration:
@@ -96,7 +97,15 @@ jobs:
           cache: maven
 
       - name: Install Tesseract
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng tesseract-ocr-chi-sim tesseract-ocr-chi-sim-vert fonts-noto-cjk
+          fc-cache -f
+          tesseract --list-langs | awk '$0 == "eng" { eng=1 } $0 == "chi_sim" { zh=1 } $0 == "chi_sim_vert" { vert=1 } END { exit !(eng && zh && vert) }'
 
-      - name: Run real image OCR
-        run: mvn -B -ntp -pl task-service -am -Dskip.frontend=true -Dtest=TesseractOcrConverterTest,PdfOcrConverterTest,OfdOcrConverterTest -Dsurefire.failIfNoSpecifiedTests=false test
+      - name: Run real multilingual and mixed-document OCR
+        env:
+          FORMAT_CONVERTER_OCR_ENABLED: "true"
+          FORMAT_CONVERTER_OCR_LANGUAGES: chi_sim+eng
+          FORMAT_CONVERTER_OCR_MAX_CONCURRENCY: "1"
+        run: mvn -B -ntp -pl task-service -am -Dskip.frontend=true -Dtest=TesseractOcrConverterTest,TesseractMultilingualIntegrationTest,OcrEnabledRegistryIntegrationTest,PdfOcrConverterTest,OfdOcrConverterTest -Dsurefire.failIfNoSpecifiedTests=false test

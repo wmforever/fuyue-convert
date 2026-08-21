@@ -4,6 +4,9 @@ import com.fuyue.formatconverter.model.ColorValue;
 import com.fuyue.formatconverter.model.ConversionWarning;
 import com.fuyue.formatconverter.model.DocumentModel;
 import com.fuyue.formatconverter.model.FontStyle;
+import com.fuyue.formatconverter.model.ImageBlock;
+import com.fuyue.formatconverter.model.LineElement;
+import com.fuyue.formatconverter.model.Point;
 import com.fuyue.formatconverter.model.PageModel;
 import com.fuyue.formatconverter.model.Rect;
 import com.fuyue.formatconverter.model.TextBlock;
@@ -20,12 +23,19 @@ import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImage;
+import org.apache.pdfbox.contentstream.PDFGraphicsStreamEngine;
+import org.apache.pdfbox.util.Matrix;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
+import java.io.ByteArrayOutputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -33,6 +43,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import javax.imageio.ImageIO;
 
 /** Extracts editable PDF text objects into the shared millimetre-based layout model. */
 public final class PdfLayoutParser {
@@ -81,6 +92,8 @@ public final class PdfLayoutParser {
             stripper.setSuppressDuplicateOverlappingText(true);
             stripper.getText(document);
 
+            Map<Integer, PageGraphics> graphics = extractGraphics(document, states, limits.maxEntries());
+
             List<PageModel> pages = new ArrayList<>(pageCount);
             for (PageState state : states) {
                 if (mode.requiresExtractableText() && !state.hasEditableText() && state.hasVisibleContent()) {
@@ -88,12 +101,20 @@ public final class PdfLayoutParser {
                             "PDF 第 " + state.pageNumber() + " 页未检测到可编辑文字，可能是扫描件或纯图片 PDF；请先接入 OCR。");
                 }
                 List<ConversionWarning> warnings = new ArrayList<>();
-                if (mode.enforceWordPageLimit() && state.hasEditableText() && state.hasImageObjects()) {
+                PageGraphics pageGraphics = graphics.getOrDefault(state.pageNumber(), PageGraphics.EMPTY);
+                if (state.scale() < 0.9999d) {
+                    warnings.add(ConversionWarning.of(WarningCode.OFFICE_COMPATIBILITY_LAYOUT,
+                            "PDF 第 " + state.pageNumber() + " 页尺寸超过 Word 22 英寸上限，已按 "
+                                    + String.format(Locale.ROOT, "%.1f", state.scale() * 100d)
+                                    + "% 等比缩小页面、文字与布局。", state.pageNumber()));
+                }
+                if (mode.enforceWordPageLimit() && state.hasEditableText() && state.hasImageObjects()
+                        && pageGraphics.images().isEmpty()) {
                     warnings.add(ConversionWarning.of(WarningCode.IMAGE_EXTRACTION_FAILED,
                             "PDF 第 " + state.pageNumber() + " 页包含图片；当前可编辑路线仅恢复文字，图片尚未写入 Word。",
                             state.pageNumber()));
                 }
-                pages.add(new PageModel(state.pageNumber(), state.pageBox(), state.texts(), List.of(), List.of(),
+                pages.add(new PageModel(state.pageNumber(), state.pageBox(), state.texts(), pageGraphics.lines(), pageGraphics.images(),
                         List.of(), List.of(), warnings));
             }
             return new DocumentModel(displayName, "PDFBox 3.0.8", pageCount, pages, List.of());
@@ -114,19 +135,14 @@ public final class PdfLayoutParser {
                 || widthPoints <= 0 || heightPoints <= 0) {
             throw new IOException("PDF 第 " + pageNumber + " 页尺寸无效");
         }
-        if (enforceWordPageLimit && (widthPoints > MAX_WORD_PAGE_POINTS || heightPoints > MAX_WORD_PAGE_POINTS)) {
-            throw new ConversionFailureException("PAGE_SIZE_UNSUPPORTED",
-                    "PDF 第 " + pageNumber + " 页尺寸超过 Word 支持的 22 英寸上限："
-                            + formatPoints(widthPoints) + " × " + formatPoints(heightPoints) + " pt");
-        }
+        double scale = enforceWordPageLimit
+                ? Math.min(1d, Math.min(MAX_WORD_PAGE_POINTS / widthPoints, MAX_WORD_PAGE_POINTS / heightPoints))
+                : 1d;
+        double scaledUnit = userUnit * scale;
         return new PageState(pageNumber,
-                new Rect(0, 0, pointsToMm(widthPoints), pointsToMm(heightPoints)), userUnit, rotation,
+                new Rect(0, 0, pointsToMm(widthPoints * scale), pointsToMm(heightPoints * scale)), scaledUnit, rotation,
                 hasVisibleContent(page), hasImageObjects(page.getResources(),
-                        java.util.Collections.newSetFromMap(new IdentityHashMap<>())), new ArrayList<>());
-    }
-
-    private static String formatPoints(double value) {
-        return String.format(Locale.ROOT, "%.2f", value);
+                        java.util.Collections.newSetFromMap(new IdentityHashMap<>())), new ArrayList<>(), scale);
     }
 
     private boolean hasVisibleContent(PDPage page) throws IOException {
@@ -148,6 +164,21 @@ public final class PdfLayoutParser {
             if (object instanceof PDFormXObject form && hasImageObjects(form.getResources(), visited)) return true;
         }
         return false;
+    }
+
+    private Map<Integer, PageGraphics> extractGraphics(PDDocument document, List<PageState> states, int maxEntries) {
+        Map<Integer, PageGraphics> result = new java.util.HashMap<>();
+        for (int index = 0; index < states.size(); index++) {
+            PageState state = states.get(index);
+            try {
+                PdfGraphicsCollector collector = new PdfGraphicsCollector(document.getPage(index), state, maxEntries);
+                collector.processPage(document.getPage(index));
+                result.put(state.pageNumber(), collector.graphics());
+            } catch (Exception ignored) {
+                result.put(state.pageNumber(), PageGraphics.EMPTY);
+            }
+        }
+        return result;
     }
 
     private static double pointsToMm(double points) { return points * MM_PER_POINT; }
@@ -327,9 +358,109 @@ public final class PdfLayoutParser {
 
     private record PageState(int pageNumber, Rect pageBox, double userUnit, int rotation,
                              boolean hasVisibleContent, boolean hasImageObjects,
-                             List<TextBlock> texts) {
+                             List<TextBlock> texts, double scale) {
         private boolean hasEditableText() {
             return texts.stream().anyMatch(text -> !text.text().isBlank());
+        }
+    }
+
+    private record PageGraphics(List<LineElement> lines, List<ImageBlock> images) {
+        private static final PageGraphics EMPTY = new PageGraphics(List.of(), List.of());
+        private PageGraphics {
+            lines = List.copyOf(lines);
+            images = List.copyOf(images);
+        }
+    }
+
+    /** Extracts simple vector rules and image placements used by editable Word tables and pictures. */
+    private static final class PdfGraphicsCollector extends PDFGraphicsStreamEngine {
+        private final PageState page;
+        private final int maxEntries;
+        private final Path2D.Float path = new Path2D.Float();
+        private final List<LineElement> lines = new ArrayList<>();
+        private final List<ImageBlock> images = new ArrayList<>();
+        private int entries;
+
+        private PdfGraphicsCollector(PDPage source, PageState page, int maxEntries) {
+            super(source);
+            this.page = page;
+            this.maxEntries = Math.max(1, maxEntries);
+        }
+
+        private PageGraphics graphics() { return new PageGraphics(lines, images); }
+
+        @Override public void appendRectangle(Point2D p0, Point2D p1, Point2D p2, Point2D p3) {
+            path.moveTo(p0.getX(), p0.getY()); path.lineTo(p1.getX(), p1.getY());
+            path.lineTo(p2.getX(), p2.getY()); path.lineTo(p3.getX(), p3.getY()); path.closePath();
+        }
+
+        @Override public void drawImage(PDImage image) throws IOException {
+            if (++entries > maxEntries) throw new IOException("PDF 图形对象数量超过限制");
+            ByteArrayOutputStream data = new ByteArrayOutputStream();
+            if (!ImageIO.write(image.getImage(), "png", data)) return;
+            Matrix matrix = getGraphicsState().getCurrentTransformationMatrix();
+            float width = Math.abs(matrix.getScalingFactorX());
+            float height = Math.abs(matrix.getScalingFactorY());
+            float x = matrix.getTranslateX();
+            float y = matrix.getTranslateY();
+            Rect box = rect(x, y, width, height);
+            if (box.width() > 0.1d && box.height() > 0.1d) {
+                images.add(new ImageBlock("pdf-p%d-image-%d".formatted(page.pageNumber(), entries), page.pageNumber(), box,
+                        "image/png", data.toByteArray(), "PDF_IMAGE", -100 + entries));
+            }
+        }
+
+        @Override public void clip(int windingRule) { path.setWindingRule(windingRule); }
+        @Override public void moveTo(float x, float y) { path.moveTo(x, y); }
+        @Override public void lineTo(float x, float y) { path.lineTo(x, y); }
+        @Override public void curveTo(float x1, float y1, float x2, float y2, float x3, float y3) { path.curveTo(x1, y1, x2, y2, x3, y3); }
+        @Override public Point2D getCurrentPoint() { return path.getCurrentPoint(); }
+        @Override public void closePath() { path.closePath(); }
+        @Override public void endPath() { path.reset(); }
+        @Override public void strokePath() throws IOException { addPathLines(); path.reset(); }
+        @Override public void fillPath(int windingRule) { path.reset(); }
+        @Override public void fillAndStrokePath(int windingRule) throws IOException { addPathLines(); path.reset(); }
+        @Override public void shadingFill(org.apache.pdfbox.cos.COSName shadingName) { }
+
+        private void addPathLines() throws IOException {
+            PathIterator iterator = path.getPathIterator(null);
+            double[] coords = new double[6];
+            Point2D.Double previous = null;
+            while (!iterator.isDone()) {
+                int type = iterator.currentSegment(coords);
+                if (type == PathIterator.SEG_MOVETO) previous = new Point2D.Double(coords[0], coords[1]);
+                else if (type == PathIterator.SEG_LINETO && previous != null) {
+                    addLine(previous, new Point2D.Double(coords[0], coords[1]));
+                    previous = new Point2D.Double(coords[0], coords[1]);
+                }
+                iterator.next();
+            }
+        }
+
+        private void addLine(Point2D from, Point2D to) throws IOException {
+            if (++entries > maxEntries) throw new IOException("PDF 图形对象数量超过限制");
+            Matrix matrix = getGraphicsState().getCurrentTransformationMatrix();
+            Point2D start = matrix.transformPoint((float) from.getX(), (float) from.getY());
+            Point2D end = matrix.transformPoint((float) to.getX(), (float) to.getY());
+            Point a = point(start.getX(), start.getY());
+            Point b = point(end.getX(), end.getY());
+            if (Math.hypot(a.x() - b.x(), a.y() - b.y()) < 0.5d) return;
+            int rgb;
+            try { rgb = getGraphicsState().getStrokingColor().toRGB(); } catch (Exception ignored) { rgb = 0; }
+            lines.add(new LineElement("pdf-p%d-line-%d".formatted(page.pageNumber(), entries), page.pageNumber(), a, b,
+                    Math.max(0.1d, getGraphicsState().getLineWidth() * page.userUnit() * MM_PER_POINT),
+                    new ColorValue((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, 255), entries));
+        }
+
+        private Rect rect(double x, double y, double width, double height) {
+            double unit = page.userUnit();
+            return new Rect(pointsToMm(x * unit), pointsToMm((page.pageBox().height() / MM_PER_POINT) - (y + height) * unit),
+                    pointsToMm(width * unit), pointsToMm(height * unit));
+        }
+
+        private Point point(double x, double y) {
+            double unit = page.userUnit();
+            return new Point(pointsToMm(x * unit), page.pageBox().height() - pointsToMm(y * unit));
         }
     }
 }

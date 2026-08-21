@@ -41,7 +41,14 @@ public class HealthController {
         ocr.put("available", ocrEngineStatus.available());
         ocr.put("binaryName", ocrEngineStatus.binaryName());
         ocr.put("version", ocrEngineStatus.version());
-        ocr.put("languages", ocrEngineStatus.languages());
+        ocr.put("requestedLanguages", ocrEngineStatus.requestedLanguages());
+        ocr.put("availableLanguages", ocrEngineStatus.availableLanguages());
+        ocr.put("timeoutSeconds", ocrEngineStatus.timeoutSeconds());
+        ocr.put("maxConcurrency", ocrEngineStatus.maxConcurrency());
+        ocr.put("maxImagePixels", ocrEngineStatus.maxImagePixels());
+        ocr.put("minimumConfidence", ocrEngineStatus.minimumConfidence());
+        ocr.put("bundled", ocrEngineStatus.bundled());
+        ocr.put("errorCode", ocrEngineStatus.errorCode());
         ocr.put("message", ocrEngineStatus.message());
         return ocr;
     }

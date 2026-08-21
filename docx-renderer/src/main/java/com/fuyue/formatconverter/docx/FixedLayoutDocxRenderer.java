@@ -112,12 +112,13 @@ final class FixedLayoutDocxRenderer {
         Rect textBox = tolerantTextBox(block);
         int characterSpacing = characterSpacingTwips(block);
         FontStyle font = block.style();
+        String family = DocxFontSupport.familyFor(block);
         int horizontalScale = horizontalScalePercent(block);
         int halfPoints = Math.max(2, (int) Math.round(font.sizePt() * 2d));
         int lineTwips = Math.max(20, (int) Math.round(font.sizePt() * 20d));
         String runProperties = "<w:rPr>" +
-                "<w:rFonts w:ascii=\"" + attr(font.family()) + "\" w:hAnsi=\"" + attr(font.family()) +
-                "\" w:eastAsia=\"" + attr(font.family()) + "\"/>" +
+                "<w:rFonts w:ascii=\"" + attr(family) + "\" w:hAnsi=\"" + attr(family) +
+                "\" w:eastAsia=\"" + attr(family) + "\"/>" +
                 "<w:sz w:val=\"" + halfPoints + "\"/><w:szCs w:val=\"" + halfPoints + "\"/>" +
                 (horizontalScale == 100 ? "" : "<w:w w:val=\"" + horizontalScale + "\"/>") +
                 (font.bold() ? "<w:b/><w:bCs/>" : "") +
@@ -297,10 +298,11 @@ final class FixedLayoutDocxRenderer {
                 }).append("\"/></w:pPr>");
         for (TextBlock run : paragraph.runs()) {
             FontStyle font = run.style();
+            String family = DocxFontSupport.familyFor(run);
             int halfPoints = Math.max(2, (int) Math.round(font.sizePt() * 2d));
-            xml.append("<w:r><w:rPr><w:rFonts w:ascii=\"").append(attr(font.family()))
-                    .append("\" w:hAnsi=\"").append(attr(font.family())).append("\" w:eastAsia=\"")
-                    .append(attr(font.family())).append("\"/><w:sz w:val=\"").append(halfPoints)
+            xml.append("<w:r><w:rPr><w:rFonts w:ascii=\"").append(attr(family))
+                    .append("\" w:hAnsi=\"").append(attr(family)).append("\" w:eastAsia=\"")
+                    .append(attr(family)).append("\"/><w:sz w:val=\"").append(halfPoints)
                     .append("\"/><w:szCs w:val=\"").append(halfPoints).append("\"/>");
             if (font.bold()) xml.append("<w:b/><w:bCs/>");
             if (font.italic()) xml.append("<w:i/><w:iCs/>");

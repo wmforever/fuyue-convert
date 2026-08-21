@@ -25,18 +25,18 @@ Status legend:
 
 | Route | Status | Default strategy | Notes |
 | --- | --- | --- | --- |
-| OFD -> DOCX/TXT/PDF/PNG/JPG | beta | structure/layout | DOCX and TXT use structured parsing. Scanned pages fail when OCR is not configured; local Tesseract can add positioned text from scan images. PDF/PNG/JPEG paint text, images, seal appearances, and paths at source coordinates; multi-page images are zipped. |
+| OFD -> DOCX/TXT/PDF/PNG/JPG | beta | structure/layout | DOCX and TXT use structured parsing. DOCX files containing CJK text embed a licensed fallback font so glyphs remain visible on another machine. Scanned pages fail when OCR is not configured; local Tesseract can add positioned text from scan images. PDF/PNG/JPEG paint text, images, seal appearances, and paths at source coordinates; multi-page images are zipped. |
 | OFD -> XLSX | experimental | data first | Writes high-confidence bordered grid tables as real cells, per-page worksheets, and merged regions. It returns `NO_TABLE_FOUND` when no reliable table is found and `OCR_REQUIRED` for scanned pages. |
 | CSV <-> XLSX | stable | data first | CSV supports UTF-8, BOM-marked UTF-16, GB18030, and comma/TAB/semicolon/pipe detection. Inputs stay text to prevent formula injection. XLSX exports cached formula results, formatted dates, and multi-sheet CSV ZIPs. |
 | DOCX/XLSX/PPTX -> PDF | beta | layout first | Uses an isolated LibreOffice headless profile when available and validates the actual PDF page count. Local fonts affect visual output. |
-| TXT -> DOCX/PDF | stable | content first | Supports UTF-8, BOM-marked UTF-16, and strict GB18030 decoding. Form feeds create real page breaks, PDF wraps CJK by glyph width, and DOCX writes configurable Latin/CJK fonts. |
+| TXT -> DOCX/PDF | stable | content first | Supports UTF-8, BOM-marked UTF-16, and strict GB18030 decoding. Form feeds create real page breaks and PDF wraps CJK by glyph width. DOCX embeds the licensed fallback on demand unless an explicit East Asian font is configured. |
 | DOCX -> TXT | beta | text extraction | Extracts paragraphs and tables in body order, then labeled headers, footers, text boxes, footnotes, endnotes, comments, and tracked revisions; layout is not retained. |
 | PDF -> TXT | beta | extraction | Extracts text by page coordinates and multi-column reading order with page boundaries. Scanned pages fail with `OCR_REQUIRED` by default; explicit local OCR fills only content pages that have no real text. |
 | PDF -> PNG/JPG | stable | rendering | Defaults to 160 DPI (configurable from 36-600); PNG preserves a transparent canvas, JPEG converts to RGB at 0.9 quality, and multi-page output is zipped. |
-| PDF -> DOCX | beta | editability first | Restores real text, basic paragraphs, page sizes, and orientation. Scanned pages fail by default; explicit local OCR converts them to positioned editable text without embedding full-page images. |
-| PDF -> OFD | experimental | fidelity first | Produces a real OFD package. A 144-DPI page image preserves appearance, while text PDFs also receive source-positioned OFD text objects. Complex objects are not yet reconstructed individually. |
+| PDF -> DOCX | beta | editability first | Restores real text, basic paragraphs, page sizes, and orientation. CJK output embeds the licensed Droid Sans Fallback while still avoiding full-page images. Scanned pages fail by default; explicit local OCR converts them to positioned editable text. |
+| PDF -> OFD | experimental | fidelity first | Produces a real OFD package. A 160-DPI page image preserves appearance, while text PDFs also receive source-positioned OFD text objects. Poppler is preferred with a PDFBox fallback; complex objects are not yet reconstructed individually. |
 | PNG/JPG -> PDF | stable | layout first | Reads PNG pHYs, JPEG JFIF/EXIF DPI, and EXIF orientation; transparent PNG composition is preserved. Missing DPI defaults to 96 with a warning. Same-format batches merge in upload order. |
-| PNG/JPG -> TXT | experimental/configured | OCR extraction | Disabled by default. Available only when local Tesseract and every requested language model are explicitly configured; outputs carry `OCR_APPLIED` and require human review. |
+| PNG/JPG -> TXT/DOCX | experimental/on demand | OCR extraction | Official runtime bundles and the Docker image include Tesseract; source/JAR deployments can use an explicitly configured system engine. TXT emits recognized text; DOCX maps positioned OCR text through `DocumentModel` to real editable text. Both expose page confidence and OCR warnings. |
 | WPS/ET/DPS/UOF -> OOXML | experimental | compatibility first | Depends on LibreOffice import support. UOF is converted directly to editable DOCX, so pagination and object positions may change. |
 | DOCX -> UOF | experimental | compatibility first | When LibreOffice is available, uses the explicit `UOF text` export filter to write real UOF XML and validates the UOF root. Paragraph and table text are covered by a LibreOffice reopen round trip. |
 
@@ -46,10 +46,12 @@ External dependencies:
 - Poppler: used for PDF to PNG/JPEG rendering and visual regression checks.
 - `FORMAT_CONVERTER_IMAGE_DPI`: PDF image-export resolution, default `160`, allowed range `36-600`; invalid configuration fails explicitly when the converter starts.
 - `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION`: optional LibreOffice version lock fragment such as `24.8`. A mismatching `--version` marks the Office engine unavailable; the detected version is exposed by `/api/health` and `/api/diagnostics`.
-- Local OCR is off by default. Set `FORMAT_CONVERTER_OCR_ENABLED=true`, optionally point `FORMAT_CONVERTER_TESSERACT_BINARY` at Tesseract, and set `FORMAT_CONVERTER_OCR_LANGUAGES` (default `chi_sim+eng`). Missing engines or models leave image OCR planned while PDF/OFD remain strict. `/api/health` and `/api/diagnostics` expose enablement, version, and languages without revealing absolute paths.
-- System fonts: affect pagination, line spacing, and font substitution in Office output. Basic PDF text routes include fallback fonts, and a custom TrueType font can be selected with `FORMAT_CONVERTER_PDF_FONT`. TXT -> DOCX font names can be configured with `FORMAT_CONVERTER_DOCX_FONT` and `FORMAT_CONVERTER_DOCX_CJK_FONT`.
+- Official runtime bundles carry Tesseract, its native libraries, and the `eng`, `chi_sim`, and `chi_sim_vert` models under `app/ocr`; the application detects and enables this capability automatically. OCR is still invoked only by explicit image OCR routes or detected scan pages. Set `FORMAT_CONVERTER_OCR_ENABLED=false` to disable it. Source/standalone-JAR deployments can set the value to `true` and optionally select a system binary. Health and diagnostics expose `ocr.bundled` along with version, models, limits, confidence thresholds, and capability errors.
+- OCR never replaces native PDF/OFD parsing and is not used for fixed-layout rendering. Mixed documents are processed page by page. Missing page models, no recognized text, confidence below the hard threshold, timeouts, and resource termination return `OCR_PAGE_MISSING`, `OCR_NO_TEXT`, `OCR_LOW_CONFIDENCE`, `OCR_TIMEOUT`, and `OCR_RESOURCE_EXHAUSTED` instead of publishing partial output.
+- System fonts still affect pagination, line spacing, and font substitution in Office output. PDF/OFD-to-DOCX embeds the project's licensed CJK fallback to keep basic glyphs visible, although its metrics and design may differ from the source font. Basic PDF output routes also include fallback fonts, and a custom TrueType font can be selected with `FORMAT_CONVERTER_PDF_FONT`. TXT -> DOCX font names can be configured with `FORMAT_CONVERTER_DOCX_FONT` and `FORMAT_CONVERTER_DOCX_CJK_FONT`; without an explicit East Asian font, it also embeds the bundled fallback on demand.
 
 See [docs/quality-standard.md](docs/quality-standard.md) for quality definitions.
+See [docs/ocr-deployment.md](docs/ocr-deployment.md) for the deployment ownership and enablement contract of the optional local OCR engine.
 
 ## Quick Start
 
@@ -59,6 +61,9 @@ Requirements:
 - Maven 3.9+
 - Optional: LibreOffice or `soffice`
 - Optional: Poppler `pdftoppm`
+- Optional for source/standalone JAR: Tesseract 5.x and models; official runtime bundles and Docker include them
+
+If `pdftoppm` is not on `PATH`, set `PDFTOPPM_BIN=/absolute/path/to/pdftoppm`. OFD image, PDF-to-OFD, and PDF-to-JPEG routes prefer Poppler and fall back to PDFBox when it is unavailable; PDF-to-PNG always uses PDFBox to preserve transparency semantics.
 
 Build:
 
@@ -111,9 +116,13 @@ Each file is converted in an independent JVM worker by default. The API process 
 FORMAT_CONVERTER_WORKER_ENABLED=true
 FORMAT_CONVERTER_WORKER_MAX_MEMORY_MB=768
 FORMAT_CONVERTER_WORKER_JAVA_BINARY=/path/to/java
+FORMAT_CONVERTER_MAX_FILES_PER_TASK=100
+FORMAT_CONVERTER_MAX_TASK_UPLOAD_BYTES=262144000
+FORMAT_CONVERTER_MAX_TASK_OUTPUT_BYTES=536870912
+FORMAT_CONVERTER_MIN_FREE_DISK_BYTES=536870912
 ```
 
-The worker memory setting limits the JVM heap only. Apply CPU, total-memory, and process-count limits with Docker/cgroups or systemd at deployment time.
+The service binds to `127.0.0.1` by default. Remote deployments must explicitly set `SERVER_ADDRESS=0.0.0.0` and should also configure `FORMAT_CONVERTER_API_TOKEN`; the bundled web UI accepts the token at the bottom of the page. File count, per-file size, total upload, total output, and free-disk watermarks are enforced. Failed and cancelled inputs are retained for the configured TTL starting when the task finishes. The worker memory setting limits the JVM heap only. Apply CPU, total-memory, and process-count limits with Docker/cgroups or systemd at deployment time.
 
 ## QA
 

@@ -254,6 +254,13 @@ def docx_media_entries(docx):
         return [name for name in archive.namelist() if name.startswith("word/media/")]
 
 
+def docx_embedded_font_entries(docx):
+    with zipfile.ZipFile(docx) as archive:
+        names = archive.namelist()
+        fonts = [name for name in names if name.startswith("word/fonts/") and name.endswith(".odttf")]
+        return fonts, "word/fontTable.xml" in names
+
+
 def normalized_character_counts(value):
     return Counter(character for character in value if not character.isspace())
 
@@ -540,7 +547,7 @@ def pdf_docx_editable_case(source):
     docx_task, docx_output = upload_convert(source, "docx")
     result["taskStatus"] = docx_task["status"]
     result["output"] = docx_output.name if docx_output else None
-    result["exactCheck"] = "pdf-vs-docx-editable-character-content-no-images"
+    result["exactCheck"] = "pdf-vs-docx-editable-character-content-no-images-portable-cjk-font"
     if not text_output or not docx_output:
         result["strictPass"] = False
         result["error"] = text_task.get("errorMessage") or docx_task.get("errorMessage")
@@ -549,6 +556,8 @@ def pdf_docx_editable_case(source):
     expected = normalized_character_counts(text_output.read_text(encoding="utf-8", errors="replace"))
     actual = normalized_character_counts(docx_text_content(docx_output))
     media = docx_media_entries(docx_output)
+    embedded_fonts, has_font_table = docx_embedded_font_entries(docx_output)
+    requires_cjk_font = any("\u3400" <= character <= "\u9fff" for character in expected)
     case_dir = WORK / result["name"]
     expected_pages = render_pdf(source, case_dir / "source-render", "source")
     target_pdf = office_pdf(docx_output, case_dir / "target-pdf")
@@ -557,10 +566,13 @@ def pdf_docx_editable_case(source):
     result["sourceCharacterCount"] = sum(expected.values())
     result["docxCharacterCount"] = sum(actual.values())
     result["embeddedMedia"] = media
+    result["embeddedFonts"] = embedded_fonts
+    result["hasFontTable"] = has_font_table
     result["pageCountMatch"] = comparison["pageCountMatch"]
     result["diffRatio"] = comparison["diffRatio"]
     result["visualPass"] = comparison["pageCountMatch"] and comparison["diffRatio"] <= VISUAL_THRESHOLD
-    result["strictPass"] = expected == actual and not media and comparison["pageCountMatch"]
+    result["strictPass"] = (expected == actual and not media and comparison["pageCountMatch"]
+                            and (not requires_cjk_font or (has_font_table and bool(embedded_fonts))))
     result["practicalPass"] = result["strictPass"]
     return result
 
@@ -754,7 +766,7 @@ def main():
         if process:
             stop_service(process)
     report = {
-        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, normalized text for editable documents, and table data for spreadsheets. PDF-to-TXT requires source character preservation, correct page-boundary count, and OCR_REQUIRED for image-only input. Editable PDF-to-DOCX additionally requires matching page count and no embedded media for a generated text-only source; an image-only PDF must fail with OCR_REQUIRED. PDF-to-OFD requires a real OFD package plus character and page-count preservation, while visual round-trip difference is reported separately. OFD-to-PDF requires character and declared/rendered page-count preservation. OFD-to-PNG/JPEG require page-count, pixel-dimension, nonblank-content, and bounded raster-error checks. OFD-to-XLSX requires exact invoice cell and merge counts plus known text, while low-confidence grid candidates are excluded; generated fixtures additionally cover pages, cells, merges, NO_TABLE_FOUND, and OCR_REQUIRED. JPEG uses a declared lossy-error bound.",
+        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, normalized text for editable documents, and table data for spreadsheets. PDF-to-TXT requires source character preservation, correct page-boundary count, and OCR_REQUIRED for image-only input. Editable PDF-to-DOCX additionally requires matching page count, no embedded media, and a font table plus an OOXML obfuscated font part for generated CJK text; an image-only PDF must fail with OCR_REQUIRED. PDF-to-OFD requires a real OFD package plus character and page-count preservation, while visual round-trip difference is reported separately. OFD-to-PDF requires character and declared/rendered page-count preservation. OFD-to-PNG/JPEG require page-count, pixel-dimension, nonblank-content, and bounded raster-error checks. OFD-to-XLSX requires exact invoice cell and merge counts plus known text, while low-confidence grid candidates are excluded; generated fixtures additionally cover pages, cells, merges, NO_TABLE_FOUND, and OCR_REQUIRED. JPEG uses a declared lossy-error bound.",
         "visualThresholdForReferenceOnly": VISUAL_THRESHOLD,
         "health": sanitized_health(health),
         "results": results,

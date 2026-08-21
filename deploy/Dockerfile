@@ -4,6 +4,10 @@ COPY . .
 RUN mvn -B -DskipTests package
 
 FROM eclipse-temurin:17-jre
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       tesseract-ocr tesseract-ocr-eng tesseract-ocr-chi-sim tesseract-ocr-chi-sim-vert \
+    && rm -rf /var/lib/apt/lists/*
 RUN useradd --system --uid 10001 --create-home appuser
 WORKDIR /app
 COPY --from=build /build/web-api/target/web-api-*.jar /app/app.jar
@@ -11,4 +15,7 @@ RUN mkdir -p /app/data && chown -R appuser:appuser /app
 USER appuser
 EXPOSE 8080
 ENV JAVA_OPTS="-Xms512m -Xmx2g -Djava.awt.headless=true"
+ENV FORMAT_CONVERTER_OCR_ENABLED="true" \
+    FORMAT_CONVERTER_OCR_LANGUAGES="chi_sim+eng" \
+    SERVER_ADDRESS="0.0.0.0"
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]

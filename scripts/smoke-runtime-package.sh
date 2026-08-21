@@ -42,6 +42,10 @@ if [[ ! -f "$PACKAGE_DIR/app/fuyue-convert.jar" ]]; then
   echo "发布包缺少应用 JAR" >&2
   exit 1
 fi
+if [[ -d "$PACKAGE_DIR/app/ocr" && ! -x "$PACKAGE_DIR/app/ocr/bin/tesseract" ]]; then
+  echo "发布包含 OCR 目录但缺少可执行引擎" >&2
+  exit 1
+fi
 
 "$PACKAGE_DIR/runtime/bin/java" -version >/dev/null
 
@@ -68,6 +72,10 @@ done
 if [[ "${HEALTH:-}" != *'"status":"UP"'* ]]; then
   echo "等待健康检查超时:" >&2
   cat "$LOG_FILE" >&2
+  exit 1
+fi
+if [[ -d "$PACKAGE_DIR/app/ocr" && "${HEALTH:-}" != *'"bundled":true'* ]]; then
+  echo "发布包内置 OCR 未被应用自动发现: $HEALTH" >&2
   exit 1
 fi
 

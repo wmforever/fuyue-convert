@@ -29,6 +29,45 @@ jobs:
           java-version: "17"
           cache: maven
 
+      - name: Install bundled OCR dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng tesseract-ocr-chi-sim tesseract-ocr-chi-sim-vert
+          echo "FORMAT_CONVERTER_BUNDLE_OCR=true" >> "$GITHUB_ENV"
+
+      - name: Install bundled OCR dependencies
+        if: runner.os == 'macOS'
+        run: |
+          brew install tesseract tesseract-lang
+          echo "FORMAT_CONVERTER_BUNDLE_OCR=true" >> "$GITHUB_ENV"
+
+      - name: Install bundled OCR dependencies
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install tesseract --yes --no-progress
+          $Tesseract = Get-ChildItem "$env:ProgramFiles", "${env:ProgramFiles(x86)}" -Recurse -File -Filter tesseract.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $Tesseract) { throw "Tesseract was not installed" }
+          $Data = Join-Path $env:GITHUB_WORKSPACE "target\bundled-tessdata"
+          New-Item -ItemType Directory -Force $Data | Out-Null
+          $InstalledData = Join-Path $Tesseract.Directory.FullName "tessdata"
+          if (Test-Path $InstalledData) { Copy-Item "$InstalledData\*" $Data -Recurse -Force }
+          $Commit = "87416418657359cb625c412a48b6e1d6d41c29bd"
+          $Models = @{
+            "eng" = "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+            "chi_sim" = "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+            "chi_sim_vert" = "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+          }
+          foreach ($Entry in $Models.GetEnumerator()) {
+            $File = Join-Path $Data "$($Entry.Key).traineddata"
+            Invoke-WebRequest "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/$Commit/$($Entry.Key).traineddata" -OutFile $File
+            if ((Get-FileHash $File -Algorithm SHA256).Hash.ToLowerInvariant() -ne $Entry.Value) { throw "Checksum mismatch: $($Entry.Key)" }
+          }
+          "FORMAT_CONVERTER_TESSERACT_BINARY=$($Tesseract.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "FORMAT_CONVERTER_TESSDATA_SOURCE=$Data" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "FORMAT_CONVERTER_BUNDLE_OCR=true" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
       - name: Package runtime bundle
         if: runner.os != 'Windows'
         run: bash scripts/package-runtime.sh

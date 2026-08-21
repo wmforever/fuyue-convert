@@ -1,4 +1,6 @@
 server:
+  # 本机使用默认回环地址；远程部署设置 SERVER_ADDRESS=0.0.0.0，并同时启用下方 API Token。
+  address: ${SERVER_ADDRESS:127.0.0.1}
   port: 8080
 spring:
   servlet:
@@ -11,6 +13,10 @@ format-converter:
   queue-capacity: 20
   timeout: 5m
   result-ttl: 24h
+  max-files-per-task: 100
+  max-task-upload-bytes: 262144000
+  max-task-output-bytes: 536870912
+  min-free-disk-bytes: 536870912
   max-file-size: 52428800
   max-expanded-size: 209715200
   max-entry-size: 41943040
@@ -25,5 +31,9 @@ format-converter:
   worker-max-memory-mb: 768
   # 留空时使用当前 Runtime 中的 java。
   worker-java-binary: ""
+  # 官方运行包会自动发现并启用 app/ocr 内置能力；设置
+  # FORMAT_CONVERTER_OCR_ENABLED=false 可强制关闭。源码/独立 JAR 使用系统
+  # Tesseract 时，需设置 FORMAT_CONVERTER_OCR_ENABLED=true。
+  # 建议生产值：FORMAT_CONVERTER_OCR_MAX_CONCURRENCY=1、FORMAT_CONVERTER_OCR_TIMEOUT_SECONDS=120，并保留 worker 进程隔离。
   # 留空表示不启用 API Token。公网部署建议设置，并通过 X-Format-Converter-Token 或 Bearer Token 调用 /api/tasks。
   api-token: ""

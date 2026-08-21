@@ -50,7 +50,14 @@ public class DiagnosticsController {
         ocr.put("available", ocrEngineStatus.available());
         ocr.put("binaryName", ocrEngineStatus.binaryName());
         ocr.put("version", ocrEngineStatus.version());
-        ocr.put("languages", ocrEngineStatus.languages());
+        ocr.put("requestedLanguages", ocrEngineStatus.requestedLanguages());
+        ocr.put("availableLanguages", ocrEngineStatus.availableLanguages());
+        ocr.put("timeoutSeconds", ocrEngineStatus.timeoutSeconds());
+        ocr.put("maxConcurrency", ocrEngineStatus.maxConcurrency());
+        ocr.put("maxImagePixels", ocrEngineStatus.maxImagePixels());
+        ocr.put("minimumConfidence", ocrEngineStatus.minimumConfidence());
+        ocr.put("bundled", ocrEngineStatus.bundled());
+        ocr.put("errorCode", ocrEngineStatus.errorCode());
         ocr.put("message", ocrEngineStatus.message());
         return ocr;
     }
@@ -79,8 +86,10 @@ public class DiagnosticsController {
         limits.put("concurrency", properties.getConcurrency());
         limits.put("queueCapacity", properties.getQueueCapacity());
         limits.put("timeout", properties.getTimeout().toString());
+        limits.put("maxFilesPerTask", properties.getMaxFilesPerTask());
         limits.put("maxFileSize", properties.getMaxFileSize());
         limits.put("maxTaskUploadBytes", properties.getMaxTaskUploadBytes());
+        limits.put("maxTaskOutputBytes", properties.getMaxTaskOutputBytes());
         limits.put("minFreeDiskBytes", properties.getMinFreeDiskBytes());
         limits.put("resultTtl", properties.getResultTtl().toString());
         limits.put("maxPages", properties.getMaxPages());

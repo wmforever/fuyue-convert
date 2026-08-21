@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -44,10 +45,23 @@ final class ConversionGuards {
 
     static String runProcess(List<String> command, Path logFile, Duration timeout, String label)
             throws IOException, InterruptedException {
+        return runProcess(command, Map.of(), logFile, timeout, label);
+    }
+
+    static String runProcess(List<String> command, Map<String, String> environment,
+                             Path logFile, Duration timeout, String label)
+            throws IOException, InterruptedException {
         Files.createDirectories(logFile.getParent());
         ProcessBuilder builder = new ProcessBuilder(command);
+        if (environment != null) builder.environment().putAll(environment);
         builder.redirectErrorStream(true);
-        Process process = builder.start();
+        Process process;
+        try {
+            process = builder.start();
+        } catch (IOException e) {
+            throw new ExternalProcessException(ExternalProcessException.Reason.START_FAILED, null,
+                    label + "无法启动", e);
+        }
         ProcessOutputCapture capture = ProcessOutputCapture.start(process, command, MAX_PROCESS_LOG_BYTES);
         Set<ProcessHandle> observedDescendants = new HashSet<>();
         boolean finished;
@@ -71,13 +85,15 @@ final class ConversionGuards {
         }
         if (!finished) {
             terminateProcessTree(process, observedDescendants);
-            throw new IOException(label + "超时，输出：" + capture.finish(logFile));
+            throw new ExternalProcessException(ExternalProcessException.Reason.TIMEOUT, null,
+                    label + "超时，输出：" + capture.finish(logFile), null);
         }
         observeDescendants(process, observedDescendants);
         terminateAlive(observedDescendants);
         String output = capture.finish(logFile);
         if (process.exitValue() != 0) {
-            throw new IOException(label + "失败，exit=" + process.exitValue() + "，输出：" + output);
+            throw new ExternalProcessException(ExternalProcessException.Reason.NON_ZERO_EXIT,
+                    process.exitValue(), label + "失败，exit=" + process.exitValue() + "，输出：" + output, null);
         }
         return output;
     }

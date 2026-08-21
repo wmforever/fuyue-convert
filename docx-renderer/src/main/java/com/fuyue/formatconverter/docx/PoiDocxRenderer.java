@@ -51,7 +51,9 @@ public final class PoiDocxRenderer implements DocxRenderer {
                     if (i < pages.size() - 1) {
                         boundaryProperties = sectionCarrier.getCTP().isSetPPr()
                                 ? sectionCarrier.getCTP().getPPr() : sectionCarrier.getCTP().addNewPPr();
-                        reserveSectionBreakSpace(boundaryProperties);
+                        if (needsSectionBreakReserve(page, semanticParagraphs, fixedParagraphs)) {
+                            reserveSectionBreakSpace(boundaryProperties);
+                        }
                     }
                     if (geometryChanges) {
                         configureSection(boundaryProperties.addNewSectPr(), page.physicalBox(), true);
@@ -62,6 +64,7 @@ public final class PoiDocxRenderer implements DocxRenderer {
                         configureSection(finalSection, page.physicalBox(), false);
                     }
                 }
+                DocxFontSupport.embedBundledCjkFont(docx, document);
                 try (var stream = Files.newOutputStream(output)) { docx.write(stream); }
             }
         } catch (Exception e) {
@@ -104,7 +107,7 @@ public final class PoiDocxRenderer implements DocxRenderer {
             if (item.paragraph() != null) {
                 lastParagraph = docx.createParagraph();
                 renderParagraph(lastParagraph, item.paragraph(), page.physicalBox(), previousBottom);
-                previousBottom = item.paragraph().box().bottom();
+                previousBottom = item.paragraph().box().y() + paragraphLineHeightMm(item.paragraph());
                 tableLast = false;
             } else if (item.table() != null) {
                 addVerticalSpacer(docx, Math.max(0, item.table().box().y() - previousBottom));
@@ -146,15 +149,16 @@ public final class PoiDocxRenderer implements DocxRenderer {
     private void appendRun(XWPFParagraph paragraph, TextBlock block) {
         XWPFRun run = paragraph.createRun();
         FontStyle style = block.style();
+        String family = DocxFontSupport.familyFor(block);
         run.setText(block.text());
-        run.setFontFamily(style.family());
+        run.setFontFamily(family);
         run.setFontSize(Math.max(1d, style.sizePt()));
         run.setBold(style.bold());
         run.setItalic(style.italic());
         run.setColor(style.color().rgbHex());
         CTRPr properties = run.getCTR().isSetRPr() ? run.getCTR().getRPr() : run.getCTR().addNewRPr();
         CTFonts fonts = properties.sizeOfRFontsArray() > 0 ? properties.getRFontsArray(0) : properties.addNewRFonts();
-        fonts.setAscii(style.family()); fonts.setHAnsi(style.family()); fonts.setEastAsia(style.family());
+        fonts.setAscii(family); fonts.setHAnsi(family); fonts.setEastAsia(family);
         int horizontalScale = horizontalScalePercent(block);
         if (horizontalScale != 100) properties.addNewW().setVal(BigInteger.valueOf(horizontalScale));
         int characterSpacing = characterSpacingTwips(block);
@@ -319,7 +323,19 @@ public final class PoiDocxRenderer implements DocxRenderer {
         // with Word's nominal font height adds a small amount on every visual
         // line; over a dense page those fractions accumulate and push the
         // footer onto an extra page.
-        return Math.max(0.5d, paragraph.box().height());
+        double fontHeight = paragraph.runs().stream().mapToDouble(run -> run.style().sizePt())
+                .max().orElse(1d) * 25.4d / 72d;
+        return Math.max(0.5d, Math.max(paragraph.box().height(), fontHeight));
+    }
+
+    private boolean needsSectionBreakReserve(PageModel page, List<ParagraphModel> paragraphs,
+                                             List<ParagraphModel> fixedParagraphs) {
+        double flowBottom = paragraphs.stream().filter(paragraph -> !fixedParagraphs.contains(paragraph))
+                .mapToDouble(paragraph -> paragraph.box().y() + paragraphLineHeightMm(paragraph))
+                .max().orElse(page.physicalBox().y());
+        flowBottom = Math.max(flowBottom, page.tables().stream().mapToDouble(table -> table.box().bottom())
+                .max().orElse(page.physicalBox().y()));
+        return page.physicalBox().bottom() - flowBottom < 2d;
     }
 
     private void appendVisualGap(XWPFParagraph paragraph, TextBlock previous, TextBlock current) {

@@ -58,11 +58,19 @@ public final class LibreOfficeConverter implements FileConverter {
         Path produced = findProducedFile(outDir, route.targetFormat());
         ConversionGuards.requireNonEmptyOutputFile(produced, limits, "LibreOffice");
         Integer pageCount = validateOutput(produced, route.targetFormat(), limits);
+        UofDocxCompatibilityFixer.RepairResult repair =
+                route.sourceFormat() == DocumentFormat.UOF && route.targetFormat() == DocumentFormat.DOCX
+                        ? UofDocxCompatibilityFixer.repair(produced)
+                        : new UofDocxCompatibilityFixer.RepairResult(0, false);
+        if (repair.changed()) pageCount = validateOutput(produced, route.targetFormat(), limits);
         Files.move(produced, outputPath, StandardCopyOption.REPLACE_EXISTING);
-        List<ConversionWarning> warnings = domesticFormat
-                ? List.of(ConversionWarning.of(WarningCode.OFFICE_COMPATIBILITY_LAYOUT,
-                "国产格式兼容转换已完成；字体、分页、自动编号和对象位置可能因 LibreOffice 兼容性发生变化，请复核内容与版式。", null))
-                : List.of();
+        List<ConversionWarning> warnings = new ArrayList<>();
+        if (domesticFormat) warnings.add(ConversionWarning.of(WarningCode.OFFICE_COMPATIBILITY_LAYOUT,
+                "国产格式兼容转换已完成；字体、分页、自动编号和对象位置可能因 LibreOffice 兼容性发生变化，请复核内容与版式。", null));
+        if (repair.continuedLists() > 0) warnings.add(ConversionWarning.of(WarningCode.OFFICE_COMPATIBILITY_LAYOUT,
+                "已修复 LibreOffice UOF 导入产生的 " + repair.continuedLists() + " 处续接列表编号。", null));
+        if (repair.endnotePageBreak()) warnings.add(ConversionWarning.of(WarningCode.OFFICE_COMPATIBILITY_LAYOUT,
+                "已保留 UOF 文末尾注的独立分页。", null));
         return new ConversionOutput(outputPath, outputFileName(input.displayName()), pageCount, warnings);
     }
 

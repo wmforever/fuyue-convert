@@ -39,7 +39,7 @@ class PdfToOfdConverterTest {
         }
         Path output = temp.resolve("layout.ofd");
 
-        ConversionOutput converted = new PdfToOfdConverter().convert(
+        ConversionOutput converted = new PdfToOfdConverter(new PdfLayoutParser(), null).convert(
                 new ConversionInput("layout.pdf", "application/pdf", Files.size(source), source),
                 temp.resolve("work"), output, ParseLimits.defaults(), (stage, percent) -> { });
 
@@ -87,7 +87,7 @@ class PdfToOfdConverterTest {
         }
         Path output = temp.resolve("scan.ofd");
 
-        ConversionOutput converted = new PdfToOfdConverter().convert(
+        ConversionOutput converted = new PdfToOfdConverter(new PdfLayoutParser(), null).convert(
                 new ConversionInput("scan.pdf", "application/pdf", Files.size(source), source),
                 temp.resolve("scan-work"), output, ParseLimits.defaults(), (stage, percent) -> { });
 

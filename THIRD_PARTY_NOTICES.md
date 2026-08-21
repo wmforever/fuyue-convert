@@ -1,5 +1,14 @@
 # Third-Party Notices
 
+## Tesseract OCR and tessdata
+
+- Tesseract source: `tesseract-ocr/tesseract`
+- Language models: `tesseract-ocr/tessdata_fast`
+- Runtime location in platform packages: `app/ocr/`
+- License: Apache License 2.0
+
+Platform release workflows obtain the engine from the operating-system package manager and bundle only the selected `eng`, `chi_sim`, `chi_sim_vert`, and supporting `osd` data. Windows model downloads are pinned to a source commit and verified by SHA-256 before packaging.
+
 ## Droid Sans Fallback
 
 - File: `task-service/src/main/resources/fonts/DroidSansFallback.ttf`

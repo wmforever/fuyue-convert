@@ -42,6 +42,7 @@ h1 { margin: 0; font-size: clamp(27px, 4vw, 40px); letter-spacing: 0; }
 .route-option:hover:not(:disabled), .route-option.selected { background: #edf8f5; }
 .route-option.selected { box-shadow: inset 3px 0 0 #0a7569; }
 .route-option.planned { color: #8a9896; background: transparent; }
+.route-option.unavailable { color: #936052; background: #fffaf7; }
 .route-main { min-width: 0; display: grid; gap: 3px; }
 .route-main strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
 .route-main small { display: -webkit-box; overflow: hidden; color: #728885; font-size: 12px; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
@@ -50,6 +51,7 @@ h1 { margin: 0; font-size: clamp(27px, 4vw, 40px); letter-spacing: 0; }
 .route-badge.beta { color: #7a5b00; background: #fff4ce; }
 .route-badge.experimental { color: #944230; background: #ffeadf; }
 .route-badge.planned { color: #7f8d8b; background: #eef2f1; }
+.route-badge.unavailable { color: #944230; background: #ffeadf; }
 .route-option.planned .route-badge { color: #7f8d8b; background: #eef2f1; }
 .route-empty { margin: 12px; color: #718885; font-size: 13px; text-align: center; }
 .route-meta { display: block; margin-top: 4px; color: #7c6b35; font-size: 12px; font-weight: 800; }

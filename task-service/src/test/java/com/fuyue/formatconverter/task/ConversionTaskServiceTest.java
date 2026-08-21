@@ -4,6 +4,7 @@ import com.fuyue.formatconverter.docx.PoiDocxRenderer;
 import com.fuyue.formatconverter.model.DocumentModel;
 import com.fuyue.formatconverter.model.Rect;
 import com.fuyue.formatconverter.model.TextBlock;
+import com.fuyue.formatconverter.model.WarningCode;
 import com.fuyue.formatconverter.parser.*;
 import com.fuyue.formatconverter.table.PageLayoutAnalyzer;
 import org.apache.poi.ss.usermodel.Row;
@@ -38,6 +39,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -290,6 +292,62 @@ class ConversionTaskServiceTest {
         }
     }
 
+    @Test void rejectsBatchWhoseFileCountExceedsTaskLimit() throws Exception {
+        byte[] payload = "x".getBytes(StandardCharsets.UTF_8);
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("file-count-data"), 1, 2,
+                Duration.ofSeconds(10), Duration.ofHours(1), 1,
+                100, 1_000, 0, new ParseLimits(100, 1_000, 1_000, 10, 100d, 10));
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(new TextToDocxConverter()))) {
+            IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> service.createTask(List.of(
+                    new UploadPayload("one.txt", "text/plain", payload.length, () -> new ByteArrayInputStream(payload)),
+                    new UploadPayload("two.txt", "text/plain", payload.length, () -> new ByteArrayInputStream(payload))
+            ), DocumentFormat.DOCX));
+            assertTrue(error.getMessage().contains("文件数量"));
+        }
+    }
+
+    @Test void failsFileThatWouldExceedTaskOutputQuota() throws Exception {
+        FileConverter converter = fixedTextConverter("123456");
+        byte[] payload = "input".getBytes(StandardCharsets.UTF_8);
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("output-quota-data"), 1, 2,
+                Duration.ofSeconds(10), Duration.ofHours(1), 10,
+                100, 5, 0, new ParseLimits(100, 1_000, 1_000, 10, 100d, 10));
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(converter))) {
+            TaskSnapshot created = service.createTask(List.of(new UploadPayload("input.txt", "text/plain", payload.length,
+                    () -> new ByteArrayInputStream(payload))), DocumentFormat.DOCX);
+            TaskSnapshot finished = await(service, created.taskId());
+
+            assertEquals(TaskStatus.FAILED, finished.status());
+            assertEquals("TASK_OUTPUT_LIMIT_EXCEEDED", finished.files().get(0).errorCode());
+            assertFalse(finished.downloadReady());
+        }
+    }
+
+    @Test void sanitizesPortablePathsBeforeWritingBatchZipEntries() throws Exception {
+        FileConverter converter = fixedTextConverter("result");
+        byte[] payload = "input".getBytes(StandardCharsets.UTF_8);
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("safe-name-data"), 1, 2,
+                Duration.ofSeconds(10), Duration.ofHours(1), ParseLimits.defaults());
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(converter))) {
+            TaskSnapshot created = service.createTask(List.of(
+                    new UploadPayload("..\\evil.txt", "text/plain", payload.length, () -> new ByteArrayInputStream(payload)),
+                    new UploadPayload("folder/good.txt", "text/plain", payload.length, () -> new ByteArrayInputStream(payload))
+            ), DocumentFormat.DOCX);
+            TaskSnapshot finished = await(service, created.taskId());
+
+            assertEquals(TaskStatus.SUCCESS, finished.status(), finished.errorMessage());
+            assertEquals(List.of("evil.txt", "good.txt"), finished.files().stream().map(TaskFileResult::fileName).toList());
+            try (ZipFile zip = new ZipFile(service.download(created.taskId()).path().toFile())) {
+                List<String> entries = zip.stream().map(entry -> entry.getName()).toList();
+                assertEquals(List.of("evil.docx", "good.docx"), entries);
+                assertTrue(entries.stream().noneMatch(name -> name.contains("..") || name.contains("/") || name.contains("\\")));
+            }
+        }
+    }
+
     @Test void rejectsNewTaskWhenDiskIsBelowConfiguredWatermark() throws Exception {
         byte[] payload = "disk".getBytes(StandardCharsets.UTF_8);
         TaskServiceConfig config = new TaskServiceConfig(temp.resolve("disk-watermark-data"), 1, 2,
@@ -457,6 +515,13 @@ class ConversionTaskServiceTest {
             assertEquals(BigInteger.valueOf(10000), word.getDocument().getBody().getSectPr().getPgSz().getW());
             assertEquals(BigInteger.valueOf(6000), word.getDocument().getBody().getSectPr().getPgSz().getH());
         }
+        try (ZipFile archive = new ZipFile(output.toFile())) {
+            assertNotNull(archive.getEntry("word/fontTable.xml"), "中文 DOCX 应包含字体表");
+            assertNotNull(archive.getEntry("word/fonts/DroidSansFallback.odttf"),
+                    "中文 DOCX 应嵌入许可的回退字体，避免换机后文字不可见");
+            assertTrue(archive.stream().noneMatch(entry -> entry.getName().startsWith("word/media/")),
+                    "字体部件不能被误记为页面图片");
+        }
     }
 
     @Test void preservesDisplayedCoordinatesForRotatedPagesAndRotatedText() throws Exception {
@@ -507,7 +572,7 @@ class ConversionTaskServiceTest {
         assertEquals(300d * 25.4d / 72d, textRotationBounds.bottom(), 1.5d);
     }
 
-    @Test void rejectsPdfPagesLargerThanWordSupports() throws Exception {
+    @Test void scalesPdfPagesLargerThanWordSupports() throws Exception {
         Path source = temp.resolve("oversized-page.pdf");
         try (PDDocument pdf = new PDDocument()) {
             pdf.addPage(new PDPage(new PDRectangle(20_000, 400)));
@@ -515,15 +580,15 @@ class ConversionTaskServiceTest {
         }
         Path output = temp.resolve("oversized-page.docx");
 
-        ConversionFailureException error = assertThrows(ConversionFailureException.class,
-                () -> new PdfToDocxConverter().convert(
-                        new ConversionInput("oversized-page.pdf", "application/pdf", Files.size(source), source),
-                        temp.resolve("oversized-work"), output, ParseLimits.defaults(),
-                        (stage, progress) -> { }));
+        ConversionOutput converted = new PdfToDocxConverter().convert(
+                new ConversionInput("oversized-page.pdf", "application/pdf", Files.size(source), source),
+                temp.resolve("oversized-work"), output, ParseLimits.defaults(),
+                (stage, progress) -> { });
 
-        assertEquals("PAGE_SIZE_UNSUPPORTED", error.code());
-        assertTrue(error.getMessage().contains("第 1 页"));
-        assertFalse(Files.exists(output));
+        assertTrue(Files.size(output) > 0);
+        assertTrue(converted.warnings().stream().anyMatch(warning ->
+                warning.code() == WarningCode.OFFICE_COMPATIBILITY_LAYOUT
+                        && warning.message().contains("等比缩小")));
     }
 
     @Test void scannedPdfFailsWithOcrRequiredInsteadOfReturningImageDocx() throws Exception {
@@ -729,6 +794,22 @@ class ConversionTaskServiceTest {
         Paragraph paragraph = new Paragraph(text, 5d);
         paragraph.setPosition(Position.Absolute).setBox(15d, 15d, width - 30d, 15d);
         return new VirtualPage(width, height).add(paragraph);
+    }
+
+    private FileConverter fixedTextConverter(String outputContent) {
+        return new FileConverter() {
+            @Override public ConversionRoute route() {
+                return ConversionRoute.of(DocumentFormat.TXT, DocumentFormat.DOCX, "test converter");
+            }
+
+            @Override
+            public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                              ParseLimits limits, ConversionProgress progress) throws Exception {
+                Files.writeString(outputPath, outputContent, StandardCharsets.UTF_8);
+                return new ConversionOutput(outputPath,
+                        input.displayName().replaceFirst("(?i)\\.txt$", ".docx"), null, List.of());
+            }
+        };
     }
 
     private PDType0Font loadTestFont(PDDocument pdf, String resource) throws IOException {
