@@ -7,7 +7,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.awt.Desktop;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
@@ -49,10 +51,15 @@ public class BrowserLauncher {
     }
 
     private void open(String url) throws IOException {
+        if (tryDesktopBrowse(url)) return;
         String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
         ProcessBuilder builder;
         if (os.contains("win")) {
-            builder = new ProcessBuilder("cmd", "/c", "start", "", url);
+            try {
+                builder = windowsPowerShellBrowser(url);
+            } catch (IllegalArgumentException ignored) {
+                builder = new ProcessBuilder("explorer.exe", url);
+            }
         } else if (os.contains("mac")) {
             builder = new ProcessBuilder("open", url);
         } else {
@@ -60,5 +67,24 @@ public class BrowserLauncher {
         }
         builder.redirectErrorStream(true);
         builder.start();
+    }
+
+    private boolean tryDesktopBrowse(String url) {
+        if (Boolean.getBoolean("java.awt.headless")) return false;
+        if (!Desktop.isDesktopSupported()) return false;
+        Desktop desktop = Desktop.getDesktop();
+        if (!desktop.isSupported(Desktop.Action.BROWSE)) return false;
+        try {
+            desktop.browse(URI.create(url));
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private ProcessBuilder windowsPowerShellBrowser(String url) {
+        String escapedUrl = url.replace("'", "''");
+        return new ProcessBuilder("powershell.exe", "-NoProfile", "-NonInteractive",
+                "-WindowStyle", "Hidden", "-Command", "Start-Process '" + escapedUrl + "'");
     }
 }

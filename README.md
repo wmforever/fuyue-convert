@@ -94,7 +94,7 @@ bash scripts/package-runtime.sh
 生成文件位于 `dist/`：
 
 - macOS/Linux：`fuyue-convert-<version>-<os>-<arch>.tar.gz`，解压后运行 `start.command` 或 `bin/start.sh`。
-- Windows：通过 GitHub Actions 或 Windows 本机运行 `scripts/package-runtime.ps1`。Release 同时提供普通 ZIP、`*-exe.zip` 免安装程序、原生 `.exe` 安装器和 `.msi`；四者均内置 Java Runtime。安装器当前未做商业代码签名，Windows 可能显示 SmartScreen/未知发布者提示。
+- Windows：通过 GitHub Actions 或 Windows 本机运行 `scripts/package-runtime.ps1`。Release 同时提供普通 ZIP、`*-exe.zip` 免安装程序、原生 `.exe` 安装器和 `.msi`；四者均内置 Java Runtime。构建机若安装了 Poppler `pdftoppm.exe`，脚本会自动一并打入运行包，供 PDF 保真路线直接使用。安装器当前未做商业代码签名，Windows 可能显示 SmartScreen/未知发布者提示。
 
 GitHub Release 会在打包后自动执行 smoke test：三个平台都会使用内置 Runtime 启动服务、检查 `/api/health`，再完成一次真实 `TXT -> DOCX` Worker 转换和下载内容校验；Windows 另外检查 `FuyueConvert.exe`。
 
@@ -104,7 +104,7 @@ GitHub Release 会在打包后自动执行 smoke test：三个平台都会使用
 http://127.0.0.1:8080
 ```
 
-发布包默认会自动打开浏览器。需要关闭时可设置：
+发布包默认会自动打开浏览器。Windows ZIP 额外提供 `start.vbs`，可隐藏控制台窗口启动。需要关闭自动开浏览器时可设置：
 
 ```bash
 AUTO_OPEN_BROWSER=false ./bin/start.sh

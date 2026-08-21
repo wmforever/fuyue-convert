@@ -28,6 +28,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 abstract class PdfToImageConverter implements FileConverter {
+    private static final String APP_HOME_PROPERTY = "format.converter.app.home";
+    private static final String APP_HOME_ENV = "FORMAT_CONVERTER_APP_HOME";
     private final ConversionRoute route;
     private final DocumentFormat targetFormat;
     private final String imageFormat;
@@ -269,16 +271,52 @@ abstract class PdfToImageConverter implements FileConverter {
         List<Path> candidates = new ArrayList<>();
         String configured = System.getenv("PDFTOPPM_BIN");
         if (configured != null && !configured.isBlank()) candidates.add(Path.of(configured));
+        bundledRoot().ifPresent(root -> {
+            candidates.add(root.resolve(binaryName()));
+            candidates.add(root.resolve("bin").resolve(binaryName()));
+        });
         String path = System.getenv("PATH");
         if (path != null) {
             for (String dir : path.split(java.io.File.pathSeparator)) {
-                if (!dir.isBlank()) candidates.add(Path.of(dir, "pdftoppm"));
+                if (!dir.isBlank()) candidates.add(Path.of(dir, binaryName()));
             }
         }
         for (Path candidate : candidates) {
             if (Files.isRegularFile(candidate) && Files.isExecutable(candidate)) return Optional.of(candidate);
         }
         return Optional.empty();
+    }
+
+    private static Optional<Path> bundledRoot() {
+        List<Path> homes = new ArrayList<>();
+        addHome(homes, System.getenv(APP_HOME_ENV));
+        addHome(homes, System.getProperty(APP_HOME_PROPERTY));
+        addHome(homes, System.getProperty("jpackage.app-path"));
+        addHome(homes, System.getProperty("user.dir"));
+        for (Path home : homes) {
+            Path root = home.resolve("app").resolve("poppler");
+            if (Files.isDirectory(root)) return Optional.of(root.toAbsolutePath().normalize());
+            root = home.resolve("poppler");
+            if (Files.isDirectory(root)) return Optional.of(root.toAbsolutePath().normalize());
+        }
+        return Optional.empty();
+    }
+
+    private static void addHome(List<Path> homes, String value) {
+        if (value == null || value.isBlank()) return;
+        try {
+            homes.add(Path.of(value).toAbsolutePath().normalize());
+        } catch (RuntimeException ignored) {
+            // ignore invalid paths from external environment
+        }
+    }
+
+    private static String binaryName() {
+        return isWindows() ? "pdftoppm.exe" : "pdftoppm";
+    }
+
+    private static boolean isWindows() {
+        return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
     }
 
     private static float configuredDpi() {

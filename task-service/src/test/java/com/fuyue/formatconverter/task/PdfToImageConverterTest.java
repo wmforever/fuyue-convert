@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -128,6 +129,26 @@ class PdfToImageConverterTest {
                         temp.resolve("protected.png"), ParseLimits.defaults(), (stage, percent) -> { }));
 
         assertEquals("PDF_PASSWORD_REQUIRED", failure.code());
+    }
+
+    @Test
+    void discoversBundledPopplerFromAppHome() throws Exception {
+        String property = "format.converter.app.home";
+        String previous = System.getProperty(property);
+        Path appHome = temp.resolve("runtime-home");
+        Path popplerDir = Files.createDirectories(appHome.resolve("app/poppler/bin"));
+        Path binary = popplerDir.resolve("pdftoppm");
+        Files.writeString(binary, "#!/bin/sh\nexit 0\n");
+        binary.toFile().setExecutable(true);
+        try {
+            System.setProperty(property, appHome.toString());
+            Optional<Path> discovered = PdfToImageConverter.discoverPoppler();
+            assertTrue(discovered.isPresent());
+            assertEquals(binary.toAbsolutePath().normalize(), discovered.orElseThrow());
+        } finally {
+            if (previous == null) System.clearProperty(property);
+            else System.setProperty(property, previous);
+        }
     }
 
     private ConversionInput input(Path source) throws Exception {

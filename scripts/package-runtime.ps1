@@ -21,6 +21,30 @@ $PackageName = "fuyue-convert-$Version-windows-$Arch"
 $PackageDir = Join-Path $DistDir $PackageName
 $RuntimeDir = Join-Path $PackageDir "runtime"
 
+function Resolve-PdftoppmBinary {
+  if ($env:PDFTOPPM_BIN -and (Test-Path $env:PDFTOPPM_BIN)) {
+    return (Resolve-Path $env:PDFTOPPM_BIN).Path
+  }
+  $candidates = @()
+  if ($env:PATH) {
+    foreach ($dir in $env:PATH.Split([IO.Path]::PathSeparator, [System.StringSplitOptions]::RemoveEmptyEntries)) {
+      $candidate = Join-Path $dir "pdftoppm.exe"
+      if (Test-Path $candidate) { $candidates += $candidate }
+    }
+  }
+  foreach ($root in @($env:ProgramFiles, ${env:ProgramFiles(x86)})) {
+    if (-not $root) { continue }
+    $matches = Get-ChildItem $root -Recurse -File -Filter pdftoppm.exe -ErrorAction SilentlyContinue
+    foreach ($match in $matches) { $candidates += $match.FullName }
+  }
+  foreach ($candidate in $candidates) {
+    if (Test-Path $candidate) {
+      return (Resolve-Path $candidate).Path
+    }
+  }
+  return $null
+}
+
 if (-not $JlinkBin) {
   if ($env:JAVA_HOME) {
     $JlinkBin = Join-Path $env:JAVA_HOME "bin\jlink.exe"
@@ -84,6 +108,17 @@ Copy-Item (Join-Path $RootDir "THIRD_PARTY_NOTICES.md") (Join-Path $PackageDir "
 Copy-Item (Join-Path $RootDir "docs\known-limitations.md") (Join-Path $PackageDir "app\docs")
 Copy-Item (Join-Path $RootDir "docs\test-report.md") (Join-Path $PackageDir "app\docs")
 
+$PopplerBin = Resolve-PdftoppmBinary
+if ($PopplerBin) {
+  $PopplerSourceDir = Split-Path $PopplerBin -Parent
+  $PopplerTargetDir = Join-Path $PackageDir "app\poppler\bin"
+  New-Item -ItemType Directory -Force $PopplerTargetDir | Out-Null
+  Copy-Item (Join-Path $PopplerSourceDir "*") $PopplerTargetDir -Recurse -Force
+  Write-Host "已内置 Poppler: $PopplerBin"
+} else {
+  Write-Host "未找到 pdftoppm.exe，本次 Windows 运行包不含 Poppler；PDF 保真路线将依赖运行环境自行提供。"
+}
+
 & $JlinkBin `
   --add-modules java.base,java.compiler,java.desktop,java.instrument,java.logging,java.management,java.naming,java.net.http,java.prefs,java.security.jgss,java.sql,jdk.crypto.ec,jdk.unsupported `
   --bind-services `
@@ -101,17 +136,27 @@ set APP_HOME=%~dp0..
 if "%SERVER_PORT%"=="" set SERVER_PORT=8080
 if "%JAVA_OPTS%"=="" set JAVA_OPTS=-Xms256m -Xmx1g -Djava.awt.headless=true
 if "%AUTO_OPEN_BROWSER%"=="" set AUTO_OPEN_BROWSER=true
+if exist "%APP_HOME%\app\poppler\bin\pdftoppm.exe" set "PDFTOPPM_BIN=%APP_HOME%\app\poppler\bin\pdftoppm.exe"
 echo Fuyue Convert 正在启动...
 echo 浏览器地址: http://127.0.0.1:%SERVER_PORT%
 "%APP_HOME%\runtime\bin\java.exe" %JAVA_OPTS% -Dformat.converter.app.home="%APP_HOME%" -jar "%APP_HOME%\app\fuyue-convert.jar" --server.port=%SERVER_PORT% --format-converter.auto-open-browser=%AUTO_OPEN_BROWSER% --spring.config.additional-location="%APP_HOME%\application.yml"
-pause
 '@ | Set-Content -Encoding UTF8 (Join-Path $PackageDir "start.bat")
+
+@'
+Set WshShell = CreateObject("WScript.Shell")
+command = """" & Replace(WScript.ScriptFullName, "start.vbs", "start.bat") & """"
+WshShell.Run command, 0, False
+'@ | Set-Content -Encoding ASCII (Join-Path $PackageDir "start.vbs")
 
 @'
 $AppHome = Resolve-Path (Join-Path $PSScriptRoot ".")
 if (-not $env:SERVER_PORT) { $env:SERVER_PORT = "8080" }
 if (-not $env:JAVA_OPTS) { $env:JAVA_OPTS = "-Xms256m -Xmx1g -Djava.awt.headless=true" }
 if (-not $env:AUTO_OPEN_BROWSER) { $env:AUTO_OPEN_BROWSER = "true" }
+if (-not $env:PDFTOPPM_BIN) {
+  $BundledPdftoppm = Join-Path $AppHome "app\poppler\bin\pdftoppm.exe"
+  if (Test-Path $BundledPdftoppm) { $env:PDFTOPPM_BIN = $BundledPdftoppm }
+}
 Write-Host "Fuyue Convert 正在启动..."
 Write-Host "浏览器地址: http://127.0.0.1:$env:SERVER_PORT"
 $JavaOptions = $env:JAVA_OPTS -split " "
@@ -141,7 +186,6 @@ if ($JpackageCommand) {
     --app-version $AppVersion `
     --vendor Fuyue `
     --description "Open-source document format conversion platform" `
-    --win-console `
     --arguments '--format-converter.auto-open-browser=true --format-converter.data-root=${user.home}/FuyueConvert/data' `
     --java-options "-Xms256m" `
     --java-options "-Xmx1g" `
@@ -173,7 +217,6 @@ if ($JpackageCommand) {
       --vendor Fuyue `
       --description "Open-source document format conversion platform" `
       --license-file (Join-Path $RootDir "LICENSE") `
-      --win-console `
       --win-menu `
       --win-menu-group "Fuyue Convert" `
       --win-shortcut `
