@@ -74,7 +74,7 @@ mvn clean verify
 运行：
 
 ```bash
-java -jar web-api/target/web-api-0.1.2.jar
+java -jar web-api/target/web-api-0.1.3.jar
 ```
 
 访问：

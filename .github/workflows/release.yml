@@ -80,7 +80,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          choco install wixtoolset --version=3.14.1.20250415 --yes --no-progress
+          choco install wixtoolset --version=3.14.1.20250415 --yes --no-progress --force
           $Candle = Get-ChildItem "${env:ProgramFiles(x86)}\WiX Toolset*" -Recurse -File -Filter candle.exe | Select-Object -First 1
           if (-not $Candle) { $Candle = Get-ChildItem "$env:ChocolateyInstall\lib\wixtoolset\tools" -Recurse -File -Filter candle.exe | Select-Object -First 1 }
           if (-not $Candle) { throw "WiX candle.exe not found" }

@@ -12,7 +12,7 @@ $DistDir = Join-Path $RootDir "dist"
 [xml]$pom = Get-Content (Join-Path $RootDir "pom.xml")
 $Version = $pom.project.version
 if (-not $Version) { $Version = "0.0.0" }
-$AppVersion = "0.1.2"
+$AppVersion = "0.1.3"
 if ($Version -match "^\d+(\.\d+){0,2}") { $AppVersion = $Matches[0] }
 
 $Arch = $env:PROCESSOR_ARCHITECTURE
@@ -136,6 +136,7 @@ set APP_HOME=%~dp0..
 if "%SERVER_PORT%"=="" set SERVER_PORT=8080
 if "%JAVA_OPTS%"=="" set JAVA_OPTS=-Xms256m -Xmx1g -Djava.awt.headless=true
 if "%AUTO_OPEN_BROWSER%"=="" set AUTO_OPEN_BROWSER=true
+set "FORMAT_CONVERTER_APP_HOME=%APP_HOME%\app"
 if exist "%APP_HOME%\app\poppler\bin\pdftoppm.exe" set "PDFTOPPM_BIN=%APP_HOME%\app\poppler\bin\pdftoppm.exe"
 echo Fuyue Convert 正在启动...
 echo 浏览器地址: http://127.0.0.1:%SERVER_PORT%
@@ -153,6 +154,7 @@ $AppHome = Resolve-Path (Join-Path $PSScriptRoot ".")
 if (-not $env:SERVER_PORT) { $env:SERVER_PORT = "8080" }
 if (-not $env:JAVA_OPTS) { $env:JAVA_OPTS = "-Xms256m -Xmx1g -Djava.awt.headless=true" }
 if (-not $env:AUTO_OPEN_BROWSER) { $env:AUTO_OPEN_BROWSER = "true" }
+$env:FORMAT_CONVERTER_APP_HOME = Join-Path $AppHome "app"
 if (-not $env:PDFTOPPM_BIN) {
   $BundledPdftoppm = Join-Path $AppHome "app\poppler\bin\pdftoppm.exe"
   if (Test-Path $BundledPdftoppm) { $env:PDFTOPPM_BIN = $BundledPdftoppm }

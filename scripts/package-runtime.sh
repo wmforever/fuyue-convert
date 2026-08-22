@@ -76,6 +76,7 @@ JAVA_BIN="$APP_HOME/runtime/bin/java"
 JAVA_OPTS="${JAVA_OPTS:--Xms256m -Xmx1g -Djava.awt.headless=true}"
 URL="http://127.0.0.1:${SERVER_PORT:-8080}"
 AUTO_OPEN_BROWSER="${AUTO_OPEN_BROWSER:-true}"
+export FORMAT_CONVERTER_APP_HOME="$APP_HOME/app"
 
 echo "Fuyue Convert 正在启动..."
 echo "浏览器地址: $URL"

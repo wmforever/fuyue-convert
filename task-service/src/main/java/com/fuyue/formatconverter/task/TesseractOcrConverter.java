@@ -397,7 +397,8 @@ public final class TesseractOcrConverter implements FileConverter {
             // Explicit app-home and system PATH remain available.
         }
         addHome(homes, System.getProperty("user.dir"));
-        return homes.stream().map(home -> home.resolve("ocr").toAbsolutePath().normalize())
+        return homes.stream().flatMap(home -> java.util.stream.Stream.of(home.resolve("ocr"), home.resolve("app/ocr")))
+                .map(path -> path.toAbsolutePath().normalize())
                 .filter(Files::isDirectory).findFirst();
     }
 

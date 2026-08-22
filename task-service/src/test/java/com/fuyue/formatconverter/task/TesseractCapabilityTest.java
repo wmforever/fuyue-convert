@@ -49,6 +49,24 @@ class TesseractCapabilityTest {
     }
 
     @Test
+    void discoversBundledRuntimeFromPackagedApplicationRoot() throws Exception {
+        assumePosix();
+        Path packageRoot = temp.resolve("runtime-package");
+        Path binary = packageRoot.resolve("app/ocr/bin/tesseract");
+        Files.createDirectories(binary.getParent());
+        Files.createDirectories(packageRoot.resolve("app/ocr/tessdata"));
+        writeCapabilityBinary(binary, "eng\nchi_sim");
+
+        var capability = TesseractOcrConverter.detectConfigured(Map.of(
+                "FORMAT_CONVERTER_APP_HOME", packageRoot.toString(),
+                "FORMAT_CONVERTER_OCR_LANGUAGES", "chi_sim+eng",
+                "PATH", temp.resolve("empty-path").toString()));
+
+        assertTrue(capability.available(), capability.message());
+        assertTrue(capability.settings().bundled());
+    }
+
+    @Test
     void explicitFalseDisablesEvenAValidBundledRuntime() throws Exception {
         assumePosix();
         Path appHome = temp.resolve("disabled-bundle");
