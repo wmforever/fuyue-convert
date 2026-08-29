@@ -23,6 +23,7 @@ const selectedRouteId = ref(fallbackConversions[0].id)
 const routePickerRef = ref(null)
 const routePickerOpen = ref(false)
 const routeSearch = ref('')
+const pickerSource = ref('popular')
 const dragging = ref(false)
 const uploadProgress = ref(0)
 const task = ref(null)
@@ -41,6 +42,7 @@ const routeFileLimit = computed(() => isSinglePdfTool.value ? 1 : limits.value.m
 const canSubmit = computed(() => files.value.length >= (isPdfMergeRoute.value ? 2 : 1)
   && !busy.value && selectedRoute.value?.status === 'available')
 const availableRoutes = computed(() => conversions.value.filter(route => route.status === 'available'))
+const selectedBytes = computed(() => files.value.reduce((total, file) => total + file.size, 0))
 const acceptExtension = computed(() => selectedRoute.value?.inputExtension || '.ofd')
 const acceptExtensions = computed(() => selectedRoute.value?.sourceFormat === 'jpg' ? ['.jpg', '.jpeg'] : [acceptExtension.value])
 const acceptType = computed(() => `${acceptExtensions.value.join(',')},application/${selectedRoute.value?.sourceFormat || 'ofd'}`)
@@ -51,17 +53,48 @@ const uploadHint = computed(() => {
   if (isSinglePdfTool.value) return `一次处理 1 个 PDF，单文件最大 ${formatBytes(limits.value.maxFileSize)}`
   return `最多 ${limits.value.maxFilesPerTask} 个文件，单文件最大 ${formatBytes(limits.value.maxFileSize)}，总计最大 ${formatBytes(limits.value.maxTaskUploadBytes)}`
 })
-const routeGroups = computed(() => {
-  const keyword = routeSearch.value.trim().toLowerCase()
-  const groups = new Map()
+const popularRouteIds = ['pdf-to-docx', 'docx-to-pdf', 'pdf-to-pdf-merge', 'ofd-to-docx', 'pdf-to-pdf-compress', 'png-to-pdf']
+const pdfToolRouteIds = ['pdf-to-pdf-compress', 'pdf-to-pdf-merge', 'pdf-to-pdf-split', 'pdf-to-pdf-watermark']
+const sourceOrder = ['pdf', 'ofd', 'docx', 'txt', 'xlsx', 'csv', 'png', 'jpg', 'pptx', 'wps', 'et', 'dps', 'uof']
+const sourceOptions = computed(() => {
+  const sources = new Map()
   for (const route of conversions.value) {
-    const text = `${route.id} ${route.sourceFormat} ${route.targetFormat} ${route.sourceLabel} ${route.targetLabel} ${route.description}`.toLowerCase()
-    if (keyword && !text.includes(keyword)) continue
-    const label = routeGroupLabel(route)
-    if (!groups.has(label)) groups.set(label, [])
-    groups.get(label).push(route)
+    if (!sources.has(route.sourceFormat)) {
+      sources.set(route.sourceFormat, { id: route.sourceFormat, label: route.sourceLabel, count: 0 })
+    }
+    sources.get(route.sourceFormat).count++
   }
-  return Array.from(groups, ([label, routes]) => ({ label, routes }))
+  const options = Array.from(sources.values()).sort((a, b) => {
+    const left = sourceOrder.indexOf(a.id)
+    const right = sourceOrder.indexOf(b.id)
+    return (left < 0 ? 999 : left) - (right < 0 ? 999 : right)
+  })
+  return [
+    { id: 'popular', label: '常用转换', count: popularRouteIds.filter(id => conversions.value.some(route => route.id === id)).length },
+    { id: 'pdf-tools', label: 'PDF 工具', count: pdfToolRouteIds.filter(id => conversions.value.some(route => route.id === id)).length },
+    ...options
+  ]
+})
+const pickerRoutes = computed(() => {
+  const keyword = routeSearch.value.trim().toLowerCase()
+  if (keyword) return conversions.value.filter(route => {
+    const text = `${route.id} ${route.sourceFormat} ${route.targetFormat} ${route.sourceLabel} ${route.targetLabel} ${route.description}`.toLowerCase()
+    return text.includes(keyword)
+  })
+  if (pickerSource.value === 'popular') {
+    return popularRouteIds.map(id => conversions.value.find(route => route.id === id)).filter(Boolean)
+  }
+  if (pickerSource.value === 'pdf-tools') {
+    return pdfToolRouteIds.map(id => conversions.value.find(route => route.id === id)).filter(Boolean)
+  }
+  return conversions.value.filter(route => route.sourceFormat === pickerSource.value)
+})
+const pickerTitle = computed(() => {
+  if (routeSearch.value.trim()) return `搜索结果 · ${pickerRoutes.value.length}`
+  if (pickerSource.value === 'popular') return '常用转换'
+  if (pickerSource.value === 'pdf-tools') return 'PDF 实用工具'
+  const source = sourceOptions.value.find(option => option.id === pickerSource.value)
+  return `${source?.label || '当前格式'} 可以转换为`
 })
 
 function formatRouteLabel(route) {
@@ -96,21 +129,10 @@ function routeMeta(route) {
   return values.join(' · ')
 }
 
-function routeGroupLabel(route) {
-  if (route.status === 'unavailable') return '当前环境不可用'
-  if (route.status !== 'available') return '规划路线'
-  if (route.sourceFormat === 'ofd') return 'OFD'
-  if (route.sourceFormat === 'pdf') return 'PDF'
-  if (['csv', 'xlsx'].includes(route.sourceFormat)) return '表格'
-  if (['txt', 'docx', 'pptx'].includes(route.sourceFormat)) return 'Office 文档'
-  if (['wps', 'et', 'dps', 'uof'].includes(route.sourceFormat)) return '国产格式'
-  if (['png', 'jpg', 'jpeg'].includes(route.sourceFormat)) return '图片'
-  return '其他'
-}
-
 function toggleRoutePicker() {
   if (busy.value) return
   routePickerOpen.value = !routePickerOpen.value
+  if (routePickerOpen.value) pickerSource.value = selectedRoute.value?.sourceFormat || 'popular'
 }
 
 function closeRoutePicker() {
@@ -123,6 +145,11 @@ function selectRoute(route) {
   selectedRouteId.value = route.id
   routeSearch.value = ''
   closeRoutePicker()
+}
+
+function selectPickerSource(source) {
+  pickerSource.value = source
+  routeSearch.value = ''
 }
 
 function onDocumentClick(event) {
@@ -394,100 +421,178 @@ onBeforeUnmount(() => {
 
 <template>
   <main class="shell">
-    <header class="masthead">
-      <div class="brand-mark">文</div>
-      <div>
-        <p class="eyebrow">开源文档转换平台</p>
-        <h1>FormatConverter</h1>
-        <p class="lead">用可验证的转换路线处理办公文档、PDF、OFD 和国产格式。</p>
+    <nav class="topbar" aria-label="品牌导航">
+      <a class="brand" href="/" aria-label="FormatConverter 首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M9 5.5h10l5 5v16H9z" />
+            <path d="M19 5.5v5h5M13 16h7M13 20h7" />
+          </svg>
+        </span>
+        <span><strong>FormatConverter</strong><small>开源文档转换平台</small></span>
+      </a>
+      <div class="topbar-meta">
+        <span class="privacy"><i></i> 数据留在本机</span>
+        <a class="github-link" href="https://github.com/wmforever/fuyue-convert" target="_blank" rel="noreferrer">开源项目 <span aria-hidden="true">↗</span></a>
       </div>
-      <span class="privacy"><i></i> 本地处理</span>
+    </nav>
+
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span> LOCAL-FIRST DOCUMENT TOOLS</p>
+        <h1>文件格式转换，<br /><em>简单、可靠、全程本地。</em></h1>
+        <p class="lead">覆盖办公文档、PDF、OFD 与国产格式。每条转换路线都有明确的质量等级和适用边界。</p>
+        <div class="hero-points" aria-label="产品特点">
+          <span><b>✓</b> 无需上传云端</span>
+          <span><b>✓</b> 批量任务处理</span>
+          <span><b>✓</b> {{ availableRoutes.length }} 条可用路线</span>
+        </div>
+      </div>
+      <aside class="trust-card" aria-label="本地处理说明">
+        <span class="trust-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 5.5 5.8v5.4c0 4.3 2.7 8.2 6.5 9.8 3.8-1.6 6.5-5.5 6.5-9.8V5.8z"/><path d="m9.2 12 1.8 1.8 4-4"/></svg>
+        </span>
+        <div><small>PRIVACY BY DESIGN</small><strong>本地处理模式</strong><p>文件仅由当前服务处理，不经过第三方云端。</p></div>
+      </aside>
     </header>
 
     <section class="workspace">
-      <div class="format-panel">
-        <label id="route-label">转换类型</label>
-        <div ref="routePickerRef" class="route-picker" @keydown="onRoutePickerKeydown">
-          <button
-            id="route"
-            type="button"
-            class="route-trigger"
-            :disabled="busy"
-            aria-haspopup="listbox"
-            :aria-expanded="routePickerOpen"
-            aria-labelledby="route-label route"
-            @click.stop="toggleRoutePicker"
-          >
-            <span>
-              <strong>{{ formatRouteLabel(selectedRoute) }}</strong>
-              <small>{{ selectedRoute.inputExtension }} 转 {{ selectedRoute.outputExtension }}</small>
-            </span>
-            <i aria-hidden="true"></i>
-          </button>
-
-          <div v-if="routePickerOpen" class="route-menu" @click.stop>
-            <input
-              v-model="routeSearch"
-              class="route-search"
-              type="search"
-              placeholder="搜索格式，如 PDF、Word、WPS"
-              aria-label="搜索转换类型"
-            />
-            <div class="route-list" role="listbox" aria-labelledby="route-label">
-              <p v-if="!routeGroups.length" class="route-empty">没有匹配的转换类型</p>
-              <section v-for="group in routeGroups" :key="group.label" class="route-group">
-                <p class="route-group-title">{{ group.label }}</p>
-                <button
-                  v-for="route in group.routes"
-                  :key="route.id"
-                  type="button"
-                  class="route-option"
-                  :class="{ selected: route.id === selectedRouteId, planned: route.status === 'planned', unavailable: route.status === 'unavailable' }"
-                  :disabled="route.status !== 'available'"
-                  role="option"
-                  :aria-selected="route.id === selectedRouteId"
-                  @click="selectRoute(route)"
-                >
-                  <span class="route-main">
-                    <strong>{{ formatRouteLabel(route) }}</strong>
-                    <small>{{ route.description }}</small>
-                    <em>{{ routeMeta(route) }}</em>
-                  </span>
-                  <span class="route-badge" :class="route.qualityLevel || route.status">{{ routeBadge(route) }}</span>
-                </button>
-              </section>
-            </div>
-          </div>
+      <div class="workspace-head">
+        <div>
+          <p class="section-kicker">CONVERT A FILE</p>
+          <h2>开始转换</h2>
         </div>
-        <span class="route-description">{{ selectedRoute.description }}{{ routeAvailability(selectedRoute) }}</span>
-        <span v-if="routeMeta(selectedRoute)" class="route-meta">{{ routeMeta(selectedRoute) }}</span>
+        <ol class="steps" aria-label="转换步骤">
+          <li class="current"><span>1</span>选择格式</li>
+          <li :class="{ current: files.length }"><span>2</span>添加文件</li>
+          <li :class="{ current: task?.downloadReady }"><span>3</span>完成下载</li>
+        </ol>
       </div>
 
-      <div
-        class="drop-zone"
-        :class="{ active: dragging, locked: busy }"
-        @dragenter.prevent="dragging = true"
-        @dragover.prevent
-        @dragleave.prevent="dragging = false"
-        @drop.prevent="drop"
-      >
-        <div class="file-symbol">{{ selectedRoute.sourceLabel }}</div>
-        <h2>拖放 {{ selectedRoute.sourceLabel }} 文件到这里</h2>
-        <p>支持单个或批量上传，{{ uploadHint }}</p>
-        <label class="select-button">
-          选择文件
-          <input type="file" :accept="acceptType" multiple :disabled="busy || selectedRoute.status !== 'available'" @change="accept($event.target.files); $event.target.value = ''" />
-        </label>
+      <div class="format-panel">
+        <div class="field-heading">
+          <span class="field-number">01</span>
+          <div><label id="route-label">选择转换类型</label><small>告诉我们文件要变成什么格式</small></div>
+        </div>
+        <div class="route-field">
+          <div ref="routePickerRef" class="route-picker" @keydown="onRoutePickerKeydown">
+            <button
+              id="route"
+              type="button"
+              class="route-trigger"
+              :disabled="busy"
+              aria-haspopup="listbox"
+              :aria-expanded="routePickerOpen"
+              aria-labelledby="route-label route"
+              @click.stop="toggleRoutePicker"
+            >
+              <span class="route-formats">
+                <b>{{ selectedRoute.sourceLabel }}</b><i aria-hidden="true">→</i><b>{{ selectedRoute.targetLabel }}</b>
+              </span>
+              <span class="chevron" aria-hidden="true"></span>
+            </button>
+
+            <div v-if="routePickerOpen" class="route-menu" @click.stop>
+              <div class="route-search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg>
+                <input
+                  v-model="routeSearch"
+                  class="route-search"
+                  type="search"
+                  placeholder="搜索 PDF、Word、WPS..."
+                  aria-label="搜索转换类型"
+                />
+                <kbd>搜索</kbd>
+              </div>
+              <div class="route-explorer">
+                <aside class="source-list" aria-label="按来源格式筛选">
+                  <button
+                    v-for="source in sourceOptions"
+                    :key="source.id"
+                    type="button"
+                    :class="{ active: pickerSource === source.id && !routeSearch.trim() }"
+                    @click="selectPickerSource(source.id)"
+                  >
+                    <span>{{ source.id === 'popular' ? '★' : source.id === 'pdf-tools' ? '◆' : source.id.slice(0, 3).toUpperCase() }}</span>
+                    <strong>{{ source.label }}</strong>
+                    <small>{{ source.count }}</small>
+                  </button>
+                </aside>
+                <section class="target-panel">
+                  <div class="target-heading">
+                    <div><strong>{{ pickerTitle }}</strong><small>选择一个目标格式即可</small></div>
+                    <button v-if="routeSearch" type="button" @click="routeSearch = ''">清除搜索</button>
+                  </div>
+                  <div class="route-list" role="listbox" aria-labelledby="route-label">
+                    <p v-if="!pickerRoutes.length" class="route-empty"><b>没有找到匹配路线</b><span>试试搜索格式名或“合并”“压缩”等功能</span></p>
+                    <button
+                      v-for="route in pickerRoutes"
+                      :key="route.id"
+                      type="button"
+                      class="route-option"
+                      :class="{ selected: route.id === selectedRouteId, planned: route.status === 'planned', unavailable: route.status === 'unavailable' }"
+                      :disabled="route.status !== 'available'"
+                      role="option"
+                      :aria-selected="route.id === selectedRouteId"
+                      @click="selectRoute(route)"
+                    >
+                      <span class="route-format-icon">{{ route.targetFormat.split('-')[0].slice(0, 4).toUpperCase() }}</span>
+                      <span class="route-main">
+                        <strong>{{ route.sourceLabel }} <i>→</i> {{ route.targetLabel }}</strong>
+                        <small>{{ route.description }}</small>
+                        <em>{{ routeMeta(route) }}</em>
+                      </span>
+                      <span class="route-badge" :class="route.qualityLevel || route.status">{{ routeBadge(route) }}</span>
+                    </button>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+          <div class="route-detail">
+            <span class="route-description">{{ selectedRoute.description }}{{ routeAvailability(selectedRoute) }}</span>
+            <span v-if="routeMeta(selectedRoute)" class="route-meta">{{ routeMeta(selectedRoute) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="upload-section">
+        <div class="field-heading">
+          <span class="field-number">02</span>
+          <div><label>添加文件</label><small>拖放文件，或从设备中选择</small></div>
+        </div>
+        <div
+          class="drop-zone"
+          :class="{ active: dragging, locked: busy, filled: files.length }"
+          @dragenter.prevent="dragging = true"
+          @dragover.prevent
+          @dragleave.prevent="dragging = false"
+          @drop.prevent="drop"
+        >
+          <div class="file-symbol" aria-hidden="true">
+            <svg viewBox="0 0 42 48" fill="none"><path d="M7 2h19l9 9v35H7z"/><path d="M26 2v10h9"/><path d="M15 25h12M15 31h12"/></svg>
+            <span>{{ selectedRoute.sourceLabel }}</span>
+          </div>
+          <div class="drop-content">
+            <h3>{{ files.length ? `已添加 ${files.length} 个文件` : `拖放 ${selectedRoute.sourceLabel} 文件到这里` }}</h3>
+            <p>{{ files.length ? `总计 ${formatBytes(selectedBytes)}，可以继续添加或开始转换` : uploadHint }}</p>
+          </div>
+          <label class="select-button">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16V4M7.5 8.5 12 4l4.5 4.5M5 14v5h14v-5"/></svg>
+            {{ files.length ? '继续添加' : '选择文件' }}
+            <input type="file" :accept="acceptType" multiple :disabled="busy || selectedRoute.status !== 'available'" @change="accept($event.target.files); $event.target.value = ''" />
+          </label>
+        </div>
       </div>
 
       <div v-if="files.length" class="file-panel">
         <div class="panel-heading">
-          <strong>待转换文件</strong>
-          <span>{{ files.length }} 个</span>
+          <div><strong>待转换文件</strong><small>将按下方顺序处理</small></div>
+          <span>{{ files.length }} 个 · {{ formatBytes(selectedBytes) }}</span>
         </div>
         <ul>
           <li v-for="(file, index) in files" :key="`${file.name}:${file.size}`">
-            <span class="mini-icon">{{ selectedRoute.sourceFormat.slice(0, 1).toUpperCase() }}</span>
+            <span class="mini-icon">{{ selectedRoute.sourceFormat.slice(0, 3).toUpperCase() }}</span>
             <span class="file-name">{{ file.name }}</span>
             <span class="file-size">{{ formatBytes(file.size) }}</span>
             <button class="remove" :disabled="busy" title="移除" @click="remove(index)">×</button>
@@ -522,8 +627,8 @@ onBeforeUnmount(() => {
       <p v-if="message" class="message">{{ message }}</p>
 
       <div class="actions">
-        <button v-if="!task" class="primary" :disabled="!canSubmit" @click="submit">开始转换</button>
-        <button v-if="task?.downloadReady" class="primary" @click="download">下载 {{ task.downloadName }}</button>
+        <button v-if="!task" class="primary" :disabled="!canSubmit" @click="submit">开始转换 <span aria-hidden="true">→</span></button>
+        <button v-if="task?.downloadReady" class="primary" @click="download">下载 {{ task.downloadName }} <span aria-hidden="true">↓</span></button>
         <button v-if="task && ['WAITING', 'CONVERTING'].includes(task.status)" class="secondary" @click="cancelTask">取消任务</button>
         <button v-if="task && ['FAILED', 'CANCELLED'].includes(task.status)" class="secondary" @click="retryTask">重试</button>
         <button v-if="task" class="secondary" @click="reset">转换其他文件</button>
@@ -531,8 +636,8 @@ onBeforeUnmount(() => {
     </section>
 
     <footer>
-      <span>当前开放文档 / 表格 / PDF / 图片</span><span>国产格式已入矩阵</span><span>不经过外部服务</span>
-      <button type="button" class="diagnostic-button" @click="copyDiagnostics">复制诊断信息</button>
+      <div class="footer-brand"><span class="footer-dot"></span><strong>FormatConverter</strong><small>让文档转换更透明、更可控。</small></div>
+      <div class="footer-actions"><span>文档 · 表格 · PDF · 图片</span><button type="button" class="diagnostic-button" @click="copyDiagnostics">复制诊断信息</button></div>
     </footer>
     <p v-if="diagnosticMessage" class="diagnostic-message">{{ diagnosticMessage }}</p>
   </main>
