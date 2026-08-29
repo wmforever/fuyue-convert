@@ -140,7 +140,7 @@ h1 em { color: var(--lime); font-style: normal; }
 .steps .current { color: #23453e; }
 .steps .current span { color: white; border-color: var(--green); background: var(--green); }
 
-.format-panel, .upload-section { display: grid; grid-template-columns: 215px minmax(0, 1fr); gap: 28px; padding: 30px 0; border-bottom: 1px solid #e7ece8; }
+.format-panel, .tool-options-section, .upload-section { display: grid; grid-template-columns: 215px minmax(0, 1fr); gap: 28px; padding: 30px 0; border-bottom: 1px solid #e7ece8; }
 .field-heading { display: flex; align-items: flex-start; gap: 12px; padding-top: 3px; }
 .field-number { width: 30px; height: 30px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 9px; color: var(--green); background: var(--green-soft); font-size: 10px; font-weight: 850; }
 .field-heading div { display: grid; gap: 5px; }
@@ -217,6 +217,43 @@ h1 em { color: var(--lime); font-style: normal; }
 .route-empty { display: grid; gap: 5px; margin: 60px 18px; color: #71817c; font-size: 11px; text-align: center; }
 .route-empty b { color: #455650; font-size: 12px; }
 .route-empty span { color: #9aa4a0; font-size: 9px; }
+
+.compression-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.compression-options > label { min-height: 126px; display: grid; align-content: start; gap: 7px; padding: 16px; position: relative; border: 1px solid #dce5df; border-radius: 14px; background: #fbfcfb; cursor: pointer; transition: .18s ease; }
+.compression-options > label:hover { border-color: #9abdb4; background: #f8fbfa; }
+.compression-options > label.selected { border-color: var(--green); background: #eef7f3; box-shadow: 0 0 0 3px rgba(12, 118, 103, .06); }
+.compression-options input { position: absolute; opacity: 0; pointer-events: none; }
+.option-check { width: 17px; height: 17px; position: absolute; top: 14px; right: 14px; border: 1.5px solid #b7c5c0; border-radius: 50%; background: #fff; }
+.selected .option-check { border: 5px solid var(--green); }
+.compression-options strong { padding-right: 24px; color: #263732; font-size: 12px; }
+.compression-options small { color: #75837e; font-size: 10px; line-height: 1.55; }
+.compression-options em { width: max-content; margin-top: auto; padding: 3px 7px; border-radius: 999px; color: #66766f; background: #edf2ef; font-size: 8px; font-style: normal; font-weight: 800; }
+.compression-options label:nth-child(2) em { color: #0a6d60; background: #dcefe9; }
+.option-notice { grid-column: 1 / -1; display: flex; align-items: center; margin: 4px 0 0; color: #75837e; font-size: 9px; }
+.option-notice span { width: 16px; height: 16px; display: grid; place-items: center; margin-right: 7px; border-radius: 50%; color: var(--green); background: #e3f1ec; font-size: 9px; font-weight: 900; }
+
+.watermark-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 12px; }
+.watermark-options > label { min-width: 0; display: grid; align-content: start; gap: 7px; color: #53635e; font-size: 9px; font-weight: 800; }
+.watermark-options .wide-field { grid-column: span 2; }
+.watermark-options input[type="text"], .watermark-options select { width: 100%; height: 42px; padding: 0 12px; border: 1px solid #d6e0da; border-radius: 10px; outline: 0; color: #263a34; background: #fbfcfb; font-size: 11px; }
+.watermark-options input[type="text"]:focus, .watermark-options select:focus { border-color: #75a99e; box-shadow: 0 0 0 3px rgba(12, 118, 103, .07); }
+.watermark-options input.invalid { border-color: #cf6868; background: #fffafa; }
+.field-error { color: #b44e4e !important; font-size: 8px !important; font-weight: 700; }
+.color-field { height: 42px; display: flex; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid #d6e0da; border-radius: 10px; background: #fbfcfb; }
+.color-field input { width: 25px; height: 25px; padding: 0; border: 0; border-radius: 7px; background: transparent; cursor: pointer; }
+.color-field b { color: #687873; font-size: 9px; }
+.range-field > span { display: flex; justify-content: space-between; }
+.range-field > span b { color: var(--green); }
+.range-field input { width: 100%; accent-color: var(--green); }
+.toggle-field { grid-template-columns: auto auto 1fr; align-items: center !important; align-content: center !important; cursor: pointer; }
+.toggle-field > input { position: absolute; opacity: 0; }
+.toggle { width: 36px; height: 20px; padding: 2px; position: relative; border-radius: 999px; background: #cad4cf; transition: .18s ease; }
+.toggle::after { content: ""; width: 16px; height: 16px; display: block; border-radius: 50%; background: white; box-shadow: 0 1px 3px rgba(20, 43, 37, .2); transition: .18s ease; }
+.toggle-field input:checked + .toggle { background: var(--green); }
+.toggle-field input:checked + .toggle::after { transform: translateX(16px); }
+.toggle-field > span:last-child { display: grid; gap: 2px; }
+.toggle-field strong { color: #384a44; font-size: 10px; }
+.toggle-field small { color: #8b9893; font-size: 8px; font-weight: 500; }
 
 .drop-zone {
   min-height: 154px;
@@ -327,7 +364,7 @@ footer { display: flex; align-items: center; justify-content: space-between; gap
   .steps li { font-size: 0; }
   .steps li + li::before { display: none; }
   .steps span { margin: 0; }
-  .format-panel, .upload-section { grid-template-columns: 1fr; gap: 14px; padding: 22px 0; }
+  .format-panel, .tool-options-section, .upload-section { grid-template-columns: 1fr; gap: 14px; padding: 22px 0; }
   .field-heading { align-items: center; }
   .route-field { grid-template-columns: 1fr; gap: 10px; }
   .route-menu { width: min(100%, calc(100vw - 54px)); }
@@ -344,6 +381,11 @@ footer { display: flex; align-items: center; justify-content: space-between; gap
   .route-format-icon { width: 34px; height: 34px; }
   .route-option .route-badge { display: none; }
   .route-main small { -webkit-line-clamp: 1; }
+  .compression-options { grid-template-columns: 1fr; }
+  .compression-options > label { min-height: 92px; }
+  .watermark-options { grid-template-columns: 1fr 1fr; }
+  .watermark-options .wide-field { grid-column: 1 / -1; }
+  .toggle-field { grid-column: 1 / -1; }
   .drop-zone { grid-template-columns: 58px minmax(0, 1fr); gap: 14px; padding: 20px 16px; }
   .file-symbol { width: 56px; height: 66px; }
   .file-symbol svg { width: 40px; height: 46px; }

@@ -30,6 +30,14 @@ const task = ref(null)
 const busy = ref(false)
 const message = ref('')
 const diagnosticMessage = ref('')
+const compressionMode = ref('balanced')
+const watermarkText = ref('机密资料')
+const watermarkOpacity = ref(0.18)
+const watermarkAngle = ref(35)
+const watermarkPosition = ref('center')
+const watermarkTiled = ref(false)
+const watermarkPages = ref('all')
+const watermarkColor = ref('#969696')
 const limits = ref({ maxFileSize: 50 * 1024 * 1024, maxFilesPerTask: 100, maxTaskUploadBytes: 250 * 1024 * 1024 })
 let pollTimer
 let pollGeneration = 0
@@ -38,9 +46,15 @@ let pollFailures = 0
 const selectedRoute = computed(() => conversions.value.find(route => route.id === selectedRouteId.value) || conversions.value[0])
 const isPdfMergeRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-merge')
 const isSinglePdfTool = computed(() => ['pdf-split', 'pdf-watermark', 'pdf-compress'].includes(selectedRoute.value?.targetFormat))
+const isPdfCompressRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-compress')
+const isPdfWatermarkRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-watermark')
+const hasToolOptions = computed(() => isPdfCompressRoute.value || isPdfWatermarkRoute.value)
+const watermarkPagesValid = computed(() => validWatermarkPages(watermarkPages.value))
+const toolOptionsValid = computed(() => !isPdfWatermarkRoute.value
+  || (watermarkText.value.trim().length > 0 && watermarkPagesValid.value))
 const routeFileLimit = computed(() => isSinglePdfTool.value ? 1 : limits.value.maxFilesPerTask)
 const canSubmit = computed(() => files.value.length >= (isPdfMergeRoute.value ? 2 : 1)
-  && !busy.value && selectedRoute.value?.status === 'available')
+  && !busy.value && toolOptionsValid.value && selectedRoute.value?.status === 'available')
 const availableRoutes = computed(() => conversions.value.filter(route => route.status === 'available'))
 const selectedBytes = computed(() => files.value.reduce((total, file) => total + file.size, 0))
 const acceptExtension = computed(() => selectedRoute.value?.inputExtension || '.ofd')
@@ -99,6 +113,16 @@ const pickerTitle = computed(() => {
 
 function formatRouteLabel(route) {
   return `${route.sourceLabel} → ${route.targetLabel}`
+}
+
+function validWatermarkPages(value) {
+  const normalized = String(value || '').replace(/\s+/g, '').toLowerCase()
+  if (normalized === 'all') return true
+  if (!/^[1-9]\d*(?:-[1-9]\d*)?(?:,[1-9]\d*(?:-[1-9]\d*)?)*$/.test(normalized)) return false
+  return normalized.split(',').every(part => {
+    const [start, end = start] = part.split('-').map(Number)
+    return Number.isSafeInteger(start) && Number.isSafeInteger(end) && start <= end && end <= 1000000
+  })
 }
 
 function routeBadge(route) {
@@ -263,6 +287,16 @@ async function submit() {
   const data = new FormData()
   files.value.forEach(file => data.append('files', file))
   data.append('targetFormat', selectedRoute.value.targetFormat)
+  if (isPdfCompressRoute.value) data.append('compressionMode', compressionMode.value)
+  if (isPdfWatermarkRoute.value) {
+    data.append('watermarkText', watermarkText.value)
+    data.append('watermarkOpacity', watermarkOpacity.value)
+    data.append('watermarkAngle', watermarkAngle.value)
+    data.append('watermarkPosition', watermarkPosition.value)
+    data.append('watermarkTiled', watermarkTiled.value)
+    data.append('watermarkPages', watermarkPages.value)
+    data.append('watermarkColor', watermarkColor.value)
+  }
   try {
     const created = await upload(data)
     task.value = created
@@ -556,9 +590,80 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <div class="upload-section">
+      <div v-if="hasToolOptions" class="tool-options-section">
         <div class="field-heading">
           <span class="field-number">02</span>
+          <div><label>{{ isPdfCompressRoute ? '压缩设置' : '水印设置' }}</label><small>根据使用场景调整处理参数</small></div>
+        </div>
+
+        <div v-if="isPdfCompressRoute" class="compression-options" role="radiogroup" aria-label="PDF 压缩等级">
+          <label :class="{ selected: compressionMode === 'lossless' }">
+            <input v-model="compressionMode" type="radio" value="lossless" />
+            <span class="option-check"></span>
+            <strong>无损优化</strong>
+            <small>不改变图片质量，清理并压缩 PDF 结构</small>
+            <em>画质优先</em>
+          </label>
+          <label :class="{ selected: compressionMode === 'balanced' }">
+            <input v-model="compressionMode" type="radio" value="balanced" />
+            <span class="option-check"></span>
+            <strong>均衡压缩</strong>
+            <small>适度优化图片，兼顾清晰度和文件体积</small>
+            <em>推荐</em>
+          </label>
+          <label :class="{ selected: compressionMode === 'strong' }">
+            <input v-model="compressionMode" type="radio" value="strong" />
+            <span class="option-check"></span>
+            <strong>强力压缩</strong>
+            <small>显著降低图片分辨率，适合在线传输</small>
+            <em>体积优先</em>
+          </label>
+          <p class="option-notice"><span>i</span> 若处理后的文件没有变小，系统会自动保留原文件。</p>
+        </div>
+
+        <div v-else class="watermark-options">
+          <label class="wide-field">
+            <span>水印文字</span>
+            <input v-model="watermarkText" type="text" maxlength="80" placeholder="例如：机密资料" />
+          </label>
+          <label>
+            <span>应用页面</span>
+            <input v-model="watermarkPages" type="text" placeholder="all 或 1,3-5" :class="{ invalid: !watermarkPagesValid }" />
+            <small v-if="!watermarkPagesValid" class="field-error">请输入 all、1 或 1,3-5</small>
+          </label>
+          <label>
+            <span>位置</span>
+            <select v-model="watermarkPosition" :disabled="watermarkTiled">
+              <option value="center">页面居中</option>
+              <option value="top-left">左上角</option>
+              <option value="top-right">右上角</option>
+              <option value="bottom-left">左下角</option>
+              <option value="bottom-right">右下角</option>
+            </select>
+          </label>
+          <label>
+            <span>颜色</span>
+            <span class="color-field"><input v-model="watermarkColor" type="color" /><b>{{ watermarkColor.toUpperCase() }}</b></span>
+          </label>
+          <label class="range-field">
+            <span>透明度 <b>{{ Math.round(watermarkOpacity * 100) }}%</b></span>
+            <input v-model.number="watermarkOpacity" type="range" min="0.05" max="0.85" step="0.01" />
+          </label>
+          <label class="range-field">
+            <span>旋转角度 <b>{{ watermarkAngle }}°</b></span>
+            <input v-model.number="watermarkAngle" type="range" min="-180" max="180" step="1" />
+          </label>
+          <label class="toggle-field">
+            <input v-model="watermarkTiled" type="checkbox" />
+            <span class="toggle"></span>
+            <span><strong>平铺水印</strong><small>在整页重复显示水印</small></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="upload-section">
+        <div class="field-heading">
+          <span class="field-number">{{ hasToolOptions ? '03' : '02' }}</span>
           <div><label>添加文件</label><small>拖放文件，或从设备中选择</small></div>
         </div>
         <div
