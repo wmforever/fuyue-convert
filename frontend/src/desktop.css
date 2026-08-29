@@ -275,13 +275,15 @@ body::before { display: none; }
 .route-option.selected { box-shadow: inset 3px 0 0 var(--app-blue); }
 .route-option.planned { color: #647086; }
 .route-option.unavailable { color: #9b7478; background: rgba(239,111,120,.03); }
+.route-option:disabled { cursor: not-allowed; opacity: 1; }
 .route-main strong { font-size: 10px; }
 .route-main strong i { color: #5f83bd; }
 .route-main small { color: #65748a; font-size: 8px; }
 .route-main em { color: #708ebd; font-size: 7px; }
 .route-badge { color: #6fd7b0; background: rgba(54,211,154,.09); font-size: 7px; }
 .route-badge.beta { color: #e4b979; background: rgba(245,168,91,.1); }
-.route-badge.experimental, .route-badge.unavailable { color: #e58c91; background: rgba(239,111,120,.09); }
+.route-badge.experimental { color: #bba0ef; background: rgba(147,112,219,.12); }
+.route-badge.unavailable { color: #e58c91; background: rgba(239,111,120,.09); }
 .route-badge.planned { color: #7a8799; background: rgba(122,135,153,.08); }
 .route-format-icon { border-color: #24334a; color: #86a9e2; background: #111b29; }
 .route-option.selected .route-format-icon { border-color: var(--app-blue); background: var(--app-blue); }

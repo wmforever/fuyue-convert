@@ -82,6 +82,7 @@ const availableRoutes = computed(() => conversions.value.filter(route => route.s
 const availableSourceCount = computed(() => new Set(availableRoutes.value.map(route => route.sourceFormat)).size)
 const stableRoutes = computed(() => conversions.value.filter(route => route.status === 'available' && route.qualityLevel === 'stable'))
 const betaRoutes = computed(() => conversions.value.filter(route => route.status === 'available' && route.qualityLevel === 'beta'))
+const experimentalRoutes = computed(() => conversions.value.filter(route => route.status === 'available' && route.qualityLevel === 'experimental'))
 const pdfToolRoutes = computed(() => pdfToolRouteIds.map(id => conversions.value.find(route => route.id === id)).filter(Boolean))
 const quickRoutes = computed(() => popularRouteIds.map(id => conversions.value.find(route => route.id === id)).filter(route => route?.status === 'available').slice(0, 6))
 const successfulTasks = computed(() => recentTasks.value.filter(item => item.status === 'SUCCESS').length)
@@ -109,23 +110,37 @@ const routeSearchAliases = {
   'pdf-split': '拆分 分割 按页 split',
   'pdf-watermark': '水印 标记 盖章 watermark'
 }
+const routeQualityFilters = {
+  stable: 'stable', '稳定': 'stable',
+  beta: 'beta', '测试版': 'beta',
+  experimental: 'experimental', '实验': 'experimental', '试验': 'experimental'
+}
+const routeStatusFilters = {
+  available: 'available', '可用': 'available',
+  unavailable: 'unavailable', '不可用': 'unavailable', '缺少依赖': 'unavailable',
+  planned: 'planned', '规划中': 'planned'
+}
 const sourceOrder = ['pdf', 'ofd', 'docx', 'txt', 'xlsx', 'csv', 'png', 'jpg', 'pptx', 'wps', 'et', 'dps', 'uof']
 const sourceOptions = computed(() => {
   const sources = new Map()
   for (const route of conversions.value) {
     if (!sources.has(route.sourceFormat)) {
-      sources.set(route.sourceFormat, { id: route.sourceFormat, label: route.sourceLabel, count: 0 })
+      sources.set(route.sourceFormat, { id: route.sourceFormat, label: route.sourceLabel, count: 0, availableCount: 0 })
     }
-    sources.get(route.sourceFormat).count++
+    const source = sources.get(route.sourceFormat)
+    source.count++
+    if (route.status === 'available') source.availableCount++
   }
   const options = Array.from(sources.values()).sort((a, b) => {
     const left = sourceOrder.indexOf(a.id)
     const right = sourceOrder.indexOf(b.id)
     return (left < 0 ? 999 : left) - (right < 0 ? 999 : right)
   })
+  const popular = popularRouteIds.map(id => conversions.value.find(route => route.id === id)).filter(Boolean)
+  const pdfTools = pdfToolRouteIds.map(id => conversions.value.find(route => route.id === id)).filter(Boolean)
   return [
-    { id: 'popular', label: '常用转换', count: popularRouteIds.filter(id => conversions.value.some(route => route.id === id)).length },
-    { id: 'pdf-tools', label: 'PDF 工具', count: pdfToolRouteIds.filter(id => conversions.value.some(route => route.id === id)).length },
+    { id: 'popular', label: '常用转换', count: popular.length, availableCount: popular.filter(route => route.status === 'available').length },
+    { id: 'pdf-tools', label: 'PDF 工具', count: pdfTools.length, availableCount: pdfTools.filter(route => route.status === 'available').length },
     ...options
   ]
 })
@@ -135,14 +150,30 @@ const pickerRoutes = computed(() => {
   const keywords = routeSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean)
   if (keywords.length) return conversions.value.map(route => {
     const aliases = routeSearchAliases[route.targetFormat] || ''
-    const text = `${route.id} ${route.sourceFormat} ${route.targetFormat} ${route.sourceLabel} ${route.targetLabel} ${route.description} ${aliases}`.toLowerCase()
-    if (!keywords.every(keyword => text.includes(keyword))) return null
+    const qualityAliases = ({
+      stable: 'stable 稳定',
+      beta: 'beta 测试版',
+      experimental: 'experimental 实验 试验',
+      planned: 'planned 规划中'
+    })[route.qualityLevel] || ''
+    const statusAliases = route.status === 'unavailable'
+      ? 'unavailable 不可用 缺少依赖'
+      : (route.status === 'planned' ? 'planned 规划中' : 'available 可用')
+    const requirements = (route.requires || []).join(' ')
+    const strategy = strategyLabel(route)
+    const text = `${route.id} ${route.sourceFormat} ${route.targetFormat} ${route.sourceLabel} ${route.targetLabel} ${route.description} ${aliases} ${qualityAliases} ${statusAliases} ${requirements} ${strategy}`.toLowerCase()
+    if (!keywords.every(keyword => {
+      if (routeQualityFilters[keyword]) return route.qualityLevel === routeQualityFilters[keyword]
+      if (routeStatusFilters[keyword]) return route.status === routeStatusFilters[keyword]
+      return text.includes(keyword)
+    })) return null
     const labels = `${route.sourceLabel} ${route.targetLabel}`.toLowerCase()
     const formats = `${route.sourceFormat} ${route.targetFormat}`.toLowerCase()
     const score = keywords.reduce((total, keyword) => total
       + (formats.includes(keyword) ? 6 : 0)
       + (labels.includes(keyword) ? 4 : 0)
-      + (aliases.includes(keyword) ? 2 : 0), 0)
+      + (routeQualityFilters[keyword] === route.qualityLevel || routeStatusFilters[keyword] === route.status ? 3 : 0)
+      + (`${aliases} ${requirements} ${strategy}`.toLowerCase().includes(keyword) ? 2 : 0), 0)
     return { route, score }
   }).filter(Boolean).sort((left, right) => right.score - left.score).map(item => item.route)
   if (pickerSource.value === 'popular') {
@@ -160,6 +191,9 @@ const pickerTitle = computed(() => {
   const source = sourceOptions.value.find(option => option.id === pickerSource.value)
   return `${source?.label || '当前格式'} 可以转换为`
 })
+const pickerHint = computed(() => pickerRoutes.value.some(route => route.status === 'available')
+  ? '选择一个目标格式即可'
+  : '当前结果均不可执行，请检查运行依赖')
 
 const viewTitle = computed(() => ({
   overview: ['概览', '掌握本地转换服务和最近任务'],
@@ -529,15 +563,27 @@ async function loadCapabilities() {
     if (!response.ok) {
       capabilityMessage.value = response.status === 401
         ? '转换能力接口需要访问令牌，请从桌面应用或正确配置的本地入口打开。'
-        : `转换能力加载失败（${response.status}），当前仅显示基础路线。`
+        : `转换能力加载失败（${response.status}），已保留上次成功加载的路线。`
       return
     }
     const routes = await response.json()
     if (Array.isArray(routes) && routes.length) {
+      const previousRoute = selectedRoute.value
+      const hasActiveBatch = busy.value || files.value.length > 0 || Boolean(task.value)
+      const currentStillListed = routes.some(route => route.id === selectedRouteId.value)
+      const nextRoutes = hasActiveBatch && previousRoute && !currentStillListed
+        ? [...routes, {
+            ...previousRoute,
+            status: 'unavailable',
+            limitations: [...(previousRoute.limitations || []), '当前转换服务刷新后不再提供这条路线']
+          }]
+        : routes
       capabilityMessage.value = ''
-      conversions.value = routes
-      if (!routes.some(route => route.id === selectedRouteId.value)) selectedRouteId.value = routes[0].id
-      if (selectedRoute.value?.status !== 'available' && availableRoutes.value.length) {
+      conversions.value = nextRoutes
+      if (!hasActiveBatch && !nextRoutes.some(route => route.id === selectedRouteId.value)) {
+        selectedRouteId.value = nextRoutes[0].id
+      }
+      if (!hasActiveBatch && selectedRoute.value?.status !== 'available' && availableRoutes.value.length) {
         selectedRouteId.value = availableRoutes.value[0].id
       }
     }
@@ -901,7 +947,7 @@ onBeforeUnmount(() => {
         <div class="page-heading"><span>{{ viewTitle[0] }}</span><small>{{ viewTitle[1] }}</small></div>
         <div class="header-actions">
           <span class="local-chip"><i></i> {{ desktopRuntime ? 'LOCAL DESKTOP' : 'CURRENT SERVICE' }}</span>
-          <button type="button" class="header-cta" @click="startNewConversion"><b>＋</b> 新建转换</button>
+          <button type="button" class="header-cta" @click.stop="startNewConversion"><b>＋</b> 新建转换</button>
         </div>
       </header>
 
@@ -916,7 +962,7 @@ onBeforeUnmount(() => {
               <p><span></span> FORMAT WORKSPACE / {{ diagnostics?.version || '0.1.3' }}</p>
               <h1>欢迎回来，开始处理文档。</h1>
               <small>{{ desktopRuntime ? '转换、整理和导出都在本机完成。' : '文件只发送到当前转换服务，不会转交第三方云端。' }}你可以从常用路线开始，也可以进入完整工作台。</small>
-              <button type="button" @click="startNewConversion">开始新任务 <span>→</span></button>
+              <button type="button" @click.stop="startNewConversion">开始新任务 <span>→</span></button>
             </div>
             <div class="banner-visual" aria-hidden="true">
               <span class="doc-card one">PDF</span><span class="doc-card two">DOCX</span><span class="doc-card three">OFD</span>
@@ -926,14 +972,14 @@ onBeforeUnmount(() => {
 
           <div class="metric-grid" aria-label="运行概览">
             <article><span class="metric-icon blue">↗</span><div><small>可用路线</small><strong>{{ availableRoutes.length }}</strong><em>覆盖 {{ availableSourceCount }} 种可用输入格式</em></div></article>
-            <article><span class="metric-icon violet">✓</span><div><small>稳定路线</small><strong>{{ stableRoutes.length }}</strong><em>{{ betaRoutes.length }} 条 Beta 持续优化</em></div></article>
+            <article><span class="metric-icon violet">✓</span><div><small>稳定路线</small><strong>{{ stableRoutes.length }}</strong><em>{{ betaRoutes.length }} 条 Beta · {{ experimentalRoutes.length }} 条实验路线</em></div></article>
             <article><span class="metric-icon cyan">▣</span><div><small>已完成任务</small><strong>{{ successfulTasks }}</strong><em>结果在到期前可重新下载</em></div></article>
             <article><span class="metric-icon green">●</span><div><small>服务状态</small><strong>{{ serviceHealthy ? '正常' : '连接中' }}</strong><em>独立 Worker {{ diagnostics?.limits?.workerEnabled ? '已启用' : '检测中' }}</em></div></article>
           </div>
 
           <div class="dashboard-grid">
             <section class="dash-panel quick-panel">
-              <div class="panel-title"><div><small>QUICK ACTIONS</small><h2>常用转换</h2></div><button type="button" @click="showAllRoutes">查看全部</button></div>
+              <div class="panel-title"><div><small>QUICK ACTIONS</small><h2>常用转换</h2></div><button type="button" @click.stop="showAllRoutes">查看全部</button></div>
               <div class="quick-grid">
                 <button v-for="(route, index) in quickRoutes" :key="route.id" type="button" @click="openRoute(route)">
                   <span :class="`quick-icon tone-${index % 4}`">{{ route.sourceFormat.slice(0, 3).toUpperCase() }}</span>
@@ -964,7 +1010,7 @@ onBeforeUnmount(() => {
                 <button type="button" class="recent-open" @click="openHistoryTask(item)">查看</button>
               </div>
             </div>
-            <div v-else class="empty-state compact"><span>⌁</span><p><strong>还没有转换记录</strong><small>完成第一项任务后会在这里显示。</small></p><button type="button" @click="startNewConversion">开始转换</button></div>
+            <div v-else class="empty-state compact"><span>⌁</span><p><strong>还没有转换记录</strong><small>完成第一项任务后会在这里显示。</small></p><button type="button" @click.stop="startNewConversion">开始转换</button></div>
           </section>
         </section>
 
@@ -998,7 +1044,7 @@ onBeforeUnmount(() => {
               </span>
             </div>
           </div>
-          <div v-else-if="!historyLoading" class="empty-state large"><span>⌁</span><p><strong>暂无任务记录</strong><small>开始转换后，可在这里恢复任务和下载结果。</small></p><button type="button" @click="startNewConversion">创建任务</button></div>
+          <div v-else-if="!historyLoading" class="empty-state large"><span>⌁</span><p><strong>暂无任务记录</strong><small>开始转换后，可在这里恢复任务和下载结果。</small></p><button type="button" @click.stop="startNewConversion">创建任务</button></div>
         </section>
 
         <section v-show="activeView === 'settings'" class="content-page settings-page">
@@ -1056,7 +1102,7 @@ onBeforeUnmount(() => {
                   v-model="routeSearch"
                   class="route-search"
                   type="search"
-                  placeholder="搜索 PDF、Word、WPS..."
+                  placeholder="搜索 PDF、压缩、Beta、实验、不可用..."
                   aria-label="搜索转换类型"
                 />
                 <kbd>搜索</kbd>
@@ -1073,7 +1119,7 @@ onBeforeUnmount(() => {
                     >
                       <span>{{ source.id === 'popular' ? '★' : '◆' }}</span>
                       <strong>{{ source.label }}</strong>
-                      <small>{{ source.count }}</small>
+                      <small :title="`${source.availableCount}/${source.count} 条可用`">{{ source.availableCount === source.count ? source.count : `${source.availableCount}/${source.count}` }}</small>
                     </button>
                   </div>
                   <div class="source-list">
@@ -1087,13 +1133,13 @@ onBeforeUnmount(() => {
                     >
                       <span>{{ source.id.slice(0, 3).toUpperCase() }}</span>
                       <strong>{{ source.label }}</strong>
-                      <small>{{ source.count }}</small>
+                      <small :title="`${source.availableCount}/${source.count} 条可用`">{{ source.availableCount === source.count ? source.count : `${source.availableCount}/${source.count}` }}</small>
                     </button>
                   </div>
                 </aside>
                 <section class="target-panel">
                   <div class="target-heading">
-                    <div><strong>{{ pickerTitle }}</strong><small>选择一个目标格式即可</small></div>
+                    <div><strong>{{ pickerTitle }}</strong><small>{{ pickerHint }}</small></div>
                     <button v-if="routeSearch" type="button" @click="routeSearch = ''">清除搜索</button>
                   </div>
                   <div class="route-list" role="listbox" aria-labelledby="route-label">
@@ -1116,7 +1162,7 @@ onBeforeUnmount(() => {
                         <small>{{ route.description }}</small>
                         <em>{{ routeMeta(route) }}</em>
                       </span>
-                      <span class="route-badge" :class="route.qualityLevel || route.status">{{ routeBadge(route) }}</span>
+                      <span class="route-badge" :class="route.status === 'available' ? route.qualityLevel : route.status">{{ routeBadge(route) }}</span>
                     </button>
                   </div>
                 </section>
