@@ -28,7 +28,8 @@ socket.addEventListener('open', () => {
     method: 'Runtime.evaluate',
     params: {
       expression: `(async () => {
-        const response = await fetch('/api/tasks/capabilities', { cache: 'no-store' })
+        const capabilitiesUrl = new URL('/api/tasks/capabilities', location.origin).href
+        const response = await fetch(capabilitiesUrl, { cache: 'no-store' })
         const routes = await response.json()
         const settingsButton = [...document.querySelectorAll('.side-nav button')]
           .find(button => button.textContent.trim() === '设置')
