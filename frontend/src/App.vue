@@ -69,6 +69,12 @@ const uploadHint = computed(() => {
 })
 const popularRouteIds = ['pdf-to-docx', 'docx-to-pdf', 'pdf-to-pdf-merge', 'ofd-to-docx', 'pdf-to-pdf-compress', 'png-to-pdf']
 const pdfToolRouteIds = ['pdf-to-pdf-compress', 'pdf-to-pdf-merge', 'pdf-to-pdf-split', 'pdf-to-pdf-watermark']
+const routeSearchAliases = {
+  'pdf-compress': '压缩 瘦身 缩小 减小体积 文件变小 optimize optimization',
+  'pdf-merge': '合并 拼接 组合 merge',
+  'pdf-split': '拆分 分割 按页 split',
+  'pdf-watermark': '水印 标记 盖章 watermark'
+}
 const sourceOrder = ['pdf', 'ofd', 'docx', 'txt', 'xlsx', 'csv', 'png', 'jpg', 'pptx', 'wps', 'et', 'dps', 'uof']
 const sourceOptions = computed(() => {
   const sources = new Map()
@@ -92,7 +98,8 @@ const sourceOptions = computed(() => {
 const pickerRoutes = computed(() => {
   const keyword = routeSearch.value.trim().toLowerCase()
   if (keyword) return conversions.value.filter(route => {
-    const text = `${route.id} ${route.sourceFormat} ${route.targetFormat} ${route.sourceLabel} ${route.targetLabel} ${route.description}`.toLowerCase()
+    const aliases = routeSearchAliases[route.targetFormat] || ''
+    const text = `${route.id} ${route.sourceFormat} ${route.targetFormat} ${route.sourceLabel} ${route.targetLabel} ${route.description} ${aliases}`.toLowerCase()
     return text.includes(keyword)
   })
   if (pickerSource.value === 'popular') {
