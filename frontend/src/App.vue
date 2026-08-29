@@ -95,6 +95,8 @@ const sourceOptions = computed(() => {
     ...options
   ]
 })
+const quickSourceOptions = computed(() => sourceOptions.value.filter(source => ['popular', 'pdf-tools'].includes(source.id)))
+const formatSourceOptions = computed(() => sourceOptions.value.filter(source => !['popular', 'pdf-tools'].includes(source.id)))
 const pickerRoutes = computed(() => {
   const keyword = routeSearch.value.trim().toLowerCase()
   if (keyword) return conversions.value.filter(route => {
@@ -546,18 +548,34 @@ onBeforeUnmount(() => {
                 <kbd>搜索</kbd>
               </div>
               <div class="route-explorer">
-                <aside class="source-list" aria-label="按来源格式筛选">
-                  <button
-                    v-for="source in sourceOptions"
-                    :key="source.id"
-                    type="button"
-                    :class="{ active: pickerSource === source.id && !routeSearch.trim() }"
-                    @click="selectPickerSource(source.id)"
-                  >
-                    <span>{{ source.id === 'popular' ? '★' : source.id === 'pdf-tools' ? '◆' : source.id.slice(0, 3).toUpperCase() }}</span>
-                    <strong>{{ source.label }}</strong>
-                    <small>{{ source.count }}</small>
-                  </button>
+                <aside class="source-sidebar" aria-label="按来源格式筛选">
+                  <div class="source-quick">
+                    <button
+                      v-for="source in quickSourceOptions"
+                      :key="source.id"
+                      type="button"
+                      :class="{ active: pickerSource === source.id && !routeSearch.trim() }"
+                      @click="selectPickerSource(source.id)"
+                    >
+                      <span>{{ source.id === 'popular' ? '★' : '◆' }}</span>
+                      <strong>{{ source.label }}</strong>
+                      <small>{{ source.count }}</small>
+                    </button>
+                  </div>
+                  <div class="source-list">
+                    <p>按文件类型</p>
+                    <button
+                      v-for="source in formatSourceOptions"
+                      :key="source.id"
+                      type="button"
+                      :class="{ active: pickerSource === source.id && !routeSearch.trim() }"
+                      @click="selectPickerSource(source.id)"
+                    >
+                      <span>{{ source.id.slice(0, 3).toUpperCase() }}</span>
+                      <strong>{{ source.label }}</strong>
+                      <small>{{ source.count }}</small>
+                    </button>
+                  </div>
                 </aside>
                 <section class="target-panel">
                   <div class="target-heading">
