@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { isSafeExternalUrl, isTaskApiUrl, isTrustedTaskRequest, isTrustedUrl } from '../src/security.mjs'
+import { isSafeExternalUrl, isTaskApiUrl, isTrustedRendererFrame, isTrustedTaskRequest, isTrustedUrl } from '../src/security.mjs'
 
 test('trusted navigation must stay on an explicitly allowed origin', () => {
   const origins = new Set(['http://127.0.0.1:43125'])
@@ -20,6 +20,13 @@ test('only HTTPS links may leave the desktop shell', () => {
   assert.equal(isSafeExternalUrl('https://example.com/help'), true)
   assert.equal(isSafeExternalUrl('http://example.com/help'), false)
   assert.equal(isSafeExternalUrl('javascript:alert(1)'), false)
+})
+
+test('desktop IPC requires the exact loopback renderer origin', () => {
+  assert.equal(isTrustedRendererFrame('http://127.0.0.1:43125/settings', 'http://127.0.0.1:43125'), true)
+  assert.equal(isTrustedRendererFrame('http://127.0.0.1:43126/settings', 'http://127.0.0.1:43125'), false)
+  assert.equal(isTrustedRendererFrame('https://evil.example/', 'http://127.0.0.1:43125'), false)
+  assert.equal(isTrustedRendererFrame('http://127.0.0.1:43125/', 'https://example.com'), false)
 })
 
 test('token injection accepts only the trusted renderer and backend origin', () => {

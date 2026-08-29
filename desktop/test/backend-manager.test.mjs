@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict'
+import { spawn } from 'node:child_process'
 import http from 'node:http'
-import { chmod, mkdtemp, mkdir, writeFile } from 'node:fs/promises'
+import { access, chmod, mkdtemp, mkdir, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
-import { findFreePort, resolveBackendLayout, startBackend, verifyBackendIdentity, waitForBackend } from '../src/backend-manager.mjs'
+import { findFreePort, resolveBackendLayout, startBackend, stopBackend, verifyBackendIdentity, waitForBackend } from '../src/backend-manager.mjs'
 
 test('findFreePort returns an available loopback port', async () => {
   const port = await findFreePort()
@@ -109,4 +110,53 @@ test('staged layout fixture matches expected directory names', async () => {
   await writeFile(layout.jar, '')
   assert.equal(path.basename(layout.appDir), 'app')
   assert.equal(path.basename(layout.root), 'backend')
+})
+
+test('stopBackend signals a detached process group after its leader has exited', { skip: process.platform === 'win32' }, async t => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'fuyue-desktop-stop-'))
+  const readyFile = path.join(directory, 'worker-ready')
+  const stoppedFile = path.join(directory, 'worker-stopped')
+  const workerScript = `
+    const fs = require('node:fs')
+    const readyFile = process.argv[1]
+    const stoppedFile = process.argv[2]
+    fs.writeFileSync(readyFile, String(process.pid))
+    process.on('SIGTERM', () => {
+      fs.writeFileSync(stoppedFile, 'stopped')
+      process.exit(0)
+    })
+    setInterval(() => {}, 1_000)
+  `
+  const leaderScript = `
+    const { spawn } = require('node:child_process')
+    const fs = require('node:fs')
+    spawn(process.execPath, ['-e', ${JSON.stringify(workerScript)}, process.argv[1], process.argv[2]], { stdio: 'ignore' })
+    const deadline = Date.now() + 5_000
+    const timer = setInterval(() => {
+      if (fs.existsSync(process.argv[1])) {
+        clearInterval(timer)
+        process.exit(0)
+      } else if (Date.now() >= deadline) {
+        clearInterval(timer)
+        process.exit(1)
+      }
+    }, 20)
+  `
+  const leader = spawn(process.execPath, ['-e', leaderScript, readyFile, stoppedFile], {
+    detached: true,
+    stdio: 'ignore'
+  })
+  t.after(() => {
+    try { process.kill(-leader.pid, 'SIGKILL') } catch {}
+  })
+
+  await new Promise((resolve, reject) => {
+    leader.once('error', reject)
+    leader.once('exit', resolve)
+  })
+  assert.equal(leader.exitCode, 0)
+  await access(readyFile)
+
+  await stopBackend({ child: leader, graceMs: 50 })
+  await access(stoppedFile)
 })

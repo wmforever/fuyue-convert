@@ -1,9 +1,9 @@
 import { randomBytes } from 'node:crypto'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { app, BrowserWindow, dialog, session, shell } from 'electron'
+import { app, BrowserWindow, clipboard, dialog, ipcMain, session, shell } from 'electron'
 import { startBackend, stopBackend } from './backend-manager.mjs'
-import { isSafeExternalUrl, isTrustedTaskRequest, isTrustedUrl } from './security.mjs'
+import { isSafeExternalUrl, isTrustedRendererFrame, isTrustedTaskRequest, isTrustedUrl } from './security.mjs'
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url))
 const managedDevelopmentMode = process.argv.includes('--managed')
@@ -15,15 +15,30 @@ let quitting = false
 let backendReady = false
 let backendStarting = false
 let startupAbortController = null
+let trustedRendererOrigin = null
 
 if (!singleInstance) app.quit()
 
-function rendererSecurity(targetSession, backendOrigin, rendererOrigin, apiToken, webContentsId) {
+ipcMain.handle('format-converter:copy-text', (event, value) => {
+  const frameUrl = event.senderFrame?.url || event.sender.getURL()
+  if (!mainWindow || mainWindow.isDestroyed() || event.sender !== mainWindow.webContents
+      || !event.senderFrame || event.senderFrame !== event.sender.mainFrame
+      || !isTrustedRendererFrame(frameUrl, trustedRendererOrigin)) {
+    throw new Error('拒绝非可信页面的剪贴板写入')
+  }
+  if (typeof value !== 'string' || value.length < 1 || value.length > 262_144) {
+    throw new Error('复制文本为空或超过 256 KiB 限制')
+  }
+  clipboard.writeText(value)
+  return true
+})
+
+function rendererSecurity(targetSession, backendOrigin, rendererOrigin, apiToken, trustedWebContents) {
   targetSession.setPermissionCheckHandler(() => false)
   targetSession.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false))
   if (!backendOrigin || !apiToken) return
   targetSession.webRequest.onBeforeSendHeaders((details, callback) => {
-    if (!isTrustedTaskRequest(details, backendOrigin, rendererOrigin, webContentsId)) {
+    if (!isTrustedTaskRequest(details, backendOrigin, rendererOrigin, trustedWebContents.id)) {
       callback({ requestHeaders: details.requestHeaders })
       return
     }
@@ -57,6 +72,7 @@ function createWindow(rendererUrl, backendOrigin, apiToken) {
     }
   })
   const allowedOrigins = new Set([new URL(rendererUrl).origin])
+  trustedRendererOrigin = new URL(rendererUrl).origin
   if (backendOrigin) allowedOrigins.add(backendOrigin)
 
   window.webContents.on('will-navigate', (event, navigationUrl) => {
@@ -68,7 +84,7 @@ function createWindow(rendererUrl, backendOrigin, apiToken) {
   })
   window.once('ready-to-show', () => window.show())
   window.on('closed', () => { mainWindow = null })
-  rendererSecurity(window.webContents.session, backendOrigin, new URL(rendererUrl).origin, apiToken, window.webContents.id)
+  rendererSecurity(window.webContents.session, backendOrigin, new URL(rendererUrl).origin, apiToken, window.webContents)
   void window.loadURL(rendererUrl).catch(async error => {
     if (quitting) return
     await dialog.showMessageBox(window, {

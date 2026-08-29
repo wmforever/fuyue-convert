@@ -16,6 +16,16 @@ export function isSafeExternalUrl(value) {
   }
 }
 
+export function isTrustedRendererFrame(value, rendererOrigin) {
+  try {
+    const expected = new URL(rendererOrigin)
+    if (expected.protocol !== 'http:' || !['127.0.0.1', '[::1]'].includes(expected.hostname)) return false
+    return new URL(value).origin === expected.origin
+  } catch {
+    return false
+  }
+}
+
 export function isTaskApiUrl(value, backendOrigin) {
   try {
     const url = new URL(value)

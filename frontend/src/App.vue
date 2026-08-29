@@ -822,7 +822,9 @@ async function copyDiagnostics() {
     if (!response.ok) throw new Error(`诊断信息获取失败（${response.status}）`)
     const diagnostics = await response.json()
     const text = JSON.stringify(diagnostics, null, 2)
-    if (navigator.clipboard?.writeText) {
+    if (window.formatConverterDesktop?.copyText) {
+      await window.formatConverterDesktop.copyText(text)
+    } else if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(text)
     } else {
       const area = document.createElement('textarea')

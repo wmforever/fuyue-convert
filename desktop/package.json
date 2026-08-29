@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "electron . --dev",
     "dev:managed": "electron . --managed",
-    "check": "node --check src/main.mjs && node --check src/backend-manager.mjs && node --check src/security.mjs && node --check scripts/stage-backend.mjs && node --check scripts/smoke-renderer.mjs && node --check scripts/smoke-conversion.mjs && node --check scripts/verify-packaged.mjs && node --check scripts/require-windows.mjs",
+    "check": "node --check src/main.mjs && node --check src/preload.cjs && node --check src/backend-manager.mjs && node --check src/security.mjs && node --check scripts/stage-backend.mjs && node --check scripts/smoke-renderer.mjs && node --check scripts/smoke-conversion.mjs && node --check scripts/verify-packaged.mjs && node --check scripts/require-windows.mjs",
     "test": "node --test",
     "stage:backend": "node scripts/stage-backend.mjs",
     "verify:package": "node scripts/verify-packaged.mjs",

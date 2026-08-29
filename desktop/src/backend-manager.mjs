@@ -226,13 +226,36 @@ function waitForExit(child, timeoutMs) {
 }
 
 function signalProcessTree(child, signal) {
-  if (!child?.pid || hasExited(child)) return
+  if (!child?.pid) return
   try {
-    if (process.platform === 'win32') child.kill(signal)
+    if (process.platform === 'win32') {
+      if (!hasExited(child)) child.kill(signal)
+    }
     else process.kill(-child.pid, signal)
   } catch {
-    // The process may already have exited between the state check and signal.
+    // The process tree may already have exited between the state check and signal.
   }
+}
+
+function isPosixProcessGroupRunning(pid) {
+  if (!pid) return false
+  try {
+    process.kill(-pid, 0)
+    return true
+  } catch (error) {
+    return error?.code !== 'ESRCH'
+  }
+}
+
+async function waitForProcessTreeExit(child, timeoutMs) {
+  if (!child?.pid) return true
+  if (process.platform === 'win32') return waitForExit(child, timeoutMs)
+  const startedAt = Date.now()
+  while (isPosixProcessGroupRunning(child.pid)) {
+    if (Date.now() - startedAt >= timeoutMs) return false
+    await delay(50)
+  }
+  return true
 }
 
 async function forceStopWindows(pid) {
@@ -248,9 +271,9 @@ async function forceStopWindows(pid) {
 }
 
 export async function stopBackend({ child, origin, apiToken, graceMs = 22_000 } = {}) {
-  if (!child || hasExited(child)) return
+  if (!child?.pid) return
   let gracefulRequested = false
-  if (origin && apiToken) {
+  if (!hasExited(child) && origin && apiToken) {
     try {
       const response = await fetch(`${origin}/api/desktop/shutdown`, {
         method: 'POST',
@@ -262,10 +285,16 @@ export async function stopBackend({ child, origin, apiToken, graceMs = 22_000 } 
       // Fall through to process signalling when graceful shutdown is unavailable.
     }
   }
-  if (gracefulRequested && await waitForExit(child, graceMs)) return
-  if (process.platform === 'win32') await forceStopWindows(child.pid)
-  else signalProcessTree(child, 'SIGTERM')
-  if (await waitForExit(child, 3_000)) return
+  if (gracefulRequested) {
+    if (process.platform === 'win32') await waitForExit(child, graceMs)
+    else if (await waitForProcessTreeExit(child, graceMs)) return
+  }
+  if (process.platform === 'win32') {
+    await forceStopWindows(child.pid)
+    return
+  }
+  signalProcessTree(child, 'SIGTERM')
+  if (await waitForProcessTreeExit(child, 3_000)) return
   signalProcessTree(child, 'SIGKILL')
-  await waitForExit(child, 1_500)
+  await waitForProcessTreeExit(child, 1_500)
 }

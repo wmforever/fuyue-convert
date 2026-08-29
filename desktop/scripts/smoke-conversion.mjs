@@ -2,9 +2,22 @@ import path from 'node:path'
 
 const debugPort = Number(process.argv[2] || 9227)
 const inputPath = path.resolve(process.argv[3] || 'test/fixtures/smoke.txt')
-const targets = await fetch(`http://127.0.0.1:${debugPort}/json`).then(response => response.json())
-const page = targets.find(target => target.type === 'page')
-if (!page?.webSocketDebuggerUrl) throw new Error('没有找到 Electron 页面调试目标')
+const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
+
+async function waitForPageTarget() {
+  for (let attempt = 0; attempt < 40; attempt++) {
+    try {
+      const targets = await fetch(`http://127.0.0.1:${debugPort}/json`).then(response => response.json())
+      const page = targets.find(target => target.type === 'page'
+        && /^http:\/\/(?:127\.0\.0\.1|\[::1\]):\d+\/$/.test(target.url || ''))
+      if (page?.webSocketDebuggerUrl) return page
+    } catch { /* Electron may still be starting */ }
+    await pause(250)
+  }
+  throw new Error('没有找到 Electron 页面调试目标')
+}
+
+const page = await waitForPageTarget()
 
 const socket = new WebSocket(page.webSocketDebuggerUrl)
 const pending = new Map()
@@ -49,12 +62,13 @@ async function evaluate(expression) {
   return result.result.value
 }
 
-const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
-
 try {
   await evaluate(`(() => {
     [...document.querySelectorAll('button')].find(button => button.textContent.includes('新建转换'))?.click()
-    document.querySelector('.route-trigger')?.click()
+  })()`)
+  await pause(350)
+  await evaluate(`(() => {
+    if (!document.querySelector('.route-search')) document.querySelector('.route-trigger')?.click()
   })()`)
   await pause(200)
   const routeSelected = await evaluate(`(() => {
