@@ -34,7 +34,8 @@ final class PdfCompressConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.PDF_COMPRESSED,
             "支持无损、均衡和强力三级 PDF 优化；结果不变小时自动保留原文件。",
             QualityLevel.BETA, ConversionStrategy.FIDELITY, List.of(),
-            List.of("均衡和强力模式会重采样或重新编码图片；带数字签名的 PDF 会被严格拒绝"));
+            List.of("一次仅支持处理一个 PDF 文件",
+                    "均衡和强力模式会重采样或重新编码图片；带数字签名的 PDF 会被严格拒绝"));
 
     @Override public ConversionRoute route() { return route; }
 

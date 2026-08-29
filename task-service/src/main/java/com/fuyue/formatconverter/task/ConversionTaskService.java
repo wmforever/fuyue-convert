@@ -333,6 +333,13 @@ public final class ConversionTaskService implements AutoCloseable {
                 update(record, TaskStatus.SUCCESS, TaskStage.COMPLETED, 100, null, null, warnings, results,
                         true, isPdfMerge(record.route) ? "merged.pdf" : "merged-images.pdf");
             } else {
+                if (outputs.size() != record.inputs.size()) {
+                    warnings.add(ConversionWarning.of(
+                            com.fuyue.formatconverter.model.WarningCode.PARTIAL_BATCH_OUTPUT,
+                            "部分文件转换失败；ZIP 结果仅包含成功的 " + outputs.size() + " / "
+                                    + record.inputs.size() + " 个文件，失败详情见文件列表和 conversion-report.txt。",
+                            null));
+                }
                 ensureStorageCapacity(taskOutputBytes);
                 Path zip = record.taskDir.resolve("output/converted-to-" + record.route.targetFormat().extension() + ".zip");
                 packageZip(zip, outputs, results);

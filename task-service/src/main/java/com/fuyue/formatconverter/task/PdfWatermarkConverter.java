@@ -24,7 +24,8 @@ final class PdfWatermarkConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.PDF_WATERMARKED,
             "为 PDF 添加可配置的中英文文字水印，支持透明度、角度、位置、平铺和页码范围。",
             QualityLevel.BETA, ConversionStrategy.FIDELITY, List.of(),
-            List.of("修改带数字签名的 PDF 会导致签名失效，因此当前严格拒绝处理"));
+            List.of("一次仅支持处理一个 PDF 文件",
+                    "修改带数字签名的 PDF 会导致签名失效，因此当前严格拒绝处理"));
 
     @Override public ConversionRoute route() { return route; }
 

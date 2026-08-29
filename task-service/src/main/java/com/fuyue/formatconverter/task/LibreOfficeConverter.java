@@ -7,6 +7,8 @@ import org.apache.pdfbox.Loader;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -16,10 +18,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 
 public final class LibreOfficeConverter implements FileConverter {
+    private static final Logger log = LoggerFactory.getLogger(LibreOfficeConverter.class);
     private final ConversionRoute route;
     private final Path binary;
     private final Duration timeout;
@@ -46,6 +51,7 @@ public final class LibreOfficeConverter implements FileConverter {
     @Override
     public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
+        validateStandardOfficePackage(input.path());
         Files.createDirectories(workDir);
         Path outDir = Files.createTempDirectory(workDir, "office-output-");
         Path profileDir = Files.createTempDirectory(workDir, "office-profile-");
@@ -54,7 +60,14 @@ public final class LibreOfficeConverter implements FileConverter {
                 "--nofirststartwizard", "--nolockcheck",
                 "-env:UserInstallation=" + profileDir.toUri(),
                 "--convert-to", convertTo, "--outdir", outDir.toString(), input.path().toString());
-        ConversionGuards.runProcess(command, workDir.resolve("libreoffice.log"), timeout, "LibreOffice 转换");
+        try {
+            ConversionGuards.runProcess(command, workDir.resolve("libreoffice.log"), timeout, "LibreOffice 转换");
+        } catch (ExternalProcessException error) {
+            log.warn("LibreOffice route={} failed reason={} exit={} detail={}", route.id(), error.reason(),
+                    error.exitCode(), ErrorMessageSanitizer.from(error));
+            if (isUnreadableStandardOfficeInput(error)) throw invalidOfficeDocument();
+            throw error;
+        }
         progress.update(TaskStage.PACKAGING, 90);
         Path produced = findProducedFile(outDir, route.targetFormat());
         ConversionGuards.requireNonEmptyOutputFile(produced, limits, "LibreOffice");
@@ -73,6 +86,47 @@ public final class LibreOfficeConverter implements FileConverter {
         if (repair.endnotePageBreak()) warnings.add(ConversionWarning.of(WarningCode.OFFICE_COMPATIBILITY_LAYOUT,
                 "已保留 UOF 文末尾注的独立分页。", null));
         return new ConversionOutput(outputPath, outputFileName(input.displayName()), pageCount, warnings);
+    }
+
+    private void validateStandardOfficePackage(Path input) throws ConversionFailureException {
+        String documentPart = switch (route.sourceFormat()) {
+            case DOCX -> "word/document.xml";
+            case XLSX -> "xl/workbook.xml";
+            case PPTX -> "ppt/presentation.xml";
+            default -> null;
+        };
+        if (documentPart == null) return;
+        try (ZipFile archive = new ZipFile(input.toFile())) {
+            requirePackagePart(archive, "[Content_Types].xml");
+            requirePackagePart(archive, documentPart);
+        } catch (IOException error) {
+            log.warn("LibreOffice source validation failed route={} detail={}", route.id(),
+                    ErrorMessageSanitizer.from(error));
+            throw invalidOfficeDocument();
+        }
+    }
+
+    private void requirePackagePart(ZipFile archive, String name) throws IOException {
+        ZipEntry entry = archive.getEntry(name);
+        if (entry == null || entry.isDirectory() || entry.getSize() == 0) {
+            throw new IOException("Office package is missing required part " + name);
+        }
+    }
+
+    private boolean isUnreadableStandardOfficeInput(ExternalProcessException error) {
+        if (error.reason() != ExternalProcessException.Reason.NON_ZERO_EXIT) return false;
+        if (route.sourceFormat() != DocumentFormat.DOCX && route.sourceFormat() != DocumentFormat.XLSX
+                && route.sourceFormat() != DocumentFormat.PPTX) return false;
+        String detail = error.getMessage() == null ? "" : error.getMessage().toLowerCase(Locale.ROOT);
+        return detail.contains("source file could not be loaded")
+                || detail.contains("source file could not be opened")
+                || detail.contains("input file could not be opened");
+    }
+
+    private ConversionFailureException invalidOfficeDocument() {
+        return new ConversionFailureException("INVALID_OFFICE_DOCUMENT",
+                "上传的 " + route.sourceFormat().label()
+                        + " 文件结构无效；请确认文件未损坏且扩展名与实际格式一致。");
     }
 
     private Integer validateOutput(Path output, DocumentFormat target, ParseLimits limits) throws IOException {

@@ -78,6 +78,7 @@ public final class DefaultConverterRegistry {
         } else {
             converters.add(new XlsxToPdfConverter());
             converters.add(new DocxToPdfConverter());
+            converters.add(new UnavailableOfficeConverter(DocumentFormat.PPTX, DocumentFormat.PDF));
         }
         return List.copyOf(converters);
     }
