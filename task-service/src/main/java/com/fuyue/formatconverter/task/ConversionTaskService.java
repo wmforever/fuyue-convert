@@ -97,11 +97,17 @@ public final class ConversionTaskService implements AutoCloseable {
     }
 
     public TaskSnapshot createTask(List<UploadPayload> uploads, DocumentFormat targetFormat) throws IOException {
+        return createTask(uploads, targetFormat, ConversionOptions.defaults());
+    }
+
+    public TaskSnapshot createTask(List<UploadPayload> uploads, DocumentFormat targetFormat,
+                                   ConversionOptions options) throws IOException {
         if (uploads == null || uploads.isEmpty()) throw new IllegalArgumentException("至少上传一个文件");
         if (uploads.size() > config.maxFilesPerTask()) {
             throw new IllegalArgumentException("单任务文件数量超过限制：" + uploads.size() + " > " + config.maxFilesPerTask());
         }
         if (targetFormat == null) throw new IllegalArgumentException("请选择目标格式");
+        options = options == null ? ConversionOptions.defaults() : options;
         long totalUploadBytes = totalUploadBytes(uploads);
         ensureStorageCapacity(totalUploadBytes);
         TaskPlan plan = plan(uploads, targetFormat);
@@ -134,7 +140,8 @@ public final class ConversionTaskService implements AutoCloseable {
         TaskRecord record = new TaskRecord(taskId, taskDir, inputs,
                 new TaskSnapshot(taskId, TaskStatus.WAITING, TaskStage.QUEUED, 0, null, null,
                         List.of(), List.of(), false, null, plan.route().sourceFormat(), plan.route().targetFormat(),
-                        now, now, now.plus(config.resultTtl())), plan.converter(), plan.route());
+                        now, now, now.plus(config.resultTtl())), plan.converter(), plan.route(), options);
+        persistOptions(record);
         tasks.put(taskId, record);
         persist(record);
         try {
@@ -181,7 +188,7 @@ public final class ConversionTaskService implements AutoCloseable {
         List<UploadPayload> uploads = source.inputs.stream().map(input ->
                 new UploadPayload(input.displayName, input.contentType, input.size,
                         () -> Files.newInputStream(input.path))).toList();
-        return createTask(uploads, source.route.targetFormat());
+        return createTask(uploads, source.route.targetFormat(), source.options);
     }
 
     public DownloadArtifact download(String taskId) {
@@ -231,7 +238,8 @@ public final class ConversionTaskService implements AutoCloseable {
                 Integer parsedPageCount = null;
                 AtomicBoolean fileActive = new AtomicBoolean(true);
                 try {
-                    ConversionInput conversionInput = new ConversionInput(input.displayName, input.contentType, input.size, input.path);
+                    ConversionInput conversionInput = new ConversionInput(input.displayName, input.contentType,
+                            input.size, input.path, record.options);
                     ensureStorageCapacity(0);
                     ConversionOutput converted = convertWithTimeout(record, conversionInput, work, output, deadline, (stage, withinFile) -> {
                         if (fileActive.get()) {
@@ -421,6 +429,24 @@ public final class ConversionTaskService implements AutoCloseable {
         }
     }
 
+    private void persistOptions(TaskRecord record) throws IOException {
+        Path target = record.taskDir.resolve("options.json");
+        Path temporary = record.taskDir.resolve("options.json.tmp");
+        json.writeValue(temporary.toFile(), record.options);
+        try { Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE); }
+        catch (AtomicMoveNotSupportedException e) { Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING); }
+    }
+
+    private ConversionOptions recoverOptions(Path directory) {
+        Path options = directory.resolve("options.json");
+        if (!Files.isRegularFile(options)) return ConversionOptions.defaults();
+        try { return json.readValue(options.toFile(), ConversionOptions.class); }
+        catch (Exception e) {
+            log.warn("Could not recover task options at {}", directory.getFileName());
+            return ConversionOptions.defaults();
+        }
+    }
+
     private void recoverManifests() throws IOException {
         Path root = config.dataRoot().resolve("tasks");
         try (var directories = Files.list(root)) {
@@ -445,7 +471,7 @@ public final class ConversionTaskService implements AutoCloseable {
                             ? ConversionRoute.of(snapshot.sourceFormat(), snapshot.targetFormat(), "已恢复的历史任务")
                             : converter.route();
                     TaskRecord record = new TaskRecord(snapshot.taskId(), directory,
-                            recoverInputs(directory, snapshot), snapshot, converter, route);
+                            recoverInputs(directory, snapshot), snapshot, converter, route, recoverOptions(directory));
                     if (snapshot.downloadReady()) {
                         Path outputDir = directory.resolve("output");
                         String recoveredDownloadName = snapshot.downloadName();
@@ -753,6 +779,7 @@ public final class ConversionTaskService implements AutoCloseable {
         private final List<InputFile> inputs;
         private final FileConverter converter;
         private final ConversionRoute route;
+        private final ConversionOptions options;
         private volatile TaskSnapshot snapshot;
         private volatile Path downloadPath;
         private final AtomicBoolean cancellationRequested = new AtomicBoolean();
@@ -760,9 +787,10 @@ public final class ConversionTaskService implements AutoCloseable {
         private final AtomicBoolean executionStarted = new AtomicBoolean();
         private volatile Future<?> execution;
         private TaskRecord(String id, Path taskDir, List<InputFile> inputs, TaskSnapshot snapshot,
-                           FileConverter converter, ConversionRoute route) {
+                           FileConverter converter, ConversionRoute route, ConversionOptions options) {
             this.id = id; this.taskDir = taskDir; this.inputs = List.copyOf(inputs); this.snapshot = snapshot;
             this.converter = converter; this.route = route;
+            this.options = options == null ? ConversionOptions.defaults() : options;
         }
         private TaskSnapshot snapshot() { return snapshot; }
     }

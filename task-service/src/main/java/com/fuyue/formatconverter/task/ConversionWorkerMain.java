@@ -47,7 +47,8 @@ public final class ConversionWorkerMain {
             Files.createDirectories(work);
             Files.createDirectories(output.getParent());
             ConversionOutput converted = converter.convert(
-                    new ConversionInput(request.displayName(), request.contentType(), request.size(), input),
+                    new ConversionInput(request.displayName(), request.contentType(), request.size(), input,
+                            request.options()),
                     work, output, request.limits(),
                     (stage, progress) -> writeProgress(progressPath, new WorkerProgress(stage, progress)));
             requireSafeOutputPath(converted.path(), output);

@@ -44,7 +44,8 @@ public final class ForkedFileConverter implements FileConverter {
         WorkerRequest request = new WorkerRequest(route.sourceFormat().id(), route.targetFormat().id(),
                 input.displayName(), input.contentType(), input.size(),
                 input.path().toAbsolutePath().normalize().toString(), workDir.resolve("conversion").toString(),
-                outputPath.toAbsolutePath().normalize().toString(), limits, officeBinary, officeTimeout.toMillis());
+                outputPath.toAbsolutePath().normalize().toString(), limits, officeBinary, officeTimeout.toMillis(),
+                input.options());
         json.writeValue(requestPath.toFile(), request);
 
         List<String> command = new ArrayList<>(workerCommand);

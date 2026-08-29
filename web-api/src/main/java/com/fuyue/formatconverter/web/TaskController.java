@@ -18,12 +18,22 @@ public class TaskController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<TaskSnapshot> create(@RequestPart("files") List<MultipartFile> files,
-                                               @RequestParam(defaultValue = "docx") String targetFormat) throws IOException {
+                                               @RequestParam(defaultValue = "docx") String targetFormat,
+                                               @RequestParam(required = false) String compressionMode,
+                                               @RequestParam(required = false) String watermarkText,
+                                               @RequestParam(required = false) Double watermarkOpacity,
+                                               @RequestParam(required = false) Double watermarkAngle,
+                                               @RequestParam(required = false) String watermarkPosition,
+                                               @RequestParam(required = false) Boolean watermarkTiled,
+                                               @RequestParam(required = false) String watermarkPages,
+                                               @RequestParam(required = false) String watermarkColor) throws IOException {
         DocumentFormat target = DocumentFormat.from(targetFormat)
                 .orElseThrow(() -> new IllegalArgumentException("暂不支持的目标格式：" + targetFormat));
         List<UploadPayload> uploads = files.stream().map(file ->
                 new UploadPayload(file.getOriginalFilename(), file.getContentType(), file.getSize(), file::getInputStream)).toList();
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(tasks.createTask(uploads, target));
+        ConversionOptions options = ConversionOptions.fromRequest(compressionMode, watermarkText,
+                watermarkOpacity, watermarkAngle, watermarkPosition, watermarkTiled, watermarkPages, watermarkColor);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(tasks.createTask(uploads, target, options));
     }
 
     @GetMapping("/capabilities")
