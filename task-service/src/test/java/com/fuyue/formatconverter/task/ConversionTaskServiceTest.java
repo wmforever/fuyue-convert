@@ -202,11 +202,11 @@ class ConversionTaskServiceTest {
         assertTrue(pngOcr.status() == RouteStatus.AVAILABLE || pngOcr.status() == RouteStatus.UNAVAILABLE);
     }
 
-    @Test void recognizesUofExtensionFamily() {
+    @Test void recognizesUofTextExtensionsWithoutMisroutingSpreadsheetOrPresentation() {
         assertEquals(DocumentFormat.UOF, DocumentFormat.fromFileName("sample.uof").orElseThrow());
         assertEquals(DocumentFormat.UOF, DocumentFormat.fromFileName("sample.uot").orElseThrow());
-        assertEquals(DocumentFormat.UOF, DocumentFormat.fromFileName("sample.uos").orElseThrow());
-        assertEquals(DocumentFormat.UOF, DocumentFormat.fromFileName("sample.uop").orElseThrow());
+        assertTrue(DocumentFormat.fromFileName("sample.uos").isEmpty());
+        assertTrue(DocumentFormat.fromFileName("sample.uop").isEmpty());
     }
 
     @Test void registersUofAsDirectEditableLibreOfficeConversion() {

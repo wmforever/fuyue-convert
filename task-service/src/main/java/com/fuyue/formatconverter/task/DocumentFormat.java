@@ -59,7 +59,9 @@ public enum DocumentFormat {
     public boolean acceptsFileName(String fileName) {
         if (fileName == null || fileName.isBlank()) return false;
         String lower = fileName.toLowerCase(Locale.ROOT);
-        if (this == UOF && (lower.endsWith(".uot") || lower.endsWith(".uos") || lower.endsWith(".uop"))) return true;
+        // This route uses LibreOffice's UOF text filter. UOS/UOP are spreadsheet and
+        // presentation documents, so accepting them here would silently misroute them to DOCX.
+        if (this == UOF && lower.endsWith(".uot")) return true;
         return lower.endsWith("." + extension) || (this == JPG && lower.endsWith(".jpeg"));
     }
 
