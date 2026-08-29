@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const fallbackConversions = [{
   id: 'ofd-to-docx',
@@ -21,8 +21,12 @@ const files = ref([])
 const conversions = ref(fallbackConversions)
 const selectedRouteId = ref(fallbackConversions[0].id)
 const activeView = ref('overview')
+const appScrollRef = ref(null)
 const routePickerRef = ref(null)
+const routeTriggerRef = ref(null)
+const routeMenuRef = ref(null)
 const routePickerOpen = ref(false)
+const routeMenuStyle = ref({})
 const routeSearch = ref('')
 const pickerSource = ref('popular')
 const dragging = ref(false)
@@ -32,6 +36,8 @@ const busy = ref(false)
 const message = ref('')
 const diagnosticMessage = ref('')
 const diagnostics = ref(null)
+const diagnosticsFailed = ref(false)
+const capabilityMessage = ref('')
 const recentTasks = ref([])
 const compressionMode = ref('balanced')
 const watermarkText = ref('机密资料')
@@ -59,6 +65,7 @@ const routeFileLimit = computed(() => isSinglePdfTool.value ? 1 : limits.value.m
 const canSubmit = computed(() => files.value.length >= (isPdfMergeRoute.value ? 2 : 1)
   && !busy.value && toolOptionsValid.value && selectedRoute.value?.status === 'available')
 const availableRoutes = computed(() => conversions.value.filter(route => route.status === 'available'))
+const availableSourceCount = computed(() => new Set(availableRoutes.value.map(route => route.sourceFormat)).size)
 const stableRoutes = computed(() => conversions.value.filter(route => route.status === 'available' && route.qualityLevel === 'stable'))
 const betaRoutes = computed(() => conversions.value.filter(route => route.status === 'available' && route.qualityLevel === 'beta'))
 const pdfToolRoutes = computed(() => pdfToolRouteIds.map(id => conversions.value.find(route => route.id === id)).filter(Boolean))
@@ -187,14 +194,39 @@ function routeMeta(route) {
   return values.join(' · ')
 }
 
-function toggleRoutePicker() {
+async function toggleRoutePicker() {
   if (busy.value) return
   routePickerOpen.value = !routePickerOpen.value
-  if (routePickerOpen.value) pickerSource.value = selectedRoute.value?.sourceFormat || 'popular'
+  if (routePickerOpen.value) {
+    pickerSource.value = selectedRoute.value?.sourceFormat || 'popular'
+    await nextTick()
+    positionRouteMenu()
+    routeMenuRef.value?.querySelector('.route-search')?.focus()
+  }
 }
 
-function closeRoutePicker() {
+function closeRoutePicker(restoreFocus = false) {
   routePickerOpen.value = false
+  if (restoreFocus) nextTick(() => routeTriggerRef.value?.focus())
+}
+
+function positionRouteMenu() {
+  if (!routePickerOpen.value || !routeTriggerRef.value || window.innerWidth <= 720) return
+  const trigger = routeTriggerRef.value.getBoundingClientRect()
+  const gutter = 14
+  const menuWidth = Math.min(760, window.innerWidth - gutter * 2)
+  const left = Math.min(Math.max(gutter, trigger.right - menuWidth), window.innerWidth - menuWidth - gutter)
+  const availableBelow = window.innerHeight - trigger.bottom - gutter
+  const availableAbove = trigger.top - gutter
+  const openUpward = availableBelow < 360 && availableAbove > availableBelow
+  const available = openUpward ? availableAbove : availableBelow
+  routeMenuStyle.value = {
+    left: `${left}px`,
+    width: `${menuWidth}px`,
+    top: openUpward ? 'auto' : `${trigger.bottom + 8}px`,
+    bottom: openUpward ? `${window.innerHeight - trigger.top + 8}px` : 'auto',
+    '--route-menu-height': `${Math.max(270, Math.min(500, available - 8))}px`
+  }
 }
 
 function selectRoute(route) {
@@ -210,9 +242,11 @@ function selectPickerSource(source) {
   routeSearch.value = ''
 }
 
-function navigate(view) {
+async function navigate(view) {
   activeView.value = view
   routePickerOpen.value = false
+  await nextTick()
+  if (appScrollRef.value) appScrollRef.value.scrollTop = 0
 }
 
 function openRoute(route) {
@@ -234,7 +268,19 @@ function openPdfWorkspace() {
 function loadRecentTasks() {
   try {
     const stored = JSON.parse(localStorage.getItem('format-converter-recent-tasks') || '[]')
-    if (Array.isArray(stored)) recentTasks.value = stored.slice(0, 12)
+    if (Array.isArray(stored)) {
+      recentTasks.value = stored.filter(item => item
+        && typeof item.taskId === 'string' && item.taskId.length > 0
+        && ['SUCCESS', 'FAILED', 'CANCELLED'].includes(item.status))
+        .map(item => ({
+          taskId: item.taskId,
+          status: item.status,
+          sourceLabel: typeof item.sourceLabel === 'string' ? item.sourceLabel : '文件',
+          targetLabel: typeof item.targetLabel === 'string' ? item.targetLabel : '输出文件',
+          fileCount: Number.isInteger(item.fileCount) && item.fileCount >= 0 ? item.fileCount : 0,
+          updatedAt: typeof item.updatedAt === 'string' ? item.updatedAt : null
+        })).slice(0, 12)
+    }
   } catch (_) { recentTasks.value = [] }
 }
 
@@ -245,7 +291,7 @@ function recordRecentTask(snapshot) {
     status: snapshot.status,
     sourceLabel: selectedRoute.value?.sourceLabel || snapshot.sourceFormat?.toUpperCase(),
     targetLabel: selectedRoute.value?.targetLabel || snapshot.targetFormat?.toUpperCase(),
-    fileCount: Array.isArray(snapshot.files) ? snapshot.files.length : files.value.length,
+    fileCount: Array.isArray(snapshot.files) && snapshot.files.length > 0 ? snapshot.files.length : files.value.length,
     updatedAt: snapshot.updatedAt || new Date().toISOString()
   }
   recentTasks.value = [entry, ...recentTasks.value.filter(item => item.taskId !== entry.taskId)].slice(0, 12)
@@ -262,18 +308,21 @@ function onDocumentClick(event) {
 }
 
 function onRoutePickerKeydown(event) {
-  if (event.key === 'Escape') closeRoutePicker()
+  if (event.key === 'Escape') closeRoutePicker(true)
 }
 
 async function loadCapabilities() {
   try {
     const response = await fetch('/api/tasks/capabilities', { cache: 'no-store' })
     if (!response.ok) {
-      if (response.status === 401) message.value = '当前部署启用了访问令牌，内置页面不可用'
+      capabilityMessage.value = response.status === 401
+        ? '转换能力接口需要访问令牌，请从桌面应用或正确配置的本地入口打开。'
+        : `转换能力加载失败（${response.status}），当前仅显示基础路线。`
       return
     }
     const routes = await response.json()
     if (Array.isArray(routes) && routes.length) {
+      capabilityMessage.value = ''
       conversions.value = routes
       if (!routes.some(route => route.id === selectedRouteId.value)) selectedRouteId.value = routes[0].id
       if (selectedRoute.value?.status !== 'available' && availableRoutes.value.length) {
@@ -282,20 +331,27 @@ async function loadCapabilities() {
     }
   } catch (_) {
     conversions.value = fallbackConversions
+    capabilityMessage.value = '暂时无法连接转换服务，当前仅显示基础路线。'
   }
 }
 
 async function loadLimits() {
+  diagnosticsFailed.value = false
   try {
     const response = await fetch('/api/diagnostics', { cache: 'no-store' })
-    if (!response.ok) return
+    if (!response.ok) {
+      diagnosticsFailed.value = true
+      return
+    }
     const payload = await response.json()
     diagnostics.value = payload
     const configured = payload?.limits || {}
     if (Number.isFinite(configured.maxFileSize) && configured.maxFileSize > 0) limits.value.maxFileSize = configured.maxFileSize
     if (Number.isInteger(configured.maxFilesPerTask) && configured.maxFilesPerTask > 0) limits.value.maxFilesPerTask = configured.maxFilesPerTask
     if (Number.isFinite(configured.maxTaskUploadBytes) && configured.maxTaskUploadBytes > 0) limits.value.maxTaskUploadBytes = configured.maxTaskUploadBytes
-  } catch (_) { /* keep safe UI defaults */ }
+  } catch (_) {
+    diagnosticsFailed.value = true
+  }
 }
 
 function startNewBatch() {
@@ -544,10 +600,12 @@ onMounted(() => {
   loadCapabilities()
   loadLimits()
   document.addEventListener('click', onDocumentClick)
+  window.addEventListener('resize', positionRouteMenu)
 })
 onBeforeUnmount(() => {
   clearTimeout(pollTimer)
   document.removeEventListener('click', onDocumentClick)
+  window.removeEventListener('resize', positionRouteMenu)
 })
 </script>
 
@@ -588,7 +646,11 @@ onBeforeUnmount(() => {
         </div>
       </header>
 
-      <div class="app-scroll">
+      <div ref="appScrollRef" class="app-scroll" @scroll.passive="positionRouteMenu">
+        <aside v-if="capabilityMessage" class="global-notice" role="status">
+          <span>!</span><p><strong>转换能力未完整加载</strong><small>{{ capabilityMessage }}</small></p>
+          <button type="button" @click="loadCapabilities">重新连接</button>
+        </aside>
         <section v-show="activeView === 'overview'" class="dashboard-page">
           <article class="welcome-banner">
             <div>
@@ -604,9 +666,9 @@ onBeforeUnmount(() => {
           </article>
 
           <div class="metric-grid" aria-label="运行概览">
-            <article><span class="metric-icon blue">↗</span><div><small>可用路线</small><strong>{{ availableRoutes.length }}</strong><em>覆盖 {{ formatSourceOptions.length }} 种输入格式</em></div></article>
+            <article><span class="metric-icon blue">↗</span><div><small>可用路线</small><strong>{{ availableRoutes.length }}</strong><em>覆盖 {{ availableSourceCount }} 种可用输入格式</em></div></article>
             <article><span class="metric-icon violet">✓</span><div><small>稳定路线</small><strong>{{ stableRoutes.length }}</strong><em>{{ betaRoutes.length }} 条 Beta 持续优化</em></div></article>
-            <article><span class="metric-icon cyan">▣</span><div><small>本机任务</small><strong>{{ successfulTasks }}</strong><em>仅记录任务摘要</em></div></article>
+            <article><span class="metric-icon cyan">▣</span><div><small>已完成任务</small><strong>{{ successfulTasks }}</strong><em>仅记录任务摘要</em></div></article>
             <article><span class="metric-icon green">●</span><div><small>服务状态</small><strong>{{ serviceHealthy ? '正常' : '连接中' }}</strong><em>独立 Worker {{ diagnostics?.limits?.workerEnabled ? '已启用' : '检测中' }}</em></div></article>
           </div>
 
@@ -626,8 +688,8 @@ onBeforeUnmount(() => {
               <div class="panel-title"><div><small>LOCAL ENGINES</small><h2>运行环境</h2></div><span class="health-pill">{{ serviceHealthy ? 'HEALTHY' : 'LOADING' }}</span></div>
               <div class="engine-list">
                 <div><span class="engine-dot" :class="{ online: serviceHealthy }"></span><p><strong>转换服务</strong><small>Java {{ diagnostics?.runtime?.javaVersion || '17' }}</small></p><b>{{ serviceHealthy ? '在线' : '检测中' }}</b></div>
-                <div><span class="engine-dot" :class="{ online: diagnostics?.office?.available }"></span><p><strong>Office 引擎</strong><small>{{ diagnostics?.office?.binaryName || 'LibreOffice' }}</small></p><b>{{ diagnostics?.office?.available ? '可用' : '不可用' }}</b></div>
-                <div><span class="engine-dot" :class="{ online: diagnostics?.ocr?.available }"></span><p><strong>OCR 识别</strong><small>本地文字识别</small></p><b>{{ diagnostics?.ocr?.available ? '可用' : '未启用' }}</b></div>
+                <div><span class="engine-dot" :class="{ online: diagnostics?.office?.available }"></span><p><strong>Office 引擎</strong><small>{{ diagnostics?.office?.binaryName || 'LibreOffice' }}</small></p><b>{{ diagnostics ? (diagnostics.office?.available ? '可用' : '不可用') : (diagnosticsFailed ? '检测失败' : '检测中') }}</b></div>
+                <div><span class="engine-dot" :class="{ online: diagnostics?.ocr?.available }"></span><p><strong>OCR 识别</strong><small>本地文字识别</small></p><b>{{ diagnostics ? (diagnostics.ocr?.available ? '可用' : '未启用') : (diagnosticsFailed ? '检测失败' : '检测中') }}</b></div>
               </div>
               <button type="button" class="engine-action" @click="navigate('settings')">查看系统详情 <span>→</span></button>
             </aside>
@@ -699,11 +761,13 @@ onBeforeUnmount(() => {
         <div class="route-field">
           <div ref="routePickerRef" class="route-picker" @keydown="onRoutePickerKeydown">
             <button
+              ref="routeTriggerRef"
               id="route"
               type="button"
               class="route-trigger"
               :disabled="busy"
               aria-haspopup="listbox"
+              aria-controls="route-menu"
               :aria-expanded="routePickerOpen"
               aria-labelledby="route-label route"
               @click.stop="toggleRoutePicker"
@@ -714,7 +778,7 @@ onBeforeUnmount(() => {
               <span class="chevron" aria-hidden="true"></span>
             </button>
 
-            <div v-if="routePickerOpen" class="route-menu" @click.stop>
+            <div v-if="routePickerOpen" id="route-menu" ref="routeMenuRef" class="route-menu" :style="routeMenuStyle" @click.stop>
               <div class="route-search-wrap">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg>
                 <input

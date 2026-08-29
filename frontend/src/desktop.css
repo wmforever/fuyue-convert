@@ -431,3 +431,87 @@ body::before { display: none; }
   .watermark-options .wide-field, .toggle-field { grid-column: 1; }
   .recent-list > div { padding-inline: 12px; }
 }
+
+/* Legibility, focus and overlay hardening */
+.global-notice { width: min(1220px, 100%); min-height: 54px; display: grid; grid-template-columns: 28px minmax(0,1fr) auto; gap: 11px; align-items: center; margin: 0 auto 14px; padding: 10px 13px; border: 1px solid rgba(245,168,91,.2); border-radius: 12px; color: #c6a477; background: rgba(245,168,91,.07); }
+.global-notice > span { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 8px; color: #f3bd78; background: rgba(245,168,91,.12); font-size: 12px; font-weight: 850; }
+.global-notice p { min-width: 0; display: grid; gap: 3px; margin: 0; }
+.global-notice strong { color: #d8bf9d; font-size: 11px; }
+.global-notice small { overflow: hidden; color: #9e8566; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.global-notice button { min-height: 32px; padding: 0 11px; border: 1px solid rgba(245,168,91,.22); border-radius: 8px; color: #dfb77f; background: rgba(245,168,91,.08); font-size: 10px; font-weight: 750; }
+
+.app-brand strong { font-size: 14px; }
+.app-brand small { font-size: 9px; }
+.side-nav button { font-size: 12px; }
+.sidebar-service strong { font-size: 11px; }
+.sidebar-service small { font-size: 9px; }
+.page-heading > span { font-size: 17px; }
+.page-heading small { font-size: 10px; }
+.local-chip { font-size: 9px; }
+.header-cta { font-size: 11px; }
+.app-statusbar { font-size: 9px; }
+.welcome-banner p { font-size: 9px; }
+.welcome-banner small { font-size: 12px; }
+.welcome-banner button { font-size: 11px; }
+.metric-grid small { font-size: 10px; }
+.metric-grid em { font-size: 9px; }
+.panel-title small { font-size: 8px; }
+.panel-title h2 { font-size: 14px; }
+.panel-title > button, .health-pill { font-size: 9px; }
+.quick-icon { font-size: 9px; }
+.quick-grid strong { font-size: 12px; }
+.quick-grid small { font-size: 10px; }
+.engine-list strong { font-size: 11px; }
+.engine-list small, .engine-list b { font-size: 9px; }
+.engine-action { font-size: 10px; }
+.recent-list strong, .empty-state strong { font-size: 11px; }
+.recent-list small, .recent-list time, .recent-list em, .empty-state small, .empty-state button { font-size: 9px; }
+.section-intro > span, .content-toolbar > div > span { font-size: 9px; }
+.section-intro p, .content-toolbar p { font-size: 12px; }
+.tool-card-grid small { font-size: 9px; }
+.tool-card-grid p { font-size: 11px; }
+.tool-card-grid button > i, .privacy-banner small { font-size: 10px; }
+.privacy-banner strong { font-size: 11px; }
+.settings-head strong { font-size: 13px; }
+.settings-head small, .settings-card dt, .settings-card dd, .action-card > small { font-size: 10px; }
+.action-card > p { font-size: 11px; }
+.action-card > button { font-size: 10px; }
+.section-kicker { font-size: 9px; }
+.steps { font-size: 10px; }
+.field-number { font-size: 10px; }
+.field-heading label { font-size: 13px; }
+.field-heading small { font-size: 11px; }
+.route-formats b { font-size: 15px; }
+.route-description { font-size: 11px; }
+.route-meta, .route-limitations { font-size: 10px; }
+.route-search, .source-sidebar button strong, .target-heading strong { font-size: 12px; }
+.source-list > p, .source-sidebar button small, .target-heading small, .target-heading > button { font-size: 10px; }
+.source-sidebar button > span, .route-format-icon, .route-badge { font-size: 9px; }
+.route-main strong { font-size: 13px; }
+.route-main small { font-size: 11px; }
+.route-main em { font-size: 9px; }
+.compression-options strong { font-size: 12px; }
+.compression-options small { font-size: 10px; }
+.compression-options em, .option-notice { font-size: 9px; }
+.watermark-options > label { font-size: 10px; }
+.watermark-options input[type="text"], .watermark-options select { font-size: 11px; }
+.drop-content h3 { font-size: 15px; }
+.drop-content p { font-size: 11px; }
+.select-button, .primary, .secondary { font-size: 11px; }
+.panel-heading strong, .file-name, .status-row strong { font-size: 11px; }
+.panel-heading small, .panel-heading > span, .file-size { font-size: 10px; }
+
+.route-menu { position: fixed; right: auto; max-height: var(--route-menu-height, 500px); }
+.route-explorer { height: min(430px, calc(var(--route-menu-height, 500px) - 70px)); min-height: 0; }
+.route-search-wrap:focus-within { border-color: #477fd8; box-shadow: 0 0 0 3px rgba(67,137,255,.09); }
+button:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #79aaff; outline-offset: 2px; }
+.compression-options > label:focus-within, .toggle-field:focus-within { border-color: #79aaff; box-shadow: 0 0 0 3px rgba(67,137,255,.09); }
+
+@media (max-width: 720px) {
+  .side-nav button { font-size: 9px; }
+  .route-menu { width: auto !important; max-height: calc(100vh - 88px); position: fixed !important; inset: auto 10px 66px !important; border-radius: 16px; }
+  .route-explorer { height: calc(100vh - 166px); min-height: 0; }
+  .global-notice { grid-template-columns: 27px minmax(0,1fr); }
+  .global-notice small { white-space: normal; line-height: 1.45; }
+  .global-notice button { grid-column: 1 / -1; width: 100%; }
+}
