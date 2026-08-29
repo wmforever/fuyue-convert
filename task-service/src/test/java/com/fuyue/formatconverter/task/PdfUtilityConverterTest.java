@@ -113,6 +113,29 @@ class PdfUtilityConverterTest {
     }
 
     @Test
+    void keepsWatermarkSearchableOnTextHeavyPdf() throws Exception {
+        String marker = "QA-WATERMARK-2026";
+        Path text = temp.resolve("text-heavy.txt");
+        Files.writeString(text, java.util.stream.IntStream.rangeClosed(1, 65)
+                .mapToObj(index -> "PDF 可编辑验收行 " + index + " / Editable line " + index)
+                .collect(java.util.stream.Collectors.joining("\n")));
+        Path source = temp.resolve("text-heavy.pdf");
+        new TextToPdfConverter().convert(new ConversionInput(text.getFileName().toString(), "text/plain",
+                        Files.size(text), text), temp.resolve("text-pdf-work"), source,
+                ParseLimits.defaults(), (stage, progress) -> { });
+        Path watermarked = temp.resolve("text-heavy-watermarked.pdf");
+        ConversionOptions options = ConversionOptions.fromRequest(null, marker, 0.30d, 25d,
+                "center", false, "all", "#667788");
+        new PdfWatermarkConverter().convert(input(source, options), temp.resolve("text-watermark-work"),
+                watermarked, ParseLimits.defaults(), (stage, progress) -> { });
+
+        try (PDDocument document = Loader.loadPDF(watermarked.toFile())) {
+            String extractedText = new PDFTextStripper().getText(document);
+            assertTrue(extractedText.replaceAll("\\s+", "").contains(marker), extractedText);
+        }
+    }
+
+    @Test
     void tiledWatermarkPreservesRotatedCropBoxAndRenders() throws Exception {
         Path source = temp.resolve("rotated-crop.pdf");
         try (PDDocument document = new PDDocument()) {

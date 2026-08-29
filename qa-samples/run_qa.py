@@ -39,7 +39,18 @@ JAVA = os.environ.get("JAVA_BIN", "java")
 SOFFICE = os.environ.get("SOFFICE_BIN") or shutil.which("soffice")
 PDFTOPPM = os.environ.get("PDFTOPPM_BIN") or shutil.which("pdftoppm")
 PDFINFO = os.environ.get("PDFINFO_BIN") or shutil.which("pdfinfo")
-JAR = ROOT / "web-api" / "target" / "web-api-0.1.1.jar"
+
+
+def project_version():
+    pom_root = ElementTree.parse(ROOT / "pom.xml").getroot()
+    namespace = "{http://maven.apache.org/POM/4.0.0}"
+    value = pom_root.findtext(f"{namespace}version")
+    if value is None or not value.strip():
+        raise RuntimeError("Could not read the project version from pom.xml")
+    return value.strip()
+
+
+JAR = ROOT / "web-api" / "target" / f"web-api-{project_version()}.jar"
 
 VISUAL_THRESHOLD = float(os.environ.get("FORMAT_QA_VISUAL_THRESHOLD", "0.001"))
 
@@ -110,13 +121,16 @@ def stop_service(process):
         process.wait(timeout=5)
 
 
-def upload_convert(path, target):
-    body = run([
+def upload_convert(path, target, fields=None):
+    command = [
         "curl", "-fsS", "-X", "POST",
         "-F", f"files=@{path}",
         "-F", f"targetFormat={target}",
-        f"{BASE_URL}/api/tasks",
-    ], timeout=180)
+    ]
+    for name, value in (fields or {}).items():
+        command.extend(["-F", f"{name}={value}"])
+    command.append(f"{BASE_URL}/api/tasks")
+    body = run(command, timeout=180)
     created = json.loads(body)
     if "taskId" not in created:
         raise RuntimeError(f"Task creation returned no taskId: {body[:1000]}")
@@ -133,10 +147,19 @@ def upload_convert(path, target):
     if task["status"] != "SUCCESS":
         return task, None
     name = task["downloadName"]
-    out = OUTPUT / f"{path.stem}-to-{target}-{name}"
+    # Chained round-trip checks can feed a generated artifact back into the API.
+    # Keep the local name bounded so repeated conversions never exceed the host
+    # filesystem's per-component limit.
+    suffix = Path(name).suffix or f".{target}"
+    out = OUTPUT / f"{path.stem[:48]}-to-{target}-{task_id[:8]}{suffix}"
     with urllib.request.urlopen(f"{BASE_URL}/api/tasks/{task_id}/download", timeout=30) as response:
         out.write_bytes(response.read())
     return task, out
+
+
+def fetch_json(path):
+    with urllib.request.urlopen(f"{BASE_URL}{path}", timeout=10) as response:
+        return json.loads(response.read().decode("utf-8"))
 
 
 def office_pdf(source, directory):
@@ -184,6 +207,16 @@ def render_pdf(pdf, directory, prefix):
     directory.mkdir(parents=True, exist_ok=True)
     run([PDFTOPPM, "-r", "160", "-png", str(pdf), str(directory / prefix)], timeout=180)
     return sorted(directory.glob(f"{prefix}-*.png"))
+
+
+def pdf_page_count(pdf):
+    if not PDFINFO:
+        raise RuntimeError("pdfinfo not found")
+    info = run([PDFINFO, str(pdf)])
+    match = re.search(r"^Pages:\s+(\d+)", info, re.MULTILINE)
+    if not match:
+        raise RuntimeError(f"pdfinfo did not report a page count for {pdf}")
+    return int(match.group(1))
 
 
 def unzip_images(zip_path, directory):
@@ -702,6 +735,133 @@ def csv_round_trip_case(source):
     return result
 
 
+def docx_txt_extraction_case(source):
+    result = {"name": "docx-to-txt-content", "source": source.name,
+              "target": "txt", "type": "content"}
+    task, output = upload_convert(source, "txt")
+    result["taskStatus"] = task.get("status")
+    result["output"] = output.name if output else None
+    result["exactCheck"] = "docx-main-text-character-preservation"
+    if not output:
+        result["strictPass"] = False
+        result["error"] = task.get("errorMessage")
+        return result
+    expected = normalized_character_counts(docx_text_content(source))
+    actual = normalized_character_counts(output.read_text(encoding="utf-8", errors="replace"))
+    result["sourceCharacterCount"] = sum(expected.values())
+    result["textCharacterCount"] = sum(actual.values())
+    result["strictPass"] = expected == actual
+    result["practicalPass"] = result["strictPass"]
+    result["visualPass"] = None
+    return result
+
+
+def pdf_compression_case(source):
+    result = {"name": "pdf-compress-balanced", "source": source.name,
+              "target": "pdf-compress", "type": "content-layout"}
+    task, output = upload_convert(source, "pdf-compress", {"compressionMode": "balanced"})
+    result["taskStatus"] = task.get("status")
+    result["output"] = output.name if output else None
+    result["exactCheck"] = "readable-same-pages-and-not-larger"
+    if not output:
+        result["strictPass"] = False
+        result["error"] = task.get("errorMessage")
+        return result
+    result["sourceBytes"] = source.stat().st_size
+    result["outputBytes"] = output.stat().st_size
+    result["sourcePageCount"] = pdf_page_count(source)
+    result["outputPageCount"] = pdf_page_count(output)
+    result["strictPass"] = (result["sourcePageCount"] == result["outputPageCount"]
+                            and result["outputBytes"] <= result["sourceBytes"])
+    result["practicalPass"] = result["strictPass"]
+    result["visualPass"] = None
+    return result
+
+
+def pdf_watermark_case(source):
+    result = {"name": "pdf-watermark-text", "source": source.name,
+              "target": "pdf-watermark", "type": "content-layout"}
+    task, output = upload_convert(source, "pdf-watermark", {
+        "watermarkText": "QA-WATERMARK-2026",
+        "watermarkOpacity": "0.30",
+        "watermarkAngle": "25",
+        "watermarkPosition": "center",
+        "watermarkPages": "all",
+        "watermarkColor": "#667788",
+    })
+    result["taskStatus"] = task.get("status")
+    result["output"] = output.name if output else None
+    result["exactCheck"] = "same-pages-and-visible-watermark-render"
+    if not output:
+        result["strictPass"] = False
+        result["error"] = task.get("errorMessage")
+        return result
+    result["sourcePageCount"] = pdf_page_count(source)
+    result["outputPageCount"] = pdf_page_count(output)
+    case_dir = WORK / result["name"]
+    source_pages = render_pdf(source, case_dir / "source-render", "source")
+    output_pages = render_pdf(output, case_dir / "output-render", "output")
+    comparison = compare_images(source_pages, output_pages, case_dir / "diff")
+    result.update(comparison)
+    result["watermarkPixelsChanged"] = comparison["differentPixels"]
+    result["strictPass"] = (result["sourcePageCount"] == result["outputPageCount"]
+                            and comparison["pageCountMatch"]
+                            and (comparison["differentPixels"] or 0) > 1_000)
+    result["practicalPass"] = result["strictPass"]
+    result["visualPass"] = result["strictPass"]
+    return result
+
+
+def docx_uof_round_trip_case(source):
+    result = {"name": "docx-uof-docx-roundtrip", "source": source.name,
+              "target": "uof,docx", "type": "content"}
+    export_task, uof = upload_convert(source, "uof")
+    result["firstTaskStatus"] = export_task.get("status")
+    result["output"] = uof.name if uof else None
+    result["exactCheck"] = "uof-root-namespace-and-text-roundtrip"
+    if not uof:
+        result["strictPass"] = False
+        result["error"] = export_task.get("errorMessage")
+        return result
+    root = ElementTree.parse(uof).getroot()
+    local_name = root.tag.rsplit("}", 1)[-1]
+    namespace = root.tag[1:].split("}", 1)[0] if root.tag.startswith("{") else ""
+    reopen_task, reopened = upload_convert(uof, "docx")
+    result["secondTaskStatus"] = reopen_task.get("status")
+    if not reopened:
+        result["strictPass"] = False
+        result["error"] = reopen_task.get("errorMessage")
+        return result
+    expected = normalized_character_counts(docx_text_content(source))
+    actual = normalized_character_counts(docx_text_content(reopened))
+    result["rootElement"] = local_name
+    result["namespace"] = namespace
+    result["sourceCharacterCount"] = sum(expected.values())
+    result["roundTripCharacterCount"] = sum(actual.values())
+    result["strictPass"] = (local_name == "UOF" and namespace.startswith("http://schemas.uof.org/")
+                            and expected == actual)
+    result["practicalPass"] = result["strictPass"]
+    result["visualPass"] = None
+    return result
+
+
+def unavailable_ocr_case(name, source, target):
+    result = {"name": name, "source": source.name, "target": target,
+              "type": "capability-contract", "exactCheck": "unavailable-route-error-contract"}
+    task, output = upload_convert(source, target)
+    files = task.get("files") or []
+    file_result = files[0] if files else {}
+    result["taskStatus"] = task.get("status")
+    result["errorCode"] = file_result.get("errorCode")
+    result["downloadProduced"] = output is not None
+    result["strictPass"] = (task.get("status") == "FAILED"
+                            and result["errorCode"] == "OCR_ENGINE_UNAVAILABLE"
+                            and output is None)
+    result["practicalPass"] = result["strictPass"]
+    result["visualPass"] = None
+    return result
+
+
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     REPORT.mkdir(parents=True, exist_ok=True)
@@ -728,6 +888,10 @@ def main():
         if not pdf_scanned_source:
             raise RuntimeError("Could not create image-only PDF QA source: "
                                + str(scanned_source_task.get("errorMessage")))
+        docx_source_task, generated_docx_source = upload_convert(pdf_editable_text, "docx")
+        if not generated_docx_source:
+            raise RuntimeError("Could not create editable DOCX QA source: "
+                               + str(docx_source_task.get("errorMessage")))
         cases = [
             visual_case("docx-to-pdf-exact", INPUT / "demo.docx", "pdf"),
             visual_case("xlsx-to-pdf-exact", INPUT / "frictionless-sample.xlsx", "pdf"),
@@ -751,7 +915,11 @@ def main():
                 pdf_txt_ocr_required_case(pdf_scanned_source),
                 pdf_docx_editable_case(pdf_editable_source),
                 pdf_docx_ocr_required_case(pdf_scanned_source),
+                docx_txt_extraction_case(generated_docx_source),
+                pdf_compression_case(pdf_scanned_source),
+                pdf_watermark_case(pdf_editable_source),
                 pdf_ofd_fixed_case(pdf_editable_source),
+                docx_uof_round_trip_case(generated_docx_source),
                 image_pdf_layout_case(INPUT / "w3c-home.png"),
                 csv_round_trip_case(INPUT / "countries.csv"),
         ])
@@ -761,12 +929,26 @@ def main():
             cases.append(ofd_image_fixed_case(INPUT / "ofdrw-invoice.ofd", "png"))
             cases.append(ofd_image_fixed_case(INPUT / "ofdrw-invoice.ofd", "jpg"))
             cases.append(ofd_xlsx_table_case(INPUT / "ofdrw-invoice.ofd"))
+        capabilities = {route["id"]: route for route in fetch_json("/api/tasks/capabilities")}
+        unavailable_ocr = [route_id for route_id in (
+            "png-to-txt", "jpg-to-txt", "png-to-docx", "jpg-to-docx"
+        ) if capabilities.get(route_id, {}).get("status") == "unavailable"]
+        if unavailable_ocr:
+            jpg_task, jpg_source = upload_convert(pdf_source, "jpg")
+            if not jpg_source:
+                raise RuntimeError("Could not create JPEG OCR capability source: "
+                                   + str(jpg_task.get("errorMessage")))
+            ocr_sources = {"png": INPUT / "w3c-home.png", "jpg": jpg_source}
+            for route_id in unavailable_ocr:
+                source_format, target_format = route_id.split("-to-", 1)
+                cases.append(unavailable_ocr_case(
+                    f"{route_id}-unavailable-contract", ocr_sources[source_format], target_format))
         results.extend(cases)
     finally:
         if process:
             stop_service(process)
     report = {
-        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, normalized text for editable documents, and table data for spreadsheets. PDF-to-TXT requires source character preservation, correct page-boundary count, and OCR_REQUIRED for image-only input. Editable PDF-to-DOCX additionally requires matching page count, no embedded media, and a font table plus an OOXML obfuscated font part for generated CJK text; an image-only PDF must fail with OCR_REQUIRED. PDF-to-OFD requires a real OFD package plus character and page-count preservation, while visual round-trip difference is reported separately. OFD-to-PDF requires character and declared/rendered page-count preservation. OFD-to-PNG/JPEG require page-count, pixel-dimension, nonblank-content, and bounded raster-error checks. OFD-to-XLSX requires exact invoice cell and merge counts plus known text, while low-confidence grid candidates are excluded; generated fixtures additionally cover pages, cells, merges, NO_TABLE_FOUND, and OCR_REQUIRED. JPEG uses a declared lossy-error bound.",
+        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, normalized text for editable documents, and table data for spreadsheets. PDF-to-TXT requires source character preservation, correct page-boundary count, and OCR_REQUIRED for image-only input. Editable PDF-to-DOCX additionally requires matching page count, no embedded media, and a font table plus an OOXML obfuscated font part for generated CJK text; an image-only PDF must fail with OCR_REQUIRED. DOCX-to-TXT covers an ordinary document without optional comments or notes. PDF compression must preserve page count and never enlarge the selected fixture; PDF watermarking must preserve page count and introduce a visible rendered pixel delta. PDF-to-OFD requires a real OFD package plus character and page-count preservation, while DOCX-to-UOF-to-DOCX requires a real UOF root/namespace and exact normalized text. OFD-to-PDF requires character and declared/rendered page-count preservation. OFD-to-PNG/JPEG require page-count, pixel-dimension, nonblank-content, and bounded raster-error checks. OFD-to-XLSX requires exact invoice cell and merge counts plus known text, while low-confidence grid candidates are excluded; generated fixtures additionally cover pages, cells, merges, NO_TABLE_FOUND, and OCR_REQUIRED. Unavailable OCR routes must fail with OCR_ENGINE_UNAVAILABLE and produce no download. JPEG uses a declared lossy-error bound.",
         "visualThresholdForReferenceOnly": VISUAL_THRESHOLD,
         "health": sanitized_health(health),
         "results": results,
