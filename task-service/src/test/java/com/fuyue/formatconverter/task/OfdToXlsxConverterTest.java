@@ -106,6 +106,31 @@ class OfdToXlsxConverterTest {
     }
 
     @Test
+    void reportsNoTableForTextLayerWithFidelityImageInsteadOfClaimingOcrIsMissing() throws Exception {
+        Path png = temp.resolve("fidelity-layer.png");
+        BufferedImage raster = new BufferedImage(600, 400, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = raster.createGraphics();
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(0, 0, raster.getWidth(), raster.getHeight());
+        graphics.dispose();
+        ImageIO.write(raster, "png", png.toFile());
+        Img image = new Img(120d, 80d, png);
+        image.setPosition(Position.Absolute).setBox(0d, 0d, 120d, 80d);
+        Path source = temp.resolve("text-and-image.ofd");
+        try (OFDDoc document = new OFDDoc(source)) {
+            document.addVPage(new VirtualPage(120d, 80d)
+                    .add(image)
+                    .add(paragraph("可检索文字层", 10, 10, 80, 10)));
+        }
+
+        ConversionFailureException failure = assertThrows(ConversionFailureException.class,
+                () -> converter().convert(input(source), temp.resolve("text-and-image-work"),
+                        temp.resolve("text-and-image.xlsx"), ParseLimits.defaults(), (stage, percent) -> { }));
+
+        assertEquals("NO_TABLE_FOUND", failure.code());
+    }
+
+    @Test
     void excludesLowConfidenceGridCandidatesFromDataExport() {
         TableModel candidate = new TableModel("candidate", 1, new Rect(10, 10, 20, 10),
                 List.of(10d, 30d), List.of(10d, 20d), List.of(), List.of(), 0.74d, List.of());

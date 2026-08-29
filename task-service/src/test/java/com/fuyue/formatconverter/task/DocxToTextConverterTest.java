@@ -17,6 +17,21 @@ class DocxToTextConverterTest {
     @TempDir Path temp;
 
     @Test
+    void extractsOrdinaryDocumentWithoutOptionalStoryParts() throws Exception {
+        Path source = temp.resolve("ordinary.docx");
+        try (XWPFDocument document = new XWPFDocument()) {
+            document.createParagraph().createRun().setText("普通正文，无批注和脚注");
+            try (var output = Files.newOutputStream(source)) { document.write(output); }
+        }
+        Path output = temp.resolve("ordinary.txt");
+
+        new DocxToTextConverter().convert(input(source), temp.resolve("work"), output,
+                ParseLimits.defaults(), (stage, percent) -> { });
+
+        assertTrue(Files.readString(output).contains("普通正文，无批注和脚注"));
+    }
+
+    @Test
     void extractsAllDocumentStoriesTablesTextBoxesCommentsAndRevisionsInDeclaredOrder() throws Exception {
         Path source = temp.resolve("stories.docx");
         try (XWPFDocument document = new XWPFDocument()) {

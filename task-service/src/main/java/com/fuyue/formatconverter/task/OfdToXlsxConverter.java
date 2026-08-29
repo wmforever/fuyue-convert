@@ -49,6 +49,7 @@ public final class OfdToXlsxConverter implements FileConverter {
         DocumentModel parsed = parser.parse(extractor.extract(input.path(), workDir, limits),
                 input.displayName(), limits);
         List<Integer> ocrPages = parsed.pages().stream()
+                .filter(page -> page.textBlocks().isEmpty())
                 .filter(page -> page.warnings().stream().anyMatch(warning -> warning.code() == WarningCode.OCR_REQUIRED))
                 .map(PageModel::pageNumber).toList();
         if (!ocrPages.isEmpty()) {

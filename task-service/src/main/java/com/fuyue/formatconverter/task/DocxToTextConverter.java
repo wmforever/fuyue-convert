@@ -32,14 +32,23 @@ public final class DocxToTextConverter implements FileConverter {
             document.getHeaderList().forEach(header -> appendStory(text, "页眉", header.getBodyElements()));
             appendElements(text, document.getBodyElements());
             document.getFooterList().forEach(footer -> appendStory(text, "页脚", footer.getBodyElements()));
-            document.getFootnotes().stream().filter(note -> note.getId() != null && note.getId().signum() > 0)
-                    .forEach(note -> appendStory(text, "脚注 " + note.getId(), note.getBodyElements()));
-            document.getEndnotes().stream().filter(note -> note.getId() != null && note.getId().signum() > 0)
-                    .forEach(note -> appendStory(text, "尾注 " + note.getId(), note.getBodyElements()));
-            for (var comment : document.getComments()) {
-                String value = normalizeLine(comment.getText());
-                if (!value.isBlank()) appendLine(text, "[批注 " + comment.getId() + " / "
-                        + safeLabel(comment.getAuthor()) + "] " + value);
+            var footnotes = document.getFootnotes();
+            if (footnotes != null) {
+                footnotes.stream().filter(note -> note.getId() != null && note.getId().signum() > 0)
+                        .forEach(note -> appendStory(text, "脚注 " + note.getId(), note.getBodyElements()));
+            }
+            var endnotes = document.getEndnotes();
+            if (endnotes != null) {
+                endnotes.stream().filter(note -> note.getId() != null && note.getId().signum() > 0)
+                        .forEach(note -> appendStory(text, "尾注 " + note.getId(), note.getBodyElements()));
+            }
+            var comments = document.getComments();
+            if (comments != null) {
+                for (var comment : comments) {
+                    String value = normalizeLine(comment.getText());
+                    if (!value.isBlank()) appendLine(text, "[批注 " + comment.getId() + " / "
+                            + safeLabel(comment.getAuthor()) + "] " + value);
+                }
             }
         }
         byte[] utf8 = text.toString().getBytes(StandardCharsets.UTF_8);

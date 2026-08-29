@@ -30,10 +30,14 @@ public enum DocumentFormat {
     PNG("png", "PNG 图片", "png", "image/png", Set.of("image/png", "application/octet-stream")),
     JPG("jpg", "JPEG 图片", "jpg", "image/jpeg", Set.of("image/jpeg", "image/jpg", "application/octet-stream")),
     HTML("html", "HTML", "html", "text/html", Set.of("text/html", "application/xhtml+xml", "application/octet-stream")),
-    UOF("uof", "UOF 国产文档", "uof", "application/octet-stream", Set.of("application/octet-stream")),
-    WPS("wps", "WPS 文字", "wps", "application/octet-stream", Set.of("application/octet-stream")),
-    ET("et", "WPS 表格 ET", "et", "application/octet-stream", Set.of("application/octet-stream")),
-    DPS("dps", "WPS 演示 DPS", "dps", "application/octet-stream", Set.of("application/octet-stream")),
+    UOF("uof", "UOF 国产文档", "uof", "application/octet-stream",
+            Set.of("application/uof", "application/x-uof", "application/octet-stream")),
+    WPS("wps", "WPS 文字", "wps", "application/octet-stream",
+            Set.of("application/wps", "application/kswps", "application/wps-office", "application/octet-stream")),
+    ET("et", "WPS 表格 ET", "et", "application/octet-stream",
+            Set.of("application/et", "application/kset", "application/octet-stream")),
+    DPS("dps", "WPS 演示 DPS", "dps", "application/octet-stream",
+            Set.of("application/dps", "application/ksdps", "application/octet-stream")),
     TXT("txt", "纯文本 TXT", "txt", "text/plain",
             Set.of("text/plain", "application/octet-stream"));
 

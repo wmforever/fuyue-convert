@@ -209,6 +209,22 @@ class ConversionTaskServiceTest {
         assertTrue(DocumentFormat.fromFileName("sample.uop").isEmpty());
     }
 
+    @Test void acceptsAdvertisedDomesticDocumentMimeTypes() {
+        assertTrue(DocumentFormat.WPS.acceptsMimeType("application/wps"));
+        assertTrue(DocumentFormat.ET.acceptsMimeType("application/et"));
+        assertTrue(DocumentFormat.DPS.acceptsMimeType("application/dps"));
+        assertTrue(DocumentFormat.UOF.acceptsMimeType("application/uof"));
+    }
+
+    @Test void keepsUnavailableOcrDocxRouteEditable() {
+        ConversionRoute route = DefaultConverterRegistry.create(null, Duration.ofSeconds(30)).stream()
+                .map(FileConverter::route)
+                .filter(candidate -> candidate.id().equals("png-to-docx"))
+                .findFirst().orElseThrow();
+
+        assertEquals(ConversionStrategy.EDITABLE, route.strategy());
+    }
+
     @Test void registersUofAsDirectEditableLibreOfficeConversion() {
         FileConverter converter = DefaultConverterRegistry.create(temp.resolve("soffice"), Duration.ofSeconds(30))
                 .stream().filter(candidate -> candidate.route().id().equals("uof-to-docx"))
