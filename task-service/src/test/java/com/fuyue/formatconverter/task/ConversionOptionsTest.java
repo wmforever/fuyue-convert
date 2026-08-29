@@ -41,5 +41,7 @@ class ConversionOptionsTest {
                 null, null, 0.99d, null, null, null, null, null));
         assertThrows(IllegalArgumentException.class, () -> ConversionOptions.fromRequest(
                 null, null, null, null, null, null, "0-2", null));
+        assertThrows(IllegalArgumentException.class, () -> ConversionOptions.fromRequest(
+                null, null, null, null, null, null, "5-3", null));
     }
 }

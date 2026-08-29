@@ -35,6 +35,8 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | PDF -> PNG/JPG | stable | 版式渲染 | 默认 160 DPI（可配置 36-600）；PNG 保留透明画布，JPEG 转为 RGB 并使用 0.9 质量；多页自动输出 ZIP。 |
 | PDF -> DOCX | beta | 可编辑优先 | 恢复真实文字、基础段落、页面尺寸和方向；含中日韩文字时嵌入已许可的 Droid Sans Fallback，仍不嵌入整页图。默认严格拒绝扫描页，显式配置本地 OCR 后把扫描页识别为带坐标的可编辑文字。 |
 | PDF -> OFD | experimental | 版式优先 | 生成真实 OFD 包；160 DPI 页面图像层保留视觉，文字型 PDF 同时写入源坐标 OFD 文字对象。优先使用 Poppler 并保留 PDFBox 回退；复杂对象尚未逐项结构化重建。 |
+| PDF 压缩/水印 | beta | 保真优先 | 压缩支持无损、均衡和强力三级策略，结果未变小时保留原文件；水印支持中英文文字、透明度、角度、颜色、位置、平铺和页码范围。两者均拒绝修改带数字签名的 PDF。 |
+| PDF 合并/拆分 | stable | 保真优先 | 合并按上传顺序输出单个 PDF；拆分按页输出编号连续的 ZIP。 |
 | PNG/JPG -> PDF | stable | 版式优先 | 读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。同格式多图按上传顺序合并为多页 PDF。 |
 | PNG/JPG -> TXT/DOCX | experimental/按需 | OCR 提取 | 官方运行包和 Docker 镜像内置 Tesseract；源码/JAR 模式也可使用显式配置的系统引擎。TXT 输出识别文字，DOCX 将坐标文字映射到 `DocumentModel` 后生成真实可编辑文本；两者均返回页级置信度和 OCR 警告。 |
 | WPS/ET/DPS/UOF -> OOXML | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |

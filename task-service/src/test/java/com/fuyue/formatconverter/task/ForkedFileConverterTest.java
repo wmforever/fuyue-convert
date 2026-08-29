@@ -1,10 +1,12 @@
 package com.fuyue.formatconverter.task;
 
 import com.fuyue.formatconverter.parser.ParseLimits;
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -97,6 +99,34 @@ class ForkedFileConverterTest {
         assertEquals("multi-sheets.zip", converted.outputName());
         try (ZipFile zip = new ZipFile(output.toFile(), StandardCharsets.UTF_8)) {
             assertEquals(2, zip.size());
+        }
+    }
+
+    @Test void passesPdfUtilityOptionsIntoIndependentJvm() throws Exception {
+        Path input = temp.resolve("watermark-pages.pdf");
+        try (PDDocument pdf = new PDDocument()) {
+            pdf.addPage(new PDPage());
+            pdf.addPage(new PDPage());
+            pdf.save(input.toFile());
+        }
+        Path output = temp.resolve("watermarked.pdf");
+        ForkedFileConverter converter = new ForkedFileConverter(new PdfWatermarkConverter().route(),
+                workerCommand(ConversionWorkerMain.class), "", Duration.ofSeconds(20));
+        ConversionOptions options = ConversionOptions.fromRequest(null, "INTERNAL-ONLY", 0.25d, 20d,
+                "center", false, "2", "#888888");
+
+        converter.convert(new ConversionInput("watermark-pages.pdf", "application/pdf", Files.size(input), input,
+                        options), temp.resolve("watermark-worker"), output, ParseLimits.defaults(),
+                (stage, progress) -> { });
+
+        try (PDDocument pdf = Loader.loadPDF(output.toFile())) {
+            PDFTextStripper text = new PDFTextStripper();
+            text.setStartPage(1); text.setEndPage(1);
+            assertFalse(text.getText(pdf).contains("INTERNAL-ONLY"));
+            text.setStartPage(2); text.setEndPage(2);
+            String secondPage = text.getText(pdf);
+            assertTrue(secondPage.replaceAll("\\s+", "").contains("INTERNAL-ONLY"),
+                    "second page text was: " + secondPage);
         }
     }
 

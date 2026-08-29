@@ -40,6 +40,7 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
         if (!PAGE_RANGE.matcher(watermarkPages).matches()) {
             throw new IllegalArgumentException("水印页码范围格式无效，例如 all、1、1-3、1,3-5");
         }
+        validatePageRanges(watermarkPages);
         if (!HEX_COLOR.matcher(watermarkColor).matches()) {
             throw new IllegalArgumentException("水印颜色必须是 #RRGGBB 格式");
         }
@@ -73,5 +74,20 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
             }
         }
         return false;
+    }
+
+    private static void validatePageRanges(String ranges) {
+        if ("all".equals(ranges)) return;
+        try {
+            for (String part : ranges.split(",")) {
+                int dash = part.indexOf('-');
+                int start = Integer.parseInt(dash < 0 ? part : part.substring(0, dash));
+                int end = Integer.parseInt(dash < 0 ? part : part.substring(dash + 1));
+                if (end < start) throw new IllegalArgumentException("水印页码范围起始页不能大于结束页");
+                if (end > 1_000_000) throw new IllegalArgumentException("水印页码范围超过允许上限");
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("水印页码范围数值过大");
+        }
     }
 }

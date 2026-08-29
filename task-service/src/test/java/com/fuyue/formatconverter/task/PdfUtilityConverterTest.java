@@ -5,6 +5,7 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
@@ -12,6 +13,7 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -90,6 +92,33 @@ class PdfUtilityConverterTest {
             assertTrue(stripper.getText(document).contains("内部资料"));
             stripper.setStartPage(3); stripper.setEndPage(3);
             assertFalse(stripper.getText(document).contains("内部资料"));
+        }
+    }
+
+    @Test
+    void tiledWatermarkPreservesRotatedCropBoxAndRenders() throws Exception {
+        Path source = temp.resolve("rotated-crop.pdf");
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage(new PDRectangle(500, 350));
+            page.setCropBox(new PDRectangle(20, 30, 440, 280));
+            page.setRotation(90);
+            document.addPage(page);
+            document.save(source.toFile());
+        }
+        Path output = temp.resolve("rotated-crop-watermarked.pdf");
+        ConversionOptions options = ConversionOptions.fromRequest(null, "草稿", 0.3d, 30d,
+                "center", true, "all", "#777777");
+        new PdfWatermarkConverter().convert(input(source, options), temp.resolve("tiled-work"), output,
+                ParseLimits.defaults(), (stage, progress) -> { });
+        try (PDDocument document = Loader.loadPDF(output.toFile())) {
+            PDPage page = document.getPage(0);
+            assertEquals(90, page.getRotation());
+            assertEquals(440f, page.getCropBox().getWidth());
+            assertEquals(280f, page.getCropBox().getHeight());
+            String text = new PDFTextStripper().getText(document).replaceAll("\\s+", "");
+            assertTrue(text.contains("草稿"));
+            BufferedImage rendered = new PDFRenderer(document).renderImageWithDPI(0, 72);
+            assertTrue(nonWhitePixels(rendered) > 1000);
         }
     }
 
@@ -205,6 +234,16 @@ class PdfUtilityConverterTest {
             document.save(path.toFile());
         }
         return path;
+    }
+
+    private long nonWhitePixels(BufferedImage image) {
+        long count = 0;
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                if ((image.getRGB(x, y) & 0x00ffffff) != 0x00ffffff) count++;
+            }
+        }
+        return count;
     }
 
     private UploadPayload upload(String name, Path path) throws Exception {

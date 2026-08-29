@@ -37,11 +37,22 @@ Content-Type: multipart/form-data
 表单字段：
 
 - `files`：可重复上传一个或多个源文件；
-- `targetFormat`：目标格式，当前开放 `docx`、`txt`、`pdf`、`xlsx`、`csv`、`png`、`jpg`，其中 `jpeg` 会按 `jpg` 处理；未传时默认 `docx`。
+- `targetFormat`：目标格式，当前开放 `docx`、`txt`、`pdf`、`xlsx`、`csv`、`png`、`jpg`、`pdf-compress`、`pdf-watermark`、`pdf-merge`、`pdf-split`，其中 `jpeg` 会按 `jpg` 处理；未传时默认 `docx`。
+
+PDF 工具可选参数：
+
+- `compressionMode`：`lossless`、`balanced` 或 `strong`；仅用于 `pdf-compress`，默认 `lossless`；
+- `watermarkText`：1-80 个字符的中英文文字，默认 `CONFIDENTIAL`；
+- `watermarkOpacity`：`0.05-0.85`，默认 `0.18`；
+- `watermarkAngle`：`-180` 到 `180` 度，默认 `35`；
+- `watermarkPosition`：`center`、`top-left`、`top-right`、`bottom-left` 或 `bottom-right`；
+- `watermarkTiled`：是否在整页平铺水印；
+- `watermarkPages`：`all`、`1`、`1-3` 或 `1,3-5` 形式的页码范围；
+- `watermarkColor`：`#RRGGBB` 形式的颜色。
 
 成功返回 HTTP 202 和任务快照。快照中包含 `sourceFormat`、`targetFormat`、任务状态、进度、警告和文件级结果。
 
-当前 API 只用 `targetFormat` 选择目标格式，转换模式由注册的转换器决定。项目后续会引入显式 `mode=fidelity|editable`，让保真优先和可编辑优先可以由调用方选择。
+除 PDF 工具的受控参数外，API 仍由 `targetFormat` 选择路线，保真优先和可编辑优先策略由注册的转换器决定。
 
 ## 转换能力
 
