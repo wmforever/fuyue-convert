@@ -62,6 +62,23 @@ class PdfUtilityConverterTest {
     }
 
     @Test
+    void splitsOnlySelectedPdfPagesAndKeepsOriginalPageNumbers() throws Exception {
+        Path source = pdf("selected-source.pdf", 5);
+        Path output = temp.resolve("selected-pages.zip");
+        ConversionOptions options = ConversionOptions.fromRequest(null, null, null, null,
+                null, null, null, null, "2,4-5");
+        new PdfSplitConverter().convert(input(source, options), temp.resolve("selected-split-work"), output,
+                ParseLimits.defaults(), (stage, progress) -> { });
+        try (ZipFile zip = new ZipFile(output.toFile())) {
+            assertEquals(3, zip.size());
+            assertTrue(zip.getEntry("page-002.pdf") != null);
+            assertTrue(zip.getEntry("page-004.pdf") != null);
+            assertTrue(zip.getEntry("page-005.pdf") != null);
+            assertTrue(zip.getEntry("page-001.pdf") == null);
+        }
+    }
+
+    @Test
     void watermarksAndOptimizesPdfWithoutChangingPageCount() throws Exception {
         Path source = pdf("source.pdf", 2);
         Path watermarked = temp.resolve("watermarked.pdf");

@@ -78,6 +78,15 @@ class FormatConverterApplicationTest {
                 .andExpect(jsonPath("$[?(@.id=='ofd-to-jpg')].qualityLevel").value(contains("beta")));
     }
 
+    @Test void taskHistoryEndpointReturnsLocalList() throws Exception {
+        mvc.perform(get("/api/tasks").param("limit", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+        mvc.perform(get("/api/tasks").param("limit", "0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("任务记录数量必须在 1 到 100 之间"));
+    }
+
     @Test void diagnosticsEndpointReturnsRedactedEnvironment() throws Exception {
         mvc.perform(get("/api/diagnostics"))
                 .andExpect(status().isOk())
@@ -111,5 +120,11 @@ class FormatConverterApplicationTest {
                         .param("watermarkPages", "0-2"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("水印透明度必须在 0.05 到 0.85 之间"));
+
+        mvc.perform(multipart("/api/tasks").file(file)
+                        .param("targetFormat", "pdf-split")
+                        .param("splitPages", "3-1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("拆分页码范围起始页不能大于结束页"));
     }
 }

@@ -1,7 +1,10 @@
 package com.fuyue.formatconverter.task;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 public record ConversionOptions(PdfCompressionMode compressionMode,
                                 String watermarkText,
@@ -10,7 +13,8 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
                                 WatermarkPosition watermarkPosition,
                                 Boolean watermarkTiled,
                                 String watermarkPages,
-                                String watermarkColor) {
+                                String watermarkColor,
+                                String splitPages) {
     private static final Pattern PAGE_RANGE = Pattern.compile("(?i)all|(?:[1-9]\\d*(?:-[1-9]\\d*)?)(?:,(?:[1-9]\\d*(?:-[1-9]\\d*)?))*");
     private static final Pattern HEX_COLOR = Pattern.compile("#[0-9a-fA-F]{6}");
 
@@ -25,6 +29,8 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
                 ? "all" : watermarkPages.replaceAll("\\s+", "").toLowerCase(Locale.ROOT);
         watermarkColor = watermarkColor == null || watermarkColor.isBlank()
                 ? "#969696" : watermarkColor.strip().toUpperCase(Locale.ROOT);
+        splitPages = splitPages == null || splitPages.isBlank()
+                ? "all" : splitPages.replaceAll("\\s+", "").toLowerCase(Locale.ROOT);
         if (watermarkText.codePointCount(0, watermarkText.length()) > 80) {
             throw new IllegalArgumentException("水印文字不能超过 80 个字符");
         }
@@ -44,19 +50,32 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
         if (!HEX_COLOR.matcher(watermarkColor).matches()) {
             throw new IllegalArgumentException("水印颜色必须是 #RRGGBB 格式");
         }
+        if (!PAGE_RANGE.matcher(splitPages).matches()) {
+            throw new IllegalArgumentException("拆分页码范围格式无效，例如 all、1、1-3、1,3-5");
+        }
+        validatePageRanges(splitPages, "拆分");
     }
 
     public static ConversionOptions defaults() {
-        return new ConversionOptions(null, null, null, null, null, null, null, null);
+        return new ConversionOptions(null, null, null, null, null, null, null, null, null);
     }
 
     public static ConversionOptions fromRequest(String compressionMode, String watermarkText,
                                                 Double watermarkOpacity, Double watermarkAngle,
                                                 String watermarkPosition, Boolean watermarkTiled,
                                                 String watermarkPages, String watermarkColor) {
+        return fromRequest(compressionMode, watermarkText, watermarkOpacity, watermarkAngle,
+                watermarkPosition, watermarkTiled, watermarkPages, watermarkColor, null);
+    }
+
+    public static ConversionOptions fromRequest(String compressionMode, String watermarkText,
+                                                Double watermarkOpacity, Double watermarkAngle,
+                                                String watermarkPosition, Boolean watermarkTiled,
+                                                String watermarkPages, String watermarkColor,
+                                                String splitPages) {
         return new ConversionOptions(PdfCompressionMode.from(compressionMode), watermarkText,
                 watermarkOpacity, watermarkAngle, WatermarkPosition.from(watermarkPosition),
-                watermarkTiled, watermarkPages, watermarkColor);
+                watermarkTiled, watermarkPages, watermarkColor, splitPages);
     }
 
     public boolean appliesWatermarkToPage(int pageNumber) {
@@ -76,18 +95,39 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
         return false;
     }
 
+    public List<Integer> splitPageNumbers(int totalPages) throws ConversionFailureException {
+        if (totalPages < 1) throw new ConversionFailureException("PDF_PAGE_RANGE_INVALID", "PDF 没有可拆分页面");
+        if ("all".equals(splitPages)) return IntStream.rangeClosed(1, totalPages).boxed().toList();
+        TreeSet<Integer> selected = new TreeSet<>();
+        for (String part : splitPages.split(",")) {
+            int dash = part.indexOf('-');
+            int start = Integer.parseInt(dash < 0 ? part : part.substring(0, dash));
+            int end = Integer.parseInt(dash < 0 ? part : part.substring(dash + 1));
+            if (end > totalPages) {
+                throw new ConversionFailureException("PDF_PAGE_RANGE_INVALID",
+                        "拆分页码超出文档范围：第 " + end + " 页，文档共 " + totalPages + " 页");
+            }
+            for (int page = start; page <= end; page++) selected.add(page);
+        }
+        return List.copyOf(selected);
+    }
+
     private static void validatePageRanges(String ranges) {
+        validatePageRanges(ranges, "水印");
+    }
+
+    private static void validatePageRanges(String ranges, String label) {
         if ("all".equals(ranges)) return;
         try {
             for (String part : ranges.split(",")) {
                 int dash = part.indexOf('-');
                 int start = Integer.parseInt(dash < 0 ? part : part.substring(0, dash));
                 int end = Integer.parseInt(dash < 0 ? part : part.substring(dash + 1));
-                if (end < start) throw new IllegalArgumentException("水印页码范围起始页不能大于结束页");
-                if (end > 1_000_000) throw new IllegalArgumentException("水印页码范围超过允许上限");
+                if (end < start) throw new IllegalArgumentException(label + "页码范围起始页不能大于结束页");
+                if (end > 1_000_000) throw new IllegalArgumentException(label + "页码范围超过允许上限");
             }
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("水印页码范围数值过大");
+            throw new IllegalArgumentException(label + "页码范围数值过大");
         }
     }
 }

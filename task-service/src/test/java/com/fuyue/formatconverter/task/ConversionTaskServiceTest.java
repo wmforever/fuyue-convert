@@ -145,6 +145,27 @@ class ConversionTaskServiceTest {
         }
     }
 
+    @Test void listsRecentTasksWithAValidatedLimit() throws Exception {
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("history-data"), 1, 2,
+                Duration.ofSeconds(10), Duration.ofHours(1), ParseLimits.defaults());
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(new TextToDocxConverter()))) {
+            byte[] first = "first".getBytes(StandardCharsets.UTF_8);
+            byte[] second = "second".getBytes(StandardCharsets.UTF_8);
+            TaskSnapshot firstTask = service.createTask(List.of(new UploadPayload("first.txt", "text/plain",
+                    first.length, () -> new ByteArrayInputStream(first))), DocumentFormat.DOCX);
+            await(service, firstTask.taskId());
+            TaskSnapshot secondTask = service.createTask(List.of(new UploadPayload("second.txt", "text/plain",
+                    second.length, () -> new ByteArrayInputStream(second))), DocumentFormat.DOCX);
+            await(service, secondTask.taskId());
+
+            List<TaskSnapshot> latest = service.listTasks(1);
+            assertEquals(1, latest.size());
+            assertEquals(secondTask.taskId(), latest.get(0).taskId());
+            assertThrows(IllegalArgumentException.class, () -> service.listTasks(0));
+            assertThrows(IllegalArgumentException.class, () -> service.listTasks(101));
+        }
+    }
+
     @Test void recognizesUofExtensionFamily() {
         assertEquals(DocumentFormat.UOF, DocumentFormat.fromFileName("sample.uof").orElseThrow());
         assertEquals(DocumentFormat.UOF, DocumentFormat.fromFileName("sample.uot").orElseThrow());

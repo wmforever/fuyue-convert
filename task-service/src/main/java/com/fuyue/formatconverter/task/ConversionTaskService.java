@@ -161,6 +161,15 @@ public final class ConversionTaskService implements AutoCloseable {
         return List.copyOf(routes);
     }
 
+    public List<TaskSnapshot> listTasks(int limit) {
+        if (limit < 1 || limit > 100) throw new IllegalArgumentException("任务记录数量必须在 1 到 100 之间");
+        return tasks.values().stream()
+                .map(TaskRecord::snapshot)
+                .sorted(Comparator.comparing(TaskSnapshot::updatedAt).reversed())
+                .limit(limit)
+                .toList();
+    }
+
     public TaskSnapshot get(String taskId) { return record(taskId).snapshot(); }
 
     public TaskSnapshot cancel(String taskId) {
