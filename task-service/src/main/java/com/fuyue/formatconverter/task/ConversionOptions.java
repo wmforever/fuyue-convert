@@ -57,4 +57,21 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
                 watermarkOpacity, watermarkAngle, WatermarkPosition.from(watermarkPosition),
                 watermarkTiled, watermarkPages, watermarkColor);
     }
+
+    public boolean appliesWatermarkToPage(int pageNumber) {
+        if (pageNumber < 1) return false;
+        if ("all".equals(watermarkPages)) return true;
+        for (String part : watermarkPages.split(",")) {
+            int dash = part.indexOf('-');
+            if (dash < 0) {
+                if (Integer.parseInt(part) == pageNumber) return true;
+            } else {
+                int start = Integer.parseInt(part.substring(0, dash));
+                int end = Integer.parseInt(part.substring(dash + 1));
+                if (end < start) throw new IllegalArgumentException("水印页码范围起始页不能大于结束页");
+                if (pageNumber >= start && pageNumber <= end) return true;
+            }
+        }
+        return false;
+    }
 }

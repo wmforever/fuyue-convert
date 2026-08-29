@@ -2,6 +2,7 @@ package com.fuyue.formatconverter.task;
 
 import com.fuyue.formatconverter.parser.ParseLimits;
 import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -104,6 +105,9 @@ final class ConversionGuards {
             if (pages <= 0) throw new IOException("PDF 没有可转换页面");
             if (pages > limits.maxPages()) throw new IOException("PDF 页数超过限制：" + pages + " > " + limits.maxPages());
             return pages;
+        } catch (InvalidPasswordException e) {
+            throw new ConversionFailureException("PDF_PASSWORD_REQUIRED",
+                    "PDF 已加密，需要密码；当前任务 API 不接收密码。");
         }
     }
 

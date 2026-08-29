@@ -5,11 +5,17 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
+import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
+import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,6 +24,8 @@ import java.util.List;
 import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PdfUtilityConverterTest {
@@ -66,6 +74,80 @@ class PdfUtilityConverterTest {
     }
 
     @Test
+    void addsChineseWatermarkOnlyToSelectedPage() throws Exception {
+        Path source = pdf("selected-pages.pdf", 3);
+        Path output = temp.resolve("selected-pages-watermarked.pdf");
+        ConversionOptions options = ConversionOptions.fromRequest(null, "内部资料", 0.28d, -22d,
+                "bottom-right", false, "2", "#B23A30");
+        new PdfWatermarkConverter().convert(input(source, options), temp.resolve("watermark-selected-work"), output,
+                ParseLimits.defaults(), (stage, progress) -> { });
+        try (PDDocument document = Loader.loadPDF(output.toFile())) {
+            assertEquals(3, document.getNumberOfPages());
+            PDFTextStripper stripper = new PDFTextStripper();
+            stripper.setStartPage(1); stripper.setEndPage(1);
+            assertFalse(stripper.getText(document).contains("内部资料"));
+            stripper.setStartPage(2); stripper.setEndPage(2);
+            assertTrue(stripper.getText(document).contains("内部资料"));
+            stripper.setStartPage(3); stripper.setEndPage(3);
+            assertFalse(stripper.getText(document).contains("内部资料"));
+        }
+    }
+
+    @Test
+    void strongCompressionReducesImageHeavyPdf() throws Exception {
+        Path source = imagePdf("image-heavy.pdf", 1800, 1400);
+        Path output = temp.resolve("image-heavy-optimized.pdf");
+        ConversionOptions options = ConversionOptions.fromRequest("strong", null, null, null,
+                null, null, null, null);
+        ConversionOutput result = new PdfCompressConverter().convert(input(source, options),
+                temp.resolve("compress-strong-work"), output, ParseLimits.defaults(), (stage, progress) -> { });
+        assertTrue(Files.size(output) < Files.size(source), "strong compression should reduce an image-heavy PDF");
+        assertTrue(result.warnings().stream().anyMatch(warning -> warning.code().name().equals("PDF_COMPRESSION_APPLIED")));
+        try (PDDocument document = Loader.loadPDF(output.toFile())) {
+            assertEquals(1, document.getNumberOfPages());
+        }
+    }
+
+    @Test
+    void compressionNeverReturnsLargerFile() throws Exception {
+        Path source = pdf("compact.pdf", 1);
+        Path output = temp.resolve("compact-optimized.pdf");
+        new PdfCompressConverter().convert(input(source), temp.resolve("compact-work"), output,
+                ParseLimits.defaults(), (stage, progress) -> { });
+        assertTrue(Files.size(output) <= Files.size(source));
+    }
+
+    @Test
+    void encryptedPdfReturnsStableErrorCode() throws Exception {
+        Path encrypted = temp.resolve("encrypted.pdf");
+        try (PDDocument document = new PDDocument()) {
+            document.addPage(new PDPage());
+            StandardProtectionPolicy policy = new StandardProtectionPolicy("owner", "secret", new AccessPermission());
+            policy.setEncryptionKeyLength(128);
+            document.protect(policy);
+            document.save(encrypted.toFile());
+        }
+        ConversionFailureException error = assertThrows(ConversionFailureException.class, () ->
+                new PdfCompressConverter().convert(input(encrypted), temp.resolve("encrypted-work"),
+                        temp.resolve("encrypted-output.pdf"), ParseLimits.defaults(), (stage, progress) -> { }));
+        assertEquals("PDF_PASSWORD_REQUIRED", error.code());
+    }
+
+    @Test
+    void signedPdfIsRejectedBeforeModification() throws Exception {
+        Path signed = temp.resolve("signed.pdf");
+        try (PDDocument document = new PDDocument()) {
+            document.addPage(new PDPage());
+            document.addSignature(new PDSignature());
+            document.save(signed.toFile());
+        }
+        ConversionFailureException error = assertThrows(ConversionFailureException.class, () ->
+                new PdfWatermarkConverter().convert(input(signed), temp.resolve("signed-work"),
+                        temp.resolve("signed-output.pdf"), ParseLimits.defaults(), (stage, progress) -> { }));
+        assertEquals("PDF_SIGNATURE_PRESENT", error.code());
+    }
+
+    @Test
     void turnsVectorGridIntoEditableWordTable() throws Exception {
         Path source = temp.resolve("grid.pdf");
         try (PDDocument document = new PDDocument()) {
@@ -102,6 +184,29 @@ class PdfUtilityConverterTest {
         return path;
     }
 
+    private Path imagePdf(String name, int width, int height) throws Exception {
+        Path path = temp.resolve(name);
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        int seed = 0x13579BDF;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                seed = seed * 1103515245 + 12345;
+                int noise = (seed >>> 16) & 0xff;
+                image.setRGB(x, y, (noise << 16) | (((x + noise) & 0xff) << 8) | ((y + noise) & 0xff));
+            }
+        }
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage();
+            document.addPage(page);
+            var pdfImage = LosslessFactory.createFromImage(document, image);
+            try (PDPageContentStream content = new PDPageContentStream(document, page)) {
+                content.drawImage(pdfImage, 0, 0, page.getMediaBox().getWidth(), page.getMediaBox().getHeight());
+            }
+            document.save(path.toFile());
+        }
+        return path;
+    }
+
     private UploadPayload upload(String name, Path path) throws Exception {
         byte[] data = Files.readAllBytes(path);
         return new UploadPayload(name, "application/pdf", data.length, () -> new ByteArrayInputStream(data));
@@ -109,6 +214,11 @@ class PdfUtilityConverterTest {
 
     private ConversionInput input(Path source) throws Exception {
         return new ConversionInput(source.getFileName().toString(), "application/pdf", Files.size(source), source);
+    }
+
+    private ConversionInput input(Path source, ConversionOptions options) throws Exception {
+        return new ConversionInput(source.getFileName().toString(), "application/pdf", Files.size(source), source,
+                options);
     }
 
     private TaskSnapshot await(ConversionTaskService service, String taskId) throws Exception {
