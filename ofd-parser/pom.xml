@@ -11,8 +11,12 @@
             <groupId>org.ofdrw</groupId><artifactId>ofdrw-converter</artifactId><version>${ofdrw.version}</version>
             <exclusions>
                 <exclusion><groupId>commons-logging</groupId><artifactId>commons-logging</artifactId></exclusion>
+                <!-- OFDRW 2.x pins PDFBox 2; the application standardizes on PDFBox 3. -->
+                <exclusion><groupId>org.apache.pdfbox</groupId><artifactId>pdfbox</artifactId></exclusion>
+                <exclusion><groupId>org.apache.pdfbox</groupId><artifactId>fontbox</artifactId></exclusion>
             </exclusions>
         </dependency>
+        <dependency><groupId>org.apache.pdfbox</groupId><artifactId>pdfbox</artifactId></dependency>
         <dependency><groupId>org.apache.commons</groupId><artifactId>commons-compress</artifactId></dependency>
         <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-layout</artifactId><version>${ofdrw.version}</version><scope>test</scope></dependency>
         <dependency><groupId>org.apache.logging.log4j</groupId><artifactId>log4j-to-slf4j</artifactId><scope>test</scope></dependency>

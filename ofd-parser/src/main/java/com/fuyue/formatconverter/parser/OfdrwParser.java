@@ -1,7 +1,13 @@
 package com.fuyue.formatconverter.parser;
 
 import com.fuyue.formatconverter.model.*;
-import org.ofdrw.converter.ImageMaker;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.ofdrw.converter.ItextMaker;
 import org.ofdrw.core.basicStructure.pageObj.layer.CT_Layer;
 import org.ofdrw.core.basicStructure.pageObj.layer.PageBlockType;
 import org.ofdrw.core.basicStructure.pageObj.layer.block.CT_PageBlock;
@@ -34,6 +40,7 @@ import java.util.Locale;
 import java.util.Map;
 
 public final class OfdrwParser implements OfdParser {
+    private static final float STAMP_RENDER_DPI = 254f;
     private static final int MAX_PAGE_BLOCK_DEPTH = 128;
     private static final int MAX_PATH_OPERATIONS = 100_000;
     private static final int MAX_PATH_SEGMENTS = 100_000;
@@ -436,12 +443,7 @@ public final class OfdrwParser implements OfdParser {
 
         String type = declaredType == null ? "" : declaredType.trim().toUpperCase(Locale.ROOT);
         if ("OFD".equals(type) || isZip(source)) {
-            try (OFDReader sealReader = new OFDReader(new ByteArrayInputStream(source))) {
-                BufferedImage rendered = new ImageMaker(sealReader, 10d).makePage(0);
-                ByteArrayOutputStream output = new ByteArrayOutputStream();
-                if (!ImageIO.write(rendered, "png", output)) return null;
-                return new NormalizedImage("image/png", output.toByteArray());
-            }
+            return renderOfdStamp(source);
         }
 
         BufferedImage decoded = ImageIO.read(new ByteArrayInputStream(source));
@@ -449,6 +451,26 @@ public final class OfdrwParser implements OfdParser {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         if (!ImageIO.write(decoded, "png", output)) return null;
         return new NormalizedImage("image/png", output.toByteArray());
+    }
+
+    private NormalizedImage renderOfdStamp(byte[] source) throws IOException {
+        // ImageMaker links against PDFBox 2 blend classes. Render through OFDRW's independent
+        // iText path first, then rasterize with the application's PDFBox 3 runtime.
+        ByteArrayOutputStream pdfOutput = new ByteArrayOutputStream();
+        try (OFDReader sealReader = new OFDReader(new ByteArrayInputStream(source));
+             PdfWriter writer = new PdfWriter(pdfOutput);
+             PdfDocument pdf = new PdfDocument(writer)) {
+            if (sealReader.getNumberOfPages() < 1) return null;
+            new ItextMaker(sealReader).makePage(pdf, sealReader.getPageInfo(1));
+        }
+
+        try (PDDocument pdf = Loader.loadPDF(pdfOutput.toByteArray())) {
+            BufferedImage rendered = new PDFRenderer(pdf)
+                    .renderImageWithDPI(0, STAMP_RENDER_DPI, ImageType.ARGB);
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            if (!ImageIO.write(rendered, "png", output)) return null;
+            return new NormalizedImage("image/png", output.toByteArray());
+        }
     }
 
     private Transform2D textTransform(TextObject object) {
