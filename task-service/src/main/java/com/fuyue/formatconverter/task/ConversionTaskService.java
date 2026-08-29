@@ -283,6 +283,19 @@ public final class ConversionTaskService implements AutoCloseable {
                 }
             }
             checkCancellation(record);
+            if (isPdfMerge(record.route) && outputs.size() != record.inputs.size()) {
+                TaskFileResult firstFailure = results.stream().filter(result -> !result.success()).findFirst()
+                        .orElse(new TaskFileResult("PDF", false, null, null, "PDF_MERGE_INPUT_INVALID",
+                                "存在无法读取的 PDF", record.route.sourceFormat(), record.route.targetFormat()));
+                deleteTree(record.taskDir.resolve("output"));
+                String detail = firstFailure.errorMessage() == null || firstFailure.errorMessage().isBlank()
+                        ? "存在无法读取的 PDF"
+                        : firstFailure.errorMessage();
+                update(record, TaskStatus.FAILED, TaskStage.FAILED, 100,
+                        firstFailure.errorCode() == null ? "PDF_MERGE_INPUT_INVALID" : firstFailure.errorCode(),
+                        "PDF 合并要求所有输入文件都有效：" + detail, warnings, results, false, null);
+                return;
+            }
             if (outputs.isEmpty()) {
                 TaskFileResult first = results.get(0);
                 String message = first.errorMessage() == null || first.errorMessage().isBlank()
@@ -310,7 +323,7 @@ public final class ConversionTaskService implements AutoCloseable {
                 if (mergedPages != expectedPages) {
                     throw new IOException("合并 PDF 页数不一致：" + mergedPages + " != " + expectedPages);
                 }
-                if (outputs.size() != record.inputs.size()) {
+                if (isImageToPdf(record.route) && outputs.size() != record.inputs.size()) {
                     warnings.add(ConversionWarning.of(com.fuyue.formatconverter.model.WarningCode.PARTIAL_BATCH_OUTPUT,
                             "部分图片转换失败；合并 PDF 仅包含成功的 " + outputs.size() + " / "
                                     + record.inputs.size() + " 张图片。", null));

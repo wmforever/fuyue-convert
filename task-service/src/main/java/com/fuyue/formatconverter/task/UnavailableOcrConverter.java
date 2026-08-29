@@ -5,7 +5,7 @@ import com.fuyue.formatconverter.parser.ParseLimits;
 import java.nio.file.Path;
 import java.util.List;
 
-/** Keeps an explicitly requested image OCR route visible while returning its precise capability failure. */
+/** Keeps image OCR routes visible while returning the precise local capability state. */
 final class UnavailableOcrConverter implements FileConverter {
     private final ConversionRoute route;
     private final TesseractOcrConverter.Capability capability;
@@ -14,7 +14,9 @@ final class UnavailableOcrConverter implements FileConverter {
                             TesseractOcrConverter.Capability capability) {
         this.capability = capability;
         this.route = ConversionRoute.unavailable(source, target,
-                "图片 OCR 需要显式配置且能力检测通过的本地 Tesseract OCR。",
+                capability.enabled()
+                        ? "图片 OCR 已启用，但当前本地 Tesseract 能力检测未通过。"
+                        : "图片 OCR 当前未启用；启用并配置本地 Tesseract 后即可使用。",
                 QualityLevel.EXPERIMENTAL, ConversionStrategy.EXTRACTION, List.of("tesseract"),
                 List.of(capability.message()));
     }

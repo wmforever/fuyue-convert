@@ -166,6 +166,42 @@ class ConversionTaskServiceTest {
         }
     }
 
+    @Test void pdfMergeFailsAtomicallyWhenAnyInputIsInvalid() throws Exception {
+        Path validPath = temp.resolve("valid.pdf");
+        try (PDDocument pdf = new PDDocument()) {
+            pdf.addPage(new PDPage(PDRectangle.A4));
+            pdf.save(validPath.toFile());
+        }
+        byte[] valid = Files.readAllBytes(validPath);
+        byte[] corrupt = "%PDF-1.7\nnot-a-real-pdf".getBytes(StandardCharsets.US_ASCII);
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("atomic-merge-data"), 1, 2,
+                Duration.ofSeconds(10), Duration.ofHours(1), ParseLimits.defaults());
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(new PdfMergeInputConverter()))) {
+            TaskSnapshot created = service.createTask(List.of(
+                    new UploadPayload("valid.pdf", "application/pdf", valid.length,
+                            () -> new ByteArrayInputStream(valid)),
+                    new UploadPayload("corrupt.pdf", "application/pdf", corrupt.length,
+                            () -> new ByteArrayInputStream(corrupt))), DocumentFormat.PDF_MERGED);
+            TaskSnapshot finished = await(service, created.taskId());
+
+            assertEquals(TaskStatus.FAILED, finished.status());
+            assertFalse(finished.downloadReady());
+            assertTrue(finished.errorMessage().contains("所有输入文件都有效"), finished.errorMessage());
+            assertEquals(1, finished.files().stream().filter(TaskFileResult::success).count());
+            assertEquals(1, finished.files().stream().filter(result -> !result.success()).count());
+        }
+    }
+
+    @Test void exposesDisabledOcrRoutesAsUnavailableInsteadOfPlanned() {
+        List<ConversionRoute> routes = DefaultConverterRegistry.create(null, Duration.ofSeconds(30)).stream()
+                .map(FileConverter::route).toList();
+        ConversionRoute pngOcr = routes.stream().filter(route -> route.id().equals("png-to-txt"))
+                .findFirst().orElseThrow();
+
+        assertNotEquals(RouteStatus.PLANNED, pngOcr.status());
+        assertTrue(pngOcr.status() == RouteStatus.AVAILABLE || pngOcr.status() == RouteStatus.UNAVAILABLE);
+    }
+
     @Test void recognizesUofExtensionFamily() {
         assertEquals(DocumentFormat.UOF, DocumentFormat.fromFileName("sample.uof").orElseThrow());
         assertEquals(DocumentFormat.UOF, DocumentFormat.fromFileName("sample.uot").orElseThrow());

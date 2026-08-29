@@ -49,7 +49,7 @@ public final class DefaultConverterRegistry {
             converters.add(new TesseractOcrConverter(DocumentFormat.JPG, ocrCapability.settings()));
             converters.add(new ImageOcrToDocxConverter(DocumentFormat.PNG, ocrCapability.settings(), analyzer, renderer));
             converters.add(new ImageOcrToDocxConverter(DocumentFormat.JPG, ocrCapability.settings(), analyzer, renderer));
-        } else if (ocrCapability.enabled()) {
+        } else {
             converters.add(new UnavailableOcrConverter(DocumentFormat.PNG, DocumentFormat.TXT, ocrCapability));
             converters.add(new UnavailableOcrConverter(DocumentFormat.JPG, DocumentFormat.TXT, ocrCapability));
             converters.add(new UnavailableOcrConverter(DocumentFormat.PNG, DocumentFormat.DOCX, ocrCapability));

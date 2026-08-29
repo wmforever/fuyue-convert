@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-/** Validates each merge input; the task service combines the successful PDFs in upload order. */
+/** Validates each merge input; the task service combines all PDFs atomically in upload order. */
 final class PdfMergeInputConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.PDF_MERGED,
             "按上传顺序将多个 PDF 合并为一个文件。", QualityLevel.STABLE, ConversionStrategy.FIDELITY,
