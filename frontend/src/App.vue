@@ -39,7 +39,11 @@ const diagnostics = ref(null)
 const diagnosticsFailed = ref(false)
 const capabilityMessage = ref('')
 const recentTasks = ref([])
+const historyLoading = ref(false)
+const historyMessage = ref('')
+const downloadingTaskId = ref('')
 const compressionMode = ref('balanced')
+const splitPages = ref('all')
 const watermarkText = ref('机密资料')
 const watermarkOpacity = ref(0.18)
 const watermarkAngle = ref(35)
@@ -47,20 +51,30 @@ const watermarkPosition = ref('center')
 const watermarkTiled = ref(false)
 const watermarkPages = ref('all')
 const watermarkColor = ref('#969696')
+const autoDownload = ref(false)
+const preferenceMessage = ref('')
+const desktopRuntime = ref(false)
 const limits = ref({ maxFileSize: 50 * 1024 * 1024, maxFilesPerTask: 100, maxTaskUploadBytes: 250 * 1024 * 1024 })
 let pollTimer
+let historyTimer
+let healthTimer
 let pollGeneration = 0
 let pollFailures = 0
+let uploadRequest = null
+const autoDownloadedTaskIds = new Set()
 
 const selectedRoute = computed(() => conversions.value.find(route => route.id === selectedRouteId.value) || conversions.value[0])
 const isPdfMergeRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-merge')
 const isSinglePdfTool = computed(() => ['pdf-split', 'pdf-watermark', 'pdf-compress'].includes(selectedRoute.value?.targetFormat))
 const isPdfCompressRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-compress')
 const isPdfWatermarkRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-watermark')
-const hasToolOptions = computed(() => isPdfCompressRoute.value || isPdfWatermarkRoute.value)
+const isPdfSplitRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-split')
+const hasToolOptions = computed(() => isPdfCompressRoute.value || isPdfWatermarkRoute.value || isPdfSplitRoute.value)
 const watermarkPagesValid = computed(() => validWatermarkPages(watermarkPages.value))
-const toolOptionsValid = computed(() => !isPdfWatermarkRoute.value
+const splitPagesValid = computed(() => validWatermarkPages(splitPages.value))
+const toolOptionsValid = computed(() => (!isPdfWatermarkRoute.value
   || (watermarkText.value.trim().length > 0 && watermarkPagesValid.value))
+  && (!isPdfSplitRoute.value || splitPagesValid.value))
 const routeFileLimit = computed(() => isSinglePdfTool.value ? 1 : limits.value.maxFilesPerTask)
 const canSubmit = computed(() => files.value.length >= (isPdfMergeRoute.value ? 2 : 1)
   && !busy.value && toolOptionsValid.value && selectedRoute.value?.status === 'available')
@@ -74,7 +88,11 @@ const successfulTasks = computed(() => recentTasks.value.filter(item => item.sta
 const serviceHealthy = computed(() => Boolean(diagnostics.value))
 const selectedBytes = computed(() => files.value.reduce((total, file) => total + file.size, 0))
 const acceptExtension = computed(() => selectedRoute.value?.inputExtension || '.ofd')
-const acceptExtensions = computed(() => selectedRoute.value?.sourceFormat === 'jpg' ? ['.jpg', '.jpeg'] : [acceptExtension.value])
+const acceptExtensions = computed(() => {
+  if (selectedRoute.value?.sourceFormat === 'jpg') return ['.jpg', '.jpeg']
+  if (selectedRoute.value?.sourceFormat === 'uof') return ['.uof', '.uot']
+  return [acceptExtension.value]
+})
 const acceptType = computed(() => `${acceptExtensions.value.join(',')},application/${selectedRoute.value?.sourceFormat || 'ofd'}`)
 const statusLabel = computed(() => ({ WAITING: '等待转换', CONVERTING: '正在转换', SUCCESS: '转换完成', FAILED: '转换失败', CANCELLED: '转换已取消' })[task.value?.status] || '')
 const progress = computed(() => task.value?.progress ?? uploadProgress.value)
@@ -114,12 +132,19 @@ const sourceOptions = computed(() => {
 const quickSourceOptions = computed(() => sourceOptions.value.filter(source => ['popular', 'pdf-tools'].includes(source.id)))
 const formatSourceOptions = computed(() => sourceOptions.value.filter(source => !['popular', 'pdf-tools'].includes(source.id)))
 const pickerRoutes = computed(() => {
-  const keyword = routeSearch.value.trim().toLowerCase()
-  if (keyword) return conversions.value.filter(route => {
+  const keywords = routeSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean)
+  if (keywords.length) return conversions.value.map(route => {
     const aliases = routeSearchAliases[route.targetFormat] || ''
     const text = `${route.id} ${route.sourceFormat} ${route.targetFormat} ${route.sourceLabel} ${route.targetLabel} ${route.description} ${aliases}`.toLowerCase()
-    return text.includes(keyword)
-  })
+    if (!keywords.every(keyword => text.includes(keyword))) return null
+    const labels = `${route.sourceLabel} ${route.targetLabel}`.toLowerCase()
+    const formats = `${route.sourceFormat} ${route.targetFormat}`.toLowerCase()
+    const score = keywords.reduce((total, keyword) => total
+      + (formats.includes(keyword) ? 6 : 0)
+      + (labels.includes(keyword) ? 4 : 0)
+      + (aliases.includes(keyword) ? 2 : 0), 0)
+    return { route, score }
+  }).filter(Boolean).sort((left, right) => right.score - left.score).map(item => item.route)
   if (pickerSource.value === 'popular') {
     return popularRouteIds.map(id => conversions.value.find(route => route.id === id)).filter(Boolean)
   }
@@ -140,8 +165,8 @@ const viewTitle = computed(() => ({
   overview: ['概览', '掌握本地转换服务和最近任务'],
   convert: ['转换工作台', '选择路线并处理你的文件'],
   pdf: ['PDF 工具', '合并、拆分、压缩与文字水印'],
-  history: ['任务记录', '仅保存在当前设备上的最近转换'],
-  settings: ['运行设置', '查看本地引擎、资源限制和诊断状态']
+  history: ['任务记录', '恢复、重下或重试转换服务中的任务'],
+  settings: ['运行设置', '调整使用偏好并查看引擎诊断状态']
 })[activeView.value] || ['概览', '本地文档转换工作台'])
 
 const navItems = [
@@ -245,8 +270,28 @@ function selectPickerSource(source) {
 async function navigate(view) {
   activeView.value = view
   routePickerOpen.value = false
+  if (view === 'history') void loadTaskHistory()
   await nextTick()
   if (appScrollRef.value) appScrollRef.value.scrollTop = 0
+}
+
+async function startNewConversion() {
+  if (busy.value) {
+    await navigate('convert')
+    message.value = task.value ? '请先取消当前任务，再开始新的转换' : '请先取消正在上传的文件'
+    return
+  }
+  startNewBatch()
+  await navigate('convert')
+  await toggleRoutePicker()
+}
+
+async function showAllRoutes() {
+  await navigate('convert')
+  if (busy.value) return
+  pickerSource.value = 'popular'
+  routeSearch.value = ''
+  await toggleRoutePicker()
 }
 
 function openRoute(route) {
@@ -265,42 +310,181 @@ function openPdfWorkspace() {
   if (firstAvailable) openRoute(firstAvailable)
 }
 
+function cacheRecentTasks() {
+  try { localStorage.setItem('format-converter-recent-tasks', JSON.stringify(recentTasks.value.slice(0, 50))) } catch (_) { /* session still works */ }
+}
+
+function routeForSnapshot(snapshot) {
+  return conversions.value.find(route => route.sourceFormat === snapshot?.sourceFormat
+    && route.targetFormat === snapshot?.targetFormat)
+}
+
+function historyEntry(snapshot, existing = null) {
+  const route = routeForSnapshot(snapshot)
+  const resultCount = Array.isArray(snapshot?.files) ? snapshot.files.length : 0
+  return {
+    taskId: snapshot.taskId,
+    status: snapshot.status,
+    stage: snapshot.stage || null,
+    progress: Number.isFinite(snapshot.progress) ? snapshot.progress : 0,
+    sourceFormat: snapshot.sourceFormat || existing?.sourceFormat || route?.sourceFormat || '',
+    targetFormat: snapshot.targetFormat || existing?.targetFormat || route?.targetFormat || '',
+    sourceLabel: route?.sourceLabel || existing?.sourceLabel || snapshot.sourceFormat?.toUpperCase() || '文件',
+    targetLabel: route?.targetLabel || existing?.targetLabel || snapshot.targetFormat?.toUpperCase() || '输出文件',
+    fileCount: resultCount || existing?.fileCount || (snapshot.taskId === task.value?.taskId ? files.value.length : 0),
+    updatedAt: snapshot.updatedAt || existing?.updatedAt || new Date().toISOString(),
+    expiresAt: snapshot.expiresAt || existing?.expiresAt || null,
+    downloadReady: Boolean(snapshot.downloadReady),
+    downloadName: snapshot.downloadName || existing?.downloadName || '',
+    errorMessage: snapshot.errorMessage || existing?.errorMessage || '',
+    warnings: Array.isArray(snapshot.warnings) ? snapshot.warnings : [],
+    files: Array.isArray(snapshot.files) ? snapshot.files : []
+  }
+}
+
 function loadRecentTasks() {
   try {
     const stored = JSON.parse(localStorage.getItem('format-converter-recent-tasks') || '[]')
     if (Array.isArray(stored)) {
       recentTasks.value = stored.filter(item => item
         && typeof item.taskId === 'string' && item.taskId.length > 0
-        && ['SUCCESS', 'FAILED', 'CANCELLED'].includes(item.status))
-        .map(item => ({
-          taskId: item.taskId,
-          status: item.status,
-          sourceLabel: typeof item.sourceLabel === 'string' ? item.sourceLabel : '文件',
-          targetLabel: typeof item.targetLabel === 'string' ? item.targetLabel : '输出文件',
-          fileCount: Number.isInteger(item.fileCount) && item.fileCount >= 0 ? item.fileCount : 0,
-          updatedAt: typeof item.updatedAt === 'string' ? item.updatedAt : null
-        })).slice(0, 12)
+        && ['WAITING', 'CONVERTING', 'SUCCESS', 'FAILED', 'CANCELLED'].includes(item.status))
+        .map(item => historyEntry(item)).slice(0, 50)
     }
   } catch (_) { recentTasks.value = [] }
 }
 
 function recordRecentTask(snapshot) {
-  if (!snapshot?.taskId || !['SUCCESS', 'FAILED', 'CANCELLED'].includes(snapshot.status)) return
-  const entry = {
-    taskId: snapshot.taskId,
-    status: snapshot.status,
-    sourceLabel: selectedRoute.value?.sourceLabel || snapshot.sourceFormat?.toUpperCase(),
-    targetLabel: selectedRoute.value?.targetLabel || snapshot.targetFormat?.toUpperCase(),
-    fileCount: Array.isArray(snapshot.files) && snapshot.files.length > 0 ? snapshot.files.length : files.value.length,
-    updatedAt: snapshot.updatedAt || new Date().toISOString()
-  }
-  recentTasks.value = [entry, ...recentTasks.value.filter(item => item.taskId !== entry.taskId)].slice(0, 12)
-  try { localStorage.setItem('format-converter-recent-tasks', JSON.stringify(recentTasks.value)) } catch (_) { /* session still works */ }
+  if (!snapshot?.taskId || !['WAITING', 'CONVERTING', 'SUCCESS', 'FAILED', 'CANCELLED'].includes(snapshot.status)) return
+  const existing = recentTasks.value.find(item => item.taskId === snapshot.taskId)
+  const entry = historyEntry(snapshot, existing)
+  recentTasks.value = [entry, ...recentTasks.value.filter(item => item.taskId !== entry.taskId)]
+    .sort((left, right) => new Date(right.updatedAt || 0) - new Date(left.updatedAt || 0)).slice(0, 50)
+  cacheRecentTasks()
 }
 
-function clearRecentTasks() {
-  recentTasks.value = []
-  try { localStorage.removeItem('format-converter-recent-tasks') } catch (_) { /* ignore */ }
+async function loadTaskHistory({ quiet = false } = {}) {
+  if (!quiet) historyLoading.value = true
+  try {
+    const response = await fetch('/api/tasks?limit=50', { cache: 'no-store' })
+    if (!response.ok) throw responseError(response, `任务记录加载失败（${response.status}）`)
+    const snapshots = await response.json()
+    if (!Array.isArray(snapshots)) throw new Error('任务记录格式无效')
+    const cached = new Map(recentTasks.value.map(item => [item.taskId, item]))
+    recentTasks.value = snapshots.map(snapshot => historyEntry(snapshot, cached.get(snapshot.taskId)))
+    cacheRecentTasks()
+    if (!quiet) historyMessage.value = ''
+    clearTimeout(historyTimer)
+    if (recentTasks.value.some(item => ['WAITING', 'CONVERTING'].includes(item.status))) {
+      historyTimer = setTimeout(() => loadTaskHistory({ quiet: true }), 1800)
+    }
+  } catch (error) {
+    if (!quiet) historyMessage.value = error.message || '任务记录加载失败'
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+async function clearRecentTasks() {
+  const terminal = recentTasks.value.filter(item => ['SUCCESS', 'FAILED', 'CANCELLED'].includes(item.status))
+  if (!terminal.length) {
+    historyMessage.value = '当前没有可清理的已结束任务'
+    return
+  }
+  if (!window.confirm(`确定删除 ${terminal.length} 条已结束任务及其本地结果文件吗？此操作不可撤销。`)) return
+  historyLoading.value = true
+  historyMessage.value = ''
+  const deleted = []
+  for (const item of terminal) {
+    try {
+      const response = await fetch(`/api/tasks/${item.taskId}`, { method: 'DELETE' })
+      if (response.ok || response.status === 404) deleted.push(item.taskId)
+    } catch (_) { /* retain failed entries */ }
+  }
+  recentTasks.value = recentTasks.value.filter(item => !deleted.includes(item.taskId))
+  cacheRecentTasks()
+  if (task.value && deleted.includes(task.value.taskId)) startNewBatch()
+  historyMessage.value = deleted.length === terminal.length
+    ? `已删除 ${deleted.length} 条任务及本地结果`
+    : `已删除 ${deleted.length} 条，另有 ${terminal.length - deleted.length} 条未能删除`
+  historyLoading.value = false
+}
+
+async function deleteHistoryTask(item) {
+  if (!window.confirm(`确定删除任务 ${item.taskId.slice(0, 8)} 及其本地结果吗？`)) return
+  historyMessage.value = ''
+  try {
+    const response = await fetch(`/api/tasks/${item.taskId}`, { method: 'DELETE' })
+    if (!response.ok && response.status !== 404) throw responseError(response, `删除失败（${response.status}）`)
+    recentTasks.value = recentTasks.value.filter(candidate => candidate.taskId !== item.taskId)
+    cacheRecentTasks()
+    if (task.value?.taskId === item.taskId) startNewBatch()
+    historyMessage.value = '任务及本地结果已删除'
+  } catch (error) {
+    historyMessage.value = error.message || '删除任务失败'
+  }
+}
+
+function applyTaskSnapshot(snapshot, changeView = true) {
+  const route = routeForSnapshot(snapshot)
+  if (route) selectedRouteId.value = route.id
+  pollGeneration++
+  clearTimeout(pollTimer)
+  files.value = []
+  task.value = snapshot
+  busy.value = ['WAITING', 'CONVERTING'].includes(snapshot.status)
+  message.value = ''
+  recordRecentTask(snapshot)
+  if (changeView) navigate('convert')
+  if (busy.value) poll()
+}
+
+async function openHistoryTask(item) {
+  historyMessage.value = ''
+  try {
+    const response = await fetch(`/api/tasks/${item.taskId}`, { cache: 'no-store' })
+    if (!response.ok) throw responseError(response, `任务详情加载失败（${response.status}）`)
+    applyTaskSnapshot(await response.json())
+  } catch (error) {
+    historyMessage.value = error.message || '任务详情加载失败'
+    if (error.status === 404) {
+      recentTasks.value = recentTasks.value.filter(candidate => candidate.taskId !== item.taskId)
+      cacheRecentTasks()
+    }
+  }
+}
+
+async function retryHistoryTask(item) {
+  historyMessage.value = ''
+  try {
+    const response = await fetch(`/api/tasks/${item.taskId}/retry`, { method: 'POST' })
+    let body = {}
+    try { body = await response.json() } catch (_) { /* ignore */ }
+    if (!response.ok) throw responseError(response, body.message || `重试失败（${response.status}）`)
+    applyTaskSnapshot(body)
+  } catch (error) {
+    historyMessage.value = error.message || '重试任务失败'
+  }
+}
+
+function loadPreferences() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('format-converter-preferences') || '{}')
+    autoDownload.value = stored.autoDownload === true
+    if (['lossless', 'balanced', 'strong'].includes(stored.compressionMode)) compressionMode.value = stored.compressionMode
+  } catch (_) { /* use safe defaults */ }
+}
+
+function savePreferences() {
+  try {
+    localStorage.setItem('format-converter-preferences', JSON.stringify({
+      autoDownload: autoDownload.value,
+      compressionMode: compressionMode.value
+    }))
+    preferenceMessage.value = '偏好已保存到当前设备'
+  } catch (_) {
+    preferenceMessage.value = '当前环境无法保存偏好'
+  }
 }
 
 function onDocumentClick(event) {
@@ -308,7 +492,35 @@ function onDocumentClick(event) {
 }
 
 function onRoutePickerKeydown(event) {
-  if (event.key === 'Escape') closeRoutePicker(true)
+  if (event.key === 'Escape') {
+    closeRoutePicker(true)
+    return
+  }
+  if (event.key === 'Enter' && document.activeElement?.classList?.contains('route-search')) {
+    const firstAvailable = pickerRoutes.value.find(route => route.status === 'available')
+    if (firstAvailable) {
+      event.preventDefault()
+      selectRoute(firstAvailable)
+    }
+    return
+  }
+  if (event.key === 'Enter' && document.activeElement?.classList?.contains('route-option')) {
+    const route = conversions.value.find(candidate => candidate.id === document.activeElement.dataset.routeId)
+    if (route?.status === 'available') {
+      event.preventDefault()
+      selectRoute(route)
+    }
+    return
+  }
+  if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return
+  const options = Array.from(routeMenuRef.value?.querySelectorAll('.route-option:not(:disabled)') || [])
+  if (!options.length) return
+  event.preventDefault()
+  const current = options.indexOf(document.activeElement)
+  const next = event.key === 'ArrowDown'
+    ? (current < 0 ? 0 : (current + 1) % options.length)
+    : (current < 0 ? options.length - 1 : (current - 1 + options.length) % options.length)
+  options[next].focus()
 }
 
 async function loadCapabilities() {
@@ -358,13 +570,12 @@ function startNewBatch() {
   pollGeneration++
   pollFailures = 0
   clearTimeout(pollTimer)
-  const previousTaskId = task.value?.taskId
+  if (uploadRequest) uploadRequest.abort()
   files.value = []
   task.value = null
   uploadProgress.value = 0
   busy.value = false
   message.value = ''
-  if (previousTaskId) fetch(`/api/tasks/${previousTaskId}`, { method: 'DELETE' }).catch(() => {})
 }
 
 function accept(selected) {
@@ -373,13 +584,10 @@ function accept(selected) {
   const matching = selectedFiles.filter(file => extensions.some(extension => file.name.toLowerCase().endsWith(extension)))
   const incoming = matching.filter(file => file.size <= limits.value.maxFileSize)
   if (incoming.length && task.value && !busy.value) startNewBatch()
-  const known = new Set(files.value.map(file => `${file.name}:${file.size}`))
   let capacityRejected = 0
   let quotaRejected = 0
   let selectedBytes = files.value.reduce((total, file) => total + file.size, 0)
   for (const file of incoming) {
-    const key = `${file.name}:${file.size}`
-    if (known.has(key)) continue
     if (files.value.length >= routeFileLimit.value) {
       capacityRejected++
       continue
@@ -390,7 +598,6 @@ function accept(selected) {
     }
     files.value.push(file)
     selectedBytes += file.size
-    known.add(key)
   }
   const notices = []
   if (matching.length !== selectedFiles.length) notices.push(`非 ${acceptExtensions.value.join(' / ').toUpperCase()} 文件`)
@@ -406,6 +613,13 @@ function drop(event) {
 }
 
 function remove(index) { if (!busy.value) files.value.splice(index, 1) }
+function moveFile(index, offset) {
+  if (busy.value) return
+  const target = index + offset
+  if (target < 0 || target >= files.value.length) return
+  const [file] = files.value.splice(index, 1)
+  files.value.splice(target, 0, file)
+}
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
@@ -420,7 +634,7 @@ function formatTaskTime(value) {
 }
 
 function recentStatusLabel(status) {
-  return ({ SUCCESS: '已完成', FAILED: '失败', CANCELLED: '已取消' })[status] || status
+  return ({ WAITING: '等待中', CONVERTING: '转换中', SUCCESS: '已完成', FAILED: '失败', CANCELLED: '已取消' })[status] || status
 }
 
 async function submit() {
@@ -437,6 +651,7 @@ async function submit() {
   files.value.forEach(file => data.append('files', file))
   data.append('targetFormat', selectedRoute.value.targetFormat)
   if (isPdfCompressRoute.value) data.append('compressionMode', compressionMode.value)
+  if (isPdfSplitRoute.value) data.append('splitPages', splitPages.value)
   if (isPdfWatermarkRoute.value) {
     data.append('watermarkText', watermarkText.value)
     data.append('watermarkOpacity', watermarkOpacity.value)
@@ -449,6 +664,7 @@ async function submit() {
   try {
     const created = await upload(data)
     task.value = created
+    recordRecentTask(created)
     poll()
   } catch (error) {
     message.value = error.message
@@ -459,19 +675,31 @@ async function submit() {
 function upload(data) {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest()
+    uploadRequest = request
+    const release = () => { if (uploadRequest === request) uploadRequest = null }
     request.open('POST', '/api/tasks')
     request.upload.onprogress = event => { if (event.lengthComputable) uploadProgress.value = Math.round(event.loaded / event.total * 100) }
     request.onload = () => {
+      release()
       let body = {}
       try { body = JSON.parse(request.responseText) } catch (_) { /* ignore */ }
       if (request.status >= 200 && request.status < 300) resolve(body)
       else if (request.status === 401) reject(new Error('任务 API 需要有效的访问令牌'))
       else reject(new Error(body.message || `上传失败（${request.status}）`))
     }
-    request.onerror = () => reject(new Error('无法连接转换服务'))
-    request.onabort = () => reject(new Error('上传已取消'))
+    request.onerror = () => { release(); reject(new Error('无法连接转换服务')) }
+    request.onabort = () => { release(); reject(new Error('上传已取消')) }
     request.send(data)
   })
+}
+
+function cancelUpload() {
+  if (!uploadRequest) return
+  uploadRequest.abort()
+  uploadRequest = null
+  busy.value = false
+  uploadProgress.value = 0
+  message.value = '上传已取消，已选择的文件仍保留在列表中'
 }
 
 async function poll() {
@@ -485,10 +713,14 @@ async function poll() {
     pollFailures = 0
     message.value = ''
     task.value = snapshot
+    recordRecentTask(snapshot)
     if (task.value.status === 'WAITING' || task.value.status === 'CONVERTING') pollTimer = setTimeout(poll, 800)
     else {
       busy.value = false
-      recordRecentTask(task.value)
+      if (task.value.status === 'SUCCESS' && autoDownload.value && !autoDownloadedTaskIds.has(task.value.taskId)) {
+        autoDownloadedTaskIds.add(task.value.taskId)
+        void downloadTask(task.value, { silent: true })
+      }
     }
   } catch (error) {
     if (generation !== pollGeneration) return
@@ -504,23 +736,35 @@ async function poll() {
   }
 }
 
-async function download() {
+async function downloadTask(item, { silent = false } = {}) {
+  if (!item?.taskId || downloadingTaskId.value) return
+  downloadingTaskId.value = item.taskId
   try {
-    const response = await fetch(`/api/tasks/${task.value.taskId}/download`)
+    const response = await fetch(`/api/tasks/${item.taskId}/download`)
     if (!response.ok) throw responseError(response, `下载失败（${response.status}）`)
     const blob = await response.blob()
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
     anchor.href = url
-    anchor.download = task.value.downloadName || 'converted-file'
+    anchor.download = item.downloadName || 'converted-file'
     document.body.appendChild(anchor)
     anchor.click()
     anchor.remove()
-    setTimeout(() => URL.revokeObjectURL(url), 0)
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+    if (!silent) {
+      const text = `已开始下载 ${anchor.download}`
+      if (activeView.value === 'history') historyMessage.value = text
+      else message.value = text
+    }
   } catch (error) {
-    message.value = error.message || '下载失败'
+    if (activeView.value === 'history') historyMessage.value = error.message || '下载失败'
+    else message.value = error.message || '下载失败'
+  } finally {
+    downloadingTaskId.value = ''
   }
 }
+
+async function download() { await downloadTask(task.value) }
 
 async function taskAction(action) {
   const response = await fetch(`/api/tasks/${task.value.taskId}/${action}`, { method: 'POST' })
@@ -553,6 +797,7 @@ async function retryTask() {
   busy.value = true
   try {
     task.value = await taskAction('retry')
+    recordRecentTask(task.value)
     poll()
   } catch (error) {
     message.value = error.message
@@ -562,6 +807,12 @@ async function retryTask() {
 
 async function reset() {
   startNewBatch()
+}
+
+async function refreshRuntime() {
+  diagnosticMessage.value = '正在刷新运行状态…'
+  await Promise.all([loadLimits(), loadCapabilities(), loadTaskHistory({ quiet: true })])
+  diagnosticMessage.value = diagnosticsFailed.value ? '运行状态刷新失败' : '运行状态已刷新'
 }
 
 async function copyDiagnostics() {
@@ -596,14 +847,20 @@ function successDescription(file) {
 }
 
 onMounted(() => {
+  desktopRuntime.value = Boolean(window.formatConverterDesktop)
+  loadPreferences()
   loadRecentTasks()
-  loadCapabilities()
+  loadCapabilities().finally(() => loadTaskHistory())
   loadLimits()
+  healthTimer = setInterval(loadLimits, 30000)
   document.addEventListener('click', onDocumentClick)
   window.addEventListener('resize', positionRouteMenu)
 })
 onBeforeUnmount(() => {
   clearTimeout(pollTimer)
+  clearTimeout(historyTimer)
+  clearInterval(healthTimer)
+  if (uploadRequest) uploadRequest.abort()
   document.removeEventListener('click', onDocumentClick)
   window.removeEventListener('resize', positionRouteMenu)
 })
@@ -614,7 +871,7 @@ onBeforeUnmount(() => {
     <aside class="app-sidebar">
       <button class="app-brand" type="button" aria-label="返回概览" @click="navigate('overview')">
         <span class="app-logo" aria-hidden="true"><b>F</b><i></i></span>
-        <span><strong>Fuyue Convert</strong><small>LOCAL DESKTOP</small></span>
+        <span><strong>Fuyue Convert</strong><small>{{ desktopRuntime ? 'DESKTOP APP' : 'LOCAL WEB' }}</small></span>
       </button>
 
       <nav class="side-nav" aria-label="应用导航">
@@ -633,7 +890,7 @@ onBeforeUnmount(() => {
 
       <div class="sidebar-service">
         <span class="service-orb" :class="{ online: serviceHealthy }"></span>
-        <span><strong>{{ serviceHealthy ? '本地服务在线' : '正在连接服务' }}</strong><small>数据不会离开设备</small></span>
+        <span><strong>{{ serviceHealthy ? '转换服务在线' : '正在连接服务' }}</strong><small>不转交第三方云服务</small></span>
       </div>
     </aside>
 
@@ -641,8 +898,8 @@ onBeforeUnmount(() => {
       <header class="app-header">
         <div class="page-heading"><span>{{ viewTitle[0] }}</span><small>{{ viewTitle[1] }}</small></div>
         <div class="header-actions">
-          <span class="local-chip"><i></i> LOCAL ONLY</span>
-          <button type="button" class="header-cta" @click="navigate('convert')"><b>＋</b> 新建转换</button>
+          <span class="local-chip"><i></i> {{ desktopRuntime ? 'LOCAL DESKTOP' : 'CURRENT SERVICE' }}</span>
+          <button type="button" class="header-cta" @click="startNewConversion"><b>＋</b> 新建转换</button>
         </div>
       </header>
 
@@ -656,8 +913,8 @@ onBeforeUnmount(() => {
             <div>
               <p><span></span> FORMAT WORKSPACE / {{ diagnostics?.version || '0.1.3' }}</p>
               <h1>欢迎回来，开始处理文档。</h1>
-              <small>转换、整理和导出都在本机完成。你可以从常用路线开始，也可以进入完整工作台。</small>
-              <button type="button" @click="navigate('convert')">开始新任务 <span>→</span></button>
+              <small>{{ desktopRuntime ? '转换、整理和导出都在本机完成。' : '文件只发送到当前转换服务，不会转交第三方云端。' }}你可以从常用路线开始，也可以进入完整工作台。</small>
+              <button type="button" @click="startNewConversion">开始新任务 <span>→</span></button>
             </div>
             <div class="banner-visual" aria-hidden="true">
               <span class="doc-card one">PDF</span><span class="doc-card two">DOCX</span><span class="doc-card three">OFD</span>
@@ -668,13 +925,13 @@ onBeforeUnmount(() => {
           <div class="metric-grid" aria-label="运行概览">
             <article><span class="metric-icon blue">↗</span><div><small>可用路线</small><strong>{{ availableRoutes.length }}</strong><em>覆盖 {{ availableSourceCount }} 种可用输入格式</em></div></article>
             <article><span class="metric-icon violet">✓</span><div><small>稳定路线</small><strong>{{ stableRoutes.length }}</strong><em>{{ betaRoutes.length }} 条 Beta 持续优化</em></div></article>
-            <article><span class="metric-icon cyan">▣</span><div><small>已完成任务</small><strong>{{ successfulTasks }}</strong><em>仅记录任务摘要</em></div></article>
+            <article><span class="metric-icon cyan">▣</span><div><small>已完成任务</small><strong>{{ successfulTasks }}</strong><em>结果在到期前可重新下载</em></div></article>
             <article><span class="metric-icon green">●</span><div><small>服务状态</small><strong>{{ serviceHealthy ? '正常' : '连接中' }}</strong><em>独立 Worker {{ diagnostics?.limits?.workerEnabled ? '已启用' : '检测中' }}</em></div></article>
           </div>
 
           <div class="dashboard-grid">
             <section class="dash-panel quick-panel">
-              <div class="panel-title"><div><small>QUICK ACTIONS</small><h2>常用转换</h2></div><button type="button" @click="navigate('convert')">查看全部</button></div>
+              <div class="panel-title"><div><small>QUICK ACTIONS</small><h2>常用转换</h2></div><button type="button" @click="showAllRoutes">查看全部</button></div>
               <div class="quick-grid">
                 <button v-for="(route, index) in quickRoutes" :key="route.id" type="button" @click="openRoute(route)">
                   <span :class="`quick-icon tone-${index % 4}`">{{ route.sourceFormat.slice(0, 3).toUpperCase() }}</span>
@@ -702,33 +959,44 @@ onBeforeUnmount(() => {
                 <span class="history-icon">{{ item.sourceLabel?.slice(0, 3) }}</span>
                 <p><strong>{{ item.sourceLabel }} → {{ item.targetLabel }}</strong><small>{{ item.fileCount }} 个文件 · {{ formatTaskTime(item.updatedAt) }}</small></p>
                 <em :class="item.status.toLowerCase()">{{ recentStatusLabel(item.status) }}</em>
+                <button type="button" class="recent-open" @click="openHistoryTask(item)">查看</button>
               </div>
             </div>
-            <div v-else class="empty-state compact"><span>⌁</span><p><strong>还没有转换记录</strong><small>完成第一项任务后会在这里显示摘要。</small></p><button type="button" @click="navigate('convert')">开始转换</button></div>
+            <div v-else class="empty-state compact"><span>⌁</span><p><strong>还没有转换记录</strong><small>完成第一项任务后会在这里显示。</small></p><button type="button" @click="startNewConversion">开始转换</button></div>
           </section>
         </section>
 
         <section v-show="activeView === 'pdf'" class="content-page pdf-page">
-          <div class="section-intro"><span>PDF LAB</span><h2>一组专注、可靠的 PDF 工具。</h2><p>不上传云端，所有修改在本机完成。选择一个工具即可进入工作台。</p></div>
+          <div class="section-intro"><span>PDF LAB</span><h2>一组专注、可靠的 PDF 工具。</h2><p>{{ desktopRuntime ? '所有修改在本机完成。' : '文件仅由当前转换服务处理。' }}选择一个工具即可进入工作台。</p></div>
           <div class="tool-card-grid">
             <button v-for="(route, index) in pdfToolRoutes" :key="route.id" type="button" :disabled="route.status !== 'available'" @click="openRoute(route)">
               <span class="tool-number">0{{ index + 1 }}</span><span class="tool-symbol">{{ ['↘', '⊕', '✂', 'W'][index] }}</span>
               <div><small>{{ routeBadge(route) }} · {{ strategyLabel(route) }}</small><h3>{{ route.targetLabel }}</h3><p>{{ route.description }}</p></div><i>进入工具 →</i>
             </button>
           </div>
-          <aside class="privacy-banner"><span>◆</span><div><strong>保护原始文档</strong><small>数字签名文件会被严格拒绝修改，转换限制会在执行前后明确展示。</small></div></aside>
+          <aside class="privacy-banner"><span>◆</span><div><strong>保护原始文档</strong><small>压缩与水印会拒绝修改数字签名 PDF；其他工具会明确展示适用边界。</small></div></aside>
         </section>
 
         <section v-show="activeView === 'history'" class="content-page history-page">
-          <div class="content-toolbar"><div><span>LOCAL ACTIVITY</span><h2>最近任务</h2><p>这里只保存路线、状态与时间，不保存文件内容。</p></div><button v-if="recentTasks.length" type="button" @click="clearRecentTasks">清空记录</button></div>
+          <div class="content-toolbar">
+            <div><span>RECOVERABLE ACTIVITY</span><h2>最近任务</h2><p>任务和结果由当前转换服务保留至到期时间，可查看详情、重新下载或重试。</p></div>
+            <div class="toolbar-actions"><button type="button" :disabled="historyLoading" @click="loadTaskHistory">{{ historyLoading ? '刷新中…' : '刷新' }}</button><button v-if="recentTasks.length" type="button" class="danger" @click="clearRecentTasks">清理已结束任务</button></div>
+          </div>
+          <p v-if="historyMessage" class="history-message" role="status">{{ historyMessage }}</p>
           <div v-if="recentTasks.length" class="recent-list full">
             <div v-for="item in recentTasks" :key="item.taskId">
               <span class="history-icon">{{ item.sourceLabel?.slice(0, 3) }}</span>
-              <p><strong>{{ item.sourceLabel }} → {{ item.targetLabel }}</strong><small>任务 {{ item.taskId.slice(0, 8) }} · {{ item.fileCount }} 个文件</small></p>
+              <p><strong>{{ item.sourceLabel }} → {{ item.targetLabel }}</strong><small>任务 {{ item.taskId.slice(0, 8) }} · {{ item.fileCount || '—' }} 个文件<span v-if="item.errorMessage"> · {{ item.errorMessage }}</span></small></p>
               <time>{{ formatTaskTime(item.updatedAt) }}</time><em :class="item.status.toLowerCase()">{{ recentStatusLabel(item.status) }}</em>
+              <span class="history-actions">
+                <button type="button" @click="openHistoryTask(item)">查看</button>
+                <button v-if="item.downloadReady" type="button" :disabled="downloadingTaskId === item.taskId" @click="downloadTask(item)">{{ downloadingTaskId === item.taskId ? '下载中' : '下载' }}</button>
+                <button v-if="['FAILED', 'CANCELLED'].includes(item.status)" type="button" @click="retryHistoryTask(item)">重试</button>
+                <button v-if="['SUCCESS', 'FAILED', 'CANCELLED'].includes(item.status)" type="button" class="danger" @click="deleteHistoryTask(item)">删除</button>
+              </span>
             </div>
           </div>
-          <div v-else class="empty-state large"><span>⌁</span><p><strong>暂无本地任务记录</strong><small>开始转换后，任务摘要会显示在这里。</small></p><button type="button" @click="navigate('convert')">创建任务</button></div>
+          <div v-else-if="!historyLoading" class="empty-state large"><span>⌁</span><p><strong>暂无任务记录</strong><small>开始转换后，可在这里恢复任务和下载结果。</small></p><button type="button" @click="startNewConversion">创建任务</button></div>
         </section>
 
         <section v-show="activeView === 'settings'" class="content-page settings-page">
@@ -736,7 +1004,8 @@ onBeforeUnmount(() => {
             <section class="settings-card"><div class="settings-head"><span>01</span><div><strong>应用信息</strong><small>当前运行版本与平台</small></div></div><dl><div><dt>版本</dt><dd>{{ diagnostics?.version || '0.1.3' }}</dd></div><div><dt>系统</dt><dd>{{ diagnostics?.runtime?.os || '检测中' }} · {{ diagnostics?.runtime?.arch || '' }}</dd></div><div><dt>处理器</dt><dd>{{ diagnostics?.runtime?.availableProcessors || '—' }} 核心</dd></div></dl></section>
             <section class="settings-card"><div class="settings-head"><span>02</span><div><strong>转换引擎</strong><small>本机依赖可用状态</small></div></div><dl><div><dt>Office</dt><dd :class="{ good: diagnostics?.office?.available }">{{ diagnostics?.office?.message || '检测中' }}</dd></div><div><dt>OCR</dt><dd :class="{ good: diagnostics?.ocr?.available }">{{ diagnostics?.ocr?.message || '检测中' }}</dd></div><div><dt>Worker</dt><dd :class="{ good: diagnostics?.limits?.workerEnabled }">{{ diagnostics?.limits?.workerEnabled ? '独立进程已启用' : '未启用' }}</dd></div></dl></section>
             <section class="settings-card"><div class="settings-head"><span>03</span><div><strong>资源限制</strong><small>保护本机运行稳定</small></div></div><dl><div><dt>单文件</dt><dd>{{ formatBytes(limits.maxFileSize) }}</dd></div><div><dt>单任务</dt><dd>{{ limits.maxFilesPerTask }} 个文件</dd></div><div><dt>并发任务</dt><dd>{{ diagnostics?.limits?.concurrency || '—' }}</dd></div></dl></section>
-            <section class="settings-card action-card"><div class="settings-head"><span>04</span><div><strong>诊断信息</strong><small>复制脱敏后的运行状态</small></div></div><p>遇到转换问题时，可复制诊断信息随问题反馈提交。</p><button type="button" @click="copyDiagnostics">复制诊断信息</button><small v-if="diagnosticMessage">{{ diagnosticMessage }}</small></section>
+            <section class="settings-card preference-card"><div class="settings-head"><span>04</span><div><strong>使用偏好</strong><small>保存在当前设备</small></div></div><label class="setting-toggle"><span><strong>完成后自动下载</strong><small>转换成功后立即保存结果</small></span><input v-model="autoDownload" type="checkbox" @change="savePreferences" /><i></i></label><label class="setting-select"><span>默认 PDF 压缩等级</span><select v-model="compressionMode" @change="savePreferences"><option value="lossless">无损优化</option><option value="balanced">均衡压缩</option><option value="strong">强力压缩</option></select></label><small v-if="preferenceMessage" class="setting-message">{{ preferenceMessage }}</small></section>
+            <section class="settings-card action-card"><div class="settings-head"><span>05</span><div><strong>诊断信息</strong><small>刷新或复制脱敏运行状态</small></div></div><p>遇到转换问题时，可刷新引擎状态，或复制诊断信息随问题反馈提交。</p><div class="settings-actions"><button type="button" @click="refreshRuntime">刷新状态</button><button type="button" @click="copyDiagnostics">复制诊断</button></div><small v-if="diagnosticMessage">{{ diagnosticMessage }}</small></section>
           </div>
         </section>
 
@@ -832,6 +1101,7 @@ onBeforeUnmount(() => {
                       :key="route.id"
                       type="button"
                       class="route-option"
+                      :data-route-id="route.id"
                       :class="{ selected: route.id === selectedRouteId, planned: route.status === 'planned', unavailable: route.status === 'unavailable' }"
                       :disabled="route.status !== 'available'"
                       role="option"
@@ -865,26 +1135,26 @@ onBeforeUnmount(() => {
       <div v-if="hasToolOptions" class="tool-options-section">
         <div class="field-heading">
           <span class="field-number">02</span>
-          <div><label>{{ isPdfCompressRoute ? '压缩设置' : '水印设置' }}</label><small>根据使用场景调整处理参数</small></div>
+          <div><label>{{ isPdfCompressRoute ? '压缩设置' : (isPdfSplitRoute ? '拆分范围' : '水印设置') }}</label><small>根据使用场景调整处理参数</small></div>
         </div>
 
         <div v-if="isPdfCompressRoute" class="compression-options" role="radiogroup" aria-label="PDF 压缩等级">
           <label :class="{ selected: compressionMode === 'lossless' }">
-            <input v-model="compressionMode" type="radio" value="lossless" />
+            <input v-model="compressionMode" type="radio" value="lossless" @change="savePreferences" />
             <span class="option-check"></span>
             <strong>无损优化</strong>
             <small>不改变图片质量，清理并压缩 PDF 结构</small>
             <em>画质优先</em>
           </label>
           <label :class="{ selected: compressionMode === 'balanced' }">
-            <input v-model="compressionMode" type="radio" value="balanced" />
+            <input v-model="compressionMode" type="radio" value="balanced" @change="savePreferences" />
             <span class="option-check"></span>
             <strong>均衡压缩</strong>
             <small>适度优化图片，兼顾清晰度和文件体积</small>
             <em>推荐</em>
           </label>
           <label :class="{ selected: compressionMode === 'strong' }">
-            <input v-model="compressionMode" type="radio" value="strong" />
+            <input v-model="compressionMode" type="radio" value="strong" @change="savePreferences" />
             <span class="option-check"></span>
             <strong>强力压缩</strong>
             <small>显著降低图片分辨率，适合在线传输</small>
@@ -893,7 +1163,7 @@ onBeforeUnmount(() => {
           <p class="option-notice"><span>i</span> 若处理后的文件没有变小，系统会自动保留原文件。</p>
         </div>
 
-        <div v-else class="watermark-options">
+        <div v-else-if="isPdfWatermarkRoute" class="watermark-options">
           <label class="wide-field">
             <span>水印文字</span>
             <input v-model="watermarkText" type="text" maxlength="80" placeholder="例如：机密资料" />
@@ -931,6 +1201,16 @@ onBeforeUnmount(() => {
             <span><strong>平铺水印</strong><small>在整页重复显示水印</small></span>
           </label>
         </div>
+
+        <div v-else class="split-options">
+          <label>
+            <span>要拆分的页面</span>
+            <input v-model="splitPages" type="text" placeholder="all 或 1,3-5" :class="{ invalid: !splitPagesValid }" />
+            <small v-if="!splitPagesValid" class="field-error">请输入 all、1 或 1,3-5</small>
+            <small v-else>输入 all 拆分全部页面；也可组合单页和连续区间。</small>
+          </label>
+          <div class="split-examples"><span>示例</span><button type="button" @click="splitPages = 'all'">全部页面</button><button type="button" @click="splitPages = '1'">仅第 1 页</button><button type="button" @click="splitPages = '1,3-5'">第 1、3–5 页</button></div>
+        </div>
       </div>
 
       <div class="upload-section">
@@ -957,7 +1237,7 @@ onBeforeUnmount(() => {
           <label class="select-button">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16V4M7.5 8.5 12 4l4.5 4.5M5 14v5h14v-5"/></svg>
             {{ files.length ? '继续添加' : '选择文件' }}
-            <input type="file" :accept="acceptType" multiple :disabled="busy || selectedRoute.status !== 'available'" @change="accept($event.target.files); $event.target.value = ''" />
+            <input type="file" :accept="acceptType" :multiple="!isSinglePdfTool" :disabled="busy || selectedRoute.status !== 'available'" @change="accept($event.target.files); $event.target.value = ''" />
           </label>
         </div>
       </div>
@@ -968,10 +1248,11 @@ onBeforeUnmount(() => {
           <span>{{ files.length }} 个 · {{ formatBytes(selectedBytes) }}</span>
         </div>
         <ul>
-          <li v-for="(file, index) in files" :key="`${file.name}:${file.size}`">
+          <li v-for="(file, index) in files" :key="`${file.name}:${file.size}:${file.lastModified}:${index}`">
             <span class="mini-icon">{{ selectedRoute.sourceFormat.slice(0, 3).toUpperCase() }}</span>
             <span class="file-name">{{ file.name }}</span>
             <span class="file-size">{{ formatBytes(file.size) }}</span>
+            <span v-if="files.length > 1" class="file-order-actions"><button type="button" :disabled="busy || index === 0" :aria-label="`上移 ${file.name}`" title="上移" @click="moveFile(index, -1)">↑</button><button type="button" :disabled="busy || index === files.length - 1" :aria-label="`下移 ${file.name}`" title="下移" @click="moveFile(index, 1)">↓</button></span>
             <button class="remove" :disabled="busy" title="移除" @click="remove(index)">×</button>
           </li>
         </ul>
@@ -999,13 +1280,16 @@ onBeforeUnmount(() => {
           <strong>转换提示</strong>
           <p v-for="(warning, index) in task.warnings" :key="index">{{ warning.message }}</p>
         </div>
+
+        <div v-if="task?.errorMessage" class="task-error" role="alert"><strong>{{ task.errorCode || 'TASK_FAILED' }}</strong><p>{{ task.errorMessage }}</p></div>
       </div>
 
       <p v-if="message" class="message">{{ message }}</p>
 
       <div class="actions">
         <button v-if="!task" class="primary" :disabled="!canSubmit" @click="submit">开始转换 <span aria-hidden="true">→</span></button>
-        <button v-if="task?.downloadReady" class="primary" @click="download">下载 {{ task.downloadName }} <span aria-hidden="true">↓</span></button>
+        <button v-if="task?.downloadReady" class="primary" :disabled="downloadingTaskId === task.taskId" @click="download">{{ downloadingTaskId === task.taskId ? '正在下载…' : `下载 ${task.downloadName}` }} <span aria-hidden="true">↓</span></button>
+        <button v-if="busy && !task" class="secondary" @click="cancelUpload">取消上传</button>
         <button v-if="task && ['WAITING', 'CONVERTING'].includes(task.status)" class="secondary" @click="cancelTask">取消任务</button>
         <button v-if="task && ['FAILED', 'CANCELLED'].includes(task.status)" class="secondary" @click="retryTask">重试</button>
         <button v-if="task" class="secondary" @click="reset">转换其他文件</button>
@@ -1014,8 +1298,8 @@ onBeforeUnmount(() => {
       </div>
 
       <footer class="app-statusbar">
-        <span><i :class="{ online: serviceHealthy }"></i>{{ serviceHealthy ? '本地服务已连接' : '正在连接本地服务' }}</span>
-        <span>文档不会上传云端</span>
+        <span><i :class="{ online: serviceHealthy }"></i>{{ serviceHealthy ? '转换服务已连接' : '正在连接转换服务' }}</span>
+        <span>{{ desktopRuntime ? '文档仅在本机处理' : '不转交第三方云服务' }}</span>
         <span>v{{ diagnostics?.version || '0.1.3' }}</span>
       </footer>
     </main>
