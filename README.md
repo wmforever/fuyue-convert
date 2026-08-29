@@ -106,7 +106,7 @@ $env:FORMAT_CONVERTER_BUNDLE_OCR = "true"
 npm run dist:win
 ```
 
-桌面模式使用随机回环端口和每次启动随机生成的 API Token；Token 只由 Electron 主进程注入本地任务请求，不暴露给页面脚本。用户文件与任务数据写入系统 `userData` 目录，关闭窗口时会优先触发后端优雅关闭。详细说明见 `desktop/README.md`。
+桌面模式使用随机回环端口和每次启动随机生成的 API Token；Token 只由 Electron 主进程注入本地任务请求，不暴露给页面脚本。用户文件与任务数据写入系统 `userData` 目录，关闭窗口时会优先触发后端优雅关闭。正式 GitHub Release 会在 Windows x64 构建机生成带 OCR 的 Electron NSIS 安装器，并校验安装器、后端布局与 Electron/Chromium 许可证；安装器当前未做商业代码签名。详细说明见 `desktop/README.md`。
 
 ## 免 Java 发布包
 
@@ -164,7 +164,7 @@ FORMAT_CONVERTER_RESULT_TTL=24h
 
 服务默认只监听 `127.0.0.1`。远程部署需显式设置 `SERVER_ADDRESS=0.0.0.0`，并建议同时设置 `FORMAT_CONVERTER_API_TOKEN`；启用令牌后，请通过 API 请求头调用受保护接口。服务会同时执行文件数、单文件、单任务总上传量、总输出量和数据盘安全水位检查；失败/取消任务的输入从任务结束起只在 TTL 内保留以支持重试。Worker 内存限制仅限 JVM 堆；Docker/cgroup 或 systemd 的 CPU、总内存和进程数限制仍应在部署层设置。
 
-正式 Release 除各平台内置 Java Runtime 的运行包外，还附带 Java/前端 CycloneDX SBOM、`SHA256SUMS`、第三方声明、已知限制和当前测试报告；发布工作流会在上传前重新校验 SBOM JSON 与全部 SHA-256。
+正式 Release 除各平台内置 Java Runtime 的运行包外，还附带 Java、前端和 Electron 桌面端 CycloneDX SBOM、`SHA256SUMS`、第三方声明、已知限制和当前测试报告；发布工作流会在上传前重新校验 SBOM JSON 与全部 SHA-256。
 
 ## QA 验证
 

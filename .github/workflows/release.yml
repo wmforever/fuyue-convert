@@ -29,6 +29,14 @@ jobs:
           java-version: "17"
           cache: maven
 
+      - name: Set up Node for Electron package
+        if: runner.os == 'Windows'
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
       - name: Install bundled OCR dependencies
         if: runner.os == 'Linux'
         run: |
@@ -99,6 +107,34 @@ jobs:
             .\scripts\smoke-runtime-package.ps1 -Archive $_.FullName
           }
 
+      - name: Install Electron desktop dependencies
+        if: runner.os == 'Windows'
+        working-directory: desktop
+        shell: pwsh
+        run: npm ci --no-audit --no-fund
+
+      - name: Check Electron desktop sources
+        if: runner.os == 'Windows'
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          npm run check
+          npm test
+
+      - name: Package Electron desktop with bundled OCR
+        if: runner.os == 'Windows'
+        working-directory: desktop
+        shell: pwsh
+        env:
+          FORMAT_CONVERTER_BUNDLE_OCR: "true"
+        run: npm run dist:win
+
+      - name: Verify Electron desktop artifact and licenses
+        if: runner.os == 'Windows'
+        working-directory: desktop
+        shell: pwsh
+        run: npm run verify:package -- --require-ocr --require-installer
+
       - name: Upload package
         uses: actions/upload-artifact@v7
         with:
@@ -108,6 +144,14 @@ jobs:
             dist/*.zip
             dist/*.exe
             dist/*.msi
+
+      - name: Upload Electron desktop package
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v7
+        with:
+          name: fuyue-convert-Windows-desktop
+          path: desktop/release/*.exe
+          if-no-files-found: error
 
   release:
     name: Publish GitHub Release
@@ -142,11 +186,15 @@ jobs:
           cd frontend
           npm sbom --package-lock-only --sbom-format cyclonedx --sbom-type application > ../dist-assets/fuyue-convert-frontend-sbom.json
           cd ..
+          cd desktop
+          npm sbom --package-lock-only --sbom-format cyclonedx --sbom-type application > ../dist-assets/fuyue-convert-desktop-sbom.json
+          cd ..
           cp docs/known-limitations.md dist-assets/KNOWN-LIMITATIONS.md
           cp docs/test-report.md dist-assets/TEST-REPORT.md
           cp THIRD_PARTY_NOTICES.md dist-assets/THIRD-PARTY-NOTICES.md
           python3 -m json.tool dist-assets/fuyue-convert-java-sbom.json >/dev/null
           python3 -m json.tool dist-assets/fuyue-convert-frontend-sbom.json >/dev/null
+          python3 -m json.tool dist-assets/fuyue-convert-desktop-sbom.json >/dev/null
           cd dist-assets
           for file in *; do if [ -f "$file" ] && [ "$file" != SHA256SUMS ]; then sha256sum "$file"; fi; done > SHA256SUMS
           sha256sum -c SHA256SUMS

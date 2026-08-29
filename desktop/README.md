@@ -40,4 +40,4 @@ npm run dist:win
 
 应用启动时使用随机回环端口与随机 API Token，文件数据写入 Electron `userData`，退出时先请求 Spring Boot 优雅关闭，再清理残留进程树。Windows 安装器应在 Windows x64 构建机完成真实启动、转换和无残留进程验证后再发布。
 
-当前仓库提供 NSIS 构建定义，但尚未把 Electron 安装器接入正式 GitHub Release 流程；本地生成的安装器也未做商业代码签名，Windows 可能显示 SmartScreen 或“未知发布者”提示。LibreOffice 不随安装器分发，Office 高保真路线会使用用户电脑已有的 LibreOffice。
+正式 GitHub Release 流程会在 Windows x64 构建机生成带 OCR 的 Electron NSIS 安装器，并校验安装器、后端布局和 Electron/Chromium 许可证文件。本地与正式流程生成的安装器当前均未做商业代码签名，Windows 可能显示 SmartScreen 或“未知发布者”提示。LibreOffice 不随安装器分发，Office 高保真路线会使用用户电脑已有的 LibreOffice。
