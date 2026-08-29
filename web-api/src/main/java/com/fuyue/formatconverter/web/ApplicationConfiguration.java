@@ -5,21 +5,44 @@ import org.springframework.boot.system.ApplicationHome;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.core.env.Environment;
 
 import java.io.IOException;
 import java.io.File;
+import java.net.InetAddress;
 import java.nio.file.Path;
 import java.util.List;
 
 @Configuration
 public class ApplicationConfiguration {
     @Bean
-    FilterRegistrationBean<ApiTokenFilter> apiTokenFilter(FormatConverterProperties properties) {
+    FilterRegistrationBean<ApiTokenFilter> apiTokenFilter(FormatConverterProperties properties,
+                                                           Environment environment) {
+        validateDesktopMode(properties, environment.getProperty("server.address", ""));
         FilterRegistrationBean<ApiTokenFilter> bean = new FilterRegistrationBean<>();
         bean.setFilter(new ApiTokenFilter(properties.getApiToken()));
-        bean.addUrlPatterns("/api/tasks", "/api/tasks/*");
+        bean.addUrlPatterns("/api/tasks", "/api/tasks/*", "/api/desktop", "/api/desktop/*");
         bean.setOrder(1);
         return bean;
+    }
+
+    static void validateDesktopMode(FormatConverterProperties properties, String serverAddress) {
+        if (!properties.isDesktopMode()) return;
+        String token = properties.getApiToken();
+        if (token == null || token.strip().length() < 32 || !token.equals(token.strip())) {
+            throw new IllegalStateException("桌面模式必须配置至少 32 个字符的 API Token");
+        }
+        if (properties.getDesktopParentPid() <= 0) {
+            throw new IllegalStateException("桌面模式必须配置有效的父进程 PID");
+        }
+        try {
+            if (serverAddress == null || serverAddress.isBlank()
+                    || !InetAddress.getByName(serverAddress.strip()).isLoopbackAddress()) {
+                throw new IllegalStateException("桌面模式仅允许监听回环地址");
+            }
+        } catch (IOException invalidAddress) {
+            throw new IllegalStateException("桌面模式仅允许监听回环地址", invalidAddress);
+        }
     }
 
     @Bean

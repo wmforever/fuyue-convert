@@ -20,7 +20,9 @@ public final class ApiTokenFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        return apiToken.isBlank() || !("/api/tasks".equals(uri) || uri.startsWith("/api/tasks/"));
+        boolean protectedApi = "/api/tasks".equals(uri) || uri.startsWith("/api/tasks/")
+                || "/api/desktop".equals(uri) || uri.startsWith("/api/desktop/");
+        return apiToken.isBlank() || !protectedApi;
     }
 
     @Override

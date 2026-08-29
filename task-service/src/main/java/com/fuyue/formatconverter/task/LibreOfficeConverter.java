@@ -13,6 +13,7 @@ import java.nio.file.*;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import javax.xml.stream.XMLInputFactory;
@@ -171,24 +172,47 @@ public final class LibreOfficeConverter implements FileConverter {
     }
 
     public static Optional<Path> discover(String configuredBinary) {
-        List<Path> candidates = new ArrayList<>();
-        if (configuredBinary != null && !configuredBinary.isBlank()) candidates.add(Path.of(configuredBinary));
-        String path = System.getenv("PATH");
-        if (path != null) {
-            for (String dir : path.split(java.io.File.pathSeparator)) {
-                if (!dir.isBlank()) {
-                    candidates.add(Path.of(dir, "soffice"));
-                    candidates.add(Path.of(dir, "libreoffice"));
-                }
-            }
-        }
-        candidates.add(Path.of("/Applications/LibreOffice.app/Contents/MacOS/soffice"));
+        boolean windows = System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
+        List<Path> candidates = discoveryCandidates(configuredBinary, System.getenv("PATH"), windows,
+                System.getenv("ProgramFiles"), System.getenv("ProgramFiles(x86)"), System.getenv("LOCALAPPDATA"));
         for (Path candidate : candidates) {
             if (Files.isRegularFile(candidate) && Files.isExecutable(candidate) && probe(candidate)) {
                 return Optional.of(candidate);
             }
         }
         return Optional.empty();
+    }
+
+    static List<Path> discoveryCandidates(String configuredBinary, String searchPath, boolean windows,
+                                           String programFiles, String programFilesX86, String localAppData) {
+        List<Path> candidates = new ArrayList<>();
+        if (configuredBinary != null && !configuredBinary.isBlank()) candidates.add(Path.of(configuredBinary));
+        if (searchPath != null) {
+            for (String dir : searchPath.split(java.io.File.pathSeparator)) {
+                if (!dir.isBlank()) {
+                    candidates.add(Path.of(dir, "soffice"));
+                    candidates.add(Path.of(dir, "libreoffice"));
+                    if (windows) {
+                        candidates.add(Path.of(dir, "soffice.exe"));
+                        candidates.add(Path.of(dir, "libreoffice.exe"));
+                    }
+                }
+            }
+        }
+        if (windows) {
+            for (String root : List.of(nullToEmpty(programFiles), nullToEmpty(programFilesX86))) {
+                if (!root.isBlank()) candidates.add(Path.of(root, "LibreOffice", "program", "soffice.exe"));
+            }
+            if (localAppData != null && !localAppData.isBlank()) {
+                candidates.add(Path.of(localAppData, "Programs", "LibreOffice", "program", "soffice.exe"));
+            }
+        }
+        candidates.add(Path.of("/Applications/LibreOffice.app/Contents/MacOS/soffice"));
+        return List.copyOf(candidates);
+    }
+
+    private static String nullToEmpty(String value) {
+        return value == null ? "" : value;
     }
 
     public static Optional<String> version(Path binary) {

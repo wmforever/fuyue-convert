@@ -1,0 +1,47 @@
+appId: com.fuyue.formatconverter
+productName: Fuyue Convert
+artifactName: Fuyue-Convert-${version}-${os}-${arch}.${ext}
+asar: true
+electronFuses:
+  runAsNode: false
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+  grantFileProtocolExtraPrivileges: false
+  resetAdHocDarwinSignature: true
+directories:
+  output: release
+  buildResources: assets
+files:
+  - src/**/*
+  - package.json
+extraResources:
+  - from: .runtime/backend
+    to: backend
+  - from: node_modules/electron/dist/LICENSE
+    to: licenses/ELECTRON-LICENSE.txt
+  - from: node_modules/electron/dist/LICENSES.chromium.html
+    to: licenses/LICENSES.chromium.html
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: assets/icon.png
+  legalTrademarks: Fuyue Convert
+mac:
+  target:
+    - dir
+  icon: assets/icon.png
+  category: public.app-category.productivity
+nsis:
+  oneClick: false
+  perMachine: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Fuyue Convert
+  deleteAppDataOnUninstall: false
+publish: null

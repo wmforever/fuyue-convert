@@ -29,3 +29,20 @@ The complete upstream notice is distributed beside the font as
 
 The complete upstream license is distributed beside the font as
 `task-service/src/main/resources/fonts/LiberationSans-LICENSE.txt`.
+
+## Electron and Chromium
+
+- Electron source: `electron/electron`
+- Runtime version: `44.0.0`
+- Electron license: MIT
+- Copyright: Electron contributors and GitHub Inc.
+
+Electron is included only in desktop application packages. Its runtime carries the full Electron license and Chromium's generated `LICENSES.chromium.html`; those files remain inside the packaged application.
+
+## electron-builder
+
+- Source: `electron-userland/electron-builder`
+- Build-time version: `26.15.3`
+- License: MIT
+
+`electron-builder` is used only to assemble desktop artifacts and is not part of the application conversion engine.

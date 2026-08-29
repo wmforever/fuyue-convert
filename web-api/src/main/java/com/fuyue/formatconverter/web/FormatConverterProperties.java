@@ -29,6 +29,8 @@ public class FormatConverterProperties {
     private Duration officeTimeout = Duration.ofMinutes(2);
     private String apiToken = "";
     private boolean autoOpenBrowser = false;
+    private boolean desktopMode = false;
+    private long desktopParentPid = -1;
     private boolean workerEnabled = true;
     private int workerMaxMemoryMb = 768;
     private String workerJavaBinary = "";
@@ -88,6 +90,10 @@ public class FormatConverterProperties {
     public void setApiToken(String apiToken) { this.apiToken = apiToken; }
     public boolean isAutoOpenBrowser() { return autoOpenBrowser; }
     public void setAutoOpenBrowser(boolean autoOpenBrowser) { this.autoOpenBrowser = autoOpenBrowser; }
+    public boolean isDesktopMode() { return desktopMode; }
+    public void setDesktopMode(boolean desktopMode) { this.desktopMode = desktopMode; }
+    public long getDesktopParentPid() { return desktopParentPid; }
+    public void setDesktopParentPid(long desktopParentPid) { this.desktopParentPid = desktopParentPid; }
     public boolean isWorkerEnabled() { return workerEnabled; }
     public void setWorkerEnabled(boolean workerEnabled) { this.workerEnabled = workerEnabled; }
     public int getWorkerMaxMemoryMb() { return workerMaxMemoryMb; }

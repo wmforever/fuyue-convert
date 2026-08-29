@@ -41,4 +41,14 @@ class ApiTokenFilterTest {
 
         assertEquals(200, response.getStatus());
     }
+
+    @Test void protectsDesktopLifecycleApi() throws ServletException, IOException {
+        ApiTokenFilter filter = new ApiTokenFilter("secret");
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/desktop/shutdown");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, new MockFilterChain());
+
+        assertEquals(401, response.getStatus());
+    }
 }

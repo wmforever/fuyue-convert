@@ -1,0 +1,25 @@
+{
+  "name": "fuyue-convert-desktop",
+  "version": "0.1.3",
+  "private": true,
+  "type": "module",
+  "main": "src/main.mjs",
+  "description": "Secure Electron shell for Fuyue Convert",
+  "author": "Fuyue Convert contributors",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "electron . --dev",
+    "dev:managed": "electron . --managed",
+    "check": "node --check src/main.mjs && node --check src/backend-manager.mjs && node --check src/security.mjs && node --check scripts/stage-backend.mjs && node --check scripts/smoke-renderer.mjs && node --check scripts/smoke-conversion.mjs && node --check scripts/verify-packaged.mjs && node --check scripts/require-windows.mjs",
+    "test": "node --test",
+    "stage:backend": "node scripts/stage-backend.mjs",
+    "verify:package": "node scripts/verify-packaged.mjs",
+    "pack": "npm run stage:backend && electron-builder --dir",
+    "dist:win": "node scripts/require-windows.mjs && npm run stage:backend && electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "cross-spawn": "7.0.6",
+    "electron": "44.0.0",
+    "electron-builder": "26.15.3"
+  }
+}

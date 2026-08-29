@@ -4,6 +4,9 @@ target-release/
 dist/
 frontend/node_modules/
 frontend/dist/
+desktop/node_modules/
+desktop/.runtime/
+desktop/release/
 data/
 logs/
 *.log

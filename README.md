@@ -85,6 +85,29 @@ java -jar web-api/target/web-api-0.1.3.jar
 http://127.0.0.1:8080
 ```
 
+## 桌面应用
+
+`desktop/` 提供独立 Electron 外壳，界面采用深色本地工作台布局。Electron 不重写转换逻辑：生产模式会启动内置 Java Runtime 与 Spring Boot 服务，并加载同源的本地页面。
+
+开发预览（先保持 Java 服务与 Vite 运行）：
+
+```bash
+cd desktop
+npm ci
+npm run dev
+```
+
+生成 Windows x64 NSIS 安装器：
+
+```powershell
+cd desktop
+npm ci
+$env:FORMAT_CONVERTER_BUNDLE_OCR = "true"
+npm run dist:win
+```
+
+桌面模式使用随机回环端口和每次启动随机生成的 API Token；Token 只由 Electron 主进程注入本地任务请求，不暴露给页面脚本。用户文件与任务数据写入系统 `userData` 目录，关闭窗口时会优先触发后端优雅关闭。详细说明见 `desktop/README.md`。
+
 ## 免 Java 发布包
 
 面向普通用户可以使用自带 Java Runtime 的发布包，解压后不需要单独安装 JDK/JRE：

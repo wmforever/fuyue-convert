@@ -40,6 +40,8 @@ format-converter:
   office-timeout: ${FORMAT_CONVERTER_OFFICE_TIMEOUT:2m}
   api-token: ${FORMAT_CONVERTER_API_TOKEN:}
   auto-open-browser: ${FORMAT_CONVERTER_AUTO_OPEN_BROWSER:false}
+  desktop-mode: ${FORMAT_CONVERTER_DESKTOP_MODE:false}
+  desktop-parent-pid: ${FORMAT_CONVERTER_DESKTOP_PARENT_PID:-1}
   worker-enabled: ${FORMAT_CONVERTER_WORKER_ENABLED:true}
   worker-max-memory-mb: ${FORMAT_CONVERTER_WORKER_MAX_MEMORY_MB:768}
   worker-java-binary: ${FORMAT_CONVERTER_WORKER_JAVA_BINARY:}
