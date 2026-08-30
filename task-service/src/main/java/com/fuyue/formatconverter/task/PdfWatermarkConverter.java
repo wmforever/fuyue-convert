@@ -22,7 +22,7 @@ final class PdfWatermarkConverter implements FileConverter {
     private static final String LATIN_FONT = "/fonts/LiberationSans-Regular.ttf";
     private static final String CJK_FONT = "/fonts/DroidSansFallback.ttf";
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.PDF_WATERMARKED,
-            "为 PDF 添加可配置的中英文文字水印，支持透明度、角度、位置、平铺和页码范围。",
+            "为 PDF 添加可配置的中英文文字水印，支持不透明度、角度、位置、平铺和页码范围。",
             QualityLevel.BETA, ConversionStrategy.FIDELITY, List.of(),
             List.of("一次仅支持处理一个 PDF 文件",
                     "修改带数字签名的 PDF 会导致签名失效，因此当前严格拒绝处理"));
@@ -62,10 +62,9 @@ final class PdfWatermarkConverter implements FileConverter {
 
     private void addWatermark(PDDocument document, PDPage page, FontSet fonts, Color color,
                               ConversionOptions options) throws IOException {
-        PDRectangle box = page.getCropBox();
-        float width = box.getWidth();
-        float height = box.getHeight();
-        float fontSize = fittedFontSize(fonts, options.watermarkText(), width, height,
+        PageGeometry geometry = PageGeometry.from(page);
+        float fontSize = fittedFontSize(fonts, options.watermarkText(), geometry.visualWidth(),
+                geometry.visualHeight(),
                 options.watermarkTiled() ? 0.24f : 0.70f);
         PDExtendedGraphicsState state = new PDExtendedGraphicsState();
         state.setNonStrokingAlphaConstant(options.watermarkOpacity().floatValue());
@@ -75,11 +74,13 @@ final class PdfWatermarkConverter implements FileConverter {
             content.setGraphicsStateParameters(state);
             content.setNonStrokingColor(color);
             if (options.watermarkTiled()) {
-                addTiled(content, box, fonts, fontSize, options);
+                addTiled(content, geometry, fonts, fontSize, options);
             } else {
-                Point position = position(box, fonts, fontSize, options.watermarkText(), options.watermarkPosition());
-                showText(content, fonts, fontSize, options.watermarkText(), position.x(), position.y(),
-                        options.watermarkAngle());
+                Point visualPosition = position(geometry.visualWidth(), geometry.visualHeight(), fonts,
+                        fontSize, options.watermarkText(), options.watermarkAngle(), options.watermarkPosition());
+                Point pagePosition = geometry.toPagePoint(visualPosition);
+                showText(content, fonts, fontSize, options.watermarkText(), pagePosition.x(), pagePosition.y(),
+                        geometry.toPageAngle(options.watermarkAngle()));
             }
             content.restoreGraphicsState();
         } catch (IllegalArgumentException e) {
@@ -88,15 +89,18 @@ final class PdfWatermarkConverter implements FileConverter {
         }
     }
 
-    private void addTiled(PDPageContentStream content, PDRectangle box, FontSet fonts, float fontSize,
+    private void addTiled(PDPageContentStream content, PageGeometry geometry, FontSet fonts, float fontSize,
                           ConversionOptions options) throws IOException {
         int columns = 3;
         int rows = 4;
         for (int row = 0; row < rows; row++) {
             for (int column = 0; column < columns; column++) {
-                float x = box.getLowerLeftX() + box.getWidth() * (column + .5f) / columns;
-                float y = box.getLowerLeftY() + box.getHeight() * (row + .5f) / rows;
-                showText(content, fonts, fontSize, options.watermarkText(), x, y, options.watermarkAngle());
+                Point visualPosition = new Point(
+                        geometry.visualWidth() * (column + .5f) / columns,
+                        geometry.visualHeight() * (row + .5f) / rows);
+                Point pagePosition = geometry.toPagePoint(visualPosition);
+                showText(content, fonts, fontSize, options.watermarkText(), pagePosition.x(), pagePosition.y(),
+                        geometry.toPageAngle(options.watermarkAngle()));
             }
         }
     }
@@ -139,22 +143,27 @@ final class PdfWatermarkConverter implements FileConverter {
         return Math.max(11f, size);
     }
 
-    private Point position(PDRectangle box, FontSet fonts, float fontSize, String text,
-                           WatermarkPosition position) throws IOException {
+    private Point position(float width, float height, FontSet fonts, float fontSize, String text,
+                           double angle, WatermarkPosition position) throws IOException {
         float textWidth = textWidth(fonts, text, fontSize);
-        float padding = Math.max(24f, Math.min(box.getWidth(), box.getHeight()) * .06f);
-        float centerX = box.getLowerLeftX() + box.getWidth() / 2f;
-        float centerY = box.getLowerLeftY() + box.getHeight() / 2f;
+        float padding = Math.max(24f, Math.min(width, height) * .06f);
+        double radians = Math.toRadians(angle);
+        float rotatedHalfWidth = (float) (Math.abs(Math.cos(radians)) * textWidth / 2f
+                + Math.abs(Math.sin(radians)) * fontSize / 2f);
+        float rotatedHalfHeight = (float) (Math.abs(Math.sin(radians)) * textWidth / 2f
+                + Math.abs(Math.cos(radians)) * fontSize / 2f);
+        float centerX = width / 2f;
+        float centerY = height / 2f;
         return switch (position) {
             case CENTER -> new Point(centerX, centerY);
-            case TOP_LEFT -> new Point(box.getLowerLeftX() + padding + textWidth / 2f,
-                    box.getUpperRightY() - padding - fontSize / 2f);
-            case TOP_RIGHT -> new Point(box.getUpperRightX() - padding - textWidth / 2f,
-                    box.getUpperRightY() - padding - fontSize / 2f);
-            case BOTTOM_LEFT -> new Point(box.getLowerLeftX() + padding + textWidth / 2f,
-                    box.getLowerLeftY() + padding + fontSize / 2f);
-            case BOTTOM_RIGHT -> new Point(box.getUpperRightX() - padding - textWidth / 2f,
-                    box.getLowerLeftY() + padding + fontSize / 2f);
+            case TOP_LEFT -> new Point(padding + rotatedHalfWidth,
+                    height - padding - rotatedHalfHeight);
+            case TOP_RIGHT -> new Point(width - padding - rotatedHalfWidth,
+                    height - padding - rotatedHalfHeight);
+            case BOTTOM_LEFT -> new Point(padding + rotatedHalfWidth,
+                    padding + rotatedHalfHeight);
+            case BOTTOM_RIGHT -> new Point(width - padding - rotatedHalfWidth,
+                    padding + rotatedHalfHeight);
         };
     }
 
@@ -198,5 +207,41 @@ final class PdfWatermarkConverter implements FileConverter {
     }
 
     private record Point(float x, float y) { }
+    private record PageGeometry(float lowerLeftX, float lowerLeftY,
+                                float pageWidth, float pageHeight,
+                                float visualWidth, float visualHeight,
+                                int rotation) {
+        private static PageGeometry from(PDPage page) throws IOException {
+            PDRectangle box = page.getCropBox();
+            float width = box.getWidth();
+            float height = box.getHeight();
+            if (!Float.isFinite(width) || !Float.isFinite(height) || width <= 0f || height <= 0f) {
+                throw new IOException("PDF 页面裁剪区域无效");
+            }
+            int rotation = Math.floorMod(page.getRotation(), 360);
+            if (rotation % 90 != 0) {
+                throw new IOException("PDF 页面旋转角度必须是 90 度的整数倍");
+            }
+            boolean sideways = rotation == 90 || rotation == 270;
+            return new PageGeometry(box.getLowerLeftX(), box.getLowerLeftY(), width, height,
+                    sideways ? height : width, sideways ? width : height, rotation);
+        }
+
+        private Point toPagePoint(Point visualPoint) {
+            float visualX = visualPoint.x();
+            float visualY = visualPoint.y();
+            return switch (rotation) {
+                case 90 -> new Point(lowerLeftX + pageWidth - visualY, lowerLeftY + visualX);
+                case 180 -> new Point(lowerLeftX + pageWidth - visualX,
+                        lowerLeftY + pageHeight - visualY);
+                case 270 -> new Point(lowerLeftX + visualY, lowerLeftY + pageHeight - visualX);
+                default -> new Point(lowerLeftX + visualX, lowerLeftY + visualY);
+            };
+        }
+
+        private double toPageAngle(double visualAngle) {
+            return visualAngle + rotation;
+        }
+    }
     private record FontSet(PDType0Font latin, PDType0Font cjk) { }
 }

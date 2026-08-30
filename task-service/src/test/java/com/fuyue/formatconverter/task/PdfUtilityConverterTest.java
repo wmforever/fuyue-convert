@@ -2,6 +2,9 @@ package com.fuyue.formatconverter.task;
 
 import com.fuyue.formatconverter.parser.ParseLimits;
 import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.contentstream.operator.Operator;
+import org.apache.pdfbox.cos.COSNumber;
+import org.apache.pdfbox.pdfparser.PDFStreamParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -22,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipFile;
 
@@ -163,6 +167,107 @@ class PdfUtilityConverterTest {
     }
 
     @Test
+    void rotatedPagesKeepAllCornerPositionsInTheRequestedVisualCorner() throws Exception {
+        for (int rotation : List.of(90, 180, 270)) {
+            for (String position : List.of("top-left", "top-right", "bottom-left", "bottom-right")) {
+                String stem = "corner-" + rotation + "-" + position;
+                Path source = rotatedCropPdf(stem + ".pdf", rotation);
+                Path output = temp.resolve(stem + "-watermarked.pdf");
+                ConversionOptions options = ConversionOptions.fromRequest(null, "MARK", 0.85d, 0d,
+                        position, false, "all", "#000000");
+                new PdfWatermarkConverter().convert(input(source, options), temp.resolve(stem + "-work"), output,
+                        ParseLimits.defaults(), (stage, progress) -> { });
+
+                try (PDDocument document = Loader.loadPDF(output.toFile())) {
+                    BufferedImage rendered = new PDFRenderer(document).renderImageWithDPI(0, 72);
+                    InkBounds ink = inkBounds(rendered);
+                    double centerX = (ink.minX() + ink.maxX()) / 2d;
+                    double centerY = (ink.minY() + ink.maxY()) / 2d;
+                    boolean left = position.endsWith("left");
+                    boolean top = position.startsWith("top");
+                    assertTrue(left ? centerX < rendered.getWidth() * .45d
+                                    : centerX > rendered.getWidth() * .55d,
+                            stem + " horizontal position was " + centerX + " of " + rendered.getWidth());
+                    assertTrue(top ? centerY < rendered.getHeight() * .45d
+                                   : centerY > rendered.getHeight() * .55d,
+                            stem + " vertical position was " + centerY + " of " + rendered.getHeight());
+                    assertEquals(rotation, firstTextMatrixAngle(document.getPage(0)), 0.01d,
+                            stem + " must counteract the page rotation so zero degrees stays horizontal");
+                }
+            }
+        }
+    }
+
+    @Test
+    void angledCornerWatermarksStayInsideEveryRotatedVisualCropBox() throws Exception {
+        for (int rotation : List.of(0, 90, 180, 270)) {
+            for (double angle : List.of(-40d, 40d)) {
+                for (String position : List.of("top-left", "top-right", "bottom-left", "bottom-right")) {
+                    String stem = "angled-corner-" + rotation + "-" + (angle < 0 ? "negative" : "positive")
+                            + "-" + position;
+                    Path source = rotatedCropPdf(stem + ".pdf", rotation);
+                    Path output = temp.resolve(stem + "-watermarked.pdf");
+                    ConversionOptions options = ConversionOptions.fromRequest(null, "ANGLE-MARK", 0.85d, angle,
+                            position, false, "all", "#000000");
+                    new PdfWatermarkConverter().convert(input(source, options), temp.resolve(stem + "-work"), output,
+                            ParseLimits.defaults(), (stage, progress) -> { });
+
+                    try (PDDocument document = Loader.loadPDF(output.toFile())) {
+                        BufferedImage rendered = new PDFRenderer(document).renderImageWithDPI(0, 72);
+                        InkBounds ink = inkBounds(rendered);
+                        assertInkInsidePage(rendered, ink, 8, stem);
+
+                        double centerX = (ink.minX() + ink.maxX()) / 2d;
+                        double centerY = (ink.minY() + ink.maxY()) / 2d;
+                        boolean left = position.endsWith("left");
+                        boolean top = position.startsWith("top");
+                        assertTrue(left ? centerX < rendered.getWidth() / 2d
+                                        : centerX > rendered.getWidth() / 2d,
+                                stem + " horizontal position was " + centerX + " of " + rendered.getWidth());
+                        assertTrue(top ? centerY < rendered.getHeight() / 2d
+                                       : centerY > rendered.getHeight() / 2d,
+                                stem + " vertical position was " + centerY + " of " + rendered.getHeight());
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void tiledWatermarkKeepsThreeByFourVisualGridOnEveryRotatedPage() throws Exception {
+        for (int rotation : List.of(90, 180, 270)) {
+            String stem = "tile-grid-" + rotation;
+            Path source = rotatedCropPdf(stem + ".pdf", rotation);
+            Path output = temp.resolve(stem + "-watermarked.pdf");
+            ConversionOptions options = ConversionOptions.fromRequest(null, "O", 0.85d, 0d,
+                    "center", true, "all", "#000000");
+            new PdfWatermarkConverter().convert(input(source, options), temp.resolve(stem + "-work"), output,
+                    ParseLimits.defaults(), (stage, progress) -> { });
+
+            try (PDDocument document = Loader.loadPDF(output.toFile())) {
+                PDPage page = document.getPage(0);
+                assertEquals(12, textMatrixAngles(page).size());
+                for (double angle : textMatrixAngles(page)) {
+                    assertEquals(rotation, angle, 0.01d,
+                            stem + " must keep every tiled mark visually horizontal");
+                }
+                BufferedImage rendered = new PDFRenderer(document).renderImageWithDPI(0, 72);
+                double cellWidth = rendered.getWidth() / 3d;
+                double cellHeight = rendered.getHeight() / 4d;
+                int radius = Math.max(8, (int) Math.floor(Math.min(cellWidth, cellHeight) * .18d));
+                for (int row = 0; row < 4; row++) {
+                    for (int column = 0; column < 3; column++) {
+                        int centerX = (int) Math.round(cellWidth * (column + .5d));
+                        int centerY = (int) Math.round(cellHeight * (row + .5d));
+                        assertTrue(hasInkNear(rendered, centerX, centerY, radius),
+                                stem + " missing visual grid mark at row=" + row + ", column=" + column);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     void strongCompressionReducesImageHeavyPdf() throws Exception {
         Path source = imagePdf("image-heavy.pdf", 1800, 1400);
         Path output = temp.resolve("image-heavy-optimized.pdf");
@@ -276,6 +381,87 @@ class PdfUtilityConverterTest {
         return path;
     }
 
+    private Path rotatedCropPdf(String name, int rotation) throws Exception {
+        Path path = temp.resolve(name);
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage(new PDRectangle(500, 350));
+            page.setCropBox(new PDRectangle(20, 30, 440, 280));
+            page.setRotation(rotation);
+            document.addPage(page);
+            document.save(path.toFile());
+        }
+        return path;
+    }
+
+    private List<Double> textMatrixAngles(PDPage page) throws Exception {
+        List<Object> tokens = new PDFStreamParser(page).parse();
+        List<Double> angles = new ArrayList<>();
+        for (int index = 6; index < tokens.size(); index++) {
+            if (!(tokens.get(index) instanceof Operator operator) || !"Tm".equals(operator.getName())) continue;
+            double a = ((COSNumber) tokens.get(index - 6)).floatValue();
+            double b = ((COSNumber) tokens.get(index - 5)).floatValue();
+            angles.add(normalizeAngle(Math.toDegrees(Math.atan2(b, a))));
+        }
+        return angles;
+    }
+
+    private double firstTextMatrixAngle(PDPage page) throws Exception {
+        List<Double> angles = textMatrixAngles(page);
+        assertFalse(angles.isEmpty(), "watermark text matrix missing");
+        return angles.get(0);
+    }
+
+    private double normalizeAngle(double angle) {
+        double normalized = angle % 360d;
+        return normalized < 0d ? normalized + 360d : normalized;
+    }
+
+    private InkBounds inkBounds(BufferedImage image) {
+        int minX = image.getWidth();
+        int minY = image.getHeight();
+        int maxX = -1;
+        int maxY = -1;
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                if (!isInk(image.getRGB(x, y))) continue;
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x);
+                maxY = Math.max(maxY, y);
+            }
+        }
+        assertTrue(maxX >= minX && maxY >= minY, "rendered watermark contains no visible ink");
+        return new InkBounds(minX, minY, maxX, maxY);
+    }
+
+    private boolean hasInkNear(BufferedImage image, int centerX, int centerY, int radius) {
+        int left = Math.max(0, centerX - radius);
+        int right = Math.min(image.getWidth() - 1, centerX + radius);
+        int top = Math.max(0, centerY - radius);
+        int bottom = Math.min(image.getHeight() - 1, centerY + radius);
+        for (int y = top; y <= bottom; y++) {
+            for (int x = left; x <= right; x++) {
+                if (isInk(image.getRGB(x, y))) return true;
+            }
+        }
+        return false;
+    }
+
+    private void assertInkInsidePage(BufferedImage image, InkBounds ink, int minimumInset, String context) {
+        assertTrue(ink.minX() >= minimumInset,
+                context + " touched the left edge at x=" + ink.minX());
+        assertTrue(ink.minY() >= minimumInset,
+                context + " touched the top edge at y=" + ink.minY());
+        assertTrue(ink.maxX() <= image.getWidth() - 1 - minimumInset,
+                context + " touched the right edge at x=" + ink.maxX() + " of " + image.getWidth());
+        assertTrue(ink.maxY() <= image.getHeight() - 1 - minimumInset,
+                context + " touched the bottom edge at y=" + ink.maxY() + " of " + image.getHeight());
+    }
+
+    private boolean isInk(int rgb) {
+        return (rgb & 0x00ffffff) != 0x00ffffff;
+    }
+
     private long nonWhitePixels(BufferedImage image) {
         long count = 0;
         for (int y = 0; y < image.getHeight(); y++) {
@@ -285,6 +471,8 @@ class PdfUtilityConverterTest {
         }
         return count;
     }
+
+    private record InkBounds(int minX, int minY, int maxX, int maxY) { }
 
     private UploadPayload upload(String name, Path path) throws Exception {
         byte[] data = Files.readAllBytes(path);

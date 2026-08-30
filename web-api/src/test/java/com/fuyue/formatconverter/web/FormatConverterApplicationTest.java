@@ -119,7 +119,7 @@ class FormatConverterApplicationTest {
                         .param("watermarkOpacity", "0.99")
                         .param("watermarkPages", "0-2"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("水印透明度必须在 0.05 到 0.85 之间"));
+                .andExpect(jsonPath("$.message").value("水印不透明度必须在 0.05 到 0.85 之间"));
 
         mvc.perform(multipart("/api/tasks").file(file)
                         .param("targetFormat", "pdf-split")

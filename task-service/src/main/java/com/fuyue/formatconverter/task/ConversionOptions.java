@@ -38,7 +38,7 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
             throw new IllegalArgumentException("水印文字不能包含控制字符");
         }
         if (!Double.isFinite(watermarkOpacity) || watermarkOpacity < 0.05d || watermarkOpacity > 0.85d) {
-            throw new IllegalArgumentException("水印透明度必须在 0.05 到 0.85 之间");
+            throw new IllegalArgumentException("水印不透明度必须在 0.05 到 0.85 之间");
         }
         if (!Double.isFinite(watermarkAngle) || watermarkAngle < -180d || watermarkAngle > 180d) {
             throw new IllegalArgumentException("水印角度必须在 -180 到 180 度之间");
