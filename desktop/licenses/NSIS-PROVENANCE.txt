@@ -1,0 +1,28 @@
+NSIS installer toolchain provenance
+===================================
+
+electron-builder toolset: nsis@1.2.1
+NSIS version: 3.12 (tag v312, commit e3f60402bcdf7be822d159b531c6e38ddf32de12)
+Unified toolset archive:
+https://github.com/electron-userland/electron-builder-binaries/releases/download/nsis%401.2.1/nsis-bundle-3.12.tar.gz
+Toolset archive SHA-256:
+56997fdefe25e7928a1a68b4583d08b240b66cf660234053b20131a74cc082f4
+Windows launcher (makensis.cmd) SHA-256:
+4c4b2a9575382001d285a978780906ad0ea9823d0f9818498247e96f430c0cb5
+Windows compiler (windows/makensis.exe) SHA-256:
+b043e554afefbfc56315669d0b4779793aeae67f0f2a7a790e2ea91f05298eff
+
+Corresponding NSIS source archive:
+https://github.com/nsis-dev/nsis/archive/refs/tags/v312.tar.gz
+Source SHA-256:
+5ee95daa11e3c3a40581cf9824598b5871048942d0ed802561c321621624fe8e
+
+The exact NSIS source archive is uploaded beside the official installer in the
+same GitHub Release. See NSIS-LICENSE.txt for the zlib/libpng, bzip2, and Common
+Public License 1.0 terms, including the LZMA special exception.
+
+Fuyue Convert does not use electron-builder's NSIS target or template. Its
+tracked core-only script uses the NSIS 3.12 built-in File, CreateShortCut, and
+WriteUninstaller instructions with zlib compression and user-level execution.
+It does not embed StdUtils, UAC, WinShell, nsProcess, nsis7z, elevate.exe, the
+bzip2 module, or the LZMA module.

@@ -7,39 +7,34 @@ Third-party libraries, fonts, runtimes, native tools, and generated application
 bundles remain subject to their own licenses. The project is therefore not a
 claim that every assembled binary is distributed solely under Apache-2.0.
 
-Public binary redistribution is currently paused. The release workflow on the
-current default branch is fail-closed until the repository variable
-`FORMAT_CONVERTER_BINARY_RELEASE_APPROVED` is explicitly enabled after a
-component-level license, provenance, checksum, notice, and source-obligation
-review. Historical releases, workflow artifacts, and tags must also be reviewed
-or removed before the repository is made public. This file is a human-readable
-disclosure for the source tree; it is not by itself an approval to redistribute
-a generated runtime package.
+The official public binary path is restricted to the reviewed Windows x64 Lite
+desktop package. It excludes bundled OCR, Poppler, and LibreOffice. The release
+workflow remains fail-closed unless the repository variable
+`FORMAT_CONVERTER_BINARY_RELEASE_APPROVED` is deliberately enabled for an
+audited tag. The workflow verifies the staged application and the payload
+installed by the final NSIS executable, and publishes checksums, component
+metadata, notices, and corresponding source artifacts with the installer.
 
-## OFDRW and its conversion dependency chain
+Historical v0.1.0 and v0.1.1 binary assets and expired workflow artifacts were
+withdrawn before the repository became public. Locally assembled packages are
+not official releases and must not be redistributed merely because they build
+successfully.
+
+## OFDRW
 
 - OFDRW modules: `org.ofdrw:*` 2.3.9
 - Source: `ofdrw/ofdrw`
 - Declared license: Apache License 2.0
 
-The current signed-seal appearance path also uses dependencies pulled by
-`ofdrw-converter` and invoked directly by the project:
+The current runtime uses the OFDRW reader, core, package, font, graphics, and
+layout modules. It does not include `ofdrw-converter`, iText, UJMP, or the legacy
+`org.json:json:20141113` dependency chain. That chain appeared in older local
+and historical builds and was removed before the reviewed Lite release.
 
-- iText 7 `kernel`, `io`, `commons`, `layout`, and `font-asian` 7.2.6 — GNU
-  Affero General Public License v3 according to the upstream parent POM, unless
-  covered by a separate commercial license.
-- UJMP Core 0.3.0 — GNU Lesser General Public License. The artifact contains
-  the LGPL v3 text while its embedded notice states LGPL v2 or later; a binary
-  release must resolve and document the applicable terms.
-- JSON-java `org.json:json:20141113` — The JSON License, including its
-  additional use restriction.
-
-These dependencies are among the unresolved reasons binary releases remain
-disabled. Do not publish the
-fat JAR, runtime archive, container image, or installer as an Apache-2.0-only
-artifact. The preferred remediation is to replace the iText-dependent path;
-any alternative distribution model requires a dedicated license review and
-complete corresponding notices/source obligations.
+Image-based PNG/JPEG seal appearances remain supported. A seal appearance that
+is itself an embedded OFD document is skipped with an explicit warning while
+the document body is preserved; the project does not silently substitute an
+unreviewed renderer.
 
 ## Tesseract OCR and tessdata
 
@@ -48,7 +43,7 @@ complete corresponding notices/source obligations.
 - Runtime location in platform packages: `app/ocr/`
 - License: Apache License 2.0
 
-When explicitly enabled for local verification, packaging scripts obtain the engine from the operating-system package manager, copy its required native runtime, and include only the selected `eng`, `chi_sim`, `chi_sim_vert`, and supporting `osd` data. Windows model downloads are pinned to a source commit and verified by SHA-256 before packaging.
+When explicitly enabled for local verification, packaging scripts obtain the engine from the operating-system package manager, copy its required native runtime, and include only the selected `eng`, `chi_sim`, `chi_sim_vert`, and supporting `osd` data. Windows model downloads are pinned to a source commit and verified by SHA-256 before packaging. The official Windows x64 Lite package does not include this directory.
 
 Tesseract packages also depend on native libraries such as Leptonica and image
 codec/archive libraries. Those libraries vary by operating system package
@@ -73,10 +68,11 @@ corresponding-source review.
 
 ## Java Runtime
 
-Official release automation, when re-enabled, requires a Java 17 runtime from
-Eclipse Temurin/Adoptium and preserves its `legal/` tree. A locally detected
-Oracle or otherwise unreviewed JDK must not be reused as a public runtime
-bundle merely because `jlink` can process it.
+The official Windows x64 Lite build pins Eclipse Temurin 17.0.20.1+1, verifies
+the vendor and version, and preserves the complete `jlink` `legal/` tree. Its
+exact corresponding source archive and checksum are published beside the
+installer. A locally detected Oracle or otherwise unreviewed JDK must not be
+reused as a public runtime bundle merely because `jlink` can process it.
 
 ## Droid Sans Fallback
 
@@ -108,6 +104,16 @@ The complete upstream license is distributed beside the font as
 
 The PDF.js worker and viewer library are bundled with the frontend assets and do not load code or documents from a third-party CDN.
 
+## Vue.js
+
+- Package: `vue` 3.5.18
+- Source: `vuejs/core`
+- Runtime use: desktop renderer user interface
+- License: MIT
+
+The full Vue license is copied into the desktop package independently of the
+minified production assets.
+
 ## Electron and Chromium
 
 - Electron source: `electron/electron`
@@ -124,3 +130,20 @@ Electron is included only in desktop application packages. Its runtime carries t
 - License: MIT
 
 `electron-builder` is used only to assemble desktop artifacts and is not part of the application conversion engine.
+
+## NSIS
+
+- Source: `nsis-dev/nsis`
+- Installer compiler version: 3.12
+- electron-builder toolset: `nsis@1.2.1`
+- License used by the official installer path: zlib/libpng
+
+The exact NSIS source archive, checksum, full license text, and provenance
+record are published with the official installer. The release workflow pins
+the unified toolset bundle that supplies `makensis` 3.12 instead of the legacy
+3.0.4.1 bundle. Electron-builder only prepares `win-unpacked`; the final
+installer is compiled from the repository's tracked core-only script using
+zlib compression and built-in NSIS instructions. It does not contain StdUtils,
+UAC, WinShell, nsProcess, nsis7z, `elevate.exe`, the bzip2 module, or the LZMA
+module. Source linting, final-EXE archive inspection, extraction, and installed
+payload verification fail the release if a forbidden helper appears.

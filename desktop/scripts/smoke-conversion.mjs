@@ -2,6 +2,7 @@ import path from 'node:path'
 
 const debugPort = Number(process.argv[2] || 9227)
 const inputPath = path.resolve(process.argv[3] || 'test/fixtures/smoke.txt')
+const closeApplication = process.argv.includes('--close-app')
 const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
 async function waitForPageTarget() {
@@ -119,5 +120,11 @@ try {
   if (!result?.download?.startsWith('下载 ')) throw new Error(`转换未成功：${JSON.stringify(result)}`)
   console.log(JSON.stringify({ ...ready, ...result }, null, 2))
 } finally {
+  if (closeApplication) {
+    try {
+      await evaluate('window.close()')
+      await pause(250)
+    } catch { /* Closing the window may close CDP before it acknowledges the command. */ }
+  }
   socket.close()
 }

@@ -10,7 +10,15 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 
 项目基于 Java 17、Spring Boot、Vue 3、Apache POI、PDFBox、Poppler、OFDRW 和 LibreOffice headless。它不会承诺所有格式都能做到“完全一致且完全可编辑”，而是把转换能力拆成明确的路线、质量等级和失败原因，让结果可以被自动验证，也方便社区逐步增强。
 
-> 当前开放范围是源码与社区协作。自有源码采用 Apache-2.0；构建依赖继续适用各自许可证。公开二进制发布暂时停用，待运行时组件逐项完成来源、许可和再分发审核后再恢复，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。
+> 自有源码采用 Apache-2.0；构建依赖继续适用各自许可证。官方 Windows x64 Lite 桌面版通过独立的运行时来源、许可、哈希和安装后冒烟门禁发布，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。
+
+## 直接下载桌面版
+
+[下载 Fuyue Convert v0.1.4（Windows 10/11 x64）](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.4/Fuyue-Convert-0.1.4-win-x64.exe)
+
+安装包内置 Eclipse Temurin Java Runtime，安装后可直接运行，不需要另外安装 Java。完整文件、`SHA256SUMS`、许可证、对应源码和测试材料见 [v0.1.4 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.4)。
+
+这是 Lite 版：不内置 OCR/Tesseract、Poppler 或 LibreOffice；PDF 基础路线有内置回退，OCR 路线会显示不可用，Office 高保真路线会使用电脑上已有的 LibreOffice。首个公开版本尚未做商业代码签名，Windows 可能显示 SmartScreen 或“未知发布者”提示。macOS/Linux 桌面安装包尚未开放。
 
 ## 项目定位
 
@@ -31,7 +39,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 
 | 路线 | 状态 | 默认策略 | 说明 |
 | --- | --- | --- | --- |
-| OFD -> DOCX/TXT/PDF/PNG/JPG | beta | 结构/版式 | DOCX/TXT 使用结构化解析；含中日韩文字的 DOCX 嵌入已许可的回退字体，避免换机后文字不可见。未配置 OCR 时扫描页严格失败，配置本地 Tesseract 后对扫描图像补充坐标文字。PDF/PNG/JPEG 按源坐标绘制文字、图片、签章和路径；图片固定为 160 DPI，多页输出 ZIP。 |
+| OFD -> DOCX/TXT/PDF/PNG/JPG | beta | 结构/版式 | DOCX/TXT 使用结构化解析；含中日韩文字的 DOCX 嵌入已许可的回退字体，避免换机后文字不可见。未配置 OCR 时扫描页严格失败，配置本地 Tesseract 后对扫描图像补充坐标文字。PDF/PNG/JPEG 按源坐标绘制文字、图片、路径和普通图片型签章；嵌套 OFD 签章外观会明确警告并跳过，正文仍保留。图片固定为 160 DPI，多页输出 ZIP。 |
 | OFD -> XLSX | experimental | 数据优先 | 将高置信度有线规则表格写成真实单元格、分页工作表和合并区域；未识别到可靠表格返回 `NO_TABLE_FOUND`，扫描页返回 `OCR_REQUIRED`。 |
 | CSV <-> XLSX | stable | 数据优先 | CSV 支持 UTF-8/UTF-16 BOM/GB18030 与逗号、TAB、分号、竖线识别；输入统一写成文本以阻断公式注入。XLSX 公式导出缓存结果，日期按单元格格式输出，多工作表分别导出 CSV ZIP。 |
 | DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用隔离的 headless profile 转换，校验真实 PDF 页数；本地字体会影响结果。 |
@@ -121,16 +129,20 @@ npm ci
 npm run dev
 ```
 
-本地生成 Windows x64 NSIS 安装器用于开发验收：
+Windows x64 Lite 正式打包命令如下；普通用户请直接使用上面的 Release 安装包：
 
 ```powershell
 cd desktop
-npm ci
-$env:FORMAT_CONVERTER_BUNDLE_OCR = "true"
+npm ci --no-audit --no-fund
+$env:FORMAT_CONVERTER_BUNDLE_OCR = "false"
+$env:FORMAT_CONVERTER_PUBLIC_LITE_RELEASE = "true"
+$env:FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME = "true"
+$env:FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION = "17.0.20.1"
 npm run dist:win
+npm run verify:package -- --public-lite --require-installer
 ```
 
-桌面模式使用随机回环端口和每次启动随机生成的 API Token；Token 只由 Electron 主进程注入本地任务请求，不暴露给页面脚本。用户文件与任务数据写入系统 `userData` 目录，关闭窗口时会优先触发后端优雅关闭。上述本地安装器不得直接作为公开 Release 上传；二进制再分发恢复前必须通过完整许可证和运行时来源门禁。详细说明见 `desktop/README.md`。
+桌面模式使用随机回环端口和每次启动随机生成的 API Token；Token 只由 Electron 主进程注入本地任务请求，不暴露给页面脚本。用户文件与任务数据写入系统 `userData` 目录，关闭窗口时会优先触发后端优雅关闭。正式发布还会校验最终 EXE、静默安装后的真实资源、转换结果和退出后的残留进程；本地自行生成的安装器不属于官方发行版。详细说明见 [desktop/README.md](desktop/README.md)。
 
 ## 本地运行包构建
 
@@ -145,7 +157,7 @@ bash scripts/package-runtime.sh
 - macOS/Linux：`fuyue-convert-<version>-<os>-<arch>.tar.gz`，解压后运行 `start.command` 或 `bin/start.sh`。
 - Windows：在 Windows 本机运行 `scripts/package-runtime.ps1`。脚本不会自动复制构建机上的 Poppler；运行时可使用 PDFBox 回退或由用户显式配置系统 `pdftoppm`。
 
-> 公开二进制发布目前暂停。发布工作流默认拒绝执行，只有完成 fat JAR、JRE、OCR 原生库及可选 Poppler 的逐项许可/来源审核后，维护者才能显式开启。不要上传现有本地 `dist/` 或 `desktop/release/` 产物。
+> 这些通用运行包只用于本地开发验收，不属于官方公开下载。当前官方二进制仅为上方的 Windows x64 Lite 桌面安装包；不要上传本机已有的 `dist/` 或 `desktop/release/` 产物。
 
 启动后访问：
 
@@ -188,7 +200,7 @@ FORMAT_CONVERTER_RESULT_TTL=24h
 
 服务默认只监听 `127.0.0.1`。远程部署设置 `SERVER_ADDRESS=0.0.0.0` 时必须同时配置至少 32 个字符且不含首尾空白的 `FORMAT_CONVERTER_API_TOKEN`，否则服务拒绝启动；只有外层网络已严格隔离时才可显式设置 `FORMAT_CONVERTER_ALLOW_INSECURE_REMOTE=true`。生产环境还应使用 TLS 反向代理，并通过 `X-Format-Converter-Token` 或 Bearer Token 调用任务 API。服务会执行文件数、单文件、单任务总上传量、总输出量和数据盘安全水位检查；Worker 堆限制不替代 Docker/cgroup 或 systemd 的 CPU、总内存和进程数限制。
 
-二进制发布恢复后，Release 还必须附带与最终归档内容对账的 SBOM、`SHA256SUMS`、完整许可证、已知限制和测试报告；只生成依赖锁文件级 SBOM 不视为再分发审核完成。
+官方 Release 附带与最终安装内容对账的运行时组件清单、SBOM、`SHA256SUMS`、完整许可证、已知限制和测试报告；只生成依赖锁文件级 SBOM 不视为再分发审核完成。
 
 ## QA 验证
 

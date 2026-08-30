@@ -10,7 +10,15 @@ Fuyue Convert is an open-source document format conversion platform. It focuses 
 
 The project is built with Java 17, Spring Boot, Vue 3, Apache POI, PDFBox, Poppler, OFDRW, and LibreOffice headless. It does not promise that every format can be converted with perfect visual fidelity and full structural editability. Instead, each route has an explicit status, quality goal, and failure reason so results can be verified and improved by the community.
 
-> The current public scope is source code and community collaboration. Project-authored source is Apache-2.0; build dependencies remain under their own licenses. Public binary releases are paused until every bundled runtime component has reviewed provenance, licensing, and redistribution obligations. See [Third-Party Notices](THIRD_PARTY_NOTICES.md).
+> Project-authored source is Apache-2.0; build dependencies remain under their own licenses. The official Windows x64 Lite desktop build is released through dedicated provenance, license, hash, installed-payload, and smoke-test gates. See [Third-Party Notices](THIRD_PARTY_NOTICES.md).
+
+## Download the desktop app
+
+[Download Fuyue Convert v0.1.4 for Windows 10/11 x64](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.4/Fuyue-Convert-0.1.4-win-x64.exe)
+
+The installer includes an Eclipse Temurin Java Runtime, so no separate Java installation is required. See the [v0.1.4 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.4) for `SHA256SUMS`, licenses, corresponding source, and test evidence.
+
+This is a Lite build: OCR/Tesseract, Poppler, and LibreOffice are not bundled. Core PDF routes have a built-in fallback, OCR routes report unavailable, and high-fidelity Office routes use an existing local LibreOffice installation. The first public build is not commercially code-signed, so Windows may show SmartScreen or an unknown-publisher warning. macOS and Linux desktop installers are not yet published.
 
 ## Positioning
 
@@ -31,7 +39,7 @@ Status legend:
 
 | Route | Status | Default strategy | Notes |
 | --- | --- | --- | --- |
-| OFD -> DOCX/TXT/PDF/PNG/JPG | beta | structure/layout | DOCX and TXT use structured parsing. DOCX files containing CJK text embed a licensed fallback font so glyphs remain visible on another machine. Scanned pages fail when OCR is not configured; local Tesseract can add positioned text from scan images. PDF/PNG/JPEG paint text, images, seal appearances, and paths at source coordinates; multi-page images are zipped. |
+| OFD -> DOCX/TXT/PDF/PNG/JPG | beta | structure/layout | DOCX and TXT use structured parsing. DOCX files containing CJK text embed a licensed fallback font so glyphs remain visible on another machine. Scanned pages fail when OCR is not configured; local Tesseract can add positioned text from scan images. PDF/PNG/JPEG paint text, images, paths, and ordinary image-based seals at source coordinates. Embedded-OFD seal appearances are skipped with an explicit warning while body content is preserved. Multi-page images are zipped. |
 | OFD -> XLSX | experimental | data first | Writes high-confidence bordered grid tables as real cells, per-page worksheets, and merged regions. It returns `NO_TABLE_FOUND` when no reliable table is found and `OCR_REQUIRED` for scanned pages. |
 | CSV <-> XLSX | stable | data first | CSV supports UTF-8, BOM-marked UTF-16, GB18030, and comma/TAB/semicolon/pipe detection. Inputs stay text to prevent formula injection. XLSX exports cached formula results, formatted dates, and multi-sheet CSV ZIPs. |
 | DOCX/XLSX/PPTX -> PDF | beta | layout first | Uses an isolated LibreOffice headless profile when available and validates the actual PDF page count. Local fonts affect visual output. |
@@ -123,9 +131,9 @@ npm ci --no-audit --no-fund
 npm run dev
 ```
 
-Windows x64 NSIS builds are currently for local engineering validation only.
-Do not upload a locally generated installer as a public release until the binary
-license/provenance gate is complete. See [desktop/README.md](desktop/README.md).
+The official Windows x64 Lite installer is produced by the audited tag workflow.
+Locally generated installers are development artifacts and are not official
+releases. See [desktop/README.md](desktop/README.md).
 
 ## Local Runtime Package Build
 
@@ -140,7 +148,7 @@ Generated files are placed under `dist/`:
 - macOS/Linux: `fuyue-convert-<version>-<os>-<arch>.tar.gz`, then run `start.command` or `bin/start.sh`.
 - Windows: run `scripts/package-runtime.ps1` locally. The script no longer copies an arbitrary Poppler installation from the build machine; use the PDFBox fallback or explicitly configure a system `pdftoppm` at runtime.
 
-> Public binary releases are paused and the release workflow is fail-closed. Maintainers may re-enable it only after reviewing the fat JAR, JRE, OCR native libraries, optional Poppler, checksums, notices, and source obligations. Do not upload existing local `dist/` or `desktop/release/` artifacts.
+> These generic runtime packages are for local engineering validation and are not official public downloads. The current official binary is the Windows x64 Lite desktop installer linked above. Do not upload existing local `dist/` or `desktop/release/` artifacts.
 
 After startup, open:
 

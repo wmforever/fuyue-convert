@@ -11,9 +11,12 @@ const repositoryRoot = path.resolve(desktopDirectory, '..')
 const destination = path.join(desktopDirectory, '.runtime', 'backend')
 const argumentsSet = new Set(process.argv.slice(2))
 const skipBuild = argumentsSet.has('--skip-build')
+const publicLiteRelease = ['true', '1'].includes(
+  (process.env.FORMAT_CONVERTER_PUBLIC_LITE_RELEASE || '').toLowerCase()
+)
 
 if (argumentsSet.has('--help')) {
-  console.log(`用法: node scripts/stage-backend.mjs [--skip-build]\n\n环境变量:\n  FORMAT_CONVERTER_RUNTIME_HOME   已生成的 jlink Runtime\n  FORMAT_CONVERTER_OCR_HOME       可选 OCR 目录\n  FORMAT_CONVERTER_POPPLER_HOME   可选 Poppler 目录`)
+  console.log(`用法: node scripts/stage-backend.mjs [--skip-build]\n\n环境变量:\n  FORMAT_CONVERTER_RUNTIME_HOME          已生成的 jlink Runtime\n  FORMAT_CONVERTER_OCR_HOME              可选 OCR 目录\n  FORMAT_CONVERTER_POPPLER_HOME          可选 Poppler 目录\n  FORMAT_CONVERTER_PUBLIC_LITE_RELEASE   正式 Lite 发布门禁（禁止 OCR/Poppler）`)
   process.exit(0)
 }
 
@@ -104,6 +107,10 @@ async function verifyRuntime(runtimeTarget) {
   if (releaseRuntimeRequired && !/java\.vendor\s*=\s*Eclipse Adoptium(?:\s|$)/i.test(output)) {
     throw new Error('正式发布只允许使用 Eclipse Temurin/Adoptium Java Runtime')
   }
+  const requiredVersion = (process.env.FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION || '').trim()
+  if (requiredVersion && !output.includes(`java.version = ${requiredVersion}`)) {
+    throw new Error(`Java Runtime 版本必须是 ${requiredVersion}`)
+  }
 }
 
 async function stageOcr(target) {
@@ -122,7 +129,38 @@ async function stageOcr(target) {
   }
 }
 
+function assertPublicLiteRelease() {
+  if (!publicLiteRelease) return
+  const bundleOcr = ['true', '1'].includes((process.env.FORMAT_CONVERTER_BUNDLE_OCR || '').toLowerCase())
+  if (bundleOcr || process.env.FORMAT_CONVERTER_OCR_HOME || process.env.FORMAT_CONVERTER_POPPLER_HOME) {
+    throw new Error('公开 Lite 发布不得捆绑 OCR 或 Poppler Runtime')
+  }
+  if (!['true', '1'].includes((process.env.FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME || '').toLowerCase())) {
+    throw new Error('公开 Lite 发布必须启用 Temurin Runtime 门禁')
+  }
+  if ((process.env.FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION || '').trim() !== '17.0.20.1') {
+    throw new Error('公开 Lite v0.1.4 必须锁定 Temurin 17.0.20.1+1')
+  }
+}
+
+async function stageLicenses() {
+  const licenses = path.join(destination, 'licenses')
+  await mkdir(licenses, { recursive: true })
+  await copyRequired(path.join(repositoryRoot, 'LICENSE'), path.join(licenses, 'FUYUE-CONVERT-APACHE-2.0.txt'), '项目许可证')
+  await copyRequired(path.join(repositoryRoot, 'THIRD_PARTY_NOTICES.md'), path.join(licenses, 'THIRD-PARTY-NOTICES.md'), '第三方声明')
+  await copyRequired(path.join(repositoryRoot, 'frontend', 'node_modules', 'vue', 'LICENSE'), path.join(licenses, 'VUE-MIT.txt'), 'Vue 许可证')
+  await copyRequired(path.join(repositoryRoot, 'frontend', 'node_modules', 'pdfjs-dist', 'LICENSE'), path.join(licenses, 'PDFJS-APACHE-2.0.txt'), 'PDF.js 许可证')
+  await copyRequired(path.join(repositoryRoot, 'task-service', 'src', 'main', 'resources', 'fonts', 'DroidSansFallback-NOTICE.txt'), path.join(licenses, 'DROID-SANS-FALLBACK-NOTICE.txt'), 'Droid Sans Fallback 声明')
+  await copyRequired(path.join(repositoryRoot, 'task-service', 'src', 'main', 'resources', 'fonts', 'LiberationSans-LICENSE.txt'), path.join(licenses, 'LIBERATION-SANS-OFL-1.1.txt'), 'Liberation Sans 许可证')
+  if (publicLiteRelease) {
+    await copyRequired(path.join(desktopDirectory, 'licenses', 'TEMURIN-RUNTIME.txt'), path.join(licenses, 'TEMURIN-RUNTIME.txt'), 'Temurin 来源记录')
+    await copyRequired(path.join(desktopDirectory, 'licenses', 'NSIS-LICENSE.txt'), path.join(licenses, 'NSIS-LICENSE.txt'), 'NSIS 许可证')
+    await copyRequired(path.join(desktopDirectory, 'licenses', 'NSIS-PROVENANCE.txt'), path.join(licenses, 'NSIS-PROVENANCE.txt'), 'NSIS 来源记录')
+  }
+}
+
 async function main() {
+  assertPublicLiteRelease()
   const version = await projectVersion()
   await assertVersionSync(version)
   const maven = process.env.MAVEN_BIN || (process.platform === 'win32' ? 'mvn.cmd' : 'mvn')
@@ -138,6 +176,13 @@ async function main() {
   await copyRequired(path.join(repositoryRoot, 'THIRD_PARTY_NOTICES.md'), path.join(destination, 'THIRD_PARTY_NOTICES.md'), '第三方声明')
   await stageRuntime(path.join(destination, 'runtime'))
   await verifyRuntime(path.join(destination, 'runtime'))
+  await stageLicenses()
+  if (publicLiteRelease) {
+    await run(process.execPath, [
+      path.join(scriptDirectory, 'generate-runtime-manifest.mjs'),
+      '--public-lite'
+    ], desktopDirectory)
+  }
 
   await stageOcr(path.join(destination, 'app', 'ocr'))
   await copyOptional(process.env.FORMAT_CONVERTER_POPPLER_HOME, path.join(destination, 'app', 'poppler'), 'Poppler Runtime')

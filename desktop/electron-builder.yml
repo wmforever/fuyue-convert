@@ -1,6 +1,8 @@
 appId: com.fuyue.formatconverter
 productName: Fuyue Convert
 artifactName: Fuyue-Convert-${version}-${os}-${arch}.${ext}
+toolsets:
+  nsis: "1.2.1"
 asar: true
 electronFuses:
   runAsNode: false
@@ -25,7 +27,7 @@ extraResources:
     to: licenses/LICENSES.chromium.html
 win:
   target:
-    - target: nsis
+    - target: dir
       arch:
         - x64
   icon: assets/icon.png
@@ -35,13 +37,4 @@ mac:
     - dir
   icon: assets/icon.png
   category: public.app-category.productivity
-nsis:
-  oneClick: false
-  perMachine: false
-  allowElevation: true
-  allowToChangeInstallationDirectory: true
-  createDesktopShortcut: always
-  createStartMenuShortcut: true
-  shortcutName: Fuyue Convert
-  deleteAppDataOnUninstall: false
 publish: null

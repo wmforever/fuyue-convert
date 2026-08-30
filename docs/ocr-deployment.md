@@ -1,6 +1,6 @@
 # OCR 运行方式
 
-OCR 仍是 Tesseract 原生进程，不是 JDK、PDFBox 或 OFDRW 提供的继承能力。源码运行可使用系统 Tesseract，本地构建脚本也能暂存引擎、动态库和语言模型；但公开二进制发布目前暂停，原生依赖逐项许可与来源审核完成前，不得分发这些暂存产物。
+OCR 仍是 Tesseract 原生进程，不是 JDK、PDFBox 或 OFDRW 提供的继承能力。源码运行可使用系统 Tesseract，本地构建脚本也能暂存引擎、动态库和语言模型；官方 Windows x64 Lite 桌面版明确不内置 OCR。原生依赖逐项许可与来源审核完成前，不得把本地暂存的 OCR 目录作为公开发行物分发。
 
 ## 各运行方式
 
@@ -54,7 +54,7 @@ $env:FORMAT_CONVERTER_BUNDLE_OCR = "true"
 
 `prepare-ocr-runtime.sh`/`.ps1` 会复制平台二进制、动态库、选定模型和 TSV 配置，然后用复制后的引擎执行 `--version`、`--list-langs` 自检。缺少任何必需文件时打包直接失败。可通过 `FORMAT_CONVERTER_BUNDLED_OCR_LANGUAGES` 调整模型集合，默认是 `eng chi_sim chi_sim_vert`。功能自检不等于再分发许可审核，生成目录只能用于本地开发验收。
 
-发布 Workflow 虽能显式安装各平台 Tesseract，并对 Windows 模型固定提交和验证 SHA-256，但整个发布 job 默认被 `FORMAT_CONVERTER_BINARY_RELEASE_APPROVED` 门禁禁用。恢复发布前必须为 Tesseract、Leptonica 及复制的每个原生库补齐固定版本、来源、哈希、许可证文本和必要源码义务；`ocr.bundled=true` 只证明功能发现成功，不代表许可审核完成。
+官方 Lite 发布 Workflow 强制 `FORMAT_CONVERTER_BUNDLE_OCR=false`，并校验安装后目录不存在 OCR Runtime。若未来恢复带 OCR 的发行物，必须先为 Tesseract、Leptonica 及复制的每个原生库补齐固定版本、来源、哈希、许可证文本和必要源码义务；`ocr.bundled=true` 只证明功能发现成功，不代表许可审核完成。
 
 ## 系统引擎回退
 

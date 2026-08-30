@@ -1,0 +1,68 @@
+NSIS installer plug-in and helper notices
+=========================================
+
+This inventory describes native code used by electron-builder's nsis@1.2.1
+toolset. It does not change or replace the upstream license terms. The exact
+source archives and checksums below must be published beside any installer
+that contains the corresponding native code.
+
+StdUtils 1.14 (build 2018-10-27)
+--------------------------------
+Copyright: LoRd_MuldeR and contributors
+License: GNU Lesser General Public License 2.1 or later, with the author's
+LGPL clarification shipped in the upstream archive. The DLL is used as an
+unmodified, separately extracted NSIS plug-in.
+Upstream page: https://nsis.sourceforge.io/StdUtils_plug-in
+Source archive: https://github.com/lordmulder/stdutils/releases/download/1.14/StdUtils.2018-10-27.zip
+SHA-256: 3ffe893dc7477fdb1cac551a86ae017509e1f2d0ebdc7185fd0fbaf20870688c
+Required archive members: LGPL.txt, LGPL_CLARIFICATION.txt and
+Contrib/StdUtils/StdUtils.2018-10-27.Sources.tar
+
+UAC plug-in 0.2.4c (2015-05-26)
+--------------------------------
+Copyright: Anders Kjersem
+License: zlib/libpng license (see License.txt in the upstream archive)
+Upstream page: https://nsis.sourceforge.io/UAC_plug-in
+Source archive: https://nsis.sourceforge.io/mediawiki/images/8/8f/UAC.zip
+SHA-256: 20e3192af5598568887c16d88de59a52c2ce4a26e42c5fb8bee8105dcbbd1760
+
+WinShell plug-in 20121005
+-------------------------
+Copyright: Anders and contributors
+Declared terms: the upstream page says only "License: Freeware". The archive
+contains DLLs but no license or source. Do not infer an SPDX license.
+Upstream page: https://nsis.sourceforge.io/WinShell_plug-in
+Upstream archive: https://nsis.sourceforge.io/mediawiki/images/5/54/WinShell.zip
+SHA-256: 34e111f8aacf64c540d848fd06b9d6f3e2c10cb825ec9329a01d1141973e749b
+Release status: BLOCKED until explicit redistribution approval or replacement.
+
+nsProcess plug-in 1.6
+---------------------
+Copyright: Shengalts Aleksander (brainsucker) and contributors
+Declared terms: the archive contains source but no project-level license;
+NSIS api.h carries zlib terms. Do not infer a project-wide SPDX license.
+Upstream page: https://nsis.sourceforge.io/NsProcess_plugin
+Source archive: https://nsis.sourceforge.io/mediawiki/images/1/18/NsProcess.zip
+SHA-256: fc19fc66a5219a233570fafd5daeb0c9b85387b379f6df5ac8898159a57c5944
+Release status: BLOCKED until the applicable project license is confirmed.
+
+nsis7z 19.00
+-------------
+Copyright: brainsucker/Nik Medved, Marek Mizanin, Stuart Welch, Igor Pavlov,
+and contributors
+Declared terms: DOC/nsis7z.txt says the plug-in is under the "LGPL license"
+without identifying a version. DOC/License.txt describes the LZMA SDK as
+public domain. Do not select a specific LGPL version without confirmation.
+Upstream page: https://nsis.sourceforge.io/Nsis7z_plug-in
+Source archive: https://nsis.sourceforge.io/mediawiki/images/6/69/Nsis7z_19.00.7z
+SHA-256: 6f2f3730049926f40442ee0c8b7d3e3dee7ace544d82467ff8059ea3f4201c58
+Release status: BLOCKED until the applicable LGPL version is confirmed.
+
+elevate.exe 1.3.0 (optional Electron helper)
+--------------------------------------------
+Copyright (c) 2011 Kai Liu. All rights reserved.
+License: BSD 2-Clause. The full upstream notice must accompany the binary.
+Source archive: https://code.kliu.org/misc/elevate/elevate-1.3.0-redist.7z
+SHA-256: b1b3f070353a0eadee2cea3a575049d10df9763ff24e39313da4cec9455382e1
+The public Lite package should set nsis.packElevateHelper=false and verify that
+elevate.exe is absent unless this notice and source archive are shipped.

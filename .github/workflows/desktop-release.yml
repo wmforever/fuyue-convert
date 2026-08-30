@@ -1,0 +1,274 @@
+name: Release Windows desktop
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # setup-java uses Adoptium's SemVer form; this resolves exactly to
+  # OpenJDK 17.0.20.1+1 (the API reports semver 17.0.20+101).
+  TEMURIN_VERSION: "17.0.20+101"
+  TEMURIN_RUNTIME_VERSION: "17.0.20.1"
+
+jobs:
+  package:
+    name: Package Windows x64 desktop
+    # This repository variable is a deliberate maintainer-controlled release
+    # switch. Keep it false except while publishing an audited tag.
+    if: >-
+      vars.FORMAT_CONVERTER_BINARY_RELEASE_APPROVED == 'true' &&
+      vars.FORMAT_CONVERTER_BINARY_RELEASE_APPROVED_SHA == github.sha
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Verify tag and application version
+        shell: pwsh
+        run: |
+          $Desktop = Get-Content desktop\package.json -Raw | ConvertFrom-Json
+          if ("v$($Desktop.version)" -ne $env:GITHUB_REF_NAME) {
+            throw "Tag $env:GITHUB_REF_NAME does not match desktop version $($Desktop.version)"
+          }
+
+      - name: Set up pinned Temurin 17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.TEMURIN_VERSION }}
+          architecture: x64
+          java-package: jdk
+          check-latest: false
+          verify-signature: true
+          cache: maven
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        shell: pwsh
+        run: npm ci --no-audit --no-fund
+
+      - name: Check desktop sources
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          npm run check
+          npm test
+
+      - name: Package public Lite installer
+        working-directory: desktop
+        shell: pwsh
+        env:
+          FORMAT_CONVERTER_BUNDLE_OCR: "false"
+          FORMAT_CONVERTER_PUBLIC_LITE_RELEASE: "true"
+          FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME: "true"
+          FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION: ${{ env.TEMURIN_RUNTIME_VERSION }}
+        run: npm run dist:win
+
+      - name: Inspect final installer archive
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $Installer = Get-ChildItem release\Fuyue-Convert-*-win-x64.exe | Select-Object -First 1
+          if (-not $Installer) { throw "NSIS installer not found" }
+          $SevenZip = (Get-Command 7z.exe -ErrorAction Stop).Source
+          $Listing = Join-Path $Installer.DirectoryName "$($Installer.BaseName)-7z-listing.txt"
+          & $SevenZip l -slt $Installer.FullName 2>&1 | Tee-Object -FilePath $Listing
+          if ($LASTEXITCODE -ne 0) { throw "7-Zip could not list the final installer" }
+          $Forbidden = @(
+            "elevate.exe", "nsis7z.dll", "nsprocess.dll", "nsprocessw.dll",
+            "stdutils.dll", "uac.dll", "winshell.dll"
+          )
+          $ListedViolations = Get-Content $Listing | ForEach-Object {
+            if ($_ -match '^Path = (.+)$') { [IO.Path]::GetFileName($Matches[1]).ToLowerInvariant() }
+          } | Where-Object { $_ -in $Forbidden }
+          if ($ListedViolations) {
+            throw "Final installer embeds forbidden NSIS components: $($ListedViolations -join ', ')"
+          }
+          $Extracted = Join-Path $env:RUNNER_TEMP "fuyue-installer-7z"
+          Remove-Item $Extracted -Recurse -Force -ErrorAction SilentlyContinue
+          try {
+            & $SevenZip x -y "-o$Extracted" $Installer.FullName | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw "7-Zip could not extract the final installer" }
+            $ExtractedViolations = Get-ChildItem $Extracted -File -Recurse | Where-Object {
+              $_.Name.ToLowerInvariant() -in $Forbidden
+            }
+            if ($ExtractedViolations) {
+              throw "Extracted installer contains forbidden NSIS components: $($ExtractedViolations.FullName -join ', ')"
+            }
+          } finally {
+            Remove-Item $Extracted -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+      - name: Verify unpacked application and installer
+        working-directory: desktop
+        shell: pwsh
+        run: npm run verify:package -- --public-lite --require-installer
+
+      - name: Verify installed application payload
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $Installer = Get-ChildItem release\Fuyue-Convert-*-win-x64.exe | Select-Object -First 1
+          if (-not $Installer) { throw "NSIS installer not found" }
+          $InstallDir = Join-Path $env:LOCALAPPDATA "Programs\Fuyue Convert"
+          $OverrideDir = Join-Path $env:RUNNER_TEMP "fuyue-untrusted-install-override"
+          $AppProcess = $null
+          Remove-Item $InstallDir -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item $OverrideDir -Recurse -Force -ErrorAction SilentlyContinue
+          try {
+            $Install = Start-Process -FilePath $Installer.FullName -ArgumentList @("/S", "/D=$OverrideDir") -Wait -PassThru
+            if ($Install.ExitCode -ne 0) { throw "Silent installer failed with exit code $($Install.ExitCode)" }
+            if (Test-Path (Join-Path $OverrideDir "Fuyue Convert.exe")) {
+              throw "Installer accepted an untrusted /D target"
+            }
+            node scripts/verify-packaged.mjs (Join-Path $InstallDir "resources") --public-lite
+            if ($LASTEXITCODE -ne 0) { throw "Installed payload verification failed" }
+            $Executable = Join-Path $InstallDir "Fuyue Convert.exe"
+            if (-not (Test-Path $Executable)) { throw "Installed desktop executable not found" }
+            $AppProcess = Start-Process -FilePath $Executable -ArgumentList "--remote-debugging-port=9227" -PassThru
+            node scripts/smoke-conversion.mjs 9227 test\fixtures\smoke.txt --close-app
+            if ($LASTEXITCODE -ne 0) { throw "Installed desktop conversion smoke test failed" }
+            if (-not $AppProcess.WaitForExit(45000)) { throw "Desktop application did not exit gracefully" }
+            Start-Sleep -Seconds 2
+            $Residual = Get-CimInstance Win32_Process | Where-Object {
+              $_.ExecutablePath -and $_.ExecutablePath.StartsWith($InstallDir, [System.StringComparison]::OrdinalIgnoreCase)
+            }
+            if ($Residual) { throw "Installed application left residual processes: $($Residual.ProcessId -join ', ')" }
+          } finally {
+            if ($AppProcess -and -not $AppProcess.HasExited) {
+              Stop-Process -Id $AppProcess.Id -Force -ErrorAction SilentlyContinue
+            }
+            Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+              $_.ExecutablePath -and $_.ExecutablePath.StartsWith($InstallDir, [System.StringComparison]::OrdinalIgnoreCase)
+            } | ForEach-Object {
+              Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+            }
+            $Uninstaller = Get-ChildItem $InstallDir -Filter "Uninstall*.exe" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+            if (-not $Uninstaller) { throw "Installed application did not contain its uninstaller" }
+            $Uninstall = Start-Process -FilePath $Uninstaller.FullName -ArgumentList "/S" -Wait -PassThru
+            if ($Uninstall.ExitCode -ne 0) { throw "Silent uninstaller failed with exit code $($Uninstall.ExitCode)" }
+            for ($Attempt = 0; $Attempt -lt 20 -and (Test-Path $InstallDir); $Attempt++) {
+              Start-Sleep -Milliseconds 250
+            }
+            if (Test-Path $InstallDir) { throw "Uninstaller left the installation directory behind" }
+            Remove-Item $OverrideDir -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+      - name: Export audited runtime metadata
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $Version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $BaseName = "Fuyue-Convert-$Version-win-x64"
+          $Publish = "release\publish"
+          Remove-Item $Publish -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item $Publish -ItemType Directory -Force | Out-Null
+          Copy-Item "release\$BaseName.exe" $Publish
+          Copy-Item "release\$BaseName-7z-listing.txt" $Publish
+          Copy-Item release\win-unpacked\resources\backend\RUNTIME-COMPONENTS.json $Publish
+          Copy-Item release\win-unpacked\resources\backend\licenses\THIRD-PARTY-LICENSES.txt $Publish
+
+      - name: Upload Windows desktop installer and audit evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: fuyue-convert-Windows-x64-desktop
+          path: desktop/release/publish/
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    runs-on: ubuntu-latest
+    needs: package
+    if: >-
+      startsWith(github.ref, 'refs/tags/v') &&
+      vars.FORMAT_CONVERTER_BINARY_RELEASE_APPROVED == 'true' &&
+      vars.FORMAT_CONVERTER_BINARY_RELEASE_APPROVED_SHA == github.sha
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up JDK
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.TEMURIN_VERSION }}
+          architecture: x64
+          java-package: jdk
+          check-latest: false
+          verify-signature: true
+          cache: maven
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+
+      - name: Download Windows installer
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: fuyue-convert-Windows-x64-desktop
+          path: dist-assets
+
+      - name: Add exact Temurin corresponding source
+        run: |
+          curl --fail --location --retry 3 \
+            'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jdk-sources_17.0.20.1_1.tar.gz' \
+            --output dist-assets/OpenJDK17U-jdk-sources_17.0.20.1_1.tar.gz
+          echo '21e2a065d244ab048e737f21af5d1fc74daaeb6707de36477ead8db1dca71214  dist-assets/OpenJDK17U-jdk-sources_17.0.20.1_1.tar.gz' | sha256sum -c -
+
+      - name: Add exact NSIS corresponding source
+        run: |
+          curl --fail --location --retry 3 \
+            'https://github.com/nsis-dev/nsis/archive/refs/tags/v312.tar.gz' \
+            --output dist-assets/nsis-3.12-source.tar.gz
+          echo '5ee95daa11e3c3a40581cf9824598b5871048942d0ed802561c321621624fe8e  dist-assets/nsis-3.12-source.tar.gz' | sha256sum -c -
+
+      - name: Generate release metadata and checksums
+        run: |
+          mvn -B -ntp -DskipTests -Dskip.frontend=true org.cyclonedx:cyclonedx-maven-plugin:2.9.2:makeAggregateBom -DoutputFormat=json -DoutputName=fuyue-convert-java-sbom -DoutputDirectory="$GITHUB_WORKSPACE/dist-assets" -Dcyclonedx.skipAttach=true
+          cd frontend
+          npm sbom --package-lock-only --sbom-format cyclonedx --sbom-type application > ../dist-assets/fuyue-convert-frontend-sbom.json
+          cd ..
+          cd desktop
+          npm sbom --package-lock-only --sbom-format cyclonedx --sbom-type application > ../dist-assets/fuyue-convert-desktop-sbom.json
+          cd ..
+          cp LICENSE dist-assets/FUYUE-CONVERT-LICENSE.txt
+          cp THIRD_PARTY_NOTICES.md dist-assets/THIRD-PARTY-NOTICES.md
+          cp desktop/licenses/TEMURIN-RUNTIME.txt dist-assets/TEMURIN-RUNTIME.txt
+          cp desktop/licenses/NSIS-LICENSE.txt dist-assets/NSIS-LICENSE.txt
+          cp desktop/licenses/NSIS-PROVENANCE.txt dist-assets/NSIS-PROVENANCE.txt
+          cp docs/known-limitations.md dist-assets/KNOWN-LIMITATIONS.md
+          cp docs/test-report.md dist-assets/TEST-REPORT.md
+          python3 -m json.tool dist-assets/fuyue-convert-java-sbom.json >/dev/null
+          python3 -m json.tool dist-assets/fuyue-convert-frontend-sbom.json >/dev/null
+          python3 -m json.tool dist-assets/fuyue-convert-desktop-sbom.json >/dev/null
+          cd dist-assets
+          for file in *; do if [ -f "$file" ] && [ "$file" != SHA256SUMS ]; then sha256sum "$file"; fi; done > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish release with directly downloadable installer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist-assets/* --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --generate-notes
