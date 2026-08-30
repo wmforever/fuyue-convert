@@ -1,0 +1,31 @@
+.git
+.github
+.idea
+.vscode
+.DS_Store
+*.iml
+*.log
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+tmp
+
+**/target
+target-release
+dist
+data
+logs
+
+frontend/node_modules
+frontend/dist
+desktop
+
+# The full QA corpus is local-only until every sample has documented
+# provenance, redistribution permission, and a completed privacy review.
+qa-samples

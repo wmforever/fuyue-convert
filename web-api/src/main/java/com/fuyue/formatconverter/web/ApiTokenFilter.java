@@ -19,10 +19,11 @@ public final class ApiTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        boolean protectedApi = "/api/tasks".equals(uri) || uri.startsWith("/api/tasks/")
-                || "/api/desktop".equals(uri) || uri.startsWith("/api/desktop/");
-        return apiToken.isBlank() || !protectedApi;
+        // FilterRegistrationBean maps this filter only to protected API URL
+        // patterns. Once the container selects it, never reinterpret the path:
+        // servlet context paths and matrix parameters may be normalized
+        // differently by Spring MVC and must not create an authentication gap.
+        return apiToken.isBlank();
     }
 
     @Override

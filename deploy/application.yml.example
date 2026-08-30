@@ -31,9 +31,12 @@ format-converter:
   worker-max-memory-mb: 768
   # 留空时使用当前 Runtime 中的 java。
   worker-java-binary: ""
-  # 官方运行包会自动发现并启用 app/ocr 内置能力；设置
+  # 本地运行包会自动发现 app/ocr 暂存能力；公开发布恢复前不得分发该目录。设置
   # FORMAT_CONVERTER_OCR_ENABLED=false 可强制关闭。源码/独立 JAR 使用系统
   # Tesseract 时，需设置 FORMAT_CONVERTER_OCR_ENABLED=true。
   # 建议生产值：FORMAT_CONVERTER_OCR_MAX_CONCURRENCY=1、FORMAT_CONVERTER_OCR_TIMEOUT_SECONDS=120，并保留 worker 进程隔离。
-  # 留空表示不启用 API Token。公网部署建议设置，并通过 X-Format-Converter-Token 或 Bearer Token 调用 /api/tasks。
+  # 留空表示不启用 API Token，仅允许回环监听。非回环监听必须设置至少 32 个字符且不含首尾空白的值，并通过 X-Format-Converter-Token 或 Bearer Token 调用 /api/tasks。
   api-token: ""
+  # 非回环监听且未配置 API Token 时，服务默认拒绝启动。
+  # 只有外层网络已严格隔离时才显式改为 true。
+  allow-insecure-remote: false

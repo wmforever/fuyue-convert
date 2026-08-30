@@ -98,6 +98,12 @@ async function verifyRuntime(runtimeTarget) {
   if (process.platform === 'win32' && !/os\.arch\s*=\s*(?:amd64|x86_64)(?:\s|$)/i.test(output)) {
     throw new Error('Windows 桌面 Runtime 必须是 x64')
   }
+  const releaseRuntimeRequired = ['true', '1'].includes(
+    (process.env.FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME || '').toLowerCase()
+  )
+  if (releaseRuntimeRequired && !/java\.vendor\s*=\s*Eclipse Adoptium(?:\s|$)/i.test(output)) {
+    throw new Error('正式发布只允许使用 Eclipse Temurin/Adoptium Java Runtime')
+  }
 }
 
 async function stageOcr(target) {

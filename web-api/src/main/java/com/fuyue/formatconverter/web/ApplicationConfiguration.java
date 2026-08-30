@@ -18,12 +18,24 @@ public class ApplicationConfiguration {
     @Bean
     FilterRegistrationBean<ApiTokenFilter> apiTokenFilter(FormatConverterProperties properties,
                                                            Environment environment) {
-        validateDesktopMode(properties, environment.getProperty("server.address", ""));
+        String serverAddress = environment.getProperty("server.address", "");
+        validateNetworkExposure(properties, serverAddress);
+        validateDesktopMode(properties, serverAddress);
         FilterRegistrationBean<ApiTokenFilter> bean = new FilterRegistrationBean<>();
         bean.setFilter(new ApiTokenFilter(properties.getApiToken()));
         bean.addUrlPatterns("/api/tasks", "/api/tasks/*", "/api/desktop", "/api/desktop/*");
         bean.setOrder(1);
         return bean;
+    }
+
+    static void validateNetworkExposure(FormatConverterProperties properties, String serverAddress) {
+        if (isLoopbackAddress(serverAddress)) return;
+        String token = properties.getApiToken();
+        if (token != null && token.strip().length() >= 32 && token.equals(token.strip())) return;
+        if (properties.isAllowInsecureRemote()) return;
+        throw new IllegalStateException(
+                "非回环监听必须配置至少 32 个字符且不含首尾空白的 FORMAT_CONVERTER_API_TOKEN；"
+                        + "仅在外层网络已严格隔离时才可显式设置 FORMAT_CONVERTER_ALLOW_INSECURE_REMOTE=true");
     }
 
     static void validateDesktopMode(FormatConverterProperties properties, String serverAddress) {
@@ -35,13 +47,17 @@ public class ApplicationConfiguration {
         if (properties.getDesktopParentPid() <= 0) {
             throw new IllegalStateException("桌面模式必须配置有效的父进程 PID");
         }
+        if (!isLoopbackAddress(serverAddress)) {
+            throw new IllegalStateException("桌面模式仅允许监听回环地址");
+        }
+    }
+
+    private static boolean isLoopbackAddress(String serverAddress) {
+        if (serverAddress == null || serverAddress.isBlank()) return false;
         try {
-            if (serverAddress == null || serverAddress.isBlank()
-                    || !InetAddress.getByName(serverAddress.strip()).isLoopbackAddress()) {
-                throw new IllegalStateException("桌面模式仅允许监听回环地址");
-            }
+            return InetAddress.getByName(serverAddress.strip()).isLoopbackAddress();
         } catch (IOException invalidAddress) {
-            throw new IllegalStateException("桌面模式仅允许监听回环地址", invalidAddress);
+            throw new IllegalStateException("无法解析服务监听地址：" + serverAddress, invalidAddress);
         }
     }
 

@@ -39,6 +39,7 @@ format-converter:
   office-required-version: ${FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION:}
   office-timeout: ${FORMAT_CONVERTER_OFFICE_TIMEOUT:2m}
   api-token: ${FORMAT_CONVERTER_API_TOKEN:}
+  allow-insecure-remote: ${FORMAT_CONVERTER_ALLOW_INSECURE_REMOTE:false}
   auto-open-browser: ${FORMAT_CONVERTER_AUTO_OPEN_BROWSER:false}
   desktop-mode: ${FORMAT_CONVERTER_DESKTOP_MODE:false}
   desktop-parent-pid: ${FORMAT_CONVERTER_DESKTOP_PARENT_PID:-1}

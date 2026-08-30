@@ -68,6 +68,13 @@ else
   exit 1
 fi
 
+if [[ "${FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME:-false}" == "true" || "${FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME:-false}" == "1" ]]; then
+  if ! "$RUNTIME_DIR/bin/java" -XshowSettings:properties -version 2>&1 | grep -Eq 'java\.vendor[[:space:]]*=[[:space:]]*Eclipse Adoptium'; then
+    echo "正式发布只允许使用 Eclipse Temurin/Adoptium Java Runtime" >&2
+    exit 1
+  fi
+fi
+
 cat > "$PACKAGE_DIR/bin/start.sh" <<'SH'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -97,7 +104,18 @@ chmod +x "$PACKAGE_DIR/start.command"
 (
   cd "$DIST_DIR"
   rm -f "$PACKAGE_NAME.tar.gz"
-  tar -czf "$PACKAGE_NAME.tar.gz" "$PACKAGE_NAME"
+  if tar --version 2>/dev/null | grep -q "GNU tar"; then
+    tar --sort=name \
+      --mtime="@${SOURCE_DATE_EPOCH:-0}" \
+      --owner=0 --group=0 --numeric-owner \
+      -czf "$PACKAGE_NAME.tar.gz" "$PACKAGE_NAME"
+  else
+    # bsdtar is used by macOS. Override archive ownership so release
+    # metadata never exposes the local build account or group.
+    COPYFILE_DISABLE=1 tar \
+      --uid 0 --gid 0 --uname root --gname root \
+      -czf "$PACKAGE_NAME.tar.gz" "$PACKAGE_NAME"
+  fi
 )
 
 echo "已生成 $DIST_DIR/$PACKAGE_NAME.tar.gz"

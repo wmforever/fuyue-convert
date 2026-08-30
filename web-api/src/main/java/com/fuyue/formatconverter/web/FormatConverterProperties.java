@@ -28,6 +28,7 @@ public class FormatConverterProperties {
     private String officeRequiredVersion = "";
     private Duration officeTimeout = Duration.ofMinutes(2);
     private String apiToken = "";
+    private boolean allowInsecureRemote = false;
     private boolean autoOpenBrowser = false;
     private boolean desktopMode = false;
     private long desktopParentPid = -1;
@@ -88,6 +89,8 @@ public class FormatConverterProperties {
     public void setOfficeTimeout(Duration officeTimeout) { this.officeTimeout = officeTimeout; }
     public String getApiToken() { return apiToken; }
     public void setApiToken(String apiToken) { this.apiToken = apiToken; }
+    public boolean isAllowInsecureRemote() { return allowInsecureRemote; }
+    public void setAllowInsecureRemote(boolean allowInsecureRemote) { this.allowInsecureRemote = allowInsecureRemote; }
     public boolean isAutoOpenBrowser() { return autoOpenBrowser; }
     public void setAutoOpenBrowser(boolean autoOpenBrowser) { this.autoOpenBrowser = autoOpenBrowser; }
     public boolean isDesktopMode() { return desktopMode; }

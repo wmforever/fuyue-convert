@@ -21,30 +21,6 @@ $PackageName = "fuyue-convert-$Version-windows-$Arch"
 $PackageDir = Join-Path $DistDir $PackageName
 $RuntimeDir = Join-Path $PackageDir "runtime"
 
-function Resolve-PdftoppmBinary {
-  if ($env:PDFTOPPM_BIN -and (Test-Path $env:PDFTOPPM_BIN)) {
-    return (Resolve-Path $env:PDFTOPPM_BIN).Path
-  }
-  $candidates = @()
-  if ($env:PATH) {
-    foreach ($dir in $env:PATH.Split([IO.Path]::PathSeparator, [System.StringSplitOptions]::RemoveEmptyEntries)) {
-      $candidate = Join-Path $dir "pdftoppm.exe"
-      if (Test-Path $candidate) { $candidates += $candidate }
-    }
-  }
-  foreach ($root in @($env:ProgramFiles, ${env:ProgramFiles(x86)})) {
-    if (-not $root) { continue }
-    $matches = Get-ChildItem $root -Recurse -File -Filter pdftoppm.exe -ErrorAction SilentlyContinue
-    foreach ($match in $matches) { $candidates += $match.FullName }
-  }
-  foreach ($candidate in $candidates) {
-    if (Test-Path $candidate) {
-      return (Resolve-Path $candidate).Path
-    }
-  }
-  return $null
-}
-
 if (-not $JlinkBin) {
   if ($env:JAVA_HOME) {
     $JlinkBin = Join-Path $env:JAVA_HOME "bin\jlink.exe"
@@ -108,16 +84,7 @@ Copy-Item (Join-Path $RootDir "THIRD_PARTY_NOTICES.md") (Join-Path $PackageDir "
 Copy-Item (Join-Path $RootDir "docs\known-limitations.md") (Join-Path $PackageDir "app\docs")
 Copy-Item (Join-Path $RootDir "docs\test-report.md") (Join-Path $PackageDir "app\docs")
 
-$PopplerBin = Resolve-PdftoppmBinary
-if ($PopplerBin) {
-  $PopplerSourceDir = Split-Path $PopplerBin -Parent
-  $PopplerTargetDir = Join-Path $PackageDir "app\poppler\bin"
-  New-Item -ItemType Directory -Force $PopplerTargetDir | Out-Null
-  Copy-Item (Join-Path $PopplerSourceDir "*") $PopplerTargetDir -Recurse -Force
-  Write-Host "已内置 Poppler: $PopplerBin"
-} else {
-  Write-Host "未找到 pdftoppm.exe，本次 Windows 运行包不含 Poppler；PDF 保真路线将依赖运行环境自行提供。"
-}
+Write-Host "运行包不会自动复制构建机上的 Poppler；PDF 保真路线使用 PDFBox 回退或由用户在运行环境中显式配置。"
 
 & $JlinkBin `
   --add-modules java.base,java.compiler,java.desktop,java.instrument,java.logging,java.management,java.naming,java.net.http,java.prefs,java.security.jgss,java.sql,jdk.crypto.ec,jdk.unsupported `
@@ -128,6 +95,13 @@ if ($PopplerBin) {
   --compress=2 `
   --output $RuntimeDir
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+if ($env:FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME -in @("true", "1")) {
+  $RuntimeSettings = (& (Join-Path $RuntimeDir "bin\java.exe") -XshowSettings:properties -version 2>&1 | Out-String)
+  if ($RuntimeSettings -notmatch "java\.vendor\s*=\s*Eclipse Adoptium") {
+    throw "正式发布只允许使用 Eclipse Temurin/Adoptium Java Runtime"
+  }
+}
 
 @'
 @echo off

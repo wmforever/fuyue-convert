@@ -10,6 +10,16 @@ desktop/release/
 data/
 logs/
 *.log
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+tmp/
 *.pyc
 __pycache__/
 .DS_Store
@@ -24,3 +34,4 @@ qa-samples/work/
 qa-samples/runtime-data/
 qa-samples/debug-runtime*/
 qa-samples/report/
+qa-samples/reference-render/

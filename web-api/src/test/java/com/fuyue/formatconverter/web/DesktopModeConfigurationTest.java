@@ -6,9 +6,40 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DesktopModeConfigurationTest {
-    @Test void ignoresDesktopGuardForRegularWebMode() {
-        assertDoesNotThrow(() -> ApplicationConfiguration.validateDesktopMode(
-                new FormatConverterProperties(), "0.0.0.0"));
+    @Test void refusesUnauthenticatedNonLoopbackBinding() {
+        assertThrows(IllegalStateException.class,
+                () -> ApplicationConfiguration.validateNetworkExposure(
+                        new FormatConverterProperties(), "0.0.0.0"));
+    }
+
+    @Test void acceptsAuthenticatedOrExplicitlyIsolatedRemoteBinding() {
+        FormatConverterProperties authenticated = new FormatConverterProperties();
+        authenticated.setApiToken("r".repeat(32));
+        assertDoesNotThrow(() -> ApplicationConfiguration.validateNetworkExposure(
+                authenticated, "0.0.0.0"));
+
+        FormatConverterProperties isolated = new FormatConverterProperties();
+        isolated.setAllowInsecureRemote(true);
+        assertDoesNotThrow(() -> ApplicationConfiguration.validateNetworkExposure(
+                isolated, "::"));
+    }
+
+    @Test void refusesWeakOrWhitespacePaddedRemoteToken() {
+        FormatConverterProperties properties = new FormatConverterProperties();
+        properties.setApiToken("short");
+        assertThrows(IllegalStateException.class,
+                () -> ApplicationConfiguration.validateNetworkExposure(properties, "0.0.0.0"));
+
+        properties.setApiToken(" " + "r".repeat(32));
+        assertThrows(IllegalStateException.class,
+                () -> ApplicationConfiguration.validateNetworkExposure(properties, "0.0.0.0"));
+    }
+
+    @Test void acceptsUnauthenticatedLoopbackBinding() {
+        assertDoesNotThrow(() -> ApplicationConfiguration.validateNetworkExposure(
+                new FormatConverterProperties(), "localhost"));
+        assertDoesNotThrow(() -> ApplicationConfiguration.validateNetworkExposure(
+                new FormatConverterProperties(), "::1"));
     }
 
     @Test void requiresStrongTokenInDesktopMode() {

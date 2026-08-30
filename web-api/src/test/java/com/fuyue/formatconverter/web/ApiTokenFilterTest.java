@@ -32,8 +32,8 @@ class ApiTokenFilterTest {
         assertEquals(200, response.getStatus());
     }
 
-    @Test void allowsHealthWhenTokenIsConfigured() throws ServletException, IOException {
-        ApiTokenFilter filter = new ApiTokenFilter("secret");
+    @Test void allowsRequestsWhenTokenProtectionIsDisabled() throws ServletException, IOException {
+        ApiTokenFilter filter = new ApiTokenFilter("");
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/health");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -50,5 +50,36 @@ class ApiTokenFilterTest {
         filter.doFilter(request, response, new MockFilterChain());
 
         assertEquals(401, response.getStatus());
+    }
+
+    @Test void protectsTaskApiBelowServletContextPath() throws ServletException, IOException {
+        ApiTokenFilter filter = new ApiTokenFilter("secret");
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "GET", "/converter/api/tasks/id");
+        request.setContextPath("/converter");
+        request.setServletPath("/api/tasks/id");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, new MockFilterChain());
+
+        assertEquals(401, response.getStatus());
+    }
+
+    @Test void protectsMatrixParameterVariantsSelectedByTheServletMapping()
+            throws ServletException, IOException {
+        ApiTokenFilter filter = new ApiTokenFilter("secret");
+
+        MockHttpServletResponse taskResponse = new MockHttpServletResponse();
+        filter.doFilter(new MockHttpServletRequest(
+                "GET", "/api/tasks;source=external/capabilities"),
+                taskResponse, new MockFilterChain());
+
+        MockHttpServletResponse desktopResponse = new MockHttpServletResponse();
+        filter.doFilter(new MockHttpServletRequest(
+                "POST", "/api/desktop;source=external/shutdown"),
+                desktopResponse, new MockFilterChain());
+
+        assertEquals(401, taskResponse.getStatus());
+        assertEquals(401, desktopResponse.getStatus());
     }
 }
