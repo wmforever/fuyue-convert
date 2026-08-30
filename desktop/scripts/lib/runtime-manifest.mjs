@@ -260,7 +260,7 @@ async function collectLicenseFiles(backendRoot, desktopDirectory, runtimeLegalFi
     candidates.push([`backend/runtime/legal/${relative}`, path.join(backendRoot, 'runtime', 'legal', ...relative.split('/'))])
   }
   candidates.push(
-    ['licenses/ELECTRON-LICENSE.txt', path.join(desktopDirectory, 'node_modules', 'electron', 'dist', 'LICENSE')],
+    ['licenses/ELECTRON-LICENSE.txt', path.join(desktopDirectory, 'node_modules', 'electron', 'LICENSE')],
     ['licenses/LICENSES.chromium.html', path.join(desktopDirectory, 'node_modules', 'electron', 'dist', 'LICENSES.chromium.html')]
   )
 
@@ -377,7 +377,7 @@ export async function generateRuntimeManifest({ repositoryRoot, desktopDirectory
   if (electron.version !== policy.components.electron.version || electron.license !== policy.components.electron.spdx) {
     throw new Error(`Electron 版本/许可证未审核：${electron.version} ${electron.license}`)
   }
-  const electronLicense = await readFile(path.join(desktopDirectory, 'node_modules', 'electron', 'dist', 'LICENSE'))
+  const electronLicense = await readFile(path.join(desktopDirectory, 'node_modules', 'electron', 'LICENSE'))
   const chromiumLicenses = await readFile(path.join(desktopDirectory, 'node_modules', 'electron', 'dist', 'LICENSES.chromium.html'))
   if (strictWindows) {
     if (process.platform !== 'win32') throw new Error('公开 Windows manifest 必须在 Windows runner 生成')
