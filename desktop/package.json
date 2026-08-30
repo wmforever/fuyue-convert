@@ -14,7 +14,7 @@
     "test": "node --test",
     "stage:backend": "node scripts/stage-backend.mjs",
     "verify:package": "node scripts/verify-packaged.mjs",
-    "pack": "npm run stage:backend && electron-builder --dir",
+    "pack": "node scripts/prepare-electron-runtime.mjs && npm run stage:backend && electron-builder --dir",
     "dist:win": "node scripts/require-windows.mjs && node scripts/prepare-electron-runtime.mjs && npm run stage:backend && electron-builder --win dir --x64 && node scripts/finalize-runtime-manifest.mjs release/win-unpacked/resources && node scripts/build-windows-installer.mjs"
   },
   "devDependencies": {

@@ -63,15 +63,43 @@ async function evaluate(expression) {
   return result.result.value
 }
 
+async function waitForEvaluation(expression, attempts = 80, interval = 250) {
+  let value
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    value = await evaluate(expression)
+    if (value) return value
+    await pause(interval)
+  }
+  return value
+}
+
 try {
-  await evaluate(`(() => {
-    [...document.querySelectorAll('button')].find(button => button.textContent.includes('新建转换'))?.click()
-  })()`)
-  await pause(350)
-  await evaluate(`(() => {
-    if (!document.querySelector('.route-search')) document.querySelector('.route-trigger')?.click()
-  })()`)
-  await pause(200)
+  const applicationReady = await waitForEvaluation(`Boolean(
+    document.querySelector('.desktop-app') && document.querySelector('.header-cta')
+  )`, 120)
+  if (!applicationReady) throw new Error('桌面页面未在启动时限内完成挂载')
+
+  await evaluate(`document.querySelector('.header-cta').click()`)
+  let routeSearchReady = await waitForEvaluation(`Boolean(document.querySelector('.route-search'))`, 20)
+  if (!routeSearchReady) {
+    const triggerReady = await waitForEvaluation(`(() => {
+      const trigger = document.querySelector('.route-trigger')
+      return Boolean(trigger && !trigger.disabled)
+    })()`, 40)
+    if (triggerReady) await evaluate(`document.querySelector('.route-trigger').click()`)
+    routeSearchReady = await waitForEvaluation(`Boolean(document.querySelector('.route-search'))`, 40)
+  }
+  if (!routeSearchReady) {
+    const state = await evaluate(`(() => ({
+      title: document.title,
+      view: document.querySelector('.page-heading')?.textContent?.replace(/\\s+/g, ' ').trim(),
+      workspaceVisible: Boolean(document.querySelector('.workspace')?.offsetParent),
+      trigger: Boolean(document.querySelector('.route-trigger')),
+      notice: document.querySelector('.global-notice')?.textContent?.replace(/\\s+/g, ' ').trim()
+    }))()`)
+    throw new Error(`无法打开转换路线搜索：${JSON.stringify(state)}`)
+  }
+
   const routeSelected = await evaluate(`(() => {
     const input = document.querySelector('.route-search')
     if (!input) return false
@@ -80,30 +108,32 @@ try {
     return true
   })()`)
   if (!routeSelected) throw new Error('无法打开转换路线搜索')
-  await pause(250)
-  const clickedRoute = await evaluate(`(() => {
-    const route = [...document.querySelectorAll('.route-option')]
-      .find(button => button.textContent.includes('纯文本 TXT') && button.textContent.includes('Word DOCX'))
+  const clickedRoute = await waitForEvaluation(`(() => {
+    const route = document.querySelector('.route-option[data-route-id="txt-to-docx"]')
+    if (!route || route.disabled) return false
     route?.click()
-    return Boolean(route)
-  })()`)
+    return true
+  })()`, 40)
   if (!clickedRoute) throw new Error('没有找到 TXT → Word DOCX 路线')
 
-  const documentTree = await command('DOM.getDocument', { depth: -1 })
+  const fileInputReady = await waitForEvaluation(`Boolean(document.querySelector('input[type="file"]'))`, 40)
+  if (!fileInputReady) throw new Error('没有找到文件输入框')
+  const documentTree = await command('DOM.getDocument', { depth: -1, pierce: true })
   const fileInput = await command('DOM.querySelector', {
     nodeId: documentTree.root.nodeId,
     selector: 'input[type="file"]'
   })
   if (!fileInput.nodeId) throw new Error('没有找到文件输入框')
   await command('DOM.setFileInputFiles', { nodeId: fileInput.nodeId, files: [inputPath] })
-  await pause(250)
-
-  const ready = await evaluate(`(() => ({
-    route: document.querySelector('.route-formats')?.textContent.replace(/\\s+/g, ' ').trim(),
-    files: document.querySelectorAll('.file-panel li').length,
-    enabled: !document.querySelector('.actions .primary')?.disabled
-  }))()`)
-  if (ready.files !== 1 || !ready.enabled) throw new Error(`上传准备失败：${JSON.stringify(ready)}`)
+  const ready = await waitForEvaluation(`(() => {
+    const state = {
+      route: document.querySelector('.route-formats')?.textContent.replace(/\\s+/g, ' ').trim(),
+      files: document.querySelectorAll('.file-panel li').length,
+      enabled: !document.querySelector('.actions .primary')?.disabled
+    }
+    return state.files === 1 && state.enabled ? state : null
+  })()`, 40)
+  if (!ready || ready.files !== 1 || !ready.enabled) throw new Error(`上传准备失败：${JSON.stringify(ready)}`)
   await evaluate(`document.querySelector('.actions .primary')?.click()`)
 
   let result = null

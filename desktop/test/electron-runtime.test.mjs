@@ -75,4 +75,6 @@ test('Windows public runtime and electron-builder pin the reviewed Electron arch
   assert.match(builderConfiguration, /electronDownload:\s*[\s\S]*?force: false/)
   assert.match(builderConfiguration, /unsafelyDisableChecksums: false/)
   assert.match(builderConfiguration, new RegExp(`${identity.archiveName}: ${identity.archiveSha256}`))
+  const packageMetadata = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'))
+  assert.match(packageMetadata.scripts.pack, /^node scripts\/prepare-electron-runtime\.mjs && /)
 })

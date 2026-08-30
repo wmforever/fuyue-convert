@@ -161,14 +161,28 @@ jobs:
             } | ForEach-Object {
               Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
             }
+            for ($Attempt = 0; $Attempt -lt 60; $Attempt++) {
+              $RemainingProcesses = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+                $_.ExecutablePath -and $_.ExecutablePath.StartsWith($InstallDir, [System.StringComparison]::OrdinalIgnoreCase)
+              }
+              if (-not $RemainingProcesses) { break }
+              $RemainingProcesses | ForEach-Object {
+                Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+              }
+              Start-Sleep -Milliseconds 250
+            }
             $Uninstaller = Get-ChildItem $InstallDir -Filter "Uninstall*.exe" -File -ErrorAction SilentlyContinue | Select-Object -First 1
             if (-not $Uninstaller) { throw "Installed application did not contain its uninstaller" }
             $Uninstall = Start-Process -FilePath $Uninstaller.FullName -ArgumentList "/S" -Wait -PassThru
             if ($Uninstall.ExitCode -ne 0) { throw "Silent uninstaller failed with exit code $($Uninstall.ExitCode)" }
-            for ($Attempt = 0; $Attempt -lt 20 -and (Test-Path $InstallDir); $Attempt++) {
+            for ($Attempt = 0; $Attempt -lt 120 -and (Test-Path $InstallDir); $Attempt++) {
               Start-Sleep -Milliseconds 250
             }
-            if (Test-Path $InstallDir) { throw "Uninstaller left the installation directory behind" }
+            if (Test-Path $InstallDir) {
+              Get-ChildItem $InstallDir -Force -Recurse -ErrorAction SilentlyContinue |
+                Select-Object FullName, Length | Format-Table -AutoSize | Out-String | Write-Host
+              throw "Uninstaller left the installation directory behind"
+            }
             Remove-Item $OverrideDir -Recurse -Force -ErrorAction SilentlyContinue
           }
 
