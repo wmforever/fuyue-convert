@@ -1,6 +1,6 @@
 {
   "name": "fuyue-convert-desktop",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "type": "module",
   "main": "src/main.mjs",
@@ -10,12 +10,12 @@
   "scripts": {
     "dev": "electron . --dev",
     "dev:managed": "electron . --managed",
-    "check": "node --check src/main.mjs && node --check src/preload.cjs && node --check src/backend-manager.mjs && node --check src/security.mjs && node --check scripts/stage-backend.mjs && node --check scripts/smoke-renderer.mjs && node --check scripts/smoke-conversion.mjs && node --check scripts/verify-packaged.mjs && node --check scripts/require-windows.mjs",
+    "check": "node --check src/main.mjs && node --check src/preload.cjs && node --check src/backend-manager.mjs && node --check src/security.mjs && node --check scripts/stage-backend.mjs && node --check scripts/build-windows-installer.mjs && node --check scripts/generate-runtime-manifest.mjs && node --check scripts/finalize-runtime-manifest.mjs && node --check scripts/verify-runtime-manifest.mjs && node --check scripts/lib/runtime-manifest.mjs && node --check scripts/lib/zip-reader.mjs && node --check scripts/smoke-renderer.mjs && node --check scripts/smoke-conversion.mjs && node --check scripts/verify-packaged.mjs && node --check scripts/require-windows.mjs",
     "test": "node --test",
     "stage:backend": "node scripts/stage-backend.mjs",
     "verify:package": "node scripts/verify-packaged.mjs",
     "pack": "npm run stage:backend && electron-builder --dir",
-    "dist:win": "node scripts/require-windows.mjs && npm run stage:backend && electron-builder --win nsis --x64"
+    "dist:win": "node scripts/require-windows.mjs && npm run stage:backend && electron-builder --win dir --x64 && node scripts/finalize-runtime-manifest.mjs release/win-unpacked/resources && node scripts/build-windows-installer.mjs"
   },
   "devDependencies": {
     "cross-spawn": "7.0.6",

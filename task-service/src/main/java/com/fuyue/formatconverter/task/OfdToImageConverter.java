@@ -63,7 +63,8 @@ abstract class OfdToImageConverter implements FileConverter {
         this.popplerBinary = popplerBinary == null ? null : popplerBinary.toAbsolutePath().normalize();
         this.route = ConversionRoute.of(DocumentFormat.OFD, targetFormat, description,
                 QualityLevel.BETA, ConversionStrategy.FIDELITY, List.of(),
-                List.of("固定以 160 DPI 输出", "多页 OFD 输出 ZIP", "复杂填充、渐变、透明度和部分弧线路径仍受固定版式渲染器限制"));
+                List.of("固定以 160 DPI 输出", "多页 OFD 输出 ZIP", "嵌套 OFD 签章外观会明确警告并跳过",
+                        "复杂填充、渐变、透明度和部分弧线路径仍受固定版式渲染器限制"));
     }
 
     @Override public ConversionRoute route() { return route; }

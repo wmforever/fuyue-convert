@@ -90,7 +90,7 @@ class FormatConverterApplicationTest {
     @Test void diagnosticsEndpointReturnsRedactedEnvironment() throws Exception {
         mvc.perform(get("/api/diagnostics"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.version").value("0.1.3"))
+                .andExpect(jsonPath("$.version").value("0.1.4"))
                 .andExpect(jsonPath("$.runtime.javaVersion").isNotEmpty())
                 .andExpect(jsonPath("$.office.available").isBoolean())
                 .andExpect(jsonPath("$.ocr.enabled").isBoolean())

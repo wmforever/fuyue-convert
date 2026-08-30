@@ -1,13 +1,6 @@
 package com.fuyue.formatconverter.parser;
 
 import com.fuyue.formatconverter.model.*;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.ImageType;
-import org.apache.pdfbox.rendering.PDFRenderer;
-import org.ofdrw.converter.ItextMaker;
 import org.ofdrw.core.basicStructure.pageObj.layer.CT_Layer;
 import org.ofdrw.core.basicStructure.pageObj.layer.PageBlockType;
 import org.ofdrw.core.basicStructure.pageObj.layer.block.CT_PageBlock;
@@ -40,7 +33,6 @@ import java.util.Locale;
 import java.util.Map;
 
 public final class OfdrwParser implements OfdParser {
-    private static final float STAMP_RENDER_DPI = 254f;
     private static final int MAX_PAGE_BLOCK_DEPTH = 128;
     private static final int MAX_PATH_OPERATIONS = 100_000;
     private static final int MAX_PATH_SEGMENTS = 100_000;
@@ -410,7 +402,14 @@ public final class OfdrwParser implements OfdParser {
         try {
             int entityIndex = 0;
             for (StampAnnotEntity entity : reader.getStampAnnots()) {
-                NormalizedImage image = normalizeStampImage(entity.getImageByte(), entity.getImgType());
+                byte[] source = entity.getImageByte();
+                if (isEmbeddedOfdStamp(source, entity.getImgType())) {
+                    warnings.add(ConversionWarning.of(WarningCode.SIGNATURE_APPEARANCE_FAILED,
+                            "数字签章外观为嵌套 OFD，当前发行版不内置签章渲染器；已保留正文并跳过签章外观", null));
+                    entityIndex++;
+                    continue;
+                }
+                NormalizedImage image = normalizeStampImage(source);
                 if (image == null) {
                     warnings.add(ConversionWarning.of(WarningCode.SIGNATURE_APPEARANCE_FAILED,
                             "数字签章外观格式暂无法转换：" + entity.getImgType(), null));
@@ -431,20 +430,15 @@ public final class OfdrwParser implements OfdParser {
                     "数字签章外观提取失败：" + safeMessage(e), null));
         } catch (LinkageError e) {
             warnings.add(ConversionWarning.of(WarningCode.SIGNATURE_APPEARANCE_FAILED,
-                    "数字签章外观渲染组件不兼容，已保留正文并跳过签章外观：" + e.getClass().getSimpleName(), null));
+                    "数字签章外观解析组件不兼容，已保留正文并跳过签章外观：" + e.getClass().getSimpleName(), null));
         }
         return result;
     }
 
-    private NormalizedImage normalizeStampImage(byte[] source, String declaredType) throws IOException {
+    private NormalizedImage normalizeStampImage(byte[] source) throws IOException {
         if (source == null || source.length == 0) return null;
         String detected = detectMime(source);
         if (!"application/octet-stream".equals(detected)) return new NormalizedImage(detected, source);
-
-        String type = declaredType == null ? "" : declaredType.trim().toUpperCase(Locale.ROOT);
-        if ("OFD".equals(type) || isZip(source)) {
-            return renderOfdStamp(source);
-        }
 
         BufferedImage decoded = ImageIO.read(new ByteArrayInputStream(source));
         if (decoded == null) return null;
@@ -453,24 +447,9 @@ public final class OfdrwParser implements OfdParser {
         return new NormalizedImage("image/png", output.toByteArray());
     }
 
-    private NormalizedImage renderOfdStamp(byte[] source) throws IOException {
-        // ImageMaker links against PDFBox 2 blend classes. Render through OFDRW's independent
-        // iText path first, then rasterize with the application's PDFBox 3 runtime.
-        ByteArrayOutputStream pdfOutput = new ByteArrayOutputStream();
-        try (OFDReader sealReader = new OFDReader(new ByteArrayInputStream(source));
-             PdfWriter writer = new PdfWriter(pdfOutput);
-             PdfDocument pdf = new PdfDocument(writer)) {
-            if (sealReader.getNumberOfPages() < 1) return null;
-            new ItextMaker(sealReader).makePage(pdf, sealReader.getPageInfo(1));
-        }
-
-        try (PDDocument pdf = Loader.loadPDF(pdfOutput.toByteArray())) {
-            BufferedImage rendered = new PDFRenderer(pdf)
-                    .renderImageWithDPI(0, STAMP_RENDER_DPI, ImageType.ARGB);
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            if (!ImageIO.write(rendered, "png", output)) return null;
-            return new NormalizedImage("image/png", output.toByteArray());
-        }
+    boolean isEmbeddedOfdStamp(byte[] source, String declaredType) {
+        String type = declaredType == null ? "" : declaredType.trim().toUpperCase(Locale.ROOT);
+        return "OFD".equals(type) || (source != null && isZip(source));
     }
 
     private Transform2D textTransform(TextObject object) {

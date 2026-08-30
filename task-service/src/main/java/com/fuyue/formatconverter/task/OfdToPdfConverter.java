@@ -15,9 +15,10 @@ public final class OfdToPdfConverter implements FileConverter {
     private final OfdParser parser;
     private final FixedLayoutPdfRenderer renderer;
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.OFD, DocumentFormat.PDF,
-            "按 OFD 页面坐标渲染文字、图片、签章外观和路径线条，生成固定版式 PDF。",
+            "按 OFD 页面坐标渲染文字、图片、普通图片型签章和路径线条，生成固定版式 PDF。",
             QualityLevel.BETA, ConversionStrategy.FIDELITY, List.of(),
-            List.of("字体使用内置字体替代", "复杂填充、渐变、透明度、裁剪和部分弧线路径仍需完善"));
+            List.of("嵌套 OFD 签章外观会明确警告并跳过", "字体使用内置字体替代",
+                    "复杂填充、渐变、透明度、裁剪和部分弧线路径仍需完善"));
 
     public OfdToPdfConverter(SafeOfdExtractor extractor, OfdParser parser, PageLayoutAnalyzer analyzer) {
         this.extractor = extractor;

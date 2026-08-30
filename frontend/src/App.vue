@@ -1512,7 +1512,7 @@ onBeforeUnmount(() => {
         <section v-show="activeView === 'overview'" class="dashboard-page">
           <article class="welcome-banner">
             <div>
-              <p><span></span> FORMAT WORKSPACE / {{ diagnostics?.version || '0.1.3' }}</p>
+              <p><span></span> FORMAT WORKSPACE / {{ diagnostics?.version || '0.1.4' }}</p>
               <h1>欢迎回来，开始处理文档。</h1>
               <small>{{ desktopRuntime ? '转换、整理和导出都在本机完成。' : '文件只发送到当前转换服务，不会转交第三方云端。' }}你可以从常用路线开始，也可以进入完整工作台。</small>
               <button type="button" @click.stop="startNewConversion">开始新任务 <span>→</span></button>
@@ -1602,7 +1602,7 @@ onBeforeUnmount(() => {
 
         <section v-show="activeView === 'settings'" class="content-page settings-page">
           <div class="settings-grid">
-            <section class="settings-card"><div class="settings-head"><span>01</span><div><strong>应用信息</strong><small>当前运行版本与平台</small></div></div><dl><div><dt>版本</dt><dd>{{ diagnostics?.version || '0.1.3' }}</dd></div><div><dt>系统</dt><dd>{{ diagnostics?.runtime?.os || '检测中' }} · {{ diagnostics?.runtime?.arch || '' }}</dd></div><div><dt>处理器</dt><dd>{{ diagnostics?.runtime?.availableProcessors || '—' }} 核心</dd></div></dl></section>
+            <section class="settings-card"><div class="settings-head"><span>01</span><div><strong>应用信息</strong><small>当前运行版本与平台</small></div></div><dl><div><dt>版本</dt><dd>{{ diagnostics?.version || '0.1.4' }}</dd></div><div><dt>系统</dt><dd>{{ diagnostics?.runtime?.os || '检测中' }} · {{ diagnostics?.runtime?.arch || '' }}</dd></div><div><dt>处理器</dt><dd>{{ diagnostics?.runtime?.availableProcessors || '—' }} 核心</dd></div></dl></section>
             <section class="settings-card"><div class="settings-head"><span>02</span><div><strong>转换引擎</strong><small>本机依赖可用状态</small></div></div><dl><div><dt>Office</dt><dd :class="{ good: diagnostics?.office?.available }">{{ diagnostics?.office?.message || '检测中' }}</dd></div><div><dt>OCR</dt><dd :class="{ good: diagnostics?.ocr?.available }">{{ diagnostics?.ocr?.message || '检测中' }}</dd></div><div><dt>Worker</dt><dd :class="{ good: diagnostics?.limits?.workerEnabled }">{{ diagnostics?.limits?.workerEnabled ? '独立进程已启用' : '未启用' }}</dd></div></dl></section>
             <section class="settings-card"><div class="settings-head"><span>03</span><div><strong>资源限制</strong><small>保护本机运行稳定</small></div></div><dl><div><dt>单文件</dt><dd>{{ formatBytes(limits.maxFileSize) }}</dd></div><div><dt>单任务</dt><dd>{{ limits.maxFilesPerTask }} 个文件</dd></div><div><dt>并发任务</dt><dd>{{ diagnostics?.limits?.concurrency || '—' }}</dd></div></dl></section>
             <section class="settings-card preference-card"><div class="settings-head"><span>04</span><div><strong>使用偏好</strong><small>保存在当前设备</small></div></div><label class="setting-toggle"><span><strong>完成后自动下载</strong><small>转换成功后立即保存结果</small></span><input v-model="autoDownload" type="checkbox" @change="savePreferences" /><i></i></label><label class="setting-select"><span>默认 PDF 压缩等级</span><select v-model="compressionMode" @change="savePreferences"><option value="lossless">无损优化</option><option value="balanced">均衡压缩</option><option value="strong">强力压缩</option></select></label><small v-if="preferenceMessage" class="setting-message">{{ preferenceMessage }}</small></section>
@@ -2033,7 +2033,7 @@ onBeforeUnmount(() => {
       <footer class="app-statusbar">
         <span><i :class="{ online: serviceHealthy }"></i>{{ serviceHealthy ? '转换服务已连接' : '正在连接转换服务' }}</span>
         <span>{{ desktopRuntime ? '文档仅在本机处理' : '不转交第三方云服务' }}</span>
-        <span>v{{ diagnostics?.version || '0.1.3' }}</span>
+        <span>v{{ diagnostics?.version || '0.1.4' }}</span>
       </footer>
     </main>
   </div>
