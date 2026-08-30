@@ -174,6 +174,7 @@ h1 em { color: var(--lime); font-style: normal; }
 .route-detail { min-width: 0; display: grid; gap: 7px; }
 .route-description { color: #61706b; font-size: 12px; line-height: 1.55; }
 .route-meta { color: #7b632e; font-size: 10px; font-weight: 800; }
+.route-runtime-warning { display: block; line-height: 1.55; }
 .route-menu { position: absolute; z-index: 20; top: calc(100% + 9px); right: 0; width: min(760px, calc(100vw - 72px)); overflow: hidden; border: 1px solid #cedbd5; border-radius: 16px; background: #fff; box-shadow: 0 26px 56px rgba(26, 54, 48, .18); }
 .route-search-wrap { height: 55px; display: flex; align-items: center; gap: 8px; margin: 8px; padding: 0 12px; border-radius: 11px; background: #f4f7f5; }
 .route-search-wrap svg { width: 18px; height: 18px; flex: 0 0 auto; color: #82918c; }
@@ -211,6 +212,7 @@ h1 em { color: var(--lime); font-style: normal; }
 .route-main strong i { margin: 0 3px; color: #70a096; font-style: normal; font-weight: 500; }
 .route-main small { display: -webkit-box; overflow: hidden; color: #71817c; font-size: 11px; line-height: 1.4; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .route-main em { overflow: hidden; color: #8a6e2f; font-size: 9px; font-style: normal; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.route-mobile-quality { display: none; }
 .route-badge { min-width: 48px; padding: 5px 8px; border-radius: 999px; color: #087267; background: #e2f2ee; font-size: 9px; font-weight: 850; text-align: center; }
 .route-badge.beta { color: #7a5b00; background: #fff4ce; }
 .route-badge.experimental { color: #65439a; background: #f0e9ff; }
@@ -470,6 +472,7 @@ footer { display: flex; align-items: center; justify-content: space-between; gap
   .route-option { grid-template-columns: 34px minmax(0, 1fr); gap: 9px; padding: 8px; }
   .route-format-icon { width: 34px; height: 34px; }
   .route-option .route-badge { display: none; }
+  .route-mobile-quality { display: inline; }
   .route-main small { -webkit-line-clamp: 1; }
   .compression-options { grid-template-columns: 1fr; }
   .compression-options > label { min-height: 92px; }

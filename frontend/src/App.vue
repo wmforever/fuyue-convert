@@ -103,6 +103,13 @@ const fileIdentities = new WeakMap()
 const autoDownloadedTaskIds = new Set()
 
 const selectedRoute = computed(() => conversions.value.find(route => route.id === selectedRouteId.value) || conversions.value[0])
+const routeRuntimeWarning = computed(() => {
+  const route = selectedRoute.value
+  if (route?.qualityLevel !== 'beta' || diagnostics.value?.ocr?.available !== false) return ''
+  const usesOptionalOcr = (route.limitations || []).some(item => /OCR/i.test(item))
+  if (!usesOptionalOcr) return ''
+  return `当前 OCR 未启用：请仅使用文字型 ${route.sourceLabel}；扫描页或含扫描页的文档会严格失败。`
+})
 const isPdfMergeRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-merge')
 const isSinglePdfTool = computed(() => ['pdf-split', 'pdf-watermark', 'pdf-compress'].includes(selectedRoute.value?.targetFormat))
 const isPdfCompressRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-compress')
@@ -281,14 +288,16 @@ const sourceOptions = computed(() => {
   })
   const popular = popularRouteIds.map(id => conversions.value.find(route => route.id === id)).filter(Boolean)
   const pdfTools = pdfToolRouteIds.map(id => conversions.value.find(route => route.id === id)).filter(Boolean)
+  const beta = conversions.value.filter(route => route.qualityLevel === 'beta')
   return [
     { id: 'popular', label: '常用转换', count: popular.length, availableCount: popular.filter(route => route.status === 'available').length },
     { id: 'pdf-tools', label: 'PDF 工具', count: pdfTools.length, availableCount: pdfTools.filter(route => route.status === 'available').length },
+    { id: 'beta', label: 'Beta 路线', count: beta.length, availableCount: beta.filter(route => route.status === 'available').length },
     ...options
   ]
 })
-const quickSourceOptions = computed(() => sourceOptions.value.filter(source => ['popular', 'pdf-tools'].includes(source.id)))
-const formatSourceOptions = computed(() => sourceOptions.value.filter(source => !['popular', 'pdf-tools'].includes(source.id)))
+const quickSourceOptions = computed(() => sourceOptions.value.filter(source => ['popular', 'pdf-tools', 'beta'].includes(source.id)))
+const formatSourceOptions = computed(() => sourceOptions.value.filter(source => !['popular', 'pdf-tools', 'beta'].includes(source.id)))
 const pickerRoutes = computed(() => {
   const keywords = routeSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean)
   if (keywords.length) return conversions.value.map(route => {
@@ -325,17 +334,23 @@ const pickerRoutes = computed(() => {
   if (pickerSource.value === 'pdf-tools') {
     return pdfToolRouteIds.map(id => conversions.value.find(route => route.id === id)).filter(Boolean)
   }
+  if (pickerSource.value === 'beta') {
+    return conversions.value.filter(route => route.qualityLevel === 'beta')
+  }
   return conversions.value.filter(route => route.sourceFormat === pickerSource.value)
 })
 const pickerTitle = computed(() => {
   if (routeSearch.value.trim()) return `搜索结果 · ${pickerRoutes.value.length}`
   if (pickerSource.value === 'popular') return '常用转换'
   if (pickerSource.value === 'pdf-tools') return 'PDF 实用工具'
+  if (pickerSource.value === 'beta') return `Beta 路线 · ${pickerRoutes.value.length}`
   const source = sourceOptions.value.find(option => option.id === pickerSource.value)
   return `${source?.label || '当前格式'} 可以转换为`
 })
 const pickerHint = computed(() => pickerRoutes.value.some(route => route.status === 'available')
-  ? '选择一个目标格式即可'
+  ? (pickerSource.value === 'beta' && !routeSearch.value.trim()
+      ? '建议选择后先查看适用边界，再用代表性文件验证'
+      : '选择一个目标格式即可')
   : '当前结果均不可执行，请检查运行依赖')
 
 const viewTitle = computed(() => ({
@@ -649,6 +664,12 @@ function strategyLabel(route) {
 
 function routeMeta(route) {
   const values = [routeBadge(route), strategyLabel(route)].filter(Boolean)
+  if (Array.isArray(route.requires) && route.requires.length) values.push(`依赖 ${route.requires.join(' / ')}`)
+  return values.join(' · ')
+}
+
+function routePickerMeta(route) {
+  const values = [strategyLabel(route)].filter(Boolean)
   if (Array.isArray(route.requires) && route.requires.length) values.push(`依赖 ${route.requires.join(' / ')}`)
   return values.join(' · ')
 }
@@ -1649,7 +1670,7 @@ onBeforeUnmount(() => {
                       :class="{ active: pickerSource === source.id && !routeSearch.trim() }"
                       @click="selectPickerSource(source.id)"
                     >
-                      <span>{{ source.id === 'popular' ? '★' : '◆' }}</span>
+                      <span>{{ source.id === 'popular' ? '★' : (source.id === 'beta' ? 'β' : '◆') }}</span>
                       <strong>{{ source.label }}</strong>
                       <small :title="`${source.availableCount}/${source.count} 条可用`">{{ source.availableCount === source.count ? source.count : `${source.availableCount}/${source.count}` }}</small>
                     </button>
@@ -1692,7 +1713,7 @@ onBeforeUnmount(() => {
                       <span class="route-main">
                         <strong>{{ route.sourceLabel }} <i>→</i> {{ route.targetLabel }}</strong>
                         <small>{{ route.description }}</small>
-                        <em>{{ routeMeta(route) }}</em>
+                        <em><span v-if="routePickerMeta(route)">{{ routePickerMeta(route) }}</span><span class="route-mobile-quality">{{ routePickerMeta(route) ? ' · ' : '' }}{{ routeBadge(route) }}</span></em>
                       </span>
                       <span class="route-badge" :class="route.status === 'available' ? route.qualityLevel : route.status">{{ routeBadge(route) }}</span>
                     </button>
@@ -1704,8 +1725,9 @@ onBeforeUnmount(() => {
           <div class="route-detail">
             <span class="route-description">{{ selectedRoute.description }}{{ routeAvailability(selectedRoute) }}</span>
             <span v-if="routeMeta(selectedRoute)" class="route-meta">{{ routeMeta(selectedRoute) }}</span>
-            <details v-if="selectedRoute.limitations?.length" class="route-limitations">
-              <summary>查看适用边界 · {{ selectedRoute.limitations.length }} 项</summary>
+            <span v-if="routeRuntimeWarning" class="field-warning route-runtime-warning" role="status">{{ routeRuntimeWarning }}</span>
+            <details v-if="selectedRoute.limitations?.length" class="route-limitations" :open="selectedRoute.qualityLevel === 'beta'">
+              <summary>{{ selectedRoute.qualityLevel === 'beta' ? 'Beta 适用边界' : '查看适用边界' }} · {{ selectedRoute.limitations.length }} 项</summary>
               <ul><li v-for="item in selectedRoute.limitations" :key="item">{{ item }}</li></ul>
             </details>
           </div>
