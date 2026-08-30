@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import csv
+import hashlib
 import io
 import json
+import math
 import os
 import re
 import shutil
@@ -9,6 +11,7 @@ import signal
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.request
 import zipfile
@@ -18,12 +21,79 @@ from xml.etree import ElementTree
 
 from PIL import Image, ImageChops
 
+try:
+    import fcntl
+except ImportError:  # Windows
+    fcntl = None
+
+try:
+    import msvcrt
+except ImportError:  # Unix
+    msvcrt = None
+
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "qa-samples"
 INPUT = BASE / "input"
 OUTPUT = BASE / "output"
 REPORT = BASE / "report"
 WORK = BASE / "work"
+
+PDF_COMPRESSION_MAX_NORMALIZED_RASTER_ERROR = {
+    "lossless": 0.0,
+    "balanced": 0.14,
+    "strong": 0.19,
+}
+
+
+def acquire_run_lock():
+    lock_id = hashlib.sha256(str(BASE.resolve()).encode("utf-8")).hexdigest()[:16]
+    lock_path = Path(tempfile.gettempdir()) / f"format-converter-qa-{lock_id}.lock"
+    lock_file = lock_path.open("a+b")
+    try:
+        if fcntl is not None:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        elif msvcrt is not None:
+            lock_file.seek(0, os.SEEK_END)
+            if lock_file.tell() == 0:
+                lock_file.write(b"\0")
+                lock_file.flush()
+            lock_file.seek(0)
+            msvcrt.locking(lock_file.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            raise RuntimeError("this platform has no supported file-locking backend")
+    except (BlockingIOError, OSError):
+        try:
+            lock_file.seek(0)
+            holder = lock_file.read().decode("utf-8", errors="replace").strip("\0\r\n ")
+        except OSError:
+            holder = ""
+        lock_file.close()
+        raise RuntimeError(
+            "another QA run is already active for this checkout; "
+            f"wait for it to finish ({holder or 'holder details unavailable'})"
+        ) from None
+    except RuntimeError:
+        lock_file.close()
+        raise
+    lock_file.seek(0)
+    lock_file.truncate()
+    holder = f"pid={os.getpid()} started={time.strftime('%Y-%m-%dT%H:%M:%S%z')}"
+    lock_file.write(holder.encode("utf-8"))
+    lock_file.flush()
+    return lock_file
+
+
+def release_run_lock(lock_file):
+    try:
+        if fcntl is not None:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+        elif msvcrt is not None:
+            lock_file.seek(0)
+            msvcrt.locking(lock_file.fileno(), msvcrt.LK_UNLCK, 1)
+    finally:
+        lock_file.close()
+
+
 def available_port():
     configured = os.environ.get("FORMAT_QA_PORT")
     if configured:
@@ -344,9 +414,11 @@ def padded_image_mean_absolute_error(expected, actual):
     return error / values if values else 0.0
 
 
-def visual_case(name, source, target, source_pdf=None, exact_mode="visual"):
+def visual_case(name, source, target, source_pdf=None, exact_mode="visual", verified_route_id=None):
     result = {"name": name, "source": source.name, "target": target, "type": "visual"}
     task, converted = upload_convert(source, target)
+    if verified_route_id:
+        result["verifiedRouteIds"] = [verified_route_id]
     result["taskStatus"] = task["status"]
     result["output"] = converted.name if converted else None
     if not converted:
@@ -438,9 +510,12 @@ def image_pdf_layout_case(source):
 
 
 def ofd_docx_text_case(source):
-    result = {"name": "ofd-to-docx-text-exact", "source": source.name, "target": "docx", "type": "content"}
+    result = {"name": "ofd-to-docx-text-exact", "source": source.name, "target": "docx", "type": "content",
+              "verifiedRouteIds": []}
     text_task, text_output = upload_convert(source, "txt")
+    result["verifiedRouteIds"].append("ofd-to-txt")
     docx_task, docx_output = upload_convert(source, "docx")
+    result["verifiedRouteIds"].append("ofd-to-docx")
     result["taskStatus"] = docx_task["status"]
     result["output"] = docx_output.name if docx_output else None
     result["exactCheck"] = "ofd-vs-docx-character-content"
@@ -461,9 +536,11 @@ def ofd_docx_text_case(source):
 
 def ofd_pdf_fixed_case(source):
     result = {"name": "ofd-to-pdf-fixed-layout", "source": source.name,
-              "target": "pdf", "type": "content-layout"}
+              "target": "pdf", "type": "content-layout", "verifiedRouteIds": []}
     source_task, source_text = upload_convert(source, "txt")
+    result["verifiedRouteIds"].append("ofd-to-txt")
     pdf_task, pdf_output = upload_convert(source, "pdf")
+    result["verifiedRouteIds"].append("ofd-to-pdf")
     result["taskStatus"] = pdf_task.get("status")
     result["output"] = pdf_output.name if pdf_output else None
     result["exactCheck"] = "ofd-vs-fixed-pdf-character-content-and-page-count"
@@ -494,9 +571,11 @@ def ofd_pdf_fixed_case(source):
 
 def ofd_image_fixed_case(source, target):
     result = {"name": f"ofd-to-{target}-fixed-layout", "source": source.name,
-              "target": target, "type": "content-layout"}
+              "target": target, "type": "content-layout", "verifiedRouteIds": []}
     pdf_task, reference_pdf = upload_convert(source, "pdf")
+    result["verifiedRouteIds"].append("ofd-to-pdf")
     image_task, image_output = upload_convert(source, target)
+    result["verifiedRouteIds"].append(f"ofd-to-{target}")
     result["taskStatus"] = image_task.get("status")
     result["output"] = image_output.name if image_output else None
     result["exactCheck"] = "page-count-dimensions-nonblank-and-raster-error"
@@ -575,7 +654,8 @@ def ofd_xlsx_table_case(source):
 
 
 def pdf_docx_editable_case(source):
-    result = {"name": "pdf-to-docx-editable", "source": source.name, "target": "docx", "type": "content"}
+    result = {"name": "pdf-to-docx-editable", "source": source.name, "target": "docx", "type": "content",
+              "verifiedRouteIds": ["pdf-to-docx"]}
     text_task, text_output = upload_convert(source, "txt")
     docx_task, docx_output = upload_convert(source, "docx")
     result["taskStatus"] = docx_task["status"]
@@ -612,7 +692,7 @@ def pdf_docx_editable_case(source):
 
 def pdf_docx_ocr_required_case(source):
     result = {"name": "pdf-to-docx-ocr-required", "source": source.name,
-              "target": "docx", "type": "failure-contract"}
+              "target": "docx", "type": "failure-contract", "verifiedRouteIds": ["pdf-to-docx"]}
     task, output = upload_convert(source, "docx")
     files = task.get("files") or []
     file_result = files[0] if files else {}
@@ -630,7 +710,7 @@ def pdf_docx_ocr_required_case(source):
 
 def pdf_txt_extraction_case(source, expected_text):
     result = {"name": "pdf-to-txt-layout-extraction", "source": source.name,
-              "target": "txt", "type": "content"}
+              "target": "txt", "type": "content", "verifiedRouteIds": ["pdf-to-txt"]}
     task, output = upload_convert(source, "txt")
     result["taskStatus"] = task.get("status")
     result["output"] = output.name if output else None
@@ -658,7 +738,7 @@ def pdf_txt_extraction_case(source, expected_text):
 
 def pdf_txt_ocr_required_case(source):
     result = {"name": "pdf-to-txt-ocr-required", "source": source.name,
-              "target": "txt", "type": "failure-contract"}
+              "target": "txt", "type": "failure-contract", "verifiedRouteIds": ["pdf-to-txt"]}
     task, output = upload_convert(source, "txt")
     files = task.get("files") or []
     file_result = files[0] if files else {}
@@ -737,7 +817,7 @@ def csv_round_trip_case(source):
 
 def docx_txt_extraction_case(source):
     result = {"name": "docx-to-txt-content", "source": source.name,
-              "target": "txt", "type": "content"}
+              "target": "txt", "type": "content", "verifiedRouteIds": ["docx-to-txt"]}
     task, output = upload_convert(source, "txt")
     result["taskStatus"] = task.get("status")
     result["output"] = output.name if output else None
@@ -756,31 +836,132 @@ def docx_txt_extraction_case(source):
     return result
 
 
-def pdf_compression_case(source):
-    result = {"name": "pdf-compress-balanced", "source": source.name,
-              "target": "pdf-compress", "type": "content-layout"}
-    task, output = upload_convert(source, "pdf-compress", {"compressionMode": "balanced"})
+def create_image_heavy_png(path, width=1800, height=1400):
+    """Create deterministic high-entropy RGB pixels that PNG stores much larger than JPEG."""
+    pixels = bytearray(width * height * 3)
+    seed = 0x13579BDF
+    offset = 0
+    for y in range(height):
+        for x in range(width):
+            seed = (seed * 1103515245 + 12345) & 0xffffffff
+            noise = (seed >> 16) & 0xff
+            pixels[offset] = noise
+            pixels[offset + 1] = (x + noise) & 0xff
+            pixels[offset + 2] = (y + noise) & 0xff
+            offset += 3
+    path.parent.mkdir(parents=True, exist_ok=True)
+    image = Image.frombytes("RGB", (width, height), bytes(pixels))
+    try:
+        image.save(path, format="PNG", dpi=(144, 144), compress_level=0)
+    finally:
+        image.close()
+    return path
+
+
+def create_compressible_pdf_source():
+    fixture_png = create_image_heavy_png(WORK / "pdf-compression-fixture" / "image-heavy.png")
+    task, source = upload_convert(fixture_png, "pdf")
+    if not source:
+        raise RuntimeError("Could not create deterministic image-heavy PDF QA source: "
+                           + str(task.get("errorMessage")))
+    return source
+
+
+def rendered_pages_are_nonblank(pages):
+    if not pages:
+        return False
+    for page in pages:
+        with Image.open(page) as image:
+            rgb = white_rgb(image)
+            if ImageChops.difference(rgb, Image.new("RGB", rgb.size, "white")).getbbox() is None:
+                return False
+    return True
+
+
+def pdf_compression_case(source, source_render_pages, mode):
+    result = {"name": f"pdf-compress-{mode}-image-heavy", "source": source.name,
+              "target": "pdf-compress", "type": "content-layout", "compressionMode": mode,
+              "verifiedRouteIds": ["pdf-to-pdf-compress"]}
+    task, output = upload_convert(source, "pdf-compress", {"compressionMode": mode})
     result["taskStatus"] = task.get("status")
     result["output"] = output.name if output else None
-    result["exactCheck"] = "readable-same-pages-and-not-larger"
+    result["exactCheck"] = "mode-warning-size-pages-nonblank-and-bounded-raster-error"
     if not output:
         result["strictPass"] = False
         result["error"] = task.get("errorMessage")
         return result
     result["sourceBytes"] = source.stat().st_size
     result["outputBytes"] = output.stat().st_size
+    result["savedBytes"] = result["sourceBytes"] - result["outputBytes"]
+    result["savingsPercent"] = round(result["savedBytes"] * 100.0 / result["sourceBytes"], 4)
     result["sourcePageCount"] = pdf_page_count(source)
     result["outputPageCount"] = pdf_page_count(output)
-    result["strictPass"] = (result["sourcePageCount"] == result["outputPageCount"]
-                            and result["outputBytes"] <= result["sourceBytes"])
+    output_render_pages = render_pdf(output, WORK / result["name"] / "render", "page")
+    result["renderedNonBlank"] = rendered_pages_are_nonblank(output_render_pages)
+    raster_mae = image_mean_absolute_error(source_render_pages, output_render_pages)
+    result["rasterDimensionsMatch"] = math.isfinite(raster_mae)
+    result["rasterMeanAbsoluteError"] = raster_mae if math.isfinite(raster_mae) else None
+    result["normalizedRasterError"] = raster_mae / 255.0 if math.isfinite(raster_mae) else 1.0
+    result["rasterPixelsExact"] = result["rasterDimensionsMatch"] and raster_mae == 0.0
+    result["maxNormalizedRasterError"] = PDF_COMPRESSION_MAX_NORMALIZED_RASTER_ERROR[mode]
+    result["rasterWithinLimit"] = (
+        result["normalizedRasterError"] <= result["maxNormalizedRasterError"])
+    result["warningCodes"] = [warning.get("code") for warning in (task.get("warnings") or [])]
+    expected_warning = ("PDF_COMPRESSION_APPLIED" if result["outputBytes"] < result["sourceBytes"]
+                        else "PDF_SIZE_NOT_REDUCED")
+    result["expectedWarningCode"] = expected_warning
+    warning_matches_size = result["warningCodes"] == [expected_warning]
+    common_contract = (result["sourcePageCount"] == result["outputPageCount"]
+                       and result["renderedNonBlank"] and result["rasterWithinLimit"]
+                       and warning_matches_size)
+    if mode in ("balanced", "strong"):
+        result["strictPass"] = (common_contract
+                                and result["outputBytes"] < result["sourceBytes"]
+                                and expected_warning == "PDF_COMPRESSION_APPLIED")
+    else:
+        result["strictPass"] = common_contract and result["outputBytes"] <= result["sourceBytes"]
     result["practicalPass"] = result["strictPass"]
     result["visualPass"] = None
     return result
 
 
+def beta_capability_coverage_case(capabilities, executed_cases):
+    available_beta = {
+        route["id"] for route in capabilities
+        if route.get("status") == "available" and route.get("qualityLevel") == "beta"
+    }
+    route_evidence = {}
+    for case in executed_cases:
+        for route_id in case.get("verifiedRouteIds") or []:
+            route_evidence.setdefault(route_id, []).append(case["name"])
+    verified_routes = set(route_evidence)
+    missing = sorted(available_beta - verified_routes)
+    result = {
+        "name": "beta-capability-coverage",
+        "source": "GET /api/tasks/capabilities",
+        "target": "available beta routes",
+        "type": "capability-coverage",
+        "exactCheck": "every-available-beta-route-has-explicit-qa-coverage",
+        "availableBetaRouteIds": sorted(available_beta),
+        "verifiedBetaRouteIds": sorted(verified_routes & available_beta),
+        "verifiedRouteEvidence": {
+            route_id: sorted(case_names)
+            for route_id, case_names in sorted(route_evidence.items())
+            if route_id in available_beta
+        },
+        "missingBetaRouteIds": missing,
+        "verifiedOutsideAvailableBetaRouteIds": sorted(verified_routes - available_beta),
+        "strictPass": not missing,
+        "practicalPass": not missing,
+        "visualPass": None,
+    }
+    return result
+
+
 def pdf_watermark_case(source):
     result = {"name": "pdf-watermark-text", "source": source.name,
-              "target": "pdf-watermark", "type": "content-layout"}
+              "target": "pdf-watermark", "type": "content-layout",
+              "verifiedRouteIds": ["pdf-to-pdf-watermark"]}
     task, output = upload_convert(source, "pdf-watermark", {
         "watermarkText": "QA-WATERMARK-2026",
         "watermarkOpacity": "0.30",
@@ -862,7 +1043,7 @@ def unavailable_ocr_case(name, source, target):
     return result
 
 
-def main():
+def run_qa_suite():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     REPORT.mkdir(parents=True, exist_ok=True)
     shutil.rmtree(WORK, ignore_errors=True)
@@ -892,10 +1073,18 @@ def main():
         if not generated_docx_source:
             raise RuntimeError("Could not create editable DOCX QA source: "
                                + str(docx_source_task.get("errorMessage")))
+        pdf_compression_source = create_compressible_pdf_source()
+        pdf_compression_render = render_pdf(
+            pdf_compression_source, WORK / "pdf-compression-fixture" / "source-render", "page")
+        if not rendered_pages_are_nonblank(pdf_compression_render):
+            raise RuntimeError("Deterministic image-heavy PDF QA source rendered blank")
         cases = [
-            visual_case("docx-to-pdf-exact", INPUT / "demo.docx", "pdf"),
-            visual_case("xlsx-to-pdf-exact", INPUT / "frictionless-sample.xlsx", "pdf"),
-            visual_case("pptx-to-pdf-exact", INPUT / "microsoft-workshop.pptx", "pdf"),
+            visual_case("docx-to-pdf-exact", INPUT / "demo.docx", "pdf",
+                        verified_route_id="docx-to-pdf"),
+            visual_case("xlsx-to-pdf-exact", INPUT / "frictionless-sample.xlsx", "pdf",
+                        verified_route_id="xlsx-to-pdf"),
+            visual_case("pptx-to-pdf-exact", INPUT / "microsoft-workshop.pptx", "pdf",
+                        verified_route_id="pptx-to-pdf"),
             visual_case("wps-to-docx-exact", INPUT / "quanzhou-drug-retail.wps", "docx", exact_mode="text"),
         ]
         if (INPUT / "wps-template-newchart.et").is_file():
@@ -916,7 +1105,9 @@ def main():
                 pdf_docx_editable_case(pdf_editable_source),
                 pdf_docx_ocr_required_case(pdf_scanned_source),
                 docx_txt_extraction_case(generated_docx_source),
-                pdf_compression_case(pdf_scanned_source),
+                pdf_compression_case(pdf_compression_source, pdf_compression_render, "lossless"),
+                pdf_compression_case(pdf_compression_source, pdf_compression_render, "balanced"),
+                pdf_compression_case(pdf_compression_source, pdf_compression_render, "strong"),
                 pdf_watermark_case(pdf_editable_source),
                 pdf_ofd_fixed_case(pdf_editable_source),
                 docx_uof_round_trip_case(generated_docx_source),
@@ -929,7 +1120,9 @@ def main():
             cases.append(ofd_image_fixed_case(INPUT / "ofdrw-invoice.ofd", "png"))
             cases.append(ofd_image_fixed_case(INPUT / "ofdrw-invoice.ofd", "jpg"))
             cases.append(ofd_xlsx_table_case(INPUT / "ofdrw-invoice.ofd"))
-        capabilities = {route["id"]: route for route in fetch_json("/api/tasks/capabilities")}
+        capability_routes = fetch_json("/api/tasks/capabilities")
+        capabilities = {route["id"]: route for route in capability_routes}
+        cases.append(beta_capability_coverage_case(capability_routes, cases))
         unavailable_ocr = [route_id for route_id in (
             "png-to-txt", "jpg-to-txt", "png-to-docx", "jpg-to-docx"
         ) if capabilities.get(route_id, {}).get("status") == "unavailable"]
@@ -948,7 +1141,7 @@ def main():
         if process:
             stop_service(process)
     report = {
-        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, normalized text for editable documents, and table data for spreadsheets. PDF-to-TXT requires source character preservation, correct page-boundary count, and OCR_REQUIRED for image-only input. Editable PDF-to-DOCX additionally requires matching page count, no embedded media, and a font table plus an OOXML obfuscated font part for generated CJK text; an image-only PDF must fail with OCR_REQUIRED. DOCX-to-TXT covers an ordinary document without optional comments or notes. PDF compression must preserve page count and never enlarge the selected fixture; PDF watermarking must preserve page count and introduce a visible rendered pixel delta. PDF-to-OFD requires a real OFD package plus character and page-count preservation, while DOCX-to-UOF-to-DOCX requires a real UOF root/namespace and exact normalized text. OFD-to-PDF requires character and declared/rendered page-count preservation. OFD-to-PNG/JPEG require page-count, pixel-dimension, nonblank-content, and bounded raster-error checks. OFD-to-XLSX requires exact invoice cell and merge counts plus known text, while low-confidence grid candidates are excluded; generated fixtures additionally cover pages, cells, merges, NO_TABLE_FOUND, and OCR_REQUIRED. Unavailable OCR routes must fail with OCR_ENGINE_UNAVAILABLE and produce no download. JPEG uses a declared lossy-error bound.",
+        "standard": "strictPass uses route-specific exactness: rendered pixels for direct fidelity routes, normalized text for editable documents, and table data for spreadsheets. PDF-to-TXT requires source character preservation, correct page-boundary count, and OCR_REQUIRED for image-only input. Editable PDF-to-DOCX additionally requires matching page count, no embedded media, and a font table plus an OOXML obfuscated font part for generated CJK text; an image-only PDF must fail with OCR_REQUIRED. DOCX-to-TXT covers an ordinary document without optional comments or notes. PDF compression uses one deterministic image-heavy PDF for all three modes: every result must preserve pages, render nonblank, never grow, return the warning matching its byte outcome, and stay within a per-mode normalized raster MAE limit (lossless 0, balanced 0.14, strong 0.19); balanced and strong must strictly shrink with PDF_COMPRESSION_APPLIED. PDF watermarking must preserve page count and introduce a visible rendered pixel delta. PDF-to-OFD requires a real OFD package plus character and page-count preservation, while DOCX-to-UOF-to-DOCX requires a real UOF root/namespace and exact normalized text. OFD-to-PDF requires character and declared/rendered page-count preservation. OFD-to-PNG/JPEG require page-count, pixel-dimension, nonblank-content, and bounded raster-error checks. OFD-to-XLSX requires exact invoice cell and merge counts plus known text, while low-confidence grid candidates are excluded; generated fixtures additionally cover pages, cells, merges, NO_TABLE_FOUND, and OCR_REQUIRED. Every currently available Beta capability must appear in verifiedRouteIds emitted by a case that actually ran in this QA invocation. Unavailable OCR routes must fail with OCR_ENGINE_UNAVAILABLE and produce no download. JPEG uses a declared lossy-error bound.",
         "visualThresholdForReferenceOnly": VISUAL_THRESHOLD,
         "health": sanitized_health(health),
         "results": results,
@@ -969,23 +1162,60 @@ def main():
         f"- Visual threshold passed: {report['summary']['visualPassed']}",
         f"- Office available: {health.get('office', {}).get('available')}",
         "",
-        "| Case | Type | Exact check | Strict | Visual | Visual diff | Output |",
-        "| --- | --- | --- | --- | --- | ---: | --- |",
     ]
+    beta_coverage = next(
+        (item for item in results if item.get("name") == "beta-capability-coverage"), None)
+    if beta_coverage:
+        lines.extend([
+            "## Beta Capability Coverage",
+            "",
+            "- Available: " + ", ".join(beta_coverage["availableBetaRouteIds"]),
+            "- Verified by executed cases: " + ", ".join(beta_coverage["verifiedBetaRouteIds"]),
+            "- Missing: " + (", ".join(beta_coverage["missingBetaRouteIds"]) or "none"),
+            "",
+        ])
+    lines.extend([
+        "| Case | Type | Exact check | Strict | Visual | Visual diff | Compression savings | Raster error / limit | Warnings | Output |",
+        "| --- | --- | --- | --- | --- | ---: | --- | --- | --- | --- |",
+    ])
     for item in results:
         visual = item.get("visualPass")
-        lines.append("| {name} | {type} | {check} | {strict} | {visual} | {ratio:.8f} | {output} |".format(
+        savings = ""
+        if item.get("sourceBytes") is not None and item.get("outputBytes") is not None:
+            savings = (f"{item['sourceBytes']} → {item['outputBytes']} bytes "
+                       f"({float(item.get('savingsPercent') or 0):.4f}%)")
+        raster_error = ""
+        if item.get("normalizedRasterError") is not None:
+            raster_error = (f"{float(item['normalizedRasterError']):.6f} / "
+                            f"{float(item['maxNormalizedRasterError']):.6f}")
+        warning_codes = ", ".join(item.get("warningCodes") or [])
+        lines.append("| {name} | {type} | {check} | {strict} | {visual} | {ratio:.8f} | {savings} | {raster_error} | {warnings} | {output} |".format(
             name=item["name"],
             type=item["type"],
             check=item.get("exactCheck") or "data-roundtrip",
             strict="PASS" if item.get("strictPass") else "FAIL",
             visual="N/A" if visual is None else ("PASS" if visual else "FAIL"),
             ratio=float(item.get("visualDiffRatio", item.get("diffRatio")) or 0),
+            savings=savings,
+            raster_error=raster_error,
+            warnings=warning_codes,
             output=item.get("output") or "",
         ))
     (REPORT / "qa-report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(json.dumps(report["summary"], ensure_ascii=False))
     return 0 if report["summary"]["strictFailed"] == 0 else 1
+
+
+def main():
+    try:
+        lock_file = acquire_run_lock()
+    except RuntimeError as error:
+        print(f"QA run refused: {error}", file=sys.stderr)
+        return 2
+    try:
+        return run_qa_suite()
+    finally:
+        release_run_lock(lock_file)
 
 
 def sanitized_health(health):

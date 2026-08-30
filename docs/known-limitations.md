@@ -16,7 +16,7 @@
 4. 未启用 OCR 时，`OFD -> TXT/DOCX` 对纯扫描页以及文字极少但大幅图像覆盖的混合扫描页严格返回 `OCR_REQUIRED`，不生成不完整 TXT 或图片伪装的可编辑 DOCX。显式配置本地 Tesseract 后，会对触发扫描检测的非签章图像执行 OCR、按图像坐标合并真实文字，并保留原扫描图作为 DOCX 保真层；识别结果返回 `OCR_APPLIED`。无法解码图像或识别不到文字时返回 `OCR_NO_TEXT`。
 5. 加密 OFD、私有厂商扩展和部分数字签章外观可能无法解析；系统会失败或给出警告。固定版式 PDF 使用内置字体替代源字体，字形宽度可能存在小幅差异。
 6. `OFD -> XLSX` 仅导出置信度不低于 0.85 的水平/垂直矢量线规则表格，保留文本、分页工作表和矩形合并区域；无线表格、嵌套表格、公式、日期和数值类型推断尚未实现，当前统一写入字符串。未识别到可靠表格时返回 `NO_TABLE_FOUND`，扫描页返回 `OCR_REQUIRED`，不会生成空工作簿或低置信度数据伪装成功。
-7. `OFD -> PNG/JPEG` 固定使用 160 DPI RGB 栅格化，单页直接返回图片，多页返回按 `page-0001` 顺序命名的 ZIP。它与 `OFD -> PDF` 共享固定版式绘制限制；优先使用 Poppler，并在不可用时回退到 PDFBox。JPEG 使用 0.9 压缩质量，属于有损输出。扫描型 OFD 可以直接渲染，不需要 OCR。
+7. `OFD -> PNG/JPEG` 固定使用 160 DPI RGB 栅格化，并在 PNG `pHYs` / JPEG JFIF 中写入对应分辨率元数据；单页直接返回图片，多页返回按 `page-0001` 顺序命名的 ZIP。它与 `OFD -> PDF` 共享固定版式绘制限制；优先使用 Poppler，并在不可用时回退到 PDFBox。JPEG 使用 0.9 压缩质量，属于有损输出。扫描型 OFD 可以直接渲染，不需要 OCR，固定版式路线不会误报 `OCR_REQUIRED`。
 
 ## PDF
 
@@ -31,7 +31,7 @@
 
 ## Office 与国产格式
 
-1. `DOCX/XLSX/PPTX -> PDF` 依赖 LibreOffice headless；每次转换使用独立 profile/output 目录，输出会重新打开并校验真实页数。可通过 `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION` 锁定部署版本，但缺失字体仍会造成分页和视觉差异，生产环境应固定 LibreOffice 包及字体包镜像。
+1. `DOCX/XLSX/PPTX -> PDF` 优先使用 LibreOffice headless；每次转换使用独立 profile/output 目录，输出会重新打开并校验真实页数。可通过 `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION` 锁定部署版本，但缺失字体仍会造成分页和视觉差异，生产环境应固定 LibreOffice 包及字体包镜像。LibreOffice 不可用时，DOCX/XLSX 会降级为内容优先的 Java Beta 路线：DOCX 保持正文段落/表格顺序，XLSX 仅导出第一个工作表并使用已保存的公式缓存值，两者都不保留复杂版式；PPTX 路线会明确标记为不可用。
 2. `WPS/ET/DPS/UOF` 依赖 LibreOffice 对对应格式的兼容能力，当前标记为 experimental。
 3. `UOF -> DOCX` 当前由 LibreOffice 直接导入并输出可编辑 DOCX；能保留的对象取决于 LibreOffice 的 UOF 兼容性，分页、字体、脚注/尾注等自动编号和对象位置可能变化。
 4. WPS 官方命令行中的部分 PDF 转换能力可能需要登录或会员能力，不适合作为开源默认依赖。
