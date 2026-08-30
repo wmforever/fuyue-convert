@@ -6,9 +6,11 @@ const closeApplication = process.argv.includes('--close-app')
 const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
 async function waitForPageTarget() {
-  for (let attempt = 0; attempt < 40; attempt++) {
+  for (let attempt = 0; attempt < 240; attempt++) {
     try {
-      const targets = await fetch(`http://127.0.0.1:${debugPort}/json`).then(response => response.json())
+      const targets = await fetch(`http://127.0.0.1:${debugPort}/json`, {
+        signal: AbortSignal.timeout(1_000)
+      }).then(response => response.json())
       const page = targets.find(target => target.type === 'page'
         && /^http:\/\/(?:127\.0\.0\.1|\[::1\]):\d+\/$/.test(target.url || ''))
       if (page?.webSocketDebuggerUrl) return page
@@ -65,11 +67,18 @@ async function evaluate(expression) {
 
 async function waitForEvaluation(expression, attempts = 80, interval = 250) {
   let value
+  let lastError
   for (let attempt = 0; attempt < attempts; attempt++) {
-    value = await evaluate(expression)
-    if (value) return value
+    try {
+      value = await evaluate(expression)
+      lastError = null
+      if (value) return value
+    } catch (error) {
+      lastError = error
+    }
     await pause(interval)
   }
+  if (lastError) throw new Error(`页面状态轮询失败：${lastError.message}`)
   return value
 }
 
@@ -82,12 +91,12 @@ try {
   await evaluate(`document.querySelector('.header-cta').click()`)
   let routeSearchReady = await waitForEvaluation(`Boolean(document.querySelector('.route-search'))`, 20)
   if (!routeSearchReady) {
-    const triggerReady = await waitForEvaluation(`(() => {
+    routeSearchReady = await waitForEvaluation(`(() => {
+      if (document.querySelector('.route-search')) return true
       const trigger = document.querySelector('.route-trigger')
-      return Boolean(trigger && !trigger.disabled)
+      if (trigger && !trigger.disabled && trigger.getAttribute('aria-expanded') !== 'true') trigger.click()
+      return false
     })()`, 40)
-    if (triggerReady) await evaluate(`document.querySelector('.route-trigger').click()`)
-    routeSearchReady = await waitForEvaluation(`Boolean(document.querySelector('.route-search'))`, 40)
   }
   if (!routeSearchReady) {
     const state = await evaluate(`(() => ({
@@ -116,7 +125,11 @@ try {
   })()`, 40)
   if (!clickedRoute) throw new Error('没有找到 TXT → Word DOCX 路线')
 
-  const fileInputReady = await waitForEvaluation(`Boolean(document.querySelector('input[type="file"]'))`, 40)
+  const fileInputReady = await waitForEvaluation(`(() => {
+    const formats = document.querySelector('.route-formats')?.textContent || ''
+    const input = document.querySelector('input[type="file"]')
+    return formats.includes('纯文本 TXT') && formats.includes('Word DOCX') && Boolean(input && !input.disabled)
+  })()`, 40)
   if (!fileInputReady) throw new Error('没有找到文件输入框')
   const documentTree = await command('DOM.getDocument', { depth: -1, pierce: true })
   const fileInput = await command('DOM.querySelector', {

@@ -54,6 +54,7 @@ const forbiddenScriptPatterns = [
   [/^\s*!addplugindir\b/im, '!addplugindir'],
   [/^\s*Page\s+directory\b/im, '可修改安装目录页面'],
   [/^\s*InstallDirRegKey\b/im, '注册表安装目录覆盖'],
+  [/StrCpy\s+\$INSTDIR\s+"\$EXEDIR"/i, '临时卸载器目录覆盖'],
   [/\b(?:StdUtils|UAC|WinShell|nsProcess|nsis7z|elevate\.exe)\b/i, '禁止的社区插件/elevate']
 ]
 for (const [pattern, label] of forbiddenScriptPatterns) {
@@ -62,7 +63,10 @@ for (const [pattern, label] of forbiddenScriptPatterns) {
 for (const required of [
   'StrCpy $INSTDIR "$LOCALAPPDATA\\Programs\\${PRODUCT_NAME}"',
   'IfFileExists "$INSTDIR\\resources\\app.asar"',
-  'StrCmp $INSTDIR "$LOCALAPPDATA\\Programs\\${PRODUCT_NAME}"'
+  'StrCmp $INSTDIR "$LOCALAPPDATA\\Programs\\${PRODUCT_NAME}"',
+  'SetOutPath "$TEMP"',
+  'Delete "$INSTDIR\\Uninstall ${PRODUCT_NAME}.exe"',
+  'IfErrors 0 uninstall_complete'
 ]) {
   if (!installerScriptText.includes(required)) throw new Error(`NSIS 安全卸载门禁缺少：${required}`)
 }

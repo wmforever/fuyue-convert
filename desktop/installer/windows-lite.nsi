@@ -30,11 +30,6 @@ Function .onInit
   StrCpy $INSTDIR "$LOCALAPPDATA\Programs\${PRODUCT_NAME}"
 FunctionEnd
 
-Function un.onInit
-  ; An uninstaller copied elsewhere must not inherit or delete another path.
-  StrCpy $INSTDIR "$EXEDIR"
-FunctionEnd
-
 Section "Install"
   SetShellVarContext current
   StrCpy $INSTDIR "$LOCALAPPDATA\Programs\${PRODUCT_NAME}"
@@ -64,10 +59,20 @@ uninstall_path_valid:
   IfFileExists "$INSTDIR\resources\app.asar" uninstall_marker_valid 0
   Abort "Fuyue Convert application marker is missing."
 uninstall_marker_valid:
+  ; NSIS runs an uninstaller copy from TEMP while preserving the original
+  ; install directory in $INSTDIR. Move out of that directory and delete the
+  ; original uninstaller before recursively removing the owned tree.
+  SetOutPath "$TEMP"
   Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk"
   RMDir "$SMPROGRAMS\${PRODUCT_NAME}"
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
   DeleteRegKey HKCU "Software\${PRODUCT_NAME}"
+  Delete "$INSTDIR\Uninstall ${PRODUCT_NAME}.exe"
+  ClearErrors
   RMDir /r "$INSTDIR"
+  IfErrors 0 uninstall_complete
+  SetErrorLevel 1
+  Abort "Unable to remove the Fuyue Convert installation directory."
+uninstall_complete:
 SectionEnd

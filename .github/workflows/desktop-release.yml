@@ -171,6 +171,12 @@ jobs:
               }
               Start-Sleep -Milliseconds 250
             }
+            $RemainingProcesses = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+              $_.ExecutablePath -and $_.ExecutablePath.StartsWith($InstallDir, [System.StringComparison]::OrdinalIgnoreCase)
+            }
+            if ($RemainingProcesses) {
+              throw "Could not stop installed application processes before uninstall: $($RemainingProcesses.ProcessId -join ', ')"
+            }
             $Uninstaller = Get-ChildItem $InstallDir -Filter "Uninstall*.exe" -File -ErrorAction SilentlyContinue | Select-Object -First 1
             if (-not $Uninstaller) { throw "Installed application did not contain its uninstaller" }
             $Uninstall = Start-Process -FilePath $Uninstaller.FullName -ArgumentList "/S" -Wait -PassThru
