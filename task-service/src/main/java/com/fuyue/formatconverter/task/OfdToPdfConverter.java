@@ -37,8 +37,13 @@ public final class OfdToPdfConverter implements FileConverter {
         progress.update(TaskStage.RENDERING, 60);
         renderer.render(parsed, outputPath);
         ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "OFD 转 PDF");
-        List<ConversionWarning> warnings = new java.util.ArrayList<>(parsed.warnings());
-        parsed.pages().forEach(page -> warnings.addAll(page.warnings()));
+        List<ConversionWarning> warnings = new java.util.ArrayList<>();
+        parsed.warnings().stream()
+                .filter(warning -> warning.code() != WarningCode.OCR_REQUIRED)
+                .forEach(warnings::add);
+        parsed.pages().forEach(page -> page.warnings().stream()
+                .filter(warning -> warning.code() != WarningCode.OCR_REQUIRED)
+                .forEach(warnings::add));
         if (parsed.pages().stream().anyMatch(page -> !page.textBlocks().isEmpty())) {
             warnings.add(ConversionWarning.of(WarningCode.FONT_SUBSTITUTED,
                     "OFD 字体已使用内置 PDF 字体替代；字形宽度和少数字符可能与原文件不同。", null));

@@ -37,9 +37,11 @@ public final class XlsxToCsvConverter implements FileConverter {
         List<SheetCsv> sheets = new ArrayList<>();
         boolean[] formulas = {false};
         try (XSSFWorkbook workbook = new XSSFWorkbook(Files.newInputStream(input.path()))) {
+            boolean use1904Windowing = uses1904Windowing(workbook);
             for (int index = 0; index < workbook.getNumberOfSheets(); index++) {
                 Sheet sheet = workbook.getSheetAt(index);
-                sheets.add(new SheetCsv(index, sheet.getSheetName(), extractRows(sheet, formatter, formulas, limits)));
+                sheets.add(new SheetCsv(index, sheet.getSheetName(),
+                        extractRows(sheet, formatter, formulas, use1904Windowing, limits)));
             }
         }
 
@@ -65,6 +67,7 @@ public final class XlsxToCsvConverter implements FileConverter {
     }
 
     private List<List<String>> extractRows(Sheet sheet, DataFormatter formatter, boolean[] formulas,
+                                           boolean use1904Windowing,
                                            ParseLimits limits) throws Exception {
         List<List<String>> rows = new ArrayList<>();
         long cells = 0;
@@ -78,7 +81,7 @@ public final class XlsxToCsvConverter implements FileConverter {
                 for (int c = 0; c < lastCell; c++) {
                     ConversionGuards.requireSpreadsheetColumn(c);
                     Cell cell = row.getCell(c, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-                    String value = cell == null ? "" : cellText(cell, formatter, formulas);
+                    String value = cell == null ? "" : cellText(cell, formatter, formulas, use1904Windowing);
                     ConversionGuards.requireCellText(value);
                     values.add(value);
                     ConversionGuards.requireSpreadsheetCellCount(++cells, limits);
@@ -89,18 +92,24 @@ public final class XlsxToCsvConverter implements FileConverter {
         return rows;
     }
 
-    private String cellText(Cell cell, DataFormatter formatter, boolean[] formulas) {
+    private String cellText(Cell cell, DataFormatter formatter, boolean[] formulas, boolean use1904Windowing) {
         if (cell.getCellType() != CellType.FORMULA) return formatter.formatCellValue(cell);
         formulas[0] = true;
         CellType cached = cell.getCachedFormulaResultType();
         return switch (cached) {
             case STRING -> cell.getStringCellValue();
             case NUMERIC -> formatter.formatRawCellContents(cell.getNumericCellValue(),
-                    cell.getCellStyle().getDataFormat(), cell.getCellStyle().getDataFormatString());
+                    cell.getCellStyle().getDataFormat(), cell.getCellStyle().getDataFormatString(),
+                    use1904Windowing);
             case BOOLEAN -> Boolean.toString(cell.getBooleanCellValue()).toUpperCase(Locale.ROOT);
             case ERROR -> FormulaError.forInt(cell.getErrorCellValue()).getString();
             case BLANK, _NONE, FORMULA -> "";
         };
+    }
+
+    private boolean uses1904Windowing(XSSFWorkbook workbook) {
+        var definition = workbook.getCTWorkbook();
+        return definition.isSetWorkbookPr() && definition.getWorkbookPr().getDate1904();
     }
 
     private void packageSheets(Path zipPath, List<SheetCsv> sheets, ParseLimits limits) throws Exception {

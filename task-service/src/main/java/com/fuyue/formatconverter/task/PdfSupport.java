@@ -24,10 +24,6 @@ final class PdfSupport {
 
     private PdfSupport() {}
 
-    static void writeTextPdf(List<String> lines, Path outputPath) throws IOException {
-        writeTextPdfPages(List.of(lines), outputPath, Integer.MAX_VALUE);
-    }
-
     static int writeTextPdfPages(List<List<String>> pages, Path outputPath, int maxPages) throws IOException {
         try (PDDocument document = new PDDocument()) {
             FontSet fonts = loadFonts(document);
@@ -63,7 +59,7 @@ final class PdfSupport {
     private static PDPage addPage(PDDocument document, int pageCount, int maxPages) throws IOException {
         if (pageCount > maxPages) {
             throw new ConversionFailureException("PAGE_LIMIT_EXCEEDED",
-                    "TXT 排版后的 PDF 页数超过限制：" + pageCount + " > " + maxPages);
+                    "文本排版后的 PDF 页数超过限制：" + pageCount + " > " + maxPages);
         }
         PDPage page = new PDPage(PDRectangle.A4);
         document.addPage(page);

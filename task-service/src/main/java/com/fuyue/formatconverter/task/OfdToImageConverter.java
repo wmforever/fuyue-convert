@@ -11,8 +11,11 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
@@ -85,7 +88,10 @@ abstract class OfdToImageConverter implements FileConverter {
         ConversionGuards.requireNonEmptyOutputFile(intermediatePdf, limits, "OFD 图片渲染中间 PDF");
 
         List<Path> pages = renderPages(intermediatePdf, parsed.pages().size(), workDir, limits, progress);
-        List<ConversionWarning> warnings = new ArrayList<>(parsed.warnings());
+        List<ConversionWarning> warnings = new ArrayList<>();
+        parsed.warnings().stream()
+                .filter(warning -> warning.code() != WarningCode.OCR_REQUIRED)
+                .forEach(warnings::add);
         parsed.pages().forEach(page -> page.warnings().stream()
                 .filter(warning -> warning.code() != WarningCode.OCR_REQUIRED)
                 .forEach(warnings::add));
@@ -196,31 +202,70 @@ abstract class OfdToImageConverter implements FileConverter {
     }
 
     private void writeImage(BufferedImage image, Path output) throws IOException {
-        if (targetFormat == DocumentFormat.JPG) {
-            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpeg");
-            if (!writers.hasNext()) throw new IOException("当前 Java ImageIO 不支持写入 JPEG");
-            ImageWriter writer = writers.next();
-            ImageOutputStream imageStream = ImageIO.createImageOutputStream(output.toFile());
-            if (imageStream == null) {
-                writer.dispose();
-                throw new IOException("无法创建 JPEG 输出流");
-            }
-            try (ImageOutputStream stream = imageStream) {
-                writer.setOutput(stream);
-                ImageWriteParam parameters = writer.getDefaultWriteParam();
-                if (parameters.canWriteCompressed()) {
-                    parameters.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-                    parameters.setCompressionQuality(JPEG_QUALITY);
-                }
-                writer.write(null, new IIOImage(image, null, null), parameters);
-            } finally {
-                writer.dispose();
-            }
-            return;
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(imageFormat);
+        if (!writers.hasNext()) throw new IOException("当前 Java ImageIO 不支持写入 " + targetFormat.label());
+        ImageWriter writer = writers.next();
+        ImageOutputStream imageStream = ImageIO.createImageOutputStream(output.toFile());
+        if (imageStream == null) {
+            writer.dispose();
+            throw new IOException("无法创建 " + targetFormat.label() + " 输出流");
         }
-        if (!ImageIO.write(image, imageFormat, output.toFile())) {
-            throw new IOException("当前 Java ImageIO 不支持写入 " + targetFormat.label());
+        try (ImageOutputStream stream = imageStream) {
+            writer.setOutput(stream);
+            ImageWriteParam parameters = writer.getDefaultWriteParam();
+            if (targetFormat == DocumentFormat.JPG && parameters.canWriteCompressed()) {
+                parameters.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                parameters.setCompressionQuality(JPEG_QUALITY);
+            }
+            IIOMetadata metadata = writer.getDefaultImageMetadata(
+                    ImageTypeSpecifier.createFromRenderedImage(image), parameters);
+            if (targetFormat == DocumentFormat.PNG) applyPngDpi(metadata);
+            else applyJpegDpi(metadata);
+            writer.write(null, new IIOImage(image, null, metadata), parameters);
+        } finally {
+            writer.dispose();
         }
+    }
+
+    private void applyPngDpi(IIOMetadata metadata) throws IOException {
+        String format = "javax_imageio_png_1.0";
+        IIOMetadataNode root = (IIOMetadataNode) metadata.getAsTree(format);
+        IIOMetadataNode physical = child(root, "pHYs");
+        int pixelsPerMeter = Math.max(1, Math.round(RENDER_DPI / 0.0254f));
+        physical.setAttribute("pixelsPerUnitXAxis", Integer.toString(pixelsPerMeter));
+        physical.setAttribute("pixelsPerUnitYAxis", Integer.toString(pixelsPerMeter));
+        physical.setAttribute("unitSpecifier", "meter");
+        metadata.setFromTree(format, root);
+    }
+
+    private void applyJpegDpi(IIOMetadata metadata) throws IOException {
+        String format = "javax_imageio_jpeg_image_1.0";
+        IIOMetadataNode root = (IIOMetadataNode) metadata.getAsTree(format);
+        IIOMetadataNode jfif = descendant(root, "app0JFIF");
+        if (jfif == null) return;
+        int dpi = Math.max(1, Math.min(65_535, Math.round(RENDER_DPI)));
+        jfif.setAttribute("resUnits", "1");
+        jfif.setAttribute("Xdensity", Integer.toString(dpi));
+        jfif.setAttribute("Ydensity", Integer.toString(dpi));
+        metadata.setFromTree(format, root);
+    }
+
+    private IIOMetadataNode child(IIOMetadataNode root, String name) {
+        for (int index = 0; index < root.getLength(); index++) {
+            if (name.equals(root.item(index).getNodeName())) return (IIOMetadataNode) root.item(index);
+        }
+        IIOMetadataNode result = new IIOMetadataNode(name);
+        root.appendChild(result);
+        return result;
+    }
+
+    private IIOMetadataNode descendant(IIOMetadataNode node, String name) {
+        if (name.equals(node.getNodeName())) return node;
+        for (int index = 0; index < node.getLength(); index++) {
+            IIOMetadataNode found = descendant((IIOMetadataNode) node.item(index), name);
+            if (found != null) return found;
+        }
+        return null;
     }
 
     private void packagePages(Path zip, List<Path> pages) throws IOException {

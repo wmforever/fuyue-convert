@@ -101,6 +101,31 @@ class CsvXlsxConverterTest {
     }
 
     @Test
+    void exportsCachedFormulaDatesUsingTheWorkbook1904DateSystem() throws Exception {
+        Path source = temp.resolve("date-1904.xlsx");
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            workbook.getCTWorkbook().getWorkbookPr().setDate1904(true);
+            var formula = workbook.createSheet("date").createRow(0).createCell(0);
+            formula.setCellFormula("0");
+            formula.setCellValue(0d);
+            var style = workbook.createCellStyle();
+            style.setDataFormat(workbook.createDataFormat().getFormat("yyyy-MM-dd"));
+            formula.setCellStyle(style);
+            try (var output = Files.newOutputStream(source)) { workbook.write(output); }
+        }
+
+        ConversionOutput result = new XlsxToCsvConverter().convert(input(source,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+                temp.resolve("date-work"), temp.resolve("date.csv"), ParseLimits.defaults(),
+                (stage, percent) -> { });
+
+        String csv = Files.readString(result.path(), StandardCharsets.UTF_8);
+        assertTrue(csv.contains("1904-01-01"), csv);
+        assertFalse(csv.contains("1899-12-31"), csv);
+        assertTrue(result.warnings().stream().anyMatch(w -> w.code() == WarningCode.FORMULA_RESULT_EXPORTED));
+    }
+
+    @Test
     void streamsCsvRowsBeyondTheInMemoryWindow() throws Exception {
         Path source = temp.resolve("large.csv");
         StringBuilder csv = new StringBuilder("序号,名称,值\n");

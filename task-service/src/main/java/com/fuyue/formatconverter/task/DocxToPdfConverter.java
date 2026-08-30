@@ -2,6 +2,8 @@ package com.fuyue.formatconverter.task;
 
 import com.fuyue.formatconverter.parser.ParseLimits;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,14 +23,20 @@ public final class DocxToPdfConverter implements FileConverter {
         progress.update(TaskStage.PARSING, 40);
         List<String> lines = new ArrayList<>();
         try (XWPFDocument document = new XWPFDocument(Files.newInputStream(input.path()))) {
-            document.getParagraphs().forEach(paragraph -> lines.add(paragraph.getText()));
-            document.getTables().forEach(table -> table.getRows().forEach(row ->
-                    lines.add(row.getTableCells().stream().map(cell -> cell.getText().replace('\n', ' '))
-                            .reduce((a, b) -> a + "    " + b).orElse(""))));
+            for (var element : document.getBodyElements()) {
+                if (element instanceof XWPFParagraph paragraph) {
+                    lines.add(paragraph.getText());
+                } else if (element instanceof XWPFTable table) {
+                    table.getRows().forEach(row -> lines.add(row.getTableCells().stream()
+                            .map(cell -> cell.getText().replace('\n', ' '))
+                            .reduce((a, b) -> a + "    " + b).orElse("")));
+                }
+            }
         }
         progress.update(TaskStage.RENDERING, 80);
-        PdfSupport.writeTextPdf(lines, outputPath);
+        int pageCount = PdfSupport.writeTextPdfPages(List.of(lines), outputPath, limits.maxPages());
         ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "DOCX 转 PDF");
-        return new ConversionOutput(outputPath, input.displayName().replaceFirst("(?i)\\.docx$", ".pdf"), null, List.of());
+        return new ConversionOutput(outputPath, input.displayName().replaceFirst("(?i)\\.docx$", ".pdf"),
+                pageCount, List.of());
     }
 }

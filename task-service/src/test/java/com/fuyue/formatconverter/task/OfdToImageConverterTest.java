@@ -1,9 +1,16 @@
 package com.fuyue.formatconverter.task;
 
+import com.fuyue.formatconverter.model.ConversionWarning;
+import com.fuyue.formatconverter.model.DocumentModel;
 import com.fuyue.formatconverter.model.WarningCode;
+import com.fuyue.formatconverter.parser.OfdParseException;
+import com.fuyue.formatconverter.parser.OfdParser;
 import com.fuyue.formatconverter.parser.OfdrwParser;
 import com.fuyue.formatconverter.parser.ParseLimits;
 import com.fuyue.formatconverter.parser.SafeOfdExtractor;
+import com.fuyue.formatconverter.parser.SafeOfdPackage;
+import com.fuyue.formatconverter.table.PageLayoutAnalyzer;
+import org.apache.pdfbox.Loader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.ofdrw.layout.OFDDoc;
@@ -40,12 +47,14 @@ class OfdToImageConverterTest {
             document.addVPage(new VirtualPage(60d, 90d).add(image));
         }
 
-        ConversionOutput converted = pngConverter().convert(input(source), temp.resolve("png-work"),
+        ConversionOutput converted = pngConverter(parserWithDocumentOcrWarning()).convert(
+                input(source), temp.resolve("png-work"),
                 temp.resolve("multi.png"), ParseLimits.defaults(), (stage, percent) -> { });
 
         assertEquals(2, converted.pageCount());
         assertEquals("multi-pages.zip", converted.outputName());
         assertEquals("multi.zip", converted.path().getFileName().toString());
+        assertFalse(converted.warnings().stream().anyMatch(warning -> warning.code() == WarningCode.OCR_REQUIRED));
         assertTrue(converted.warnings().stream().anyMatch(warning -> warning.code() == WarningCode.FONT_SUBSTITUTED));
         try (ZipFile zip = new ZipFile(converted.path().toFile())) {
             assertEquals(List.of("page-0001.png", "page-0002.png"), zip.stream().map(entry -> entry.getName()).toList());
@@ -55,6 +64,11 @@ class OfdToImageConverterTest {
             assertDimensions(second, 378, 567);
             assertTrue(hasNonWhitePixel(first));
             assertTrue(second.getRGB(second.getWidth() / 2, second.getHeight() / 2) != Color.WHITE.getRGB());
+            Path firstPage = temp.resolve("zip-page-0001.png");
+            try (var stream = zip.getInputStream(zip.getEntry("page-0001.png"))) {
+                Files.copy(stream, firstPage);
+            }
+            assertEmbeddedDpi(firstPage, DocumentFormat.PNG, 160d);
         }
     }
 
@@ -79,8 +93,31 @@ class OfdToImageConverterTest {
         BufferedImage jpeg = ImageIO.read(output.toFile());
         assertNotNull(jpeg);
         assertDimensions(jpeg, 504, 378);
+        assertEmbeddedDpi(output, DocumentFormat.JPG, 160d);
         Color center = new Color(jpeg.getRGB(jpeg.getWidth() / 2, jpeg.getHeight() / 2));
         assertTrue(center.getRed() > 180 && center.getGreen() < 80 && center.getBlue() < 80, center.toString());
+    }
+
+    @Test
+    void fixedLayoutPdfDoesNotClaimOcrIsRequiredForImageOnlyPage() throws Exception {
+        Path red = raster("pdf-red.png", Color.RED);
+        Path source = temp.resolve("image-only.ofd");
+        Img image = new Img(80d, 60d, red);
+        image.setPosition(Position.Absolute).setBox(0d, 0d, 80d, 60d);
+        try (OFDDoc document = new OFDDoc(source)) {
+            document.addVPage(new VirtualPage(80d, 60d).add(image));
+        }
+        Path output = temp.resolve("image-only.pdf");
+
+        ConversionOutput converted = new OfdToPdfConverter(new SafeOfdExtractor(),
+                parserWithDocumentOcrWarning(), new PageLayoutAnalyzer()).convert(
+                input(source), temp.resolve("pdf-work"), output,
+                ParseLimits.defaults(), (stage, percent) -> { });
+
+        assertFalse(converted.warnings().stream().anyMatch(warning -> warning.code() == WarningCode.OCR_REQUIRED));
+        try (var document = Loader.loadPDF(output.toFile())) {
+            assertEquals(1, document.getNumberOfPages());
+        }
     }
 
     private VirtualPage textPage(double width, double height, String value) {
@@ -114,12 +151,37 @@ class OfdToImageConverterTest {
         assertEquals(height, image.getHeight(), 1);
     }
 
-    private OfdToPngConverter pngConverter() {
-        return new OfdToPngConverter(new SafeOfdExtractor(), new OfdrwParser(), null);
+    private void assertEmbeddedDpi(Path image, DocumentFormat format, double expected) throws Exception {
+        ImageMetadataReader.ImageMetadata metadata = ImageMetadataReader.read(image, format);
+        assertTrue(metadata.embeddedDpi());
+        assertEquals(expected, metadata.dpiX(), 0.1d);
+        assertEquals(expected, metadata.dpiY(), 0.1d);
+    }
+
+    private OfdToPngConverter pngConverter(OfdParser parser) {
+        return new OfdToPngConverter(new SafeOfdExtractor(), parser, null);
     }
 
     private OfdToJpgConverter jpgConverter() {
         return new OfdToJpgConverter(new SafeOfdExtractor(), new OfdrwParser(), null);
+    }
+
+    private OfdParser parserWithDocumentOcrWarning() {
+        OfdParser delegate = new OfdrwParser();
+        return new OfdParser() {
+            @Override
+            public DocumentModel parse(SafeOfdPackage source, String displayName, ParseLimits limits)
+                    throws OfdParseException {
+                DocumentModel parsed = delegate.parse(source, displayName, limits);
+                List<ConversionWarning> warnings = new java.util.ArrayList<>(parsed.warnings());
+                warnings.add(ConversionWarning.of(WarningCode.OCR_REQUIRED,
+                        "synthetic document-level OCR warning", null));
+                return new DocumentModel(parsed.sourceName(), parsed.parserName(), parsed.sourcePageCount(),
+                        parsed.pages(), warnings);
+            }
+
+            @Override public String name() { return delegate.name(); }
+        };
     }
 
     private ConversionInput input(Path source) throws Exception {
