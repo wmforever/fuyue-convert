@@ -30,6 +30,15 @@ The complete upstream notice is distributed beside the font as
 The complete upstream license is distributed beside the font as
 `task-service/src/main/resources/fonts/LiberationSans-LICENSE.txt`.
 
+## Mozilla PDF.js
+
+- Package: `pdfjs-dist` 5.4.149
+- Source: `mozilla/pdf.js`
+- Runtime use: local, in-browser PDF rendering for the watermark preview
+- License: Apache License 2.0
+
+The PDF.js worker and viewer library are bundled with the frontend assets and do not load code or documents from a third-party CDN.
+
 ## Electron and Chromium
 
 - Electron source: `electron/electron`

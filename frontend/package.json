@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "pdfjs-dist": "^5.4.149",
     "vue": "3.5.18"
   },
   "devDependencies": {

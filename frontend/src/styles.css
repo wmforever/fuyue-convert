@@ -243,6 +243,7 @@ h1 em { color: var(--lime); font-style: normal; }
 .watermark-options input[type="text"]:focus, .watermark-options select:focus { border-color: #75a99e; box-shadow: 0 0 0 3px rgba(12, 118, 103, .07); }
 .watermark-options input.invalid { border-color: #cf6868; background: #fffafa; }
 .field-error { color: #b44e4e !important; font-size: 8px !important; font-weight: 700; }
+.field-warning { color: #9a6b27 !important; font-size: 8px !important; font-weight: 700; }
 .color-field { height: 42px; display: flex; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid #d6e0da; border-radius: 10px; background: #fbfcfb; }
 .color-field input { width: 25px; height: 25px; padding: 0; border: 0; border-radius: 7px; background: transparent; cursor: pointer; }
 .color-field b { color: #687873; font-size: 9px; }
@@ -258,6 +259,47 @@ h1 em { color: var(--lime); font-style: normal; }
 .toggle-field > span:last-child { display: grid; gap: 2px; }
 .toggle-field strong { color: #384a44; font-size: 10px; }
 .toggle-field small { color: #8b9893; font-size: 8px; font-weight: 500; }
+
+.watermark-workbench { min-width: 0; display: grid; grid-template-columns: minmax(300px, .82fr) minmax(340px, 1.18fr); gap: 16px; align-items: start; }
+.watermark-workbench .watermark-options { grid-template-columns: 1fr 1fr; }
+.watermark-workbench .watermark-options .wide-field { grid-column: 1 / -1; }
+.watermark-options input:disabled, .watermark-options select:disabled { cursor: not-allowed; opacity: .55; }
+.watermark-preview { min-width: 0; overflow: hidden; border: 1px solid #dbe4df; border-radius: 14px; background: #fbfcfb; box-shadow: 0 12px 32px rgba(28, 58, 50, .07); }
+.watermark-preview-head { min-height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-bottom: 1px solid #e1e8e4; }
+.watermark-preview-head > div { min-width: 0; display: grid; gap: 3px; }
+.watermark-preview-head strong { color: #34463f; font-size: 11px; }
+.watermark-preview-head small { overflow: hidden; color: #86928e; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.watermark-preview-head > span { flex: 0 0 auto; padding: 4px 7px; border-radius: 999px; color: #0b7566; background: #e3f2ed; font-size: 7px; font-weight: 850; }
+.watermark-preview-stage { height: clamp(320px, 48vh, 470px); min-height: 320px; max-height: 470px; display: grid; place-items: center; padding: 16px; overflow: auto; position: relative; background: linear-gradient(145deg, #eef2ef, #e5ebe7); scrollbar-width: thin; }
+.watermark-preview-stage > * { grid-area: 1 / 1; }
+.watermark-preview-page { width: max-content; max-width: 100%; position: relative; overflow: hidden; background: white; box-shadow: 0 12px 35px rgba(21, 40, 35, .2); }
+.watermark-preview-page canvas { max-width: none; display: block; background: white; }
+.watermark-preview-overlay { position: absolute; inset: 0; overflow: hidden; pointer-events: none; font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", sans-serif; font-size: var(--watermark-font-size, 24px); font-weight: 400; line-height: 1; }
+.watermark-preview-overlay span { display: block; opacity: var(--watermark-opacity, .18); transform-origin: center; white-space: nowrap; }
+.watermark-preview-overlay.single span { max-width: none; position: absolute; left: var(--watermark-anchor-x, 50%); top: var(--watermark-anchor-y, 50%); transform: translate(-50%, -50%) rotate(var(--watermark-angle, -35deg)); }
+.watermark-preview-overlay.tiled { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); padding: 0; place-items: center; }
+.watermark-preview-overlay.tiled span { max-width: 72%; transform: rotate(var(--watermark-angle, -35deg)); }
+.watermark-preview-placeholder { min-height: 250px; max-width: 300px; display: grid; place-items: center; align-content: center; gap: 8px; padding: 24px; color: #81908a; text-align: center; }
+.watermark-preview-placeholder > span { width: 48px; height: 54px; display: grid; place-items: center; border: 1px dashed #b6c5bf; border-radius: 10px; color: #5d776e; background: rgba(255,255,255,.58); font-size: 9px; font-weight: 900; }
+.watermark-preview-placeholder strong { color: #5b6d66; font-size: 11px; }
+.watermark-preview-placeholder small { color: #8d9995; font-size: 9px; line-height: 1.5; }
+.watermark-preview-placeholder.error > span { border-color: #e6bcbc; color: #b54e4e; background: #fff4f4; }
+.watermark-preview-placeholder.error strong { color: #a94a4a; }
+.watermark-preview-spinner { width: 28px; height: 28px; border: 3px solid #cbdad4; border-top-color: var(--green); border-radius: 50%; animation: watermark-preview-spin .8s linear infinite; }
+@keyframes watermark-preview-spin { to { transform: rotate(360deg); } }
+.watermark-preview-footer { min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 12px; border-top: 1px solid #e1e8e4; }
+.watermark-page-controls { flex: 0 0 auto; display: flex; align-items: center; gap: 7px; }
+.watermark-page-controls button { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 1px solid #d4dfd9; border-radius: 7px; color: #547169; background: white; }
+.watermark-page-controls strong { min-width: 46px; color: #52645e; font-size: 9px; text-align: center; }
+.watermark-preview-footer p { min-width: 0; display: flex; align-items: center; justify-content: flex-end; gap: 5px; margin: 0; color: #8c7657; font-size: 8px; line-height: 1.4; text-align: right; }
+.watermark-preview-footer p.matched { color: #167e68; }
+.watermark-preview-footer p span { flex: 0 0 auto; font-weight: 900; }
+.watermark-preview-note { display: block; padding: 0 12px 11px; color: #98a29e; font-size: 7px; line-height: 1.45; }
+.watermark-dirty-notice { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: center; margin: 14px 0 0 243px; padding: 11px 13px; border: 1px solid #e3c895; border-radius: 11px; color: #7e6032; background: #fff9ed; }
+.watermark-dirty-notice > span { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 9px; color: #9b6a1d; background: #f7e5bd; font-size: 16px; font-weight: 800; }
+.watermark-dirty-notice p { display: grid; gap: 3px; margin: 0; }
+.watermark-dirty-notice strong { font-size: 10px; }
+.watermark-dirty-notice small { color: #9c8054; font-size: 8px; line-height: 1.45; }
 
 .drop-zone {
   min-height: 154px;

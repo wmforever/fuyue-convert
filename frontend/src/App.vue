@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const fallbackConversions = [{
   id: 'ofd-to-docx',
@@ -51,6 +51,19 @@ const watermarkPosition = ref('center')
 const watermarkTiled = ref(false)
 const watermarkPages = ref('all')
 const watermarkColor = ref('#969696')
+const watermarkPreviewCanvas = ref(null)
+const watermarkPreviewStage = ref(null)
+const watermarkPreviewRef = ref(null)
+const watermarkPreviewState = ref('empty')
+const watermarkPreviewError = ref('')
+const watermarkPreviewBlocksSubmit = ref(false)
+const watermarkPreviewCheckedFile = ref(null)
+const watermarkPreviewPage = ref(1)
+const watermarkPreviewPageCount = ref(0)
+const watermarkPreviewWidth = ref(0)
+const watermarkPreviewHeight = ref(0)
+const watermarkPreviewScale = ref(1)
+const watermarkSubmittedSettings = ref(null)
 const autoDownload = ref(false)
 const preferenceMessage = ref('')
 const desktopRuntime = ref(false)
@@ -61,6 +74,13 @@ let healthTimer
 let pollGeneration = 0
 let pollFailures = 0
 let uploadRequest = null
+let watermarkPdfDocument = null
+let watermarkPdfLoadingTask = null
+let watermarkPdfRenderTask = null
+let watermarkPreviewGeneration = 0
+let watermarkRenderGeneration = 0
+let watermarkResizeTimer
+let pdfJsModulePromise
 const autoDownloadedTaskIds = new Set()
 
 const selectedRoute = computed(() => conversions.value.find(route => route.id === selectedRouteId.value) || conversions.value[0])
@@ -71,9 +91,92 @@ const isPdfWatermarkRoute = computed(() => selectedRoute.value?.targetFormat ===
 const isPdfSplitRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-split')
 const hasToolOptions = computed(() => isPdfCompressRoute.value || isPdfWatermarkRoute.value || isPdfSplitRoute.value)
 const watermarkPagesValid = computed(() => validWatermarkPages(watermarkPages.value))
+const watermarkPreviewFile = computed(() => isPdfWatermarkRoute.value ? files.value[0] || null : null)
+const watermarkPreviewPending = computed(() => Boolean(watermarkPreviewFile.value)
+  && watermarkPreviewCheckedFile.value !== watermarkPreviewFile.value)
+const watermarkAppliesToPreviewPage = computed(() => watermarkPagesValid.value
+  && pageMatchesRange(watermarkPreviewPage.value, watermarkPages.value))
+const watermarkPreviewOverlayStyle = computed(() => {
+  const scale = watermarkPreviewScale.value || 1
+  const shortestPageEdge = Math.min(
+    watermarkPreviewWidth.value / scale || 0,
+    watermarkPreviewHeight.value / scale || 0
+  )
+  const baseSize = Math.max(18, Math.min(76, shortestPageEdge / 9)) * scale
+  const characters = Array.from(watermarkText.value)
+  const estimatedUnits = characters.reduce((total, character) => total
+    + (/\s/.test(character) ? 0.34 : (/^[\x00-\xff]$/.test(character) ? 0.6 : 1)), 0)
+  const maxTextWidth = watermarkPreviewWidth.value * (watermarkTiled.value ? 0.24 : 0.7)
+  const fittedSize = estimatedUnits > 0 ? Math.min(baseSize, maxTextWidth / estimatedUnits) : baseSize
+  const fontSize = Math.max(11 * scale, fittedSize)
+  const padding = Math.max(24, shortestPageEdge * 0.06) * scale
+  const textWidth = estimatedUnits * fontSize
+  const angleRadians = Math.abs(watermarkAngle.value) * Math.PI / 180
+  const rotatedHalfWidth = Math.abs(Math.cos(angleRadians)) * textWidth / 2
+    + Math.abs(Math.sin(angleRadians)) * fontSize / 2
+  const rotatedHalfHeight = Math.abs(Math.sin(angleRadians)) * textWidth / 2
+    + Math.abs(Math.cos(angleRadians)) * fontSize / 2
+  const leftAnchor = Math.min(watermarkPreviewWidth.value / 2, padding + rotatedHalfWidth)
+  const rightAnchor = Math.max(watermarkPreviewWidth.value / 2,
+    watermarkPreviewWidth.value - padding - rotatedHalfWidth)
+  const topAnchor = Math.min(watermarkPreviewHeight.value / 2, padding + rotatedHalfHeight)
+  const bottomAnchor = Math.max(watermarkPreviewHeight.value / 2,
+    watermarkPreviewHeight.value - padding - rotatedHalfHeight)
+  const [anchorX, anchorY] = ({
+    'top-left': [leftAnchor, topAnchor],
+    'top-right': [rightAnchor, topAnchor],
+    'bottom-left': [leftAnchor, bottomAnchor],
+    'bottom-right': [rightAnchor, bottomAnchor]
+  })[watermarkPosition.value] || [watermarkPreviewWidth.value / 2, watermarkPreviewHeight.value / 2]
+  return {
+    color: watermarkColor.value,
+    '--watermark-opacity': watermarkOpacity.value,
+    // PDF coordinates grow upward while CSS coordinates grow downward.
+    '--watermark-angle': `${-watermarkAngle.value}deg`,
+    '--watermark-font-size': `${fontSize}px`,
+    '--watermark-anchor-x': `${anchorX}px`,
+    '--watermark-anchor-y': `${anchorY}px`
+  }
+})
+const watermarkPreviewStatus = computed(() => {
+  if (watermarkPreviewState.value === 'empty') return '添加 PDF 后查看应用页面'
+  if (watermarkPreviewState.value === 'loading') return '正在读取 PDF 页数'
+  if (watermarkPreviewState.value === 'rendering') return '正在更新当前页预览'
+  if (watermarkPreviewState.value === 'error') return watermarkPreviewBlocksSubmit.value
+    ? '该文件无法处理，请更换 PDF'
+    : '预览不可用，可提交后查看服务端诊断'
+  if (!watermarkPagesValid.value) return '页码范围有误，预览暂不叠加水印'
+  if (watermarkRangeState.value.matches === false) return `应用范围未匹配这份 PDF（共 ${watermarkPreviewPageCount.value} 页）`
+  if (!watermarkText.value.trim()) return '请输入水印文字以查看效果'
+  if (watermarkAppliesToPreviewPage.value) return `第 ${watermarkPreviewPage.value} 页会添加水印`
+  return `第 ${watermarkPreviewPage.value} 页不在应用范围内`
+})
+const watermarkSettingsDirty = computed(() => isPdfWatermarkRoute.value
+  && ['SUCCESS', 'FAILED', 'CANCELLED'].includes(task.value?.status)
+  && watermarkSubmittedSettings.value
+  && JSON.stringify(currentWatermarkSettings()) !== JSON.stringify(watermarkSubmittedSettings.value))
+const watermarkRangeState = computed(() => {
+  if (!watermarkPagesValid.value) return { matches: false, overflow: false }
+  const pageCount = watermarkPreviewPageCount.value
+  if (!pageCount) return { matches: null, overflow: false }
+  const normalized = watermarkPages.value.replace(/\s+/g, '').toLowerCase()
+  if (normalized === 'all') return { matches: true, overflow: false }
+  const ranges = normalized.split(',').map(part => {
+    const [start, end = start] = part.split('-').map(Number)
+    return { start, end }
+  })
+  return {
+    matches: ranges.some(range => range.start <= pageCount),
+    overflow: ranges.some(range => range.end > pageCount)
+  }
+})
 const splitPagesValid = computed(() => validWatermarkPages(splitPages.value))
 const toolOptionsValid = computed(() => (!isPdfWatermarkRoute.value
-  || (watermarkText.value.trim().length > 0 && watermarkPagesValid.value))
+  || (watermarkText.value.trim().length > 0
+    && watermarkPagesValid.value
+    && watermarkRangeState.value.matches !== false
+    && !watermarkPreviewPending.value
+    && !watermarkPreviewBlocksSubmit.value))
   && (!isPdfSplitRoute.value || splitPagesValid.value))
 const routeFileLimit = computed(() => isSinglePdfTool.value ? 1 : limits.value.maxFilesPerTask)
 const canSubmit = computed(() => files.value.length >= (isPdfMergeRoute.value ? 2 : 1)
@@ -223,6 +326,199 @@ function validWatermarkPages(value) {
     const [start, end = start] = part.split('-').map(Number)
     return Number.isSafeInteger(start) && Number.isSafeInteger(end) && start <= end && end <= 1000000
   })
+}
+
+function pageMatchesRange(pageNumber, value) {
+  const normalized = String(value || '').replace(/\s+/g, '').toLowerCase()
+  if (normalized === 'all') return true
+  if (!validWatermarkPages(normalized)) return false
+  return normalized.split(',').some(part => {
+    const [start, end = start] = part.split('-').map(Number)
+    return pageNumber >= start && pageNumber <= end
+  })
+}
+
+function currentWatermarkSettings() {
+  return {
+    text: watermarkText.value.trim(),
+    opacity: Number(watermarkOpacity.value),
+    angle: Number(watermarkAngle.value),
+    position: watermarkPosition.value,
+    tiled: Boolean(watermarkTiled.value),
+    pages: watermarkPages.value.replace(/\s+/g, '').toLowerCase(),
+    color: watermarkColor.value.toLowerCase()
+  }
+}
+
+function loadPdfJs() {
+  if (!pdfJsModulePromise) {
+    pdfJsModulePromise = Promise.all([
+      import('pdfjs-dist'),
+      import('pdfjs-dist/build/pdf.worker.min.mjs?url')
+    ]).then(([pdfJs, worker]) => {
+      pdfJs.GlobalWorkerOptions.workerSrc = worker.default
+      return pdfJs
+    }).catch(error => {
+      pdfJsModulePromise = null
+      throw error
+    })
+  }
+  return pdfJsModulePromise
+}
+
+function disposeWatermarkPreviewResources() {
+  watermarkRenderGeneration++
+  if (watermarkPdfRenderTask) {
+    try { watermarkPdfRenderTask.cancel() } catch (_) { /* already finished */ }
+    watermarkPdfRenderTask = null
+  }
+  if (watermarkPdfLoadingTask) {
+    const loadingTask = watermarkPdfLoadingTask
+    watermarkPdfLoadingTask = null
+    Promise.resolve(loadingTask.destroy()).catch(() => {})
+  }
+  if (watermarkPdfDocument) {
+    const document = watermarkPdfDocument
+    watermarkPdfDocument = null
+    Promise.resolve(document.destroy()).catch(() => {})
+  }
+}
+
+function resetWatermarkPreview() {
+  watermarkPreviewGeneration++
+  disposeWatermarkPreviewResources()
+  watermarkPreviewPage.value = 1
+  watermarkPreviewPageCount.value = 0
+  watermarkPreviewWidth.value = 0
+  watermarkPreviewHeight.value = 0
+  watermarkPreviewScale.value = 1
+  watermarkPreviewError.value = ''
+  watermarkPreviewBlocksSubmit.value = false
+  watermarkPreviewCheckedFile.value = null
+  watermarkPreviewState.value = 'empty'
+  const canvas = watermarkPreviewCanvas.value
+  if (canvas) {
+    canvas.width = 0
+    canvas.height = 0
+    canvas.removeAttribute('style')
+  }
+}
+
+function readablePdfPreviewError(error) {
+  if (error?.name === 'PasswordException') return '转换服务无法处理受密码保护的 PDF，请解除密码后重新选择'
+  if (error?.name === 'InvalidPDFException') return '文件不是有效的 PDF，无法处理，请更换文件'
+  if (error?.name === 'MissingPDFException') return '无法读取所选 PDF，请重新选择文件'
+  return '预览生成失败，可重新选择文件或提交后查看转换服务诊断'
+}
+
+async function loadWatermarkPreview(file) {
+  const generation = ++watermarkPreviewGeneration
+  disposeWatermarkPreviewResources()
+  watermarkPreviewPage.value = 1
+  watermarkPreviewPageCount.value = 0
+  watermarkPreviewError.value = ''
+  watermarkPreviewBlocksSubmit.value = false
+  watermarkPreviewCheckedFile.value = null
+  if (!file) {
+    watermarkPreviewState.value = 'empty'
+    return
+  }
+
+  watermarkPreviewState.value = 'loading'
+  try {
+    const data = new Uint8Array(await file.arrayBuffer())
+    if (generation !== watermarkPreviewGeneration) return
+    const { getDocument } = await loadPdfJs()
+    if (generation !== watermarkPreviewGeneration) return
+    const loadingTask = getDocument({ data, isEvalSupported: false })
+    watermarkPdfLoadingTask = loadingTask
+    const document = await loadingTask.promise
+    if (generation !== watermarkPreviewGeneration) {
+      await document.destroy().catch(() => {})
+      return
+    }
+    watermarkPdfLoadingTask = null
+    watermarkPdfDocument = document
+    watermarkPreviewPageCount.value = document.numPages
+    watermarkPreviewCheckedFile.value = file
+    await renderWatermarkPreviewPage()
+  } catch (error) {
+    if (generation !== watermarkPreviewGeneration || error?.name === 'RenderingCancelledException') return
+    watermarkPdfLoadingTask = null
+    watermarkPreviewState.value = 'error'
+    watermarkPreviewBlocksSubmit.value = ['PasswordException', 'InvalidPDFException', 'MissingPDFException'].includes(error?.name)
+    watermarkPreviewCheckedFile.value = file
+    watermarkPreviewError.value = readablePdfPreviewError(error)
+  }
+}
+
+async function renderWatermarkPreviewPage() {
+  if (!watermarkPdfDocument) return
+  const document = watermarkPdfDocument
+  const generation = ++watermarkRenderGeneration
+  if (watermarkPdfRenderTask) {
+    try { watermarkPdfRenderTask.cancel() } catch (_) { /* already finished */ }
+    watermarkPdfRenderTask = null
+  }
+  watermarkPreviewPage.value = Math.min(Math.max(1, watermarkPreviewPage.value), document.numPages)
+  watermarkPreviewState.value = 'rendering'
+  watermarkPreviewError.value = ''
+  await nextTick()
+
+  let page
+  try {
+    page = await document.getPage(watermarkPreviewPage.value)
+    if (generation !== watermarkRenderGeneration || document !== watermarkPdfDocument) return
+    const canvas = watermarkPreviewCanvas.value
+    if (!canvas) return
+    const baseViewport = page.getViewport({ scale: 1 })
+    const stage = watermarkPreviewStage.value
+    const availableWidth = Math.max(180, Math.min(840, (stage?.clientWidth || 560) - 32))
+    const availableHeight = Math.max(240, Math.min(640, (stage?.clientHeight || 470) - 32))
+    const scale = Math.min(1.8,
+      availableWidth / baseViewport.width,
+      availableHeight / baseViewport.height)
+    if (!Number.isFinite(scale) || scale <= 0) throw new Error('Invalid PDF page viewport')
+    const viewport = page.getViewport({ scale })
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
+    canvas.width = Math.max(1, Math.floor(viewport.width * pixelRatio))
+    canvas.height = Math.max(1, Math.floor(viewport.height * pixelRatio))
+    canvas.style.width = `${Math.floor(viewport.width)}px`
+    canvas.style.height = `${Math.floor(viewport.height)}px`
+    watermarkPreviewWidth.value = viewport.width
+    watermarkPreviewHeight.value = viewport.height
+    watermarkPreviewScale.value = scale
+    const context = canvas.getContext('2d', { alpha: false })
+    watermarkPdfRenderTask = page.render({
+      canvasContext: context,
+      viewport,
+      transform: pixelRatio === 1 ? null : [pixelRatio, 0, 0, pixelRatio, 0, 0]
+    })
+    await watermarkPdfRenderTask.promise
+    if (generation !== watermarkRenderGeneration || document !== watermarkPdfDocument) return
+    watermarkPdfRenderTask = null
+    watermarkPreviewState.value = 'ready'
+  } catch (error) {
+    if (generation !== watermarkRenderGeneration || error?.name === 'RenderingCancelledException') return
+    watermarkPdfRenderTask = null
+    watermarkPreviewState.value = 'error'
+    watermarkPreviewError.value = readablePdfPreviewError(error)
+  } finally {
+    page?.cleanup()
+  }
+}
+
+function changeWatermarkPreviewPage(offset) {
+  const nextPage = watermarkPreviewPage.value + offset
+  if (!watermarkPdfDocument || nextPage < 1 || nextPage > watermarkPreviewPageCount.value) return
+  watermarkPreviewPage.value = nextPage
+  void renderWatermarkPreviewPage()
+}
+
+function scheduleWatermarkPreviewResize() {
+  if (!watermarkPdfDocument || !isPdfWatermarkRoute.value) return
+  clearTimeout(watermarkResizeTimer)
+  watermarkResizeTimer = setTimeout(() => void renderWatermarkPreviewPage(), 120)
 }
 
 function routeBadge(route) {
@@ -465,6 +761,7 @@ function applyTaskSnapshot(snapshot, changeView = true) {
   pollGeneration++
   clearTimeout(pollTimer)
   files.value = []
+  watermarkSubmittedSettings.value = null
   task.value = snapshot
   busy.value = ['WAITING', 'CONVERTING'].includes(snapshot.status)
   message.value = ''
@@ -622,9 +919,11 @@ function startNewBatch() {
   uploadProgress.value = 0
   busy.value = false
   message.value = ''
+  watermarkSubmittedSettings.value = null
 }
 
 function accept(selected) {
+  const wasEmpty = files.value.length === 0
   const extensions = acceptExtensions.value.map(extension => extension.toLowerCase())
   const selectedFiles = Array.from(selected || [])
   const matching = selectedFiles.filter(file => extensions.some(extension => file.name.toLowerCase().endsWith(extension)))
@@ -633,17 +932,31 @@ function accept(selected) {
   let capacityRejected = 0
   let quotaRejected = 0
   let selectedBytes = files.value.reduce((total, file) => total + file.size, 0)
-  for (const file of incoming) {
-    if (files.value.length >= routeFileLimit.value) {
-      capacityRejected++
-      continue
-    }
-    if (selectedBytes + file.size > limits.value.maxTaskUploadBytes) {
+  const replacingSingleFile = isSinglePdfTool.value && incoming.length > 0
+  if (replacingSingleFile) {
+    files.value.splice(0, files.value.length)
+    selectedBytes = 0
+    const replacement = incoming[0]
+    if (replacement.size <= limits.value.maxTaskUploadBytes) {
+      files.value.push(replacement)
+      selectedBytes = replacement.size
+    } else {
       quotaRejected++
-      continue
     }
-    files.value.push(file)
-    selectedBytes += file.size
+    capacityRejected += Math.max(0, incoming.length - 1)
+  } else {
+    for (const file of incoming) {
+      if (files.value.length >= routeFileLimit.value) {
+        capacityRejected++
+        continue
+      }
+      if (selectedBytes + file.size > limits.value.maxTaskUploadBytes) {
+        quotaRejected++
+        continue
+      }
+      files.value.push(file)
+      selectedBytes += file.size
+    }
   }
   const notices = []
   if (matching.length !== selectedFiles.length) notices.push(`非 ${acceptExtensions.value.join(' / ').toUpperCase()} 文件`)
@@ -651,6 +964,12 @@ function accept(selected) {
   if (capacityRejected) notices.push(`超出 ${routeFileLimit.value} 个文件上限的部分`)
   if (quotaRejected) notices.push(`超出 ${formatBytes(limits.value.maxTaskUploadBytes)} 总量上限的部分`)
   message.value = notices.length ? `已忽略${notices.join('、')}` : ''
+  if ((wasEmpty || replacingSingleFile) && files.value.length && isPdfWatermarkRoute.value) {
+    nextTick(() => watermarkPreviewRef.value?.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'center'
+    }))
+  }
 }
 
 function drop(event) {
@@ -693,6 +1012,7 @@ async function submit() {
   task.value = null
   uploadProgress.value = 0
   pollFailures = 0
+  if (isPdfWatermarkRoute.value) watermarkSubmittedSettings.value = currentWatermarkSettings()
   const data = new FormData()
   files.value.forEach(file => data.append('files', file))
   data.append('targetFormat', selectedRoute.value.targetFormat)
@@ -716,6 +1036,12 @@ async function submit() {
     message.value = error.message
     busy.value = false
   }
+}
+
+async function regenerateWatermark() {
+  if (!watermarkSettingsDirty.value || !canSubmit.value) return
+  message.value = '正在按当前水印设置重新生成，之前的结果仍可在任务记录中下载'
+  await submit()
 }
 
 function upload(data) {
@@ -894,6 +1220,8 @@ function successDescription(file) {
   return `已转换为 ${selectedRoute.value.targetLabel}${pages}`
 }
 
+watch(watermarkPreviewFile, file => void loadWatermarkPreview(file), { flush: 'post' })
+
 onMounted(() => {
   desktopRuntime.value = Boolean(window.formatConverterDesktop)
   loadPreferences()
@@ -903,14 +1231,18 @@ onMounted(() => {
   healthTimer = setInterval(loadLimits, 30000)
   document.addEventListener('click', onDocumentClick)
   window.addEventListener('resize', positionRouteMenu)
+  window.addEventListener('resize', scheduleWatermarkPreviewResize)
 })
 onBeforeUnmount(() => {
   clearTimeout(pollTimer)
   clearTimeout(historyTimer)
   clearInterval(healthTimer)
+  clearTimeout(watermarkResizeTimer)
   if (uploadRequest) uploadRequest.abort()
+  resetWatermarkPreview()
   document.removeEventListener('click', onDocumentClick)
   window.removeEventListener('resize', positionRouteMenu)
+  window.removeEventListener('resize', scheduleWatermarkPreviewResize)
 })
 </script>
 
@@ -1211,43 +1543,102 @@ onBeforeUnmount(() => {
           <p class="option-notice"><span>i</span> 若处理后的文件没有变小，系统会自动保留原文件。</p>
         </div>
 
-        <div v-else-if="isPdfWatermarkRoute" class="watermark-options">
-          <label class="wide-field">
-            <span>水印文字</span>
-            <input v-model="watermarkText" type="text" maxlength="80" placeholder="例如：机密资料" />
-          </label>
-          <label>
-            <span>应用页面</span>
-            <input v-model="watermarkPages" type="text" placeholder="all 或 1,3-5" :class="{ invalid: !watermarkPagesValid }" />
-            <small v-if="!watermarkPagesValid" class="field-error">请输入 all、1 或 1,3-5</small>
-          </label>
-          <label>
-            <span>位置</span>
-            <select v-model="watermarkPosition" :disabled="watermarkTiled">
-              <option value="center">页面居中</option>
-              <option value="top-left">左上角</option>
-              <option value="top-right">右上角</option>
-              <option value="bottom-left">左下角</option>
-              <option value="bottom-right">右下角</option>
-            </select>
-          </label>
-          <label>
-            <span>颜色</span>
-            <span class="color-field"><input v-model="watermarkColor" type="color" /><b>{{ watermarkColor.toUpperCase() }}</b></span>
-          </label>
-          <label class="range-field">
-            <span>透明度 <b>{{ Math.round(watermarkOpacity * 100) }}%</b></span>
-            <input v-model.number="watermarkOpacity" type="range" min="0.05" max="0.85" step="0.01" />
-          </label>
-          <label class="range-field">
-            <span>旋转角度 <b>{{ watermarkAngle }}°</b></span>
-            <input v-model.number="watermarkAngle" type="range" min="-180" max="180" step="1" />
-          </label>
-          <label class="toggle-field">
-            <input v-model="watermarkTiled" type="checkbox" />
-            <span class="toggle"></span>
-            <span><strong>平铺水印</strong><small>在整页重复显示水印</small></span>
-          </label>
+        <div v-else-if="isPdfWatermarkRoute" class="watermark-workbench">
+          <div class="watermark-options">
+            <label class="wide-field">
+              <span>水印文字</span>
+              <input v-model="watermarkText" type="text" maxlength="80" placeholder="例如：机密资料" :disabled="busy" />
+            </label>
+            <label>
+              <span>应用页面</span>
+              <input v-model="watermarkPages" type="text" placeholder="all 或 1,3-5" :class="{ invalid: !watermarkPagesValid || watermarkRangeState.matches === false }" :disabled="busy" />
+              <small v-if="!watermarkPagesValid" class="field-error">请输入 all、1 或 1,3-5</small>
+              <small v-else-if="watermarkRangeState.matches === false" class="field-error">未匹配这份 PDF（共 {{ watermarkPreviewPageCount }} 页）</small>
+              <small v-else-if="watermarkRangeState.overflow" class="field-warning">超出 {{ watermarkPreviewPageCount }} 页的部分将忽略</small>
+            </label>
+            <label>
+              <span>位置</span>
+              <select v-model="watermarkPosition" :disabled="busy || watermarkTiled">
+                <option value="center">页面居中</option>
+                <option value="top-left">左上角</option>
+                <option value="top-right">右上角</option>
+                <option value="bottom-left">左下角</option>
+                <option value="bottom-right">右下角</option>
+              </select>
+            </label>
+            <label>
+              <span>颜色</span>
+              <span class="color-field"><input v-model="watermarkColor" type="color" aria-label="选择水印颜色" :disabled="busy" /><b>{{ watermarkColor.toUpperCase() }}</b></span>
+            </label>
+            <label class="range-field">
+              <span>不透明度 <b>{{ Math.round(watermarkOpacity * 100) }}%</b></span>
+              <input v-model.number="watermarkOpacity" type="range" min="0.05" max="0.85" step="0.01" aria-label="水印不透明度" :disabled="busy" />
+            </label>
+            <label class="range-field">
+              <span>旋转角度 <b>{{ watermarkAngle }}°</b></span>
+              <input v-model.number="watermarkAngle" type="range" min="-180" max="180" step="1" aria-label="水印旋转角度" :disabled="busy" />
+            </label>
+            <label class="toggle-field">
+              <input v-model="watermarkTiled" type="checkbox" :disabled="busy" />
+              <span class="toggle"></span>
+              <span><strong>平铺水印</strong><small>在整页重复显示水印</small></span>
+            </label>
+          </div>
+
+          <section ref="watermarkPreviewRef" class="watermark-preview" aria-labelledby="watermark-preview-title">
+            <header class="watermark-preview-head">
+              <div><strong id="watermark-preview-title">效果预览</strong><small>仅在浏览器本地读取，不会提前上传</small></div>
+              <span>本地预览</span>
+            </header>
+            <div ref="watermarkPreviewStage" class="watermark-preview-stage" :class="`is-${watermarkPreviewState}`">
+              <div
+                v-show="['rendering', 'ready'].includes(watermarkPreviewState)"
+                class="watermark-preview-page"
+                role="img"
+                :aria-label="`PDF 第 ${watermarkPreviewPage} 页水印效果预览`"
+              >
+                <canvas ref="watermarkPreviewCanvas" aria-hidden="true"></canvas>
+                <div
+                  v-if="watermarkPreviewState === 'ready' && watermarkAppliesToPreviewPage && watermarkText.trim()"
+                  class="watermark-preview-overlay"
+                  :class="[watermarkTiled ? 'tiled' : 'single', watermarkPosition]"
+                  :style="watermarkPreviewOverlayStyle"
+                  aria-hidden="true"
+                >
+                  <template v-if="watermarkTiled">
+                    <span v-for="index in 12" :key="index">{{ watermarkText.trim() }}</span>
+                  </template>
+                  <span v-else>{{ watermarkText.trim() }}</span>
+                </div>
+              </div>
+              <div v-if="watermarkPreviewState === 'empty'" class="watermark-preview-placeholder">
+                <span aria-hidden="true">PDF</span>
+                <strong>添加 PDF 后即可预览</strong>
+                <small>将显示第一页，并随设置实时更新</small>
+              </div>
+              <div v-else-if="['loading', 'rendering'].includes(watermarkPreviewState)" class="watermark-preview-placeholder" role="status" aria-live="polite">
+                <i class="watermark-preview-spinner" aria-hidden="true"></i>
+                <strong>{{ watermarkPreviewState === 'loading' ? '正在读取 PDF' : '正在渲染页面' }}</strong>
+                <small>文件仅在当前设备内存中处理</small>
+              </div>
+              <div v-else-if="watermarkPreviewState === 'error'" class="watermark-preview-placeholder error" role="alert">
+                <span aria-hidden="true">!</span>
+                <strong>暂时无法预览</strong>
+                <small>{{ watermarkPreviewError }}</small>
+              </div>
+            </div>
+            <footer class="watermark-preview-footer">
+              <div class="watermark-page-controls" aria-label="预览页码">
+                <button type="button" :disabled="watermarkPreviewPage <= 1 || watermarkPreviewState !== 'ready'" aria-label="预览上一页" @click="changeWatermarkPreviewPage(-1)">←</button>
+                <strong>{{ watermarkPreviewPageCount ? `${watermarkPreviewPage} / ${watermarkPreviewPageCount}` : '— / —' }}</strong>
+                <button type="button" :disabled="watermarkPreviewPage >= watermarkPreviewPageCount || watermarkPreviewState !== 'ready'" aria-label="预览下一页" @click="changeWatermarkPreviewPage(1)">→</button>
+              </div>
+              <p :class="{ matched: watermarkPreviewState === 'ready' && watermarkAppliesToPreviewPage && watermarkPagesValid && watermarkText.trim() }" aria-live="polite">
+                <span aria-hidden="true">{{ watermarkPreviewState === 'ready' && watermarkAppliesToPreviewPage && watermarkPagesValid && watermarkText.trim() ? '✓' : '○' }}</span>{{ watermarkPreviewStatus }}
+              </p>
+            </footer>
+            <small class="watermark-preview-note">预览用于确认文字、位置与样式，最终效果以导出文件为准。</small>
+          </section>
         </div>
 
         <div v-else class="split-options">
@@ -1284,7 +1675,7 @@ onBeforeUnmount(() => {
           </div>
           <label class="select-button">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16V4M7.5 8.5 12 4l4.5 4.5M5 14v5h14v-5"/></svg>
-            {{ files.length ? '继续添加' : '选择文件' }}
+            {{ isSinglePdfTool && files.length ? '更换文件' : (files.length ? '继续添加' : '选择文件') }}
             <input type="file" :accept="acceptType" :multiple="!isSinglePdfTool" :disabled="busy || selectedRoute.status !== 'available'" @change="accept($event.target.files); $event.target.value = ''" />
           </label>
         </div>
@@ -1334,12 +1725,22 @@ onBeforeUnmount(() => {
 
       <p v-if="message" class="message">{{ message }}</p>
 
+      <div v-if="watermarkSettingsDirty" class="watermark-dirty-notice" role="alert">
+        <span aria-hidden="true">↻</span>
+        <p>
+          <strong>水印设置已修改，需要重新生成</strong>
+          <small v-if="task?.status === 'SUCCESS'">当前下载文件仍是上一次生成的结果。重新生成后才会应用预览中的新设置。</small>
+          <small v-else>“重试上次任务”仍会使用提交时的旧设置；请按当前设置重新生成。</small>
+        </p>
+      </div>
+
       <div class="actions">
         <button v-if="!task" class="primary" :disabled="!canSubmit" @click="submit">开始转换 <span aria-hidden="true">→</span></button>
-        <button v-if="task?.downloadReady" class="primary" :disabled="downloadingTaskId === task.taskId" @click="download">{{ downloadingTaskId === task.taskId ? '正在下载…' : `下载 ${task.downloadName}` }} <span aria-hidden="true">↓</span></button>
+        <button v-if="watermarkSettingsDirty" class="primary" :disabled="!canSubmit" @click="regenerateWatermark">按当前设置重新生成 <span aria-hidden="true">↻</span></button>
+        <button v-if="task?.downloadReady" :class="watermarkSettingsDirty ? 'secondary' : 'primary'" :disabled="downloadingTaskId === task.taskId" @click="download">{{ downloadingTaskId === task.taskId ? '正在下载…' : (watermarkSettingsDirty ? '下载上次结果' : `下载 ${task.downloadName}`) }} <span aria-hidden="true">↓</span></button>
         <button v-if="busy && !task" class="secondary" @click="cancelUpload">取消上传</button>
         <button v-if="task && ['WAITING', 'CONVERTING'].includes(task.status)" class="secondary" @click="cancelTask">取消任务</button>
-        <button v-if="task && ['FAILED', 'CANCELLED'].includes(task.status)" class="secondary" @click="retryTask">重试</button>
+        <button v-if="task && ['FAILED', 'CANCELLED'].includes(task.status)" class="secondary" @click="retryTask">{{ watermarkSettingsDirty ? '重试上次任务' : '重试' }}</button>
         <button v-if="task" class="secondary" @click="reset">转换其他文件</button>
       </div>
         </section>

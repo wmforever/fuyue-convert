@@ -43,7 +43,7 @@ PDF 工具可选参数：
 
 - `compressionMode`：`lossless`、`balanced` 或 `strong`；仅用于 `pdf-compress`，默认 `lossless`；
 - `watermarkText`：1-80 个字符的中英文文字，默认 `CONFIDENTIAL`；
-- `watermarkOpacity`：`0.05-0.85`，默认 `0.18`；
+- `watermarkOpacity`：水印不透明度，`0.05-0.85`，默认 `0.18`；
 - `watermarkAngle`：`-180` 到 `180` 度，默认 `35`；
 - `watermarkPosition`：`center`、`top-left`、`top-right`、`bottom-left` 或 `bottom-right`；
 - `watermarkTiled`：是否在整页平铺水印；
