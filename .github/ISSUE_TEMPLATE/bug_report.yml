@@ -37,6 +37,14 @@ body:
       label: 实际结果 / Actual behavior
     validations:
       required: true
+  - type: input
+    id: route_id
+    attributes:
+      label: 路线 ID / Route ID
+      description: 从系统信息或 `/api/tasks/capabilities` 复制，例如 `pdf-to-docx`；不涉及路线时填 N/A。
+      placeholder: pdf-to-docx
+    validations:
+      required: true
   - type: dropdown
     id: package
     attributes:
@@ -56,7 +64,31 @@ body:
     id: version
     attributes:
       label: 版本 / Version
-      placeholder: v0.1.1 或 /api/health 返回的 version
+      placeholder: v0.1.3、commit SHA 或 /api/health 返回的 version
+    validations:
+      required: true
+  - type: dropdown
+    id: client
+    attributes:
+      label: 界面 / Client
+      options:
+        - Electron desktop / 桌面版
+        - Local web UI / 本机网页
+        - Remote web UI / 远程网页
+        - REST API
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: regression
+    attributes:
+      label: 是否回归 / Regression
+      options:
+        - Previously worked / 以前可用
+        - Never worked / 从未可用
+        - Unknown / 不确定
+    validations:
+      required: true
   - type: textarea
     id: environment
     attributes:
@@ -69,3 +101,16 @@ body:
       label: 日志 / Logs
       description: 粘贴关键错误日志，不要包含 token 或隐私信息。
       render: text
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: 脱敏诊断 / Sanitized diagnostics
+      description: 可粘贴“复制诊断信息”的结果；提交前再次移除路径、账号、token 和文件内容。
+      render: text
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 隐私确认 / Privacy confirmation
+      options:
+        - label: 我没有公开 token、恶意文档、未授权样本或个人/商业敏感信息。
+          required: true

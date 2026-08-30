@@ -45,7 +45,7 @@ python3 qa-samples/run_qa.py
 - 内置运行时集成测试从独立 `app/ocr` 目录启动真实 Tesseract，验证二进制、动态库、语言模型和 `TESSDATA_PREFIX` 均不依赖系统安装路径。
 - 真实 Tesseract 金样覆盖：英文与数字、简体中文与标点、EXIF 方向校正、竖排中文、图片到 TXT/DOCX、PDF/OFD 文字/扫描混合页。
 - 竖排中文使用 `chi_sim_vert` 和 PSM 5。当前本机 Tesseract 5.5.2 对“天地玄黄”的结果为“天地去重”，因此门禁明确设为字符召回率至少 50%，并继续保持 experimental，不把“能运行”描述为逐字准确。
-- OCR CI 不继承 Runner 偶然存在的依赖：任务显式安装 `eng`、`chi_sim`、`chi_sim_vert` 和 Noto CJK 字体，先硬校验 `tesseract --list-langs`，再验证实际路线注册。Release 流程还会为 Linux、macOS、Windows 生成 `app/ocr`，安装包冒烟测试要求健康接口报告 `ocr.bundled=true`。
+- OCR CI 不继承 Runner 偶然存在的依赖：任务显式安装 `eng`、`chi_sim`、`chi_sim_vert` 和 Noto CJK 字体，先硬校验 `tesseract --list-langs`，再验证实际路线注册。发布脚本曾验证 Linux、macOS、Windows 的 `app/ocr` 暂存与 `ocr.bundled=true` 冒烟路径；公开二进制工作流现已默认停用，原生依赖逐项许可与来源审核完成前不得分发这些产物。
 
 > 历史记录：本报告记录 2026-08-08 的页面图层 PDF -> DOCX 基线。2026-08-09 默认路线已改为可编辑文字并严格拒绝扫描页；当前验收标准与最新结果以 `docs/quality-standard.md` 和重新运行 `qa-samples/run_qa.py` 生成的报告为准。
 

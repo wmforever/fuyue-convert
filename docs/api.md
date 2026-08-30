@@ -18,7 +18,7 @@ FormatConverter 的 API 以异步任务为中心：上传一个或多个文件�
 
 ## 访问令牌与监听地址
 
-默认只监听 `127.0.0.1`。需要从其他主机访问时，显式设置 `SERVER_ADDRESS=0.0.0.0`，并建议同时配置 `FORMAT_CONVERTER_API_TOKEN`。启用后，所有 `/api/tasks` 请求都必须携带以下任一请求头：
+默认只监听 `127.0.0.1`。需要从其他主机访问时，显式设置 `SERVER_ADDRESS=0.0.0.0`，并必须同时配置至少 32 个字符且不含首尾空白的 `FORMAT_CONVERTER_API_TOKEN`，否则服务拒绝启动。只有外层网络已经严格隔离时才可显式设置 `FORMAT_CONVERTER_ALLOW_INSECURE_REMOTE=true`；生产环境仍应使用 TLS 反向代理。启用 Token 后，所有 `/api/tasks` 请求都必须携带以下任一请求头：
 
 ```http
 X-Format-Converter-Token: <token>

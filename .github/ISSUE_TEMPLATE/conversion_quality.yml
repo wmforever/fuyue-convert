@@ -7,28 +7,13 @@ body:
     attributes:
       value: |
         这个模板用于反馈“转换结果不像原件、不可编辑、丢内容、分页漂移”等问题。
-        请只上传可公开分享或已脱敏的样本。
-  - type: dropdown
+        请只上传你有权公开分享并且已经完整脱敏的样本；否则请改用合成最小复现。
+  - type: input
     id: route
     attributes:
-      label: 转换路线 / Route
-      options:
-        - OFD -> DOCX
-        - OFD -> PDF
-        - OFD -> TXT
-        - PDF -> DOCX
-        - PDF -> PNG
-        - PDF -> TXT
-        - DOCX -> PDF
-        - XLSX -> PDF
-        - PPTX -> PDF
-        - CSV -> XLSX
-        - XLSX -> CSV
-        - TXT -> DOCX
-        - TXT -> PDF
-        - PNG/JPEG -> PDF
-        - WPS/ET/DPS/UOF route
-        - Other
+      label: 路线 ID / Route ID
+      description: 从系统信息或 `/api/tasks/capabilities` 复制稳定 ID。
+      placeholder: ofd-to-docx
     validations:
       required: true
   - type: dropdown
@@ -60,7 +45,18 @@ body:
     id: sample
     attributes:
       label: 样本和对比材料 / Samples and evidence
-      description: 可上传源文件、输出文件、截图、渲染图或最小复现样本。请确认已脱敏。
+      description: 可上传源文件、输出文件、截图、渲染图或最小复现样本。必须同时具备公开分享权并完成脱敏。
+  - type: textarea
+    id: task_evidence
+    attributes:
+      label: 任务证据 / Task evidence
+      description: 质量等级、受影响页码、warning/error code、源/输出文件大小；请勿粘贴 token 或本地绝对路径。
+      placeholder: |
+        qualityLevel: beta
+        pages: 2-3
+        warningCodes: FONT_SUBSTITUTED
+        sourceBytes: ...
+        outputBytes: ...
   - type: textarea
     id: environment
     attributes:
@@ -71,5 +67,7 @@ body:
     attributes:
       label: 样本确认 / Sample confirmation
       options:
-        - label: 我确认上传的样本可以公开分享，或已经移除隐私/敏感内容。
+        - label: 如提供样本，我确认有权公开分享，并且已移除隐私、商业敏感信息和隐藏元数据；未提供样本时不适用。
+          required: true
+        - label: 如提供样本，我已检查文档属性、批注、隐藏内容、签章和图片中的个人信息；未提供样本时不适用。
           required: true

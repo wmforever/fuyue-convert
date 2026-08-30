@@ -1,13 +1,13 @@
 # OCR 运行方式
 
-OCR 仍是 Tesseract 原生进程，不是 JDK、PDFBox 或 OFDRW 提供的继承能力；但正式运行包已将引擎、动态库和语言模型一起封装，最终用户不需要再安装 Tesseract。
+OCR 仍是 Tesseract 原生进程，不是 JDK、PDFBox 或 OFDRW 提供的继承能力。源码运行可使用系统 Tesseract，本地构建脚本也能暂存引擎、动态库和语言模型；但公开二进制发布目前暂停，原生依赖逐项许可与来源审核完成前，不得分发这些暂存产物。
 
 ## 各运行方式
 
 | 运行方式 | OCR 来源 | 是否需要用户安装 |
 | --- | --- | --- |
-| 官方 macOS/Linux/Windows 运行包 | `app/ocr` 内置运行时 | 否 |
-| 官方 Docker 镜像 | 镜像构建阶段安装 Tesseract 和模型 | 否 |
+| 本地 macOS/Linux/Windows 构建 | 可在 `app/ocr` 暂存运行时，仅限开发验收 | 否 |
+| 本地 Docker 构建 | 镜像构建阶段从发行版包管理器安装 | 否 |
 | 源码运行 | 系统 Tesseract 或自行准备 `app/ocr` | 是 |
 | 单独运行 Spring Boot JAR | JAR 相邻的 `ocr`/`app/ocr`，或系统 Tesseract | 视部署结构而定 |
 
@@ -37,7 +37,7 @@ app/ocr/
 
 应用会自动传递 `--tessdata-dir`，并在子进程范围内设置 `TESSDATA_PREFIX`、`LD_LIBRARY_PATH`、`DYLD_LIBRARY_PATH` 或 Windows `PATH`，不会污染主机全局环境。
 
-## 构建运行包
+## 本地构建运行包
 
 在构建机安装 Tesseract 后执行：
 
@@ -52,13 +52,13 @@ $env:FORMAT_CONVERTER_BUNDLE_OCR = "true"
 .\scripts\package-runtime.ps1
 ```
 
-`prepare-ocr-runtime.sh`/`.ps1` 会复制平台二进制、动态库、选定模型和 TSV 配置，然后用复制后的引擎执行 `--version`、`--list-langs` 自检。缺少任何必需文件时打包直接失败。可通过 `FORMAT_CONVERTER_BUNDLED_OCR_LANGUAGES` 调整模型集合，默认是 `eng chi_sim chi_sim_vert`。
+`prepare-ocr-runtime.sh`/`.ps1` 会复制平台二进制、动态库、选定模型和 TSV 配置，然后用复制后的引擎执行 `--version`、`--list-langs` 自检。缺少任何必需文件时打包直接失败。可通过 `FORMAT_CONVERTER_BUNDLED_OCR_LANGUAGES` 调整模型集合，默认是 `eng chi_sim chi_sim_vert`。功能自检不等于再分发许可审核，生成目录只能用于本地开发验收。
 
-发布 Workflow 会显式安装各平台 Tesseract。Windows 的模型固定到指定 `tessdata_fast` 提交，并在进入安装包前验证 SHA-256；运行包冒烟测试要求 `/api/health` 返回 `ocr.bundled=true`。
+发布 Workflow 虽能显式安装各平台 Tesseract，并对 Windows 模型固定提交和验证 SHA-256，但整个发布 job 默认被 `FORMAT_CONVERTER_BINARY_RELEASE_APPROVED` 门禁禁用。恢复发布前必须为 Tesseract、Leptonica 及复制的每个原生库补齐固定版本、来源、哈希、许可证文本和必要源码义务；`ocr.bundled=true` 只证明功能发现成功，不代表许可审核完成。
 
 ## 系统引擎回退
 
-不使用官方运行包时仍可这样启用：
+源码或独立 JAR 可这样启用系统引擎：
 
 ```bash
 export FORMAT_CONVERTER_OCR_ENABLED=true

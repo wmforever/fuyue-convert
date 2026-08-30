@@ -2,9 +2,15 @@
 
 [简体中文](README.md) | [English](README_EN.md)
 
+[![CI](https://github.com/wmforever/fuyue-convert/actions/workflows/ci.yml/badge.svg)](https://github.com/wmforever/fuyue-convert/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/source%20license-Apache--2.0-blue.svg)](LICENSE)
+[![Java 17](https://img.shields.io/badge/Java-17-4c8cbf.svg)](pom.xml)
+
 Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、可替换的开源组件完成常见办公文档、国产格式和版式文档之间的转换。
 
 项目基于 Java 17、Spring Boot、Vue 3、Apache POI、PDFBox、Poppler、OFDRW 和 LibreOffice headless。它不会承诺所有格式都能做到“完全一致且完全可编辑”，而是把转换能力拆成明确的路线、质量等级和失败原因，让结果可以被自动验证，也方便社区逐步增强。
+
+> 当前开放范围是源码与社区协作。自有源码采用 Apache-2.0；构建依赖继续适用各自许可证。公开二进制发布暂时停用，待运行时组件逐项完成来源、许可和再分发审核后再恢复，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。
 
 ## 项目定位
 
@@ -38,7 +44,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | PDF 压缩/水印 | beta | 保真优先 | 压缩支持无损、均衡和强力三级策略，先预览源 PDF，完成后再逐页预览真实压缩结果；水印支持中英文文字、不透明度、角度、颜色、位置、平铺和页码范围，并提供本地实时效果预览。修改已提交的设置后会明确要求重新生成，避免把旧结果当成新设置下载。两者均拒绝修改带数字签名的 PDF。 |
 | PDF 合并/拆分 | stable | 保真优先 | 合并按上传顺序输出单个 PDF，可切换检查每个源文件并在重排后保持预览绑定；拆分按页输出编号连续的 ZIP，可逐页确认选择范围并在提交前阻止越界页码。两类操作都会重写 PDF，不保留数字签名有效性。 |
 | PNG/JPG -> PDF | stable | 版式优先 | 读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。同格式多图按上传顺序合并为多页 PDF，网页端展示源图页序，转换完成后逐页展示真实 PDF 结果。 |
-| PNG/JPG -> TXT/DOCX | experimental/按需 | OCR 提取 | 官方运行包和 Docker 镜像内置 Tesseract；源码/JAR 模式也可使用显式配置的系统引擎。TXT 输出识别文字，DOCX 将坐标文字映射到 `DocumentModel` 后生成真实可编辑文本；两者均返回页级置信度和 OCR 警告。 |
+| PNG/JPG -> TXT/DOCX | experimental/按需 | OCR 提取 | 可显式配置系统 Tesseract；经许可审核的运行包未来也可内置固定 OCR 运行时。TXT 输出识别文字，DOCX 将坐标文字映射到 `DocumentModel` 后生成真实可编辑文本；两者均返回页级置信度和 OCR 警告。 |
 | WPS/ET/DPS/UOF -> OOXML | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |
 | DOCX -> UOF | experimental | 兼容优先 | LibreOffice 可用时调用明确的 `UOF text` 导出过滤器写入真实 UOF XML，并验证 UOF 根元素；已覆盖正文和表格文字的 LibreOffice 往返打开。 |
 
@@ -50,11 +56,11 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 - Poppler：用于 PDF 渲染为 PNG/JPEG 和视觉回归比较。
 - `FORMAT_CONVERTER_IMAGE_DPI`：PDF 图片导出的渲染分辨率，默认 `160`，允许 `36-600`；异常配置会在启动转换器时明确失败。
 - `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION`：可选的 LibreOffice 版本锁定片段（如 `24.8`）；实际 `--version` 不匹配时 Office 引擎会标记为不可用，版本可在 `/api/health` 和 `/api/diagnostics` 查看。
-- 官方运行包会在 `app/ocr` 携带 Tesseract、动态库及 `eng`、`chi_sim`、`chi_sim_vert` 模型，并自动启用 OCR 能力；它仍只在图片 OCR 路线或检测出的扫描页上执行，不参与普通原生文字转换。设置 `FORMAT_CONVERTER_OCR_ENABLED=false` 可强制关闭。源码/独立 JAR 模式可设置 `FORMAT_CONVERTER_OCR_ENABLED=true`，用 `FORMAT_CONVERTER_TESSERACT_BINARY` 指定系统 Tesseract（留空则从 `PATH` 查找）。其余限制参数包括超时、跨 Worker 并发、像素上限和置信度阈值；状态接口通过 `ocr.bundled` 标识当前是否使用内置运行时。
+- 源码/独立 JAR 模式可设置 `FORMAT_CONVERTER_OCR_ENABLED=true`，用 `FORMAT_CONVERTER_TESSERACT_BINARY` 指定系统 Tesseract（留空则从 `PATH` 查找）。OCR 只在图片 OCR 路线或检测出的扫描页上执行，不参与普通原生文字转换。设置 `FORMAT_CONVERTER_OCR_ENABLED=false` 可强制关闭；状态接口通过 `ocr.bundled` 标识当前是否使用经过审核的内置运行时。
 - OCR 不参与固定版式渲染，也不替换 PDF/OFD 原生文字解析。混合文档逐页处理：有原生文字的页保留原对象，只有扫描页进入 OCR；页面模型不连续时返回 `OCR_PAGE_MISSING`，无文字、低于最低置信度、超时和资源终止分别返回 `OCR_NO_TEXT`、`OCR_LOW_CONFIDENCE`、`OCR_TIMEOUT`、`OCR_RESOURCE_EXHAUSTED`，不会生成不完整结果。
 - 系统字体：仍会影响 Office 输出的分页、行距和文字替换。PDF/OFD -> DOCX 对中日韩文字嵌入项目已声明许可的回退字体，以保证基本字形可见；源字体的字宽与设计仍可能不同。基础 PDF 输出路线也内置中文回退字体，可通过 `FORMAT_CONVERTER_PDF_FONT` 指定 TrueType 字体。TXT -> DOCX 可通过 `FORMAT_CONVERTER_DOCX_FONT` 和 `FORMAT_CONVERTER_DOCX_CJK_FONT` 配置西文及东亚字体名；未显式配置东亚字体时同样按需嵌入内置字体。
 
-质量标准见 [docs/quality-standard.md](docs/quality-standard.md)。最新本地 QA 报告见 `qa-samples/report/qa-report.md`。
+质量标准和已提交的测试摘要见 [docs/quality-standard.md](docs/quality-standard.md) 与 [docs/test-report.md](docs/test-report.md)。完整 QA 会在本地生成被忽略的 `qa-samples/report/qa-report.md`。
 OCR 是否需要安装、不同运行方式的依赖责任和启用示例见 [docs/ocr-deployment.md](docs/ocr-deployment.md)。
 
 ## 快速开始
@@ -65,26 +71,42 @@ OCR 是否需要安装、不同运行方式的依赖责任和启用示例见 [do
 - Maven 3.9+
 - 可选：LibreOffice 或 `soffice`
 - 可选：Poppler `pdftoppm`
-- 源码/独立 JAR 可选：Tesseract 5.x 与所需语言包；官方运行包和 Docker 已内置
+- 源码/独立 JAR 可选：Tesseract 5.x 与所需语言包；本地 Docker 构建会从发行版包管理器安装 OCR，公开镜像发布仍处于暂停状态
 
 如果 `pdftoppm` 不在 `PATH` 中，可通过 `PDFTOPPM_BIN=/绝对路径/pdftoppm` 指定。OFD 图片、`PDF -> OFD` 和 `PDF -> JPEG` 路线会优先使用 Poppler，并在不可用时回退到 PDFBox；`PDF -> PNG` 为保留透明语义固定使用 PDFBox。
 
-构建：
+克隆并构建：
 
 ```bash
+git clone https://github.com/wmforever/fuyue-convert.git
+cd fuyue-convert
 mvn clean verify
 ```
 
 运行：
 
 ```bash
-java -jar web-api/target/web-api-0.1.3.jar
+java -jar web-api/target/web-api-*.jar
 ```
 
 访问：
 
 ```text
 http://127.0.0.1:8080
+```
+
+健康检查：
+
+```bash
+curl --fail http://127.0.0.1:8080/api/health
+```
+
+前端热更新开发（后端保持在 8080）：
+
+```bash
+cd frontend
+npm ci --no-audit --no-fund
+npm run dev
 ```
 
 ## 桌面应用
@@ -99,7 +121,7 @@ npm ci
 npm run dev
 ```
 
-生成 Windows x64 NSIS 安装器：
+本地生成 Windows x64 NSIS 安装器用于开发验收：
 
 ```powershell
 cd desktop
@@ -108,11 +130,11 @@ $env:FORMAT_CONVERTER_BUNDLE_OCR = "true"
 npm run dist:win
 ```
 
-桌面模式使用随机回环端口和每次启动随机生成的 API Token；Token 只由 Electron 主进程注入本地任务请求，不暴露给页面脚本。用户文件与任务数据写入系统 `userData` 目录，关闭窗口时会优先触发后端优雅关闭。正式 GitHub Release 会在 Windows x64 构建机生成带 OCR 的 Electron NSIS 安装器，并校验安装器、后端布局与 Electron/Chromium 许可证；安装器当前未做商业代码签名。详细说明见 `desktop/README.md`。
+桌面模式使用随机回环端口和每次启动随机生成的 API Token；Token 只由 Electron 主进程注入本地任务请求，不暴露给页面脚本。用户文件与任务数据写入系统 `userData` 目录，关闭窗口时会优先触发后端优雅关闭。上述本地安装器不得直接作为公开 Release 上传；二进制再分发恢复前必须通过完整许可证和运行时来源门禁。详细说明见 `desktop/README.md`。
 
-## 免 Java 发布包
+## 本地运行包构建
 
-面向普通用户可以使用自带 Java Runtime 的发布包，解压后不需要单独安装 JDK/JRE：
+以下脚本可用于本地验证自带 Java Runtime 的包：
 
 ```bash
 bash scripts/package-runtime.sh
@@ -121,9 +143,9 @@ bash scripts/package-runtime.sh
 生成文件位于 `dist/`：
 
 - macOS/Linux：`fuyue-convert-<version>-<os>-<arch>.tar.gz`，解压后运行 `start.command` 或 `bin/start.sh`。
-- Windows：通过 GitHub Actions 或 Windows 本机运行 `scripts/package-runtime.ps1`。Release 同时提供普通 ZIP、`*-exe.zip` 免安装程序、原生 `.exe` 安装器和 `.msi`；四者均内置 Java Runtime。构建机若安装了 Poppler `pdftoppm.exe`，脚本会自动一并打入运行包，供 PDF 保真路线直接使用。安装器当前未做商业代码签名，Windows 可能显示 SmartScreen/未知发布者提示。
+- Windows：在 Windows 本机运行 `scripts/package-runtime.ps1`。脚本不会自动复制构建机上的 Poppler；运行时可使用 PDFBox 回退或由用户显式配置系统 `pdftoppm`。
 
-GitHub Release 会在打包后自动执行 smoke test：三个平台都会使用内置 Runtime 启动服务、检查 `/api/health`，再完成一次真实 `TXT -> DOCX` Worker 转换和下载内容校验；Windows 另外检查 `FuyueConvert.exe`。
+> 公开二进制发布目前暂停。发布工作流默认拒绝执行，只有完成 fat JAR、JRE、OCR 原生库及可选 Poppler 的逐项许可/来源审核后，维护者才能显式开启。不要上传现有本地 `dist/` 或 `desktop/release/` 产物。
 
 启动后访问：
 
@@ -164,9 +186,9 @@ FORMAT_CONVERTER_MIN_FREE_DISK_BYTES=536870912
 FORMAT_CONVERTER_RESULT_TTL=24h
 ```
 
-服务默认只监听 `127.0.0.1`。远程部署需显式设置 `SERVER_ADDRESS=0.0.0.0`，并建议同时设置 `FORMAT_CONVERTER_API_TOKEN`；启用令牌后，请通过 API 请求头调用受保护接口。服务会同时执行文件数、单文件、单任务总上传量、总输出量和数据盘安全水位检查；失败/取消任务的输入从任务结束起只在 TTL 内保留以支持重试。Worker 内存限制仅限 JVM 堆；Docker/cgroup 或 systemd 的 CPU、总内存和进程数限制仍应在部署层设置。
+服务默认只监听 `127.0.0.1`。远程部署设置 `SERVER_ADDRESS=0.0.0.0` 时必须同时配置至少 32 个字符且不含首尾空白的 `FORMAT_CONVERTER_API_TOKEN`，否则服务拒绝启动；只有外层网络已严格隔离时才可显式设置 `FORMAT_CONVERTER_ALLOW_INSECURE_REMOTE=true`。生产环境还应使用 TLS 反向代理，并通过 `X-Format-Converter-Token` 或 Bearer Token 调用任务 API。服务会执行文件数、单文件、单任务总上传量、总输出量和数据盘安全水位检查；Worker 堆限制不替代 Docker/cgroup 或 systemd 的 CPU、总内存和进程数限制。
 
-正式 Release 除各平台内置 Java Runtime 的运行包外，还附带 Java、前端和 Electron 桌面端 CycloneDX SBOM、`SHA256SUMS`、第三方声明、已知限制和当前测试报告；发布工作流会在上传前重新校验 SBOM JSON 与全部 SHA-256。
+二进制发布恢复后，Release 还必须附带与最终归档内容对账的 SBOM、`SHA256SUMS`、完整许可证、已知限制和测试报告；只生成依赖锁文件级 SBOM 不视为再分发审核完成。
 
 ## QA 验证
 
@@ -182,7 +204,7 @@ mvn -DskipTests package
 python3 qa-samples/run_qa.py
 ```
 
-QA 会启动本地服务，通过 HTTP 上传样本、下载转换结果，再用 LibreOffice/Poppler 渲染并比较。`strictPass` 按路线目标判定：直接保真路线要求渲染像素一致，可编辑文档要求规范化内容一致，表格路线要求数据一致；PDF -> DOCX 还要求纯文字多页样本页数一致、零内嵌图片，并要求纯图片 PDF 严格失败为 `OCR_REQUIRED`。跨引擎二次渲染差异另记为 `visualPass`，不会被严格内容检查掩盖。
+完整语料不随仓库发布；脚本会在启动服务前一次性列出缺失的必需样本，具体文件、可选路线和许可/脱敏要求见 [qa-samples/README.md](qa-samples/README.md)。QA 会通过 HTTP 上传样本、下载结果，再用 LibreOffice/Poppler 做路线级数据或视觉比较。
 
 ## 模块结构
 
@@ -196,7 +218,7 @@ QA 会启动本地服务，通过 HTTP 上传样本、下载转换结果，再�
 
 ## 贡献
 
-欢迎贡献新的格式解析器、转换器、样本、字体兼容性报告和失败用例。新增路线前请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 和 [docs/quality-standard.md](docs/quality-standard.md)。
+欢迎贡献新的格式解析器、转换器、合成样本、字体兼容性报告和失败用例。开始前请阅读 [贡献指南](CONTRIBUTING.md)、[质量标准](docs/quality-standard.md)、[安全策略](SECURITY.md) 和 [社区行为准则](CODE_OF_CONDUCT.md)。疑似漏洞不要开公开 Issue。
 
 ## 赞助支持
 
@@ -213,4 +235,4 @@ QA 会启动本地服务，通过 HTTP 上传样本、下载转换结果，再�
 
 ## 许可证
 
-本项目使用 Apache License 2.0，详见 [LICENSE](LICENSE)。随应用分发的第三方组件和字体许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+Fuyue Convert 自有源码使用 Apache License 2.0，详见 [LICENSE](LICENSE)。依赖、字体、外部工具和组装产物继续适用各自许可证，见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。在其中列出的二进制再分发阻断项关闭前，请不要把本地构建产物作为公开安装包发布。

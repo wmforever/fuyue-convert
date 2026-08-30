@@ -6,7 +6,7 @@
 2. 外部 Office 引擎、系统字体、Poppler 版本和操作系统都会影响视觉结果。
 3. 默认已使用独立 JVM Worker 实现硬超时和进程树清理；`worker-max-memory-mb` 只限制 Java 堆，CPU、总内存和外部 Office 进程的 OS 级限制需要 Docker/cgroup 或 systemd 配合。
 4. 批量任务中单个文件失败不会中断其他文件，调用方需要检查每个 `TaskFileResult`。
-5. Windows Release 会用 JDK `jpackage` 和 WiX 3 生成内置 Runtime 的 `.exe`/`.msi` 安装器；当前开源发布流程未配置商业代码签名证书，SmartScreen 可能显示未知发布者，生产分发方应在自身安全环境中完成签名和时间戳。
+5. Windows 本地打包脚本可用 JDK `jpackage` 和 WiX 3 生成内置 Runtime 的 `.exe`/`.msi` 安装器；公开二进制发布目前暂停，且本地产物没有商业代码签名，SmartScreen 可能显示未知发布者。恢复正式分发前必须同时完成许可/来源审核、真实安装验收、签名和时间戳。
 
 ## OFD
 
@@ -40,7 +40,7 @@
 7. `CSV -> XLSX` 自动识别逗号、TAB、分号和竖线，所有值均写为文本以避免公式注入，因此不会猜测数值、日期或公式类型。`XLSX -> CSV` 使用工作簿中保存的公式缓存值，不执行或刷新公式；过期缓存需先由表格软件重新计算并保存。多工作表输出为 ZIP，每张表一个 UTF-8 CSV。CSV 不保留样式、合并区域和原始类型元数据。
 8. `PNG/JPEG -> PDF` 使用 36-1200 DPI 范围内的 PNG pHYs、JPEG JFIF 或 EXIF 分辨率；缺失或异常时固定按 96 DPI 并返回 `IMAGE_DPI_DEFAULTED`。支持 1-8 EXIF 方向和透明 PNG。同一批次目前要求全部是 PNG 或全部是 JPEG，不能混合两种扩展名；成功页面按上传顺序合并，部分失败时返回 `PARTIAL_BATCH_OUTPUT`。网页端的转换前画面只表示源图内容和页序，不承诺 PDF 物理页面尺寸；转换成功后以真实 PDF 结果预览为准。
 9. `DOCX -> UOF` 仅在 LibreOffice 提供 `UOF text` 导出过滤器时开放，输出是具有 `uof:UOF` 根元素和 UOF 命名空间的真实 XML，不是改扩展名。复杂绘图、嵌入对象、修订、域和字体仍可能在 LibreOffice 兼容转换中变化，因此保持 experimental。当前 LibreOffice 没有经本项目验证的 WPS/ET/DPS 写出过滤器，`DOCX -> WPS`、`XLSX -> ET`、`PPTX -> DPS` 继续保持 planned，禁止伪装支持。
-10. `PNG/JPEG -> TXT/DOCX` 仅在 OCR 能力可用时开放：官方运行包自动使用内置 Tesseract，源码/独立 JAR 使用系统 Tesseract 时需显式启用。TXT 输出纯文本；DOCX 将 OCR 坐标映射回 `DocumentModel` 并复用布局分析和 Word 渲染，生成真实文本框架而非整页图片。任务警告提供页级平均置信度；低于复核阈值返回 `OCR_LOW_CONFIDENCE` 警告，低于最低阈值则以同名错误码失败。印刷体中英文、数字、标点和 EXIF 旋转已纳入自动化测试。竖排需配置对应 `*_vert` 语言包并自动使用竖排分割模式；当前跨版本金样门禁为字符召回率至少 50%，不代表逐字可靠。手写体、复杂表格、倾斜和噪声图片仍可能误识别，因此保持 experimental。
+10. `PNG/JPEG -> TXT/DOCX` 仅在 OCR 能力可用时开放：源码/独立 JAR 使用系统 Tesseract 时需显式启用；经许可审核的未来运行包也可使用固定内置引擎。TXT 输出纯文本；DOCX 将 OCR 坐标映射回 `DocumentModel` 并复用布局分析和 Word 渲染，生成真实文本框架而非整页图片。任务警告提供页级平均置信度；低于复核阈值返回 `OCR_LOW_CONFIDENCE` 警告，低于最低阈值则以同名错误码失败。印刷体中英文、数字、标点和 EXIF 旋转已纳入自动化测试。竖排需配置对应 `*_vert` 语言包并自动使用竖排分割模式；当前跨版本金样门禁为字符召回率至少 50%，不代表逐字可靠。手写体、复杂表格、倾斜和噪声图片仍可能误识别，因此保持 experimental。
 
 ## QA 样本
 

@@ -42,3 +42,27 @@ body:
     attributes:
       label: 样本 / Samples
       description: 如果是新格式或新路线，请提供可公开分享的最小样本或格式说明链接。
+  - type: textarea
+    id: engine_license
+    attributes:
+      label: 实现引擎与许可证 / Engine and license
+      description: 新路线请说明候选库/命令、版本、许可证、是否会进入运行包，以及是否需要云端服务。
+  - type: dropdown
+    id: quality_goal
+    attributes:
+      label: 预期质量目标 / Expected quality goal
+      options:
+        - Visual fidelity / 视觉保真
+        - Editable structure / 可编辑结构
+        - Data consistency / 数据一致
+        - Text extraction / 文本提取
+        - Not route-specific / 非转换路线
+    validations:
+      required: true
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: 权利确认 / Rights confirmation
+      options:
+        - label: 如提供样本，我确认有权公开分享且已完成脱敏；否则本项不涉及样本。
+          required: true

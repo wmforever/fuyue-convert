@@ -23,7 +23,7 @@ npm run stage:backend
 npm run dev:managed
 ```
 
-暂存结构固定为 `.runtime/backend/{runtime,app,application.yml}`。OCR 与 Poppler 是平台相关原生依赖，可分别通过 `FORMAT_CONVERTER_OCR_HOME`、`FORMAT_CONVERTER_POPPLER_HOME` 加入。
+暂存结构固定为 `.runtime/backend/{runtime,app,application.yml}`。OCR 与 Poppler 是平台相关原生依赖，可分别通过 `FORMAT_CONVERTER_OCR_HOME`、`FORMAT_CONVERTER_POPPLER_HOME` 加入本地验收包；这些显式暂存目录尚未通过公开再分发审核。
 
 ## Windows x64 安装器
 
@@ -36,8 +36,8 @@ $env:FORMAT_CONVERTER_BUNDLE_OCR = "true"
 npm run dist:win
 ```
 
-首版生成 NSIS 安装器。正式发布建议保持 `FORMAT_CONVERTER_BUNDLE_OCR=true`，构建会调用仓库已有脚本准备并验证 OCR 运行目录；如需 PDF 图片渲染，还要通过 `FORMAT_CONVERTER_POPPLER_HOME` 指定 Windows x64 Poppler。
+首版生成 NSIS 安装器。本地完整能力验收可设置 `FORMAT_CONVERTER_BUNDLE_OCR=true`，构建会调用仓库已有脚本准备并验证 OCR 运行目录；需要验证外部 Poppler 时可临时指定 `FORMAT_CONVERTER_POPPLER_HOME`。这两个选项只证明功能可运行，不代表产物可公开再分发。
 
 应用启动时使用随机回环端口与随机 API Token，文件数据写入 Electron `userData`，退出时先请求 Spring Boot 优雅关闭，再清理残留进程树。Windows 安装器应在 Windows x64 构建机完成真实启动、转换和无残留进程验证后再发布。
 
-正式 GitHub Release 流程会在 Windows x64 构建机生成带 OCR 的 Electron NSIS 安装器，并校验安装器、后端布局和 Electron/Chromium 许可证文件。本地与正式流程生成的安装器当前均未做商业代码签名，Windows 可能显示 SmartScreen 或“未知发布者”提示。LibreOffice 不随安装器分发，Office 高保真路线会使用用户电脑已有的 LibreOffice。
+公开二进制 Release 目前暂停，工作流只有在维护者完成 fat JAR、JRE、OCR 原生库及可选工具的逐项许可/来源审核并显式启用门禁后才会运行。本地生成的安装器只用于开发验收，不得直接上传公开 Release；它也未做商业代码签名，Windows 可能显示 SmartScreen 或“未知发布者”提示。LibreOffice 不随安装器分发，Office 高保真路线会使用用户电脑已有的 LibreOffice。

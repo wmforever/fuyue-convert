@@ -9,6 +9,26 @@
     <version>0.1.3</version>
     <packaging>pom</packaging>
     <name>Format Converter</name>
+    <description>Auditable local document conversion routes for office, PDF, OFD, image, and text formats.</description>
+    <url>https://github.com/wmforever/fuyue-convert</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:https://github.com/wmforever/fuyue-convert.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/wmforever/fuyue-convert.git</developerConnection>
+        <url>https://github.com/wmforever/fuyue-convert</url>
+        <tag>HEAD</tag>
+    </scm>
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/wmforever/fuyue-convert/issues</url>
+    </issueManagement>
 
     <modules>
         <module>layout-model</module>

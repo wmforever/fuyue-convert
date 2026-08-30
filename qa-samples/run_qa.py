@@ -19,7 +19,15 @@ from collections import Counter
 from pathlib import Path
 from xml.etree import ElementTree
 
-from PIL import Image, ImageChops
+try:
+    from PIL import Image, ImageChops
+    PIL_IMPORT_ERROR = None
+except ModuleNotFoundError as error:
+    if error.name != "PIL":
+        raise
+    Image = None
+    ImageChops = None
+    PIL_IMPORT_ERROR = error
 
 try:
     import fcntl
@@ -37,6 +45,26 @@ INPUT = BASE / "input"
 OUTPUT = BASE / "output"
 REPORT = BASE / "report"
 WORK = BASE / "work"
+
+QA_PREFLIGHT_MISSING_EXIT_CODE = 3
+QA_DEPENDENCY_MISSING_EXIT_CODE = 4
+
+REQUIRED_QA_SAMPLES = (
+    ("dummy.pdf", "PDF -> PNG/JPEG and PDF-tool baseline"),
+    ("demo.docx", "DOCX -> PDF visual fidelity"),
+    ("frictionless-sample.xlsx", "XLSX -> PDF visual fidelity"),
+    ("microsoft-workshop.pptx", "PPTX -> PDF visual fidelity"),
+    ("w3c-home.png", "image -> PDF layout and OCR contracts"),
+    ("countries.csv", "CSV <-> XLSX data round trip"),
+)
+
+OPTIONAL_QA_SAMPLES = (
+    ("quanzhou-drug-retail.wps", "WPS -> DOCX compatibility"),
+    ("wps-template-newchart.et", "ET -> XLSX compatibility"),
+    ("wps-template-newfile.dps", "DPS -> PPTX compatibility"),
+    ("libreoffice-generated-demo.uof", "UOF -> DOCX compatibility"),
+    ("ofdrw-invoice.ofd", "OFD -> TXT/DOCX/PDF/PNG/JPEG/XLSX compatibility"),
+)
 
 PDF_COMPRESSION_MAX_NORMALIZED_RASTER_ERROR = {
     "lossless": 0.0,
@@ -92,6 +120,75 @@ def release_run_lock(lock_file):
             msvcrt.locking(lock_file.fileno(), msvcrt.LK_UNLCK, 1)
     finally:
         lock_file.close()
+
+
+def inspect_qa_samples(input_dir=None):
+    sample_dir = Path(input_dir) if input_dir is not None else INPUT
+    missing_required = tuple(
+        entry for entry in REQUIRED_QA_SAMPLES if not (sample_dir / entry[0]).is_file())
+    missing_optional = tuple(
+        entry for entry in OPTIONAL_QA_SAMPLES if not (sample_dir / entry[0]).is_file())
+    return {
+        "inputDir": sample_dir,
+        "missingRequired": missing_required,
+        "missingOptional": missing_optional,
+    }
+
+
+def preflight_qa_samples(input_dir=None, error_stream=None):
+    stream = error_stream if error_stream is not None else sys.stderr
+    inventory = inspect_qa_samples(input_dir)
+    missing_required = inventory["missingRequired"]
+    missing_optional = inventory["missingOptional"]
+    if missing_required:
+        print(
+            f"QA sample preflight failed: {len(missing_required)} required sample(s) missing "
+            f"under {inventory['inputDir']}:", file=stream)
+        for filename, purpose in missing_required:
+            print(f"  - {filename}: {purpose}", file=stream)
+        print(
+            "完整 QA 语料不随仓库发布。请仅放入来源清楚、具备公开许可或已充分脱敏，"
+            "且你有权使用的样本。", file=stream)
+        print(
+            "Place the files at the exact names above; see qa-samples/README.md. "
+            f"Exiting with code {QA_PREFLIGHT_MISSING_EXIT_CODE} before service startup "
+            "or QA output changes.", file=stream)
+        if missing_optional:
+            print("Optional samples are not preflight blockers; their cases run only when present:",
+                  file=stream)
+            for filename, purpose in missing_optional:
+                print(f"  - {filename}: {purpose}", file=stream)
+        return False
+    if missing_optional:
+        print("QA preflight: required samples are complete. Optional cases will be skipped for:",
+              file=stream)
+        for filename, purpose in missing_optional:
+            print(f"  - {filename}: {purpose}", file=stream)
+    return True
+
+
+def preflight_qa_dependencies(error_stream=None):
+    stream = error_stream if error_stream is not None else sys.stderr
+    missing = []
+    if PIL_IMPORT_ERROR is not None:
+        missing.append("Python Pillow (install with: python3 -m pip install Pillow)")
+    if shutil.which("curl") is None:
+        missing.append("curl")
+    if not SOFFICE:
+        missing.append("LibreOffice/soffice (or set SOFFICE_BIN)")
+    if not PDFTOPPM:
+        missing.append("Poppler pdftoppm (or set PDFTOPPM_BIN)")
+    if not PDFINFO:
+        missing.append("Poppler pdfinfo (or set PDFINFO_BIN)")
+    if not missing:
+        return True
+    print("QA dependency preflight failed:", file=stream)
+    for dependency in missing:
+        print(f"  - {dependency}", file=stream)
+    print(
+        f"Exiting with code {QA_DEPENDENCY_MISSING_EXIT_CODE} before service startup "
+        "or QA output changes; see qa-samples/README.md.", file=stream)
+    return False
 
 
 def available_port():
@@ -1085,8 +1182,11 @@ def run_qa_suite():
                         verified_route_id="xlsx-to-pdf"),
             visual_case("pptx-to-pdf-exact", INPUT / "microsoft-workshop.pptx", "pdf",
                         verified_route_id="pptx-to-pdf"),
-            visual_case("wps-to-docx-exact", INPUT / "quanzhou-drug-retail.wps", "docx", exact_mode="text"),
         ]
+        if (INPUT / "quanzhou-drug-retail.wps").is_file():
+            cases.append(visual_case(
+                "wps-to-docx-exact", INPUT / "quanzhou-drug-retail.wps", "docx",
+                exact_mode="text"))
         if (INPUT / "wps-template-newchart.et").is_file():
             cases.append(visual_case("et-to-xlsx-exact", INPUT / "wps-template-newchart.et", "xlsx",
                                      exact_mode="table-data"))
@@ -1206,14 +1306,19 @@ def run_qa_suite():
     return 0 if report["summary"]["strictFailed"] == 0 else 1
 
 
-def main():
+def main(input_dir=None, suite=None):
     try:
         lock_file = acquire_run_lock()
     except RuntimeError as error:
         print(f"QA run refused: {error}", file=sys.stderr)
         return 2
     try:
-        return run_qa_suite()
+        if not preflight_qa_samples(input_dir):
+            return QA_PREFLIGHT_MISSING_EXIT_CODE
+        if suite is None and not preflight_qa_dependencies():
+            return QA_DEPENDENCY_MISSING_EXIT_CODE
+        runner = run_qa_suite if suite is None else suite
+        return runner()
     finally:
         release_run_lock(lock_file)
 
