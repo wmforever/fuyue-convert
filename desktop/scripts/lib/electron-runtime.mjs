@@ -1,17 +1,33 @@
 import { access, readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
 
-const FORBIDDEN_DOWNLOAD_OVERRIDES = [
-  'ELECTRON_OVERRIDE_DIST_PATH',
-  'ELECTRON_MIRROR',
-  'ELECTRON_CUSTOM_DIR',
-  'ELECTRON_CUSTOM_FILENAME',
-  'electron_use_remote_checksums',
-  'npm_config_electron_use_remote_checksums'
+const FORBIDDEN_EXACT_KEYS = [
+  'electron_override_dist_path',
+  'electron_install_platform',
+  'electron_install_arch',
+  'npm_config_platform',
+  'npm_config_arch'
+]
+const FORBIDDEN_ELECTRON_SUFFIXES = [
+  'electron_mirror',
+  'electron_nightlymirror',
+  'electron_nightly_mirror',
+  'electron_customdir',
+  'electron_custom_dir',
+  'electron_customfilename',
+  'electron_custom_filename',
+  'electron_customversion',
+  'electron_custom_version',
+  'electron_use_remote_checksums'
 ]
 
 export function assertOfficialElectronDownload(environment = process.env) {
-  const overrides = FORBIDDEN_DOWNLOAD_OVERRIDES.filter(name => environment[name])
+  const overrides = Object.entries(environment)
+    .filter(([, value]) => value !== undefined && value !== '')
+    .map(([name]) => ({ name, normalized: name.toLowerCase() }))
+    .filter(({ normalized }) => FORBIDDEN_EXACT_KEYS.includes(normalized) ||
+      FORBIDDEN_ELECTRON_SUFFIXES.some(suffix => normalized.endsWith(suffix)))
+    .map(({ name }) => name)
   if (overrides.length > 0) {
     throw new Error(`正式发布禁止覆盖 Electron 下载来源或校验：${overrides.join(', ')}`)
   }

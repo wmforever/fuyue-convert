@@ -8,9 +8,16 @@ import { assertOfficialElectronDownload, verifyElectronRuntime } from '../script
 test('public Electron preparation rejects download and checksum overrides', () => {
   assert.doesNotThrow(() => assertOfficialElectronDownload({}))
   for (const name of [
-    'ELECTRON_OVERRIDE_DIST_PATH', 'ELECTRON_MIRROR', 'ELECTRON_CUSTOM_DIR',
-    'ELECTRON_CUSTOM_FILENAME', 'electron_use_remote_checksums',
-    'npm_config_electron_use_remote_checksums'
+    'ELECTRON_OVERRIDE_DIST_PATH', 'ELECTRON_INSTALL_PLATFORM', 'ELECTRON_INSTALL_ARCH',
+    'npm_config_platform', 'npm_config_arch', 'ELECTRON_MIRROR', 'ELECTRON_NIGHTLY_MIRROR',
+    'ELECTRON_CUSTOM_DIR', 'ELECTRON_CUSTOM_FILENAME', 'ELECTRON_CUSTOM_VERSION',
+    'electron_use_remote_checksums', 'npm_config_electron_use_remote_checksums',
+    'npm_config_electron_mirror', 'NPM_CONFIG_ELECTRON_MIRROR',
+    'npm_package_config_electron_mirror', 'npm_config_electron_nightlymirror',
+    'npm_config_electron_nightly_mirror', 'npm_config_electron_customdir',
+    'npm_config_electron_custom_dir', 'npm_config_electron_customfilename',
+    'npm_config_electron_custom_filename', 'npm_config_electron_customversion',
+    'npm_config_electron_custom_version'
   ]) {
     assert.throws(() => assertOfficialElectronDownload({ [name]: 'unsafe' }), new RegExp(name))
   }
