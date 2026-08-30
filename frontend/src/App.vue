@@ -1,5 +1,8 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import ImageCollectionPreview from './components/ImageCollectionPreview.vue'
+import PdfPreview from './components/PdfPreview.vue'
+import { blocksPdfSubmission, loadPdfJs, pdfPreviewError } from './pdfPreviewRuntime.js'
 
 const fallbackConversions = [{
   id: 'ofd-to-docx',
@@ -63,7 +66,21 @@ const watermarkPreviewPageCount = ref(0)
 const watermarkPreviewWidth = ref(0)
 const watermarkPreviewHeight = ref(0)
 const watermarkPreviewScale = ref(1)
-const watermarkSubmittedSettings = ref(null)
+const pdfSourcePreviewRef = ref(null)
+const pdfSourcePreviewState = ref('empty')
+const pdfSourcePreviewError = ref('')
+const pdfSourcePreviewBlocksSubmit = ref(false)
+const pdfSourcePreviewCheckedFile = ref(null)
+const pdfSourcePreviewPage = ref(1)
+const pdfSourcePreviewPageCount = ref(0)
+const pdfSourcePreviewFileIndex = ref(0)
+const submittedBatchFingerprint = ref('')
+const resultPreviewBlob = ref(null)
+const resultPreviewKind = ref('')
+const resultPreviewText = ref('')
+const resultPreviewImageUrl = ref('')
+const resultPreviewState = ref('empty')
+const resultPreviewError = ref('')
 const autoDownload = ref(false)
 const preferenceMessage = ref('')
 const desktopRuntime = ref(false)
@@ -80,7 +97,9 @@ let watermarkPdfRenderTask = null
 let watermarkPreviewGeneration = 0
 let watermarkRenderGeneration = 0
 let watermarkResizeTimer
-let pdfJsModulePromise
+let resultPreviewGeneration = 0
+let fileIdentitySequence = 0
+const fileIdentities = new WeakMap()
 const autoDownloadedTaskIds = new Set()
 
 const selectedRoute = computed(() => conversions.value.find(route => route.id === selectedRouteId.value) || conversions.value[0])
@@ -89,6 +108,9 @@ const isSinglePdfTool = computed(() => ['pdf-split', 'pdf-watermark', 'pdf-compr
 const isPdfCompressRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-compress')
 const isPdfWatermarkRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-watermark')
 const isPdfSplitRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-split')
+const isPdfInputRoute = computed(() => selectedRoute.value?.sourceFormat === 'pdf')
+const isImageToPdfRoute = computed(() => ['png', 'jpg'].includes(selectedRoute.value?.sourceFormat)
+  && selectedRoute.value?.targetFormat === 'pdf')
 const hasToolOptions = computed(() => isPdfCompressRoute.value || isPdfWatermarkRoute.value || isPdfSplitRoute.value)
 const watermarkPagesValid = computed(() => validWatermarkPages(watermarkPages.value))
 const watermarkPreviewFile = computed(() => isPdfWatermarkRoute.value ? files.value[0] || null : null)
@@ -151,10 +173,18 @@ const watermarkPreviewStatus = computed(() => {
   if (watermarkAppliesToPreviewPage.value) return `第 ${watermarkPreviewPage.value} 页会添加水印`
   return `第 ${watermarkPreviewPage.value} 页不在应用范围内`
 })
-const watermarkSettingsDirty = computed(() => isPdfWatermarkRoute.value
-  && ['SUCCESS', 'FAILED', 'CANCELLED'].includes(task.value?.status)
-  && watermarkSubmittedSettings.value
-  && JSON.stringify(currentWatermarkSettings()) !== JSON.stringify(watermarkSubmittedSettings.value))
+const showPdfSourcePreview = computed(() => isPdfInputRoute.value && !isPdfWatermarkRoute.value && files.value.length > 0)
+const pdfSourcePreviewFile = computed(() => {
+  if (!showPdfSourcePreview.value) return null
+  const index = Math.min(Math.max(0, pdfSourcePreviewFileIndex.value), files.value.length - 1)
+  return files.value[index] || null
+})
+const pdfSourcePreviewPending = computed(() => Boolean(pdfSourcePreviewFile.value)
+  && pdfSourcePreviewCheckedFile.value !== pdfSourcePreviewFile.value)
+const resultPreviewEligible = computed(() => task.value?.status === 'SUCCESS'
+  && task.value?.downloadReady
+  && /\.(pdf|png|jpe?g|txt|csv)$/i.test(task.value?.downloadName || ''))
+const resultPreviewTitle = computed(() => batchSettingsDirty.value ? '上次转换结果预览' : '转换结果预览')
 const watermarkRangeState = computed(() => {
   if (!watermarkPagesValid.value) return { matches: false, overflow: false }
   const pageCount = watermarkPreviewPageCount.value
@@ -171,13 +201,23 @@ const watermarkRangeState = computed(() => {
   }
 })
 const splitPagesValid = computed(() => validWatermarkPages(splitPages.value))
+const splitRangeState = computed(() => pageRangeState(splitPages.value, pdfSourcePreviewPageCount.value))
+const splitSelectedPages = computed(() => {
+  if (!splitPagesValid.value || !pdfSourcePreviewPageCount.value || splitRangeState.value.overflow) return []
+  return Array.from({ length: pdfSourcePreviewPageCount.value }, (_, index) => index + 1)
+    .filter(page => pageMatchesRange(page, splitPages.value))
+})
 const toolOptionsValid = computed(() => (!isPdfWatermarkRoute.value
   || (watermarkText.value.trim().length > 0
     && watermarkPagesValid.value
     && watermarkRangeState.value.matches !== false
     && !watermarkPreviewPending.value
     && !watermarkPreviewBlocksSubmit.value))
-  && (!isPdfSplitRoute.value || splitPagesValid.value))
+  && (!isPdfSplitRoute.value || (splitPagesValid.value
+    && splitRangeState.value.matches !== false
+    && !splitRangeState.value.overflow))
+  && (!(isSinglePdfTool.value && !isPdfWatermarkRoute.value && pdfSourcePreviewFile.value)
+    || (!pdfSourcePreviewPending.value && !pdfSourcePreviewBlocksSubmit.value)))
 const routeFileLimit = computed(() => isSinglePdfTool.value ? 1 : limits.value.maxFilesPerTask)
 const canSubmit = computed(() => files.value.length >= (isPdfMergeRoute.value ? 2 : 1)
   && !busy.value && toolOptionsValid.value && selectedRoute.value?.status === 'available')
@@ -338,6 +378,21 @@ function pageMatchesRange(pageNumber, value) {
   })
 }
 
+function pageRangeState(value, pageCount) {
+  if (!validWatermarkPages(value)) return { matches: false, overflow: false }
+  if (!pageCount) return { matches: null, overflow: false }
+  const normalized = String(value || '').replace(/\s+/g, '').toLowerCase()
+  if (normalized === 'all') return { matches: true, overflow: false }
+  const ranges = normalized.split(',').map(part => {
+    const [start, end = start] = part.split('-').map(Number)
+    return { start, end }
+  })
+  return {
+    matches: ranges.some(range => range.start <= pageCount),
+    overflow: ranges.some(range => range.end > pageCount)
+  }
+}
+
 function currentWatermarkSettings() {
   return {
     text: watermarkText.value.trim(),
@@ -350,20 +405,76 @@ function currentWatermarkSettings() {
   }
 }
 
-function loadPdfJs() {
-  if (!pdfJsModulePromise) {
-    pdfJsModulePromise = Promise.all([
-      import('pdfjs-dist'),
-      import('pdfjs-dist/build/pdf.worker.min.mjs?url')
-    ]).then(([pdfJs, worker]) => {
-      pdfJs.GlobalWorkerOptions.workerSrc = worker.default
-      return pdfJs
-    }).catch(error => {
-      pdfJsModulePromise = null
-      throw error
-    })
+function fileIdentity(file) {
+  if (!fileIdentities.has(file)) fileIdentities.set(file, ++fileIdentitySequence)
+  return fileIdentities.get(file)
+}
+
+function currentRouteOptions() {
+  if (isPdfWatermarkRoute.value) return currentWatermarkSettings()
+  if (isPdfCompressRoute.value) return { compressionMode: compressionMode.value }
+  if (isPdfSplitRoute.value) return { splitPages: splitPages.value.replace(/\s+/g, '').toLowerCase() }
+  return {}
+}
+
+function currentBatchFingerprint() {
+  return JSON.stringify({
+    routeId: selectedRouteId.value,
+    files: files.value.map(file => fileIdentity(file)),
+    options: currentRouteOptions()
+  })
+}
+
+const batchSettingsDirty = computed(() => ['SUCCESS', 'FAILED', 'CANCELLED'].includes(task.value?.status)
+  && submittedBatchFingerprint.value
+  && currentBatchFingerprint() !== submittedBatchFingerprint.value)
+const dirtySettingsLabel = computed(() => {
+  if (isPdfWatermarkRoute.value) return '水印设置'
+  if (isPdfCompressRoute.value) return '压缩设置'
+  if (isPdfSplitRoute.value) return '拆分页码'
+  return '文件或顺序'
+})
+
+function readablePdfPreviewError(error) {
+  return pdfPreviewError(error)
+}
+
+function resetPdfSourcePreviewState() {
+  pdfSourcePreviewState.value = 'empty'
+  pdfSourcePreviewError.value = ''
+  pdfSourcePreviewBlocksSubmit.value = false
+  pdfSourcePreviewCheckedFile.value = null
+  pdfSourcePreviewPage.value = 1
+  pdfSourcePreviewPageCount.value = 0
+  pdfSourcePreviewFileIndex.value = 0
+}
+
+function handlePdfSourcePreviewState(snapshot) {
+  if (snapshot.source !== pdfSourcePreviewFile.value) return
+  pdfSourcePreviewState.value = snapshot.state
+  pdfSourcePreviewError.value = snapshot.error || ''
+  pdfSourcePreviewPage.value = snapshot.page || 1
+  pdfSourcePreviewPageCount.value = snapshot.pageCount || 0
+  if (['ready', 'error'].includes(snapshot.state)) {
+    pdfSourcePreviewCheckedFile.value = snapshot.source
+    pdfSourcePreviewBlocksSubmit.value = Boolean(snapshot.blocking)
   }
-  return pdfJsModulePromise
+}
+
+function selectPdfSourcePreviewFile(index) {
+  if (index < 0 || index >= files.value.length || busy.value) return
+  pdfSourcePreviewFileIndex.value = index
+}
+
+function pdfSourceStatus(state, page, pageCount, error) {
+  if (state === 'error') return error || '当前文件无法预览'
+  if (state !== 'ready') return '正在准备源文件预览'
+  if (isPdfMergeRoute.value) return `合并顺序第 ${pdfSourcePreviewFileIndex.value + 1} 个文件 · 第 ${page} / ${pageCount} 页`
+  if (isPdfSplitRoute.value) return pageMatchesRange(page, splitPages.value)
+    ? `第 ${page} 页会包含在拆分结果中`
+    : `第 ${page} 页不会包含在拆分结果中`
+  if (isPdfCompressRoute.value) return `源文件第 ${page} / ${pageCount} 页；完成后将展示真实压缩结果`
+  return `源文件第 ${page} / ${pageCount} 页`
 }
 
 function disposeWatermarkPreviewResources() {
@@ -404,13 +515,6 @@ function resetWatermarkPreview() {
   }
 }
 
-function readablePdfPreviewError(error) {
-  if (error?.name === 'PasswordException') return '转换服务无法处理受密码保护的 PDF，请解除密码后重新选择'
-  if (error?.name === 'InvalidPDFException') return '文件不是有效的 PDF，无法处理，请更换文件'
-  if (error?.name === 'MissingPDFException') return '无法读取所选 PDF，请重新选择文件'
-  return '预览生成失败，可重新选择文件或提交后查看转换服务诊断'
-}
-
 async function loadWatermarkPreview(file) {
   const generation = ++watermarkPreviewGeneration
   disposeWatermarkPreviewResources()
@@ -446,7 +550,7 @@ async function loadWatermarkPreview(file) {
     if (generation !== watermarkPreviewGeneration || error?.name === 'RenderingCancelledException') return
     watermarkPdfLoadingTask = null
     watermarkPreviewState.value = 'error'
-    watermarkPreviewBlocksSubmit.value = ['PasswordException', 'InvalidPDFException', 'MissingPDFException'].includes(error?.name)
+    watermarkPreviewBlocksSubmit.value = blocksPdfSubmission(error)
     watermarkPreviewCheckedFile.value = file
     watermarkPreviewError.value = readablePdfPreviewError(error)
   }
@@ -761,7 +865,8 @@ function applyTaskSnapshot(snapshot, changeView = true) {
   pollGeneration++
   clearTimeout(pollTimer)
   files.value = []
-  watermarkSubmittedSettings.value = null
+  submittedBatchFingerprint.value = ''
+  resetPdfSourcePreviewState()
   task.value = snapshot
   busy.value = ['WAITING', 'CONVERTING'].includes(snapshot.status)
   message.value = ''
@@ -919,7 +1024,9 @@ function startNewBatch() {
   uploadProgress.value = 0
   busy.value = false
   message.value = ''
-  watermarkSubmittedSettings.value = null
+  submittedBatchFingerprint.value = ''
+  resetPdfSourcePreviewState()
+  clearResultPreview()
 }
 
 function accept(selected) {
@@ -964,8 +1071,8 @@ function accept(selected) {
   if (capacityRejected) notices.push(`超出 ${routeFileLimit.value} 个文件上限的部分`)
   if (quotaRejected) notices.push(`超出 ${formatBytes(limits.value.maxTaskUploadBytes)} 总量上限的部分`)
   message.value = notices.length ? `已忽略${notices.join('、')}` : ''
-  if ((wasEmpty || replacingSingleFile) && files.value.length && isPdfWatermarkRoute.value) {
-    nextTick(() => watermarkPreviewRef.value?.scrollIntoView({
+  if ((wasEmpty || replacingSingleFile) && files.value.length && (isPdfInputRoute.value || isImageToPdfRoute.value)) {
+    nextTick(() => (isPdfWatermarkRoute.value ? watermarkPreviewRef.value : pdfSourcePreviewRef.value)?.scrollIntoView({
       behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
       block: 'center'
     }))
@@ -977,13 +1084,24 @@ function drop(event) {
   accept(event.dataTransfer.files)
 }
 
-function remove(index) { if (!busy.value) files.value.splice(index, 1) }
+function remove(index) {
+  if (busy.value) return
+  const selectedPreviewFile = pdfSourcePreviewFile.value
+  files.value.splice(index, 1)
+  if (selectedPreviewFile && files.value.includes(selectedPreviewFile)) {
+    pdfSourcePreviewFileIndex.value = files.value.indexOf(selectedPreviewFile)
+  } else {
+    pdfSourcePreviewFileIndex.value = Math.min(pdfSourcePreviewFileIndex.value, Math.max(0, files.value.length - 1))
+  }
+}
 function moveFile(index, offset) {
   if (busy.value) return
   const target = index + offset
   if (target < 0 || target >= files.value.length) return
+  const selectedPreviewFile = pdfSourcePreviewFile.value
   const [file] = files.value.splice(index, 1)
   files.value.splice(target, 0, file)
+  if (selectedPreviewFile) pdfSourcePreviewFileIndex.value = files.value.indexOf(selectedPreviewFile)
 }
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`
@@ -1012,7 +1130,7 @@ async function submit() {
   task.value = null
   uploadProgress.value = 0
   pollFailures = 0
-  if (isPdfWatermarkRoute.value) watermarkSubmittedSettings.value = currentWatermarkSettings()
+  submittedBatchFingerprint.value = currentBatchFingerprint()
   const data = new FormData()
   files.value.forEach(file => data.append('files', file))
   data.append('targetFormat', selectedRoute.value.targetFormat)
@@ -1038,9 +1156,9 @@ async function submit() {
   }
 }
 
-async function regenerateWatermark() {
-  if (!watermarkSettingsDirty.value || !canSubmit.value) return
-  message.value = '正在按当前水印设置重新生成，之前的结果仍可在任务记录中下载'
+async function regenerateCurrentBatch() {
+  if (!batchSettingsDirty.value || !canSubmit.value) return
+  message.value = `正在按当前${dirtySettingsLabel.value}重新生成，之前的结果仍可在任务记录中下载`
   await submit()
 }
 
@@ -1108,21 +1226,91 @@ async function poll() {
   }
 }
 
+function clearResultPreview() {
+  resultPreviewGeneration++
+  if (resultPreviewImageUrl.value) URL.revokeObjectURL(resultPreviewImageUrl.value)
+  resultPreviewBlob.value = null
+  resultPreviewKind.value = ''
+  resultPreviewText.value = ''
+  resultPreviewImageUrl.value = ''
+  resultPreviewState.value = 'empty'
+  resultPreviewError.value = ''
+}
+
+async function loadResultPreview(snapshot) {
+  const generation = ++resultPreviewGeneration
+  if (resultPreviewImageUrl.value) URL.revokeObjectURL(resultPreviewImageUrl.value)
+  resultPreviewBlob.value = null
+  resultPreviewKind.value = ''
+  resultPreviewText.value = ''
+  resultPreviewImageUrl.value = ''
+  resultPreviewError.value = ''
+  const extension = (snapshot?.downloadName || '').toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] || ''
+  if (!snapshot || snapshot.status !== 'SUCCESS' || !snapshot.downloadReady || !['pdf', 'png', 'jpg', 'jpeg', 'txt', 'csv'].includes(extension)) {
+    resultPreviewState.value = 'empty'
+    return
+  }
+
+  resultPreviewState.value = 'loading'
+  try {
+    const response = await fetch(`/api/tasks/${snapshot.taskId}/download`, { cache: 'no-store' })
+    if (!response.ok) throw responseError(response, `结果预览加载失败（${response.status}）`)
+    const contentType = (response.headers.get('content-type') || '').split(';')[0].trim().toLowerCase()
+    const declaredSize = Number(response.headers.get('content-length') || 0)
+    const previewLimit = extension === 'pdf' ? 32 * 1024 * 1024
+      : (['png', 'jpg', 'jpeg'].includes(extension) ? 24 * 1024 * 1024 : 2 * 1024 * 1024)
+    if (declaredSize > previewLimit) {
+      resultPreviewState.value = 'too-large'
+      resultPreviewError.value = `结果超过 ${formatBytes(previewLimit)}，为避免占用过多内存，请直接下载查看`
+      return
+    }
+    if (extension === 'pdf') {
+      if (contentType !== 'application/pdf') throw new Error('当前结果不是可预览的 PDF')
+      const blob = await response.blob()
+      if (generation !== resultPreviewGeneration) return
+      if (blob.size > previewLimit) throw new Error(`结果超过 ${formatBytes(previewLimit)}，请直接下载查看`)
+      resultPreviewBlob.value = blob
+      resultPreviewKind.value = 'pdf'
+    } else if (['png', 'jpg', 'jpeg'].includes(extension)) {
+      if (!contentType.startsWith('image/')) throw new Error('当前结果不是可预览的图片')
+      const blob = await response.blob()
+      if (generation !== resultPreviewGeneration) return
+      if (blob.size > previewLimit) throw new Error(`结果超过 ${formatBytes(previewLimit)}，请直接下载查看`)
+      resultPreviewImageUrl.value = URL.createObjectURL(blob)
+      resultPreviewKind.value = 'image'
+    } else {
+      if (!(contentType.startsWith('text/') || ['application/csv', 'application/vnd.ms-excel'].includes(contentType))) {
+        throw new Error('当前结果不是可预览的文本')
+      }
+      const text = await response.text()
+      if (generation !== resultPreviewGeneration) return
+      const displayLimit = 200_000
+      resultPreviewText.value = text.length > displayLimit
+        ? `${text.slice(0, displayLimit)}\n\n… 预览已截断，请下载查看完整文件 …`
+        : text
+      resultPreviewKind.value = extension === 'csv' ? 'csv' : 'text'
+    }
+    resultPreviewState.value = 'ready'
+  } catch (error) {
+    if (generation !== resultPreviewGeneration) return
+    resultPreviewState.value = 'error'
+    resultPreviewError.value = error.message || '结果预览加载失败，可直接下载查看'
+  }
+}
+
 async function downloadTask(item, { silent = false } = {}) {
   if (!item?.taskId || downloadingTaskId.value) return
   downloadingTaskId.value = item.taskId
   try {
-    const response = await fetch(`/api/tasks/${item.taskId}/download`)
+    const downloadUrl = `/api/tasks/${item.taskId}/download`
+    const response = await fetch(downloadUrl, { method: 'HEAD', cache: 'no-store' })
     if (!response.ok) throw responseError(response, `下载失败（${response.status}）`)
-    const blob = await response.blob()
-    const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
-    anchor.href = url
+    anchor.href = downloadUrl
     anchor.download = item.downloadName || 'converted-file'
     document.body.appendChild(anchor)
     anchor.click()
     anchor.remove()
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
     if (!silent) {
       const text = `已开始下载 ${anchor.download}`
       if (activeView.value === 'history') historyMessage.value = text
@@ -1221,6 +1409,17 @@ function successDescription(file) {
 }
 
 watch(watermarkPreviewFile, file => void loadWatermarkPreview(file), { flush: 'post' })
+watch(pdfSourcePreviewFile, file => {
+  pdfSourcePreviewState.value = file ? 'loading' : 'empty'
+  pdfSourcePreviewError.value = ''
+  pdfSourcePreviewBlocksSubmit.value = false
+  pdfSourcePreviewPage.value = 1
+  pdfSourcePreviewPageCount.value = 0
+  if (!file) pdfSourcePreviewCheckedFile.value = null
+}, { flush: 'sync' })
+watch(() => [task.value?.taskId, task.value?.status, task.value?.downloadReady, task.value?.downloadName], () => {
+  void loadResultPreview(task.value)
+}, { immediate: true })
 
 onMounted(() => {
   desktopRuntime.value = Boolean(window.formatConverterDesktop)
@@ -1240,6 +1439,7 @@ onBeforeUnmount(() => {
   clearTimeout(watermarkResizeTimer)
   if (uploadRequest) uploadRequest.abort()
   resetWatermarkPreview()
+  clearResultPreview()
   document.removeEventListener('click', onDocumentClick)
   window.removeEventListener('resize', positionRouteMenu)
   window.removeEventListener('resize', scheduleWatermarkPreviewResize)
@@ -1520,21 +1720,21 @@ onBeforeUnmount(() => {
 
         <div v-if="isPdfCompressRoute" class="compression-options" role="radiogroup" aria-label="PDF 压缩等级">
           <label :class="{ selected: compressionMode === 'lossless' }">
-            <input v-model="compressionMode" type="radio" value="lossless" @change="savePreferences" />
+            <input v-model="compressionMode" type="radio" value="lossless" :disabled="busy" @change="savePreferences" />
             <span class="option-check"></span>
             <strong>无损优化</strong>
             <small>不改变图片质量，清理并压缩 PDF 结构</small>
             <em>画质优先</em>
           </label>
           <label :class="{ selected: compressionMode === 'balanced' }">
-            <input v-model="compressionMode" type="radio" value="balanced" @change="savePreferences" />
+            <input v-model="compressionMode" type="radio" value="balanced" :disabled="busy" @change="savePreferences" />
             <span class="option-check"></span>
             <strong>均衡压缩</strong>
             <small>适度优化图片，兼顾清晰度和文件体积</small>
             <em>推荐</em>
           </label>
           <label :class="{ selected: compressionMode === 'strong' }">
-            <input v-model="compressionMode" type="radio" value="strong" @change="savePreferences" />
+            <input v-model="compressionMode" type="radio" value="strong" :disabled="busy" @change="savePreferences" />
             <span class="option-check"></span>
             <strong>强力压缩</strong>
             <small>显著降低图片分辨率，适合在线传输</small>
@@ -1644,11 +1844,13 @@ onBeforeUnmount(() => {
         <div v-else class="split-options">
           <label>
             <span>要拆分的页面</span>
-            <input v-model="splitPages" type="text" placeholder="all 或 1,3-5" :class="{ invalid: !splitPagesValid }" />
+            <input v-model="splitPages" type="text" placeholder="all 或 1,3-5" :class="{ invalid: !splitPagesValid || splitRangeState.matches === false || splitRangeState.overflow }" :disabled="busy" />
             <small v-if="!splitPagesValid" class="field-error">请输入 all、1 或 1,3-5</small>
+            <small v-else-if="splitRangeState.matches === false" class="field-error">未匹配这份 PDF（共 {{ pdfSourcePreviewPageCount }} 页）</small>
+            <small v-else-if="splitRangeState.overflow" class="field-error">页码超出这份 PDF 的 {{ pdfSourcePreviewPageCount }} 页，请调整范围</small>
             <small v-else>输入 all 拆分全部页面；也可组合单页和连续区间。</small>
           </label>
-          <div class="split-examples"><span>示例</span><button type="button" @click="splitPages = 'all'">全部页面</button><button type="button" @click="splitPages = '1'">仅第 1 页</button><button type="button" @click="splitPages = '1,3-5'">第 1、3–5 页</button></div>
+          <div class="split-examples"><span>示例</span><button type="button" :disabled="busy" @click="splitPages = 'all'">全部页面</button><button type="button" :disabled="busy" @click="splitPages = '1'">仅第 1 页</button><button type="button" :disabled="busy" @click="splitPages = '1,3-5'">第 1、3–5 页</button><p v-if="splitSelectedPages.length">将按升序生成 {{ splitSelectedPages.length }} 个单页 PDF：{{ splitSelectedPages.slice(0, 12).join('、') }}{{ splitSelectedPages.length > 12 ? '…' : '' }}</p></div>
         </div>
       </div>
 
@@ -1697,6 +1899,40 @@ onBeforeUnmount(() => {
         </ul>
       </div>
 
+      <div v-if="showPdfSourcePreview" ref="pdfSourcePreviewRef" class="source-preview-panel">
+        <div v-if="isPdfMergeRoute && files.length > 1" class="pdf-preview-file-tabs" aria-label="选择要预览的合并文件">
+          <button
+            v-for="(file, index) in files"
+            :key="fileIdentity(file)"
+            type="button"
+            :class="{ active: index === pdfSourcePreviewFileIndex }"
+            :aria-current="index === pdfSourcePreviewFileIndex ? 'true' : undefined"
+            :title="file.name"
+            :disabled="busy"
+            @click="selectPdfSourcePreviewFile(index)"
+          ><b>{{ index + 1 }}</b><span>{{ file.name }}</span></button>
+        </div>
+        <PdfPreview
+          :id="`source-${selectedRouteId}`"
+          :source="pdfSourcePreviewFile"
+          :title="isPdfMergeRoute ? '合并源文件预览' : (isPdfSplitRoute ? '拆分页预览' : '源文件预览')"
+          :subtitle="pdfSourcePreviewFile?.name || '仅在浏览器本地读取，不会提前上传'"
+          :badge="isPdfMergeRoute ? `第 ${pdfSourcePreviewFileIndex + 1} / ${files.length} 个` : '本地预览'"
+          :note="(isPdfMergeRoute || isPdfSplitRoute) ? '预览用于确认页面、范围与顺序；重写 PDF 后不会保留数字签名的有效性。' : '这里展示源文件；转换完成后如结果为 PDF，会继续展示真实结果预览。'"
+          @state-change="handlePdfSourcePreviewState"
+        >
+          <template #status="{ state, page, pageCount, error }">
+            <p :class="{ matched: state === 'ready' && (!isPdfSplitRoute || pageMatchesRange(page, splitPages)) }" aria-live="polite">
+              <span aria-hidden="true">{{ state === 'ready' ? (isPdfSplitRoute && !pageMatchesRange(page, splitPages) ? '○' : '✓') : '○' }}</span>{{ pdfSourceStatus(state, page, pageCount, error) }}
+            </p>
+          </template>
+        </PdfPreview>
+      </div>
+
+      <div v-if="isImageToPdfRoute && files.length" ref="pdfSourcePreviewRef" class="source-preview-panel">
+        <ImageCollectionPreview :files="files" />
+      </div>
+
       <div v-if="busy || task" class="task-panel" :class="task?.status?.toLowerCase()">
         <div class="status-row">
           <div>
@@ -1723,24 +1959,50 @@ onBeforeUnmount(() => {
         <div v-if="task?.errorMessage" class="task-error" role="alert"><strong>{{ task.errorCode || 'TASK_FAILED' }}</strong><p>{{ task.errorMessage }}</p></div>
       </div>
 
+      <div v-if="resultPreviewEligible" class="result-preview-panel">
+        <PdfPreview
+          v-if="resultPreviewState === 'ready' && resultPreviewKind === 'pdf' && resultPreviewBlob"
+          :id="`result-${task.taskId}`"
+          :source="resultPreviewBlob"
+          :title="resultPreviewTitle"
+          subtitle="由转换服务真实生成，可在下载前逐页检查"
+          badge="实际结果"
+          note="这里渲染的是当前任务的真实 PDF 结果，与下载文件一致。"
+        />
+        <section v-else-if="resultPreviewState === 'ready' && resultPreviewKind === 'image'" class="direct-result-preview" aria-labelledby="direct-result-title">
+          <header><div><strong id="direct-result-title">{{ resultPreviewTitle }}</strong><small>由转换服务真实生成，可在下载前检查</small></div><span>实际图片</span></header>
+          <div class="direct-result-image"><img :src="resultPreviewImageUrl" :alt="task.downloadName" /></div>
+          <footer>这里展示的是当前任务的真实图片结果，与下载文件一致。</footer>
+        </section>
+        <section v-else-if="resultPreviewState === 'ready' && ['text', 'csv'].includes(resultPreviewKind)" class="direct-result-preview text-result-preview" aria-labelledby="text-result-title">
+          <header><div><strong id="text-result-title">{{ resultPreviewTitle }}</strong><small>纯文本安全展示，不执行 HTML、链接或公式</small></div><span>{{ resultPreviewKind === 'csv' ? '实际 CSV' : '实际文本' }}</span></header>
+          <pre>{{ resultPreviewText }}</pre>
+          <footer>这里展示的是当前任务的真实文本结果；超长内容会截断预览，但下载文件保持完整。</footer>
+        </section>
+        <section v-else class="result-preview-message" :class="{ error: ['error', 'too-large'].includes(resultPreviewState) }" aria-live="polite">
+          <span aria-hidden="true">{{ resultPreviewState === 'loading' ? '…' : '!' }}</span>
+          <p><strong>{{ resultPreviewState === 'loading' ? '正在准备真实结果预览' : '暂不内联预览结果' }}</strong><small>{{ resultPreviewError || '转换完成后会自动加载可预览的 PDF 结果' }}</small></p>
+        </section>
+      </div>
+
       <p v-if="message" class="message">{{ message }}</p>
 
-      <div v-if="watermarkSettingsDirty" class="watermark-dirty-notice" role="alert">
+      <div v-if="batchSettingsDirty" class="watermark-dirty-notice" role="alert">
         <span aria-hidden="true">↻</span>
         <p>
-          <strong>水印设置已修改，需要重新生成</strong>
-          <small v-if="task?.status === 'SUCCESS'">当前下载文件仍是上一次生成的结果。重新生成后才会应用预览中的新设置。</small>
+          <strong>{{ dirtySettingsLabel }}已修改，需要重新生成</strong>
+          <small v-if="task?.status === 'SUCCESS'">当前预览和下载仍是上一次生成的结果。重新生成后才会应用现在的文件与设置。</small>
           <small v-else>“重试上次任务”仍会使用提交时的旧设置；请按当前设置重新生成。</small>
         </p>
       </div>
 
       <div class="actions">
         <button v-if="!task" class="primary" :disabled="!canSubmit" @click="submit">开始转换 <span aria-hidden="true">→</span></button>
-        <button v-if="watermarkSettingsDirty" class="primary" :disabled="!canSubmit" @click="regenerateWatermark">按当前设置重新生成 <span aria-hidden="true">↻</span></button>
-        <button v-if="task?.downloadReady" :class="watermarkSettingsDirty ? 'secondary' : 'primary'" :disabled="downloadingTaskId === task.taskId" @click="download">{{ downloadingTaskId === task.taskId ? '正在下载…' : (watermarkSettingsDirty ? '下载上次结果' : `下载 ${task.downloadName}`) }} <span aria-hidden="true">↓</span></button>
+        <button v-if="batchSettingsDirty" class="primary" :disabled="!canSubmit" @click="regenerateCurrentBatch">按当前设置重新生成 <span aria-hidden="true">↻</span></button>
+        <button v-if="task?.downloadReady" :class="batchSettingsDirty ? 'secondary' : 'primary'" :disabled="downloadingTaskId === task.taskId" @click="download">{{ downloadingTaskId === task.taskId ? '正在下载…' : (batchSettingsDirty ? '下载上次结果' : `下载 ${task.downloadName}`) }} <span aria-hidden="true">↓</span></button>
         <button v-if="busy && !task" class="secondary" @click="cancelUpload">取消上传</button>
         <button v-if="task && ['WAITING', 'CONVERTING'].includes(task.status)" class="secondary" @click="cancelTask">取消任务</button>
-        <button v-if="task && ['FAILED', 'CANCELLED'].includes(task.status)" class="secondary" @click="retryTask">{{ watermarkSettingsDirty ? '重试上次任务' : '重试' }}</button>
+        <button v-if="task && ['FAILED', 'CANCELLED'].includes(task.status)" class="secondary" @click="retryTask">{{ batchSettingsDirty ? '重试上次任务' : '重试' }}</button>
         <button v-if="task" class="secondary" @click="reset">转换其他文件</button>
       </div>
         </section>

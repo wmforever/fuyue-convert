@@ -35,14 +35,16 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | PDF -> PNG/JPG | stable | 版式渲染 | 默认 160 DPI（可配置 36-600）；PNG 保留透明画布，JPEG 转为 RGB 并使用 0.9 质量；多页自动输出 ZIP。 |
 | PDF -> DOCX | beta | 可编辑优先 | 恢复真实文字、基础段落、页面尺寸和方向；含中日韩文字时嵌入已许可的 Droid Sans Fallback，仍不嵌入整页图。默认严格拒绝扫描页，显式配置本地 OCR 后把扫描页识别为带坐标的可编辑文字。 |
 | PDF -> OFD | experimental | 版式优先 | 生成真实 OFD 包；160 DPI 页面图像层保留视觉，文字型 PDF 同时写入源坐标 OFD 文字对象。优先使用 Poppler 并保留 PDFBox 回退；复杂对象尚未逐项结构化重建。 |
-| PDF 压缩/水印 | beta | 保真优先 | 压缩支持无损、均衡和强力三级策略，结果未变小时保留原文件；水印支持中英文文字、不透明度、角度、颜色、位置、平铺和页码范围，选择文件后可通过本地实时预览确认效果。两者均拒绝修改带数字签名的 PDF。 |
-| PDF 合并/拆分 | stable | 保真优先 | 合并按上传顺序输出单个 PDF；拆分按页输出编号连续的 ZIP。 |
-| PNG/JPG -> PDF | stable | 版式优先 | 读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。同格式多图按上传顺序合并为多页 PDF。 |
+| PDF 压缩/水印 | beta | 保真优先 | 压缩支持无损、均衡和强力三级策略，先预览源 PDF，完成后再逐页预览真实压缩结果；水印支持中英文文字、不透明度、角度、颜色、位置、平铺和页码范围，并提供本地实时效果预览。修改已提交的设置后会明确要求重新生成，避免把旧结果当成新设置下载。两者均拒绝修改带数字签名的 PDF。 |
+| PDF 合并/拆分 | stable | 保真优先 | 合并按上传顺序输出单个 PDF，可切换检查每个源文件并在重排后保持预览绑定；拆分按页输出编号连续的 ZIP，可逐页确认选择范围并在提交前阻止越界页码。两类操作都会重写 PDF，不保留数字签名有效性。 |
+| PNG/JPG -> PDF | stable | 版式优先 | 读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。同格式多图按上传顺序合并为多页 PDF，网页端展示源图页序，转换完成后逐页展示真实 PDF 结果。 |
 | PNG/JPG -> TXT/DOCX | experimental/按需 | OCR 提取 | 官方运行包和 Docker 镜像内置 Tesseract；源码/JAR 模式也可使用显式配置的系统引擎。TXT 输出识别文字，DOCX 将坐标文字映射到 `DocumentModel` 后生成真实可编辑文本；两者均返回页级置信度和 OCR 警告。 |
 | WPS/ET/DPS/UOF -> OOXML | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |
 | DOCX -> UOF | experimental | 兼容优先 | LibreOffice 可用时调用明确的 `UOF text` 导出过滤器写入真实 UOF XML，并验证 UOF 根元素；已覆盖正文和表格文字的 LibreOffice 往返打开。 |
 
 外部依赖说明：
+
+- 网页结果预览：单个 PDF、PNG/JPEG、TXT/CSV 结果会在受控大小内加载真实产物；PDF 逐页渲染，文本不会执行 HTML、链接或公式。ZIP 与超限结果保持流式下载，不在页面内自动解包。
 
 - LibreOffice：用于 DOCX/XLSX/PPTX/WPS/ET/DPS/UOF 与 PDF 相关的 Office 引擎转换；图片转 PDF 使用内置 PDFBox 路线以稳定处理 DPI 和 EXIF。
 - Poppler：用于 PDF 渲染为 PNG/JPEG 和视觉回归比较。

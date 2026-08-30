@@ -123,7 +123,9 @@ GET /api/tasks/{taskId}
 GET /api/tasks/{taskId}/download
 ```
 
-单文件任务返回目标格式文件；批量任务返回 ZIP。任务未完成时返回 HTTP 400。
+单文件任务返回目标格式文件；批量任务返回 ZIP。任务未完成时返回 HTTP 400。响应包含精确的 `Content-Type`、`Content-Length` 和附件文件名，并设置 `Cache-Control: private, no-store, max-age=0`、`Pragma: no-cache`、`X-Content-Type-Options: nosniff`，避免敏感转换结果进入浏览器缓存或被 MIME 猜测。
+
+网页端仅自动加载不超过 32 MiB 的单个 PDF、24 MiB 的单张 PNG/JPEG，以及 2 MiB 的 TXT/CSV 结果。PDF 使用本地 PDF.js 逐页渲染，图片使用受控 Blob URL，文本只作为纯文本节点展示且最长显示 200,000 个字符；ZIP 和超限结果不会自动读入页面内存，仍可直接流式下载。
 
 ## 取消任务
 
