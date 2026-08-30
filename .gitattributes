@@ -1,4 +1,4 @@
 # Keep reviewed upstream license bytes verbatim; several canonical texts contain
 # trailing spaces or a final blank line that are covered by recorded SHA-256 values.
-desktop/licenses/**/*.txt whitespace=-blank-at-eol,-blank-at-eof,-trailing-space
-desktop/licenses/**/*.html whitespace=-blank-at-eol,-blank-at-eof,-trailing-space
+desktop/licenses/**/*.txt -text whitespace=-blank-at-eol,-blank-at-eof,-trailing-space
+desktop/licenses/**/*.html -text whitespace=-blank-at-eol,-blank-at-eof,-trailing-space
