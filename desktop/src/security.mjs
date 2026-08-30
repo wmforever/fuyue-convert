@@ -1,7 +1,10 @@
 export function isTrustedUrl(value, allowedOrigins) {
   try {
     const url = new URL(value)
-    return allowedOrigins.has(url.origin)
+    return url.protocol === 'http:'
+      && ['127.0.0.1', '[::1]'].includes(url.hostname)
+      && allowedOrigins.has(url.origin)
+      && !url.pathname.startsWith('/api/')
   } catch {
     return false
   }

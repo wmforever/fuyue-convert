@@ -75,9 +75,11 @@ function createWindow(rendererUrl, backendOrigin, apiToken) {
   trustedRendererOrigin = new URL(rendererUrl).origin
   if (backendOrigin) allowedOrigins.add(backendOrigin)
 
-  window.webContents.on('will-navigate', (event, navigationUrl) => {
+  const guardRendererNavigation = (event, navigationUrl) => {
     if (!isTrustedUrl(navigationUrl, allowedOrigins)) event.preventDefault()
-  })
+  }
+  window.webContents.on('will-navigate', guardRendererNavigation)
+  window.webContents.on('will-redirect', guardRendererNavigation)
   window.webContents.setWindowOpenHandler(({ url }) => {
     if (isSafeExternalUrl(url)) void shell.openExternal(url)
     return { action: 'deny' }

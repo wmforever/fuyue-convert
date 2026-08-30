@@ -6,6 +6,9 @@ test('trusted navigation must stay on an explicitly allowed origin', () => {
   const origins = new Set(['http://127.0.0.1:43125'])
   assert.equal(isTrustedUrl('http://127.0.0.1:43125/settings', origins), true)
   assert.equal(isTrustedUrl('http://127.0.0.1:43126/', origins), false)
+  assert.equal(isTrustedUrl('http://127.0.0.1:43125/api/tasks/123/download', origins), false)
+  assert.equal(isTrustedUrl('blob:http://127.0.0.1:43125/1234', origins), false)
+  assert.equal(isTrustedUrl('data:text/html,hello', origins), false)
   assert.equal(isTrustedUrl('file:///tmp/index.html', origins), false)
 })
 

@@ -63,6 +63,10 @@ public class TaskController {
         ContentDisposition disposition = ContentDisposition.attachment().filename(artifact.fileName(), java.nio.charset.StandardCharsets.UTF_8).build();
         return ResponseEntity.ok().contentType(MediaType.parseMediaType(artifact.contentType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+                .header(HttpHeaders.CACHE_CONTROL, "private, no-store, max-age=0")
+                .header(HttpHeaders.PRAGMA, "no-cache")
+                .header("X-Content-Type-Options", "nosniff")
+                .header("Cross-Origin-Resource-Policy", "same-origin")
                 .contentLength(artifact.path().toFile().length()).body(new FileSystemResource(artifact.path()));
     }
 
