@@ -1,5 +1,33 @@
+import { createHash } from 'node:crypto'
 import { access, readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
+
+const ELECTRON_LICENSE_SHA256 = '5154e165bd6c2cc0cfbcd8916498c7abab0497923bafcd5cb07673fe8480087d'
+const ELECTRON_RUNTIME_IDENTITIES = new Map([
+  ['44.0.0:win32:x64', Object.freeze({
+    archiveName: 'electron-v44.0.0-win32-x64.zip',
+    archiveSha256: 'e61aa3bcea8152bc0730abd015e47c032d778a0ef10e2a1c78ba3c4ea47942f9',
+    licenseSha256: ELECTRON_LICENSE_SHA256,
+    chromiumLicensesSha256: 'f2310820377f4d8f2a5f6bc8744b985d6772cef9ee7d8d197b01fdb330db0bb8',
+    licenseBytes: 1_096,
+    chromiumLicensesBytes: 20_472_827
+  })],
+  ['44.0.0:darwin:x64', Object.freeze({
+    archiveName: 'electron-v44.0.0-darwin-x64.zip',
+    archiveSha256: '28429e700ad68d9624aaa90b6543ffe891a48c14121fd904cd294e5edcee63ff',
+    licenseSha256: ELECTRON_LICENSE_SHA256,
+    chromiumLicensesSha256: '4cbde8e3e7b29f451c78a44491fb32e2202884826fef47786a9cda5a36110525',
+    licenseBytes: 1_096,
+    chromiumLicensesBytes: 20_111_206
+  })]
+])
+
+export function electronRuntimeIdentity(version, platform, arch) {
+  const key = `${version}:${platform}:${arch}`
+  const identity = ELECTRON_RUNTIME_IDENTITIES.get(key)
+  if (!identity) throw new Error(`没有受审核的 Electron runtime 身份：${key}`)
+  return identity
+}
 
 const FORBIDDEN_EXACT_KEYS = [
   'electron_override_dist_path',
@@ -42,7 +70,18 @@ async function requireFile(target, minimumBytes, label) {
   return { path: target, size: metadata.size }
 }
 
-export async function verifyElectronRuntime({ electronDirectory, executablePath, platform, expectedVersion }) {
+async function fileSha256(target) {
+  return createHash('sha256').update(await readFile(target)).digest('hex')
+}
+
+export async function verifyElectronRuntime({
+  electronDirectory,
+  executablePath,
+  platform,
+  arch,
+  expectedVersion,
+  identity = electronRuntimeIdentity(expectedVersion, platform, arch)
+}) {
   const executableRelative = platform === 'win32'
     ? 'electron.exe'
     : platform === 'darwin'
@@ -56,11 +95,18 @@ export async function verifyElectronRuntime({ electronDirectory, executablePath,
   if (version !== expectedVersion) throw new Error(`Electron runtime 版本不一致：${version}，要求 ${expectedVersion}`)
   const minimumExecutableBytes = platform === 'darwin' ? 10_000 : 1_000_000
   const executable = await requireFile(expectedExecutable, minimumExecutableBytes, 'Electron 可执行文件')
-  const license = await requireFile(path.join(electronDirectory, 'LICENSE'), 1_000, 'Electron MIT 许可证')
+  const license = await requireFile(path.join(electronDirectory, 'LICENSE'), identity.licenseBytes, 'Electron MIT 许可证')
   const chromiumLicenses = await requireFile(
     path.join(electronDirectory, 'dist', 'LICENSES.chromium.html'),
-    1_000_000,
+    identity.chromiumLicensesBytes,
     'Chromium 第三方许可证'
   )
-  return { version, executable, license, chromiumLicenses }
+  if (license.size !== identity.licenseBytes || await fileSha256(license.path) !== identity.licenseSha256) {
+    throw new Error('Electron MIT 许可证与受审核官方产物不一致')
+  }
+  if (chromiumLicenses.size !== identity.chromiumLicensesBytes ||
+      await fileSha256(chromiumLicenses.path) !== identity.chromiumLicensesSha256) {
+    throw new Error('Chromium 第三方许可证与受审核平台产物不一致')
+  }
+  return { version, executable, license, chromiumLicenses, identity }
 }

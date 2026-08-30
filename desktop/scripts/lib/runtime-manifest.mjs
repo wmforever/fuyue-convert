@@ -469,6 +469,17 @@ export async function finalizeRuntimeManifest(resourcesRoot) {
     throw new Error('只能 finalise Windows x64 Lite manifest')
   }
   const applicationRoot = path.dirname(resourcesRoot)
+  const packagedElectronLicensePairs = [
+    ['LICENSE.electron.txt', 'licenses/ELECTRON-LICENSE.txt'],
+    ['LICENSES.chromium.html', 'licenses/LICENSES.chromium.html']
+  ]
+  for (const [runtimeRelative, noticeRelative] of packagedElectronLicensePairs) {
+    const runtimeLicense = await readFile(path.join(applicationRoot, ...runtimeRelative.split('/')))
+    const noticeLicense = await readFile(path.join(resourcesRoot, ...noticeRelative.split('/')))
+    if (!runtimeLicense.equals(noticeLicense)) {
+      throw new Error(`Electron runtime 许可证与随包声明不一致：${runtimeRelative}`)
+    }
+  }
   const applicationFiles = await listFiles(applicationRoot)
   if (applicationFiles.includes(INSTALLER_GENERATED_UNINSTALLER)) {
     throw new Error('Electron unpacked 目录不得预置安装器生成的卸载程序')
@@ -492,6 +503,7 @@ export async function finalizeRuntimeManifest(resourcesRoot) {
   }
   manifest.finalized = {
     electronRuntimeFileSet: true,
+    electronRuntimeLicensesMatchNotices: true,
     forbiddenInstallerComponentsAbsentFromApplication: true,
     excludedSelfReferentialManifest: RUNTIME_MANIFEST_APPLICATION_PATH,
     installerGeneratedFile: INSTALLER_GENERATED_UNINSTALLER

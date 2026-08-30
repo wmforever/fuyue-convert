@@ -16,6 +16,7 @@ async function main() {
     electronDirectory,
     executablePath,
     platform: process.platform,
+    arch: process.arch,
     expectedVersion: packageMetadata.version
   })
   console.log(`Electron ${runtime.version} runtime 已下载并通过校验：${runtime.executable.path}`)

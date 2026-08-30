@@ -1,9 +1,16 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, mkdir, writeFile } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
-import { assertOfficialElectronDownload, verifyElectronRuntime } from '../scripts/lib/electron-runtime.mjs'
+import {
+  assertOfficialElectronDownload,
+  electronRuntimeIdentity,
+  verifyElectronRuntime
+} from '../scripts/lib/electron-runtime.mjs'
+
+const sha256 = value => createHash('sha256').update(value).digest('hex')
 
 test('public Electron preparation rejects download and checksum overrides', () => {
   assert.doesNotThrow(() => assertOfficialElectronDownload({}))
@@ -30,17 +37,42 @@ test('Electron runtime verification requires the exact executable, version, and 
   const executablePath = path.join(dist, 'electron.exe')
   await writeFile(executablePath, Buffer.alloc(1_000_000))
   await writeFile(path.join(dist, 'version'), '44.0.0\n')
-  await writeFile(path.join(electronDirectory, 'LICENSE'), Buffer.alloc(1_000))
-  await writeFile(path.join(dist, 'LICENSES.chromium.html'), Buffer.alloc(1_000_000))
+  const license = Buffer.alloc(1_096, 1)
+  const chromiumLicenses = Buffer.alloc(1_000_000, 2)
+  await writeFile(path.join(electronDirectory, 'LICENSE'), license)
+  await writeFile(path.join(dist, 'LICENSES.chromium.html'), chromiumLicenses)
+  const identity = {
+    licenseBytes: license.length,
+    licenseSha256: sha256(license),
+    chromiumLicensesBytes: chromiumLicenses.length,
+    chromiumLicensesSha256: sha256(chromiumLicenses)
+  }
 
   const result = await verifyElectronRuntime({
-    electronDirectory, executablePath, platform: 'win32', expectedVersion: '44.0.0'
+    electronDirectory, executablePath, platform: 'win32', arch: 'x64', expectedVersion: '44.0.0', identity
   })
   assert.equal(result.version, '44.0.0')
   await assert.rejects(() => verifyElectronRuntime({
     electronDirectory,
     executablePath: path.join(electronDirectory, 'outside.exe'),
     platform: 'win32',
-    expectedVersion: '44.0.0'
+    arch: 'x64',
+    expectedVersion: '44.0.0',
+    identity
   }), /不在受审核 dist 目录/)
+
+  await writeFile(path.join(dist, 'LICENSES.chromium.html'), Buffer.alloc(chromiumLicenses.length, 3))
+  await assert.rejects(() => verifyElectronRuntime({
+    electronDirectory, executablePath, platform: 'win32', arch: 'x64', expectedVersion: '44.0.0', identity
+  }), /Chromium 第三方许可证与受审核平台产物不一致/)
+})
+
+test('Windows public runtime and electron-builder pin the reviewed Electron archive', async () => {
+  const identity = electronRuntimeIdentity('44.0.0', 'win32', 'x64')
+  assert.equal(identity.archiveSha256,
+    'e61aa3bcea8152bc0730abd015e47c032d778a0ef10e2a1c78ba3c4ea47942f9')
+  const builderConfiguration = await readFile(new URL('../electron-builder.yml', import.meta.url), 'utf8')
+  assert.match(builderConfiguration, /electronDownload:\s*[\s\S]*?force: false/)
+  assert.match(builderConfiguration, /unsafelyDisableChecksums: false/)
+  assert.match(builderConfiguration, new RegExp(`${identity.archiveName}: ${identity.archiveSha256}`))
 })

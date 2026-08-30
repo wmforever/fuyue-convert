@@ -1,9 +1,11 @@
 import { existsSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { access, readFile, readdir, stat } from 'node:fs/promises'
 import { spawnSync } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { javaProperty } from './lib/runtime-release.mjs'
+import { electronRuntimeIdentity } from './lib/electron-runtime.mjs'
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const desktopDirectory = path.resolve(scriptDirectory, '..')
@@ -30,6 +32,24 @@ async function requireFile(root, relative, minimumBytes = 1) {
     throw new Error(`打包文件无效：${target}`)
   }
   return target
+}
+
+const sha256 = content => createHash('sha256').update(content).digest('hex')
+
+async function verifyPublicElectronLicenses(resources, electronVersion) {
+  const applicationRoot = path.dirname(resources)
+  const identity = electronRuntimeIdentity(electronVersion, 'win32', 'x64')
+  const pairs = [
+    ['LICENSE.electron.txt', 'licenses/ELECTRON-LICENSE.txt', identity.licenseSha256],
+    ['LICENSES.chromium.html', 'licenses/LICENSES.chromium.html', identity.chromiumLicensesSha256]
+  ]
+  for (const [runtimeRelative, noticeRelative, expectedSha256] of pairs) {
+    const runtimeLicense = await readFile(await requireFile(applicationRoot, runtimeRelative))
+    const noticeLicense = await readFile(await requireFile(resources, noticeRelative))
+    if (!runtimeLicense.equals(noticeLicense) || sha256(runtimeLicense) !== expectedSha256) {
+      throw new Error(`Electron runtime 许可证未对应受审核官方产物：${runtimeRelative}`)
+    }
+  }
 }
 
 function assertMissing(root, relative) {
@@ -81,6 +101,11 @@ function verifyForbiddenJavaLibraries(jarPath) {
 
 async function main() {
   const resources = locateResources()
+  const desktopPackage = JSON.parse(await readFile(path.join(desktopDirectory, 'package.json'), 'utf8'))
+  const electronVersion = desktopPackage.devDependencies?.electron
+  if (!/^\d+\.\d+\.\d+$/.test(electronVersion || '')) {
+    throw new Error('桌面包必须精确固定 Electron 版本')
+  }
   const javaName = process.platform === 'win32' ? 'java.exe' : 'java'
   const runtimeJava = await requireFile(resources, `backend/runtime/bin/${javaName}`)
   const backendJar = await requireFile(resources, 'backend/app/fuyue-convert.jar', 1_000_000)
@@ -101,6 +126,7 @@ async function main() {
     if (requireOcr) throw new Error('Lite 发布不得要求内置 OCR')
     assertMissing(resources, 'backend/app/ocr')
     assertMissing(resources, 'backend/app/poppler')
+    await verifyPublicElectronLicenses(resources, electronVersion)
     await assertForbiddenInstallerFilesMissing(path.dirname(resources))
     await requireFile(resources, 'backend/licenses/TEMURIN-RUNTIME.txt')
     await requireFile(resources, 'backend/licenses/NSIS-LICENSE.txt')
@@ -143,7 +169,6 @@ async function main() {
 
   if (requireInstaller) {
     if (process.platform !== 'win32') throw new Error('NSIS 安装器只能在 Windows 构建产物中校验')
-    const desktopPackage = JSON.parse(await readFile(path.join(desktopDirectory, 'package.json'), 'utf8'))
     await requireFile(path.join(desktopDirectory, 'release'),
       `Fuyue-Convert-${desktopPackage.version}-win-x64.exe`, 1_000_000)
   }

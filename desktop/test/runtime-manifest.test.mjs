@@ -97,8 +97,13 @@ test('finalized application file set covers app.asar and excludes only its own m
   const resourcesRoot = path.join(applicationRoot, 'resources')
   const backendRoot = path.join(resourcesRoot, 'backend')
   await mkdir(backendRoot, { recursive: true })
+  await mkdir(path.join(resourcesRoot, 'licenses'), { recursive: true })
   await writeFile(path.join(applicationRoot, 'Fuyue Convert.exe'), 'MZ-electron')
+  await writeFile(path.join(applicationRoot, 'LICENSE.electron.txt'), 'electron-license')
+  await writeFile(path.join(applicationRoot, 'LICENSES.chromium.html'), 'chromium-licenses')
   await writeFile(path.join(resourcesRoot, 'app.asar'), 'asar')
+  await writeFile(path.join(resourcesRoot, 'licenses', 'ELECTRON-LICENSE.txt'), 'electron-license')
+  await writeFile(path.join(resourcesRoot, 'licenses', 'LICENSES.chromium.html'), 'chromium-licenses')
   await writeFile(path.join(backendRoot, 'payload.txt'), 'backend')
   await writeFile(path.join(backendRoot, 'RUNTIME-COMPONENTS.json'), JSON.stringify({
     schemaVersion: 1,
@@ -110,6 +115,25 @@ test('finalized application file set covers app.asar and excludes only its own m
   assert.ok(files.includes('resources/app.asar'))
   assert.ok(files.includes('resources/backend/payload.txt'))
   assert.ok(!files.includes('resources/backend/RUNTIME-COMPONENTS.json'))
+  assert.equal(manifest.finalized.electronRuntimeLicensesMatchNotices, true)
+})
+
+test('finalization rejects Electron runtime licenses that do not match the packaged notices', async () => {
+  const applicationRoot = await mkdtemp(path.join(os.tmpdir(), 'fuyue-finalize-license-'))
+  const resourcesRoot = path.join(applicationRoot, 'resources')
+  const backendRoot = path.join(resourcesRoot, 'backend')
+  await mkdir(path.join(resourcesRoot, 'licenses'), { recursive: true })
+  await mkdir(backendRoot, { recursive: true })
+  await writeFile(path.join(applicationRoot, 'LICENSE.electron.txt'), 'runtime-license')
+  await writeFile(path.join(applicationRoot, 'LICENSES.chromium.html'), 'same')
+  await writeFile(path.join(resourcesRoot, 'licenses', 'ELECTRON-LICENSE.txt'), 'different-license')
+  await writeFile(path.join(resourcesRoot, 'licenses', 'LICENSES.chromium.html'), 'same')
+  await writeFile(path.join(backendRoot, 'RUNTIME-COMPONENTS.json'), JSON.stringify({
+    schemaVersion: 1,
+    profile: 'windows-x64-lite',
+    components: [{ id: 'electron' }]
+  }))
+  await assert.rejects(() => finalizeRuntimeManifest(resourcesRoot), /Electron runtime 许可证与随包声明不一致/)
 })
 
 test('reviewed policy keeps NSIS plug-ins out of the core-only installer profile', async () => {
