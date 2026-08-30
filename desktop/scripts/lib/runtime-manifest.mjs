@@ -33,7 +33,7 @@ async function listFiles(root, prefix = '') {
     else if (entry.isFile()) files.push(relative)
     else throw new Error(`目录清单不允许符号链接或特殊文件：${path.join(root, relative)}`)
   }
-  return files
+  return files.sort((left, right) => left.localeCompare(right, 'en'))
 }
 
 export async function hashDirectory(root) {
@@ -589,7 +589,10 @@ export async function verifyRuntimeManifest(resourcesRoot) {
   if (manifest.schemaVersion !== 1 || manifest.profile !== 'windows-x64-lite') {
     throw new Error('运行时 manifest schema/profile 无效')
   }
-  if (!manifest.finalized?.electronRuntimeFileSet) throw new Error('运行时 manifest 尚未对最终 Electron 目录定稿')
+  if (!manifest.finalized?.electronRuntimeFileSet ||
+      !manifest.finalized?.electronRuntimeLicensesMatchNotices) {
+    throw new Error('运行时 manifest 尚未完成最终 Electron 目录与许可证定稿')
+  }
   if (manifest.finalized.excludedSelfReferentialManifest !== RUNTIME_MANIFEST_APPLICATION_PATH ||
       manifest.finalized.installerGeneratedFile !== INSTALLER_GENERATED_UNINSTALLER) {
     throw new Error('运行时 manifest 的最终文件集合排除项无效')

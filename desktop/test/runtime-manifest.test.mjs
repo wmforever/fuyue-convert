@@ -101,6 +101,7 @@ test('finalized application file set covers app.asar and excludes only its own m
   await writeFile(path.join(applicationRoot, 'Fuyue Convert.exe'), 'MZ-electron')
   await writeFile(path.join(applicationRoot, 'LICENSE.electron.txt'), 'electron-license')
   await writeFile(path.join(applicationRoot, 'LICENSES.chromium.html'), 'chromium-licenses')
+  await writeFile(path.join(applicationRoot, 'resources.pak'), 'electron-resource')
   await writeFile(path.join(resourcesRoot, 'app.asar'), 'asar')
   await writeFile(path.join(resourcesRoot, 'licenses', 'ELECTRON-LICENSE.txt'), 'electron-license')
   await writeFile(path.join(resourcesRoot, 'licenses', 'LICENSES.chromium.html'), 'chromium-licenses')
@@ -115,6 +116,8 @@ test('finalized application file set covers app.asar and excludes only its own m
   assert.ok(files.includes('resources/app.asar'))
   assert.ok(files.includes('resources/backend/payload.txt'))
   assert.ok(!files.includes('resources/backend/RUNTIME-COMPONENTS.json'))
+  assert.ok(files.indexOf('resources.pak') < files.indexOf('resources/app.asar'))
+  assert.deepEqual(files, [...files].sort((left, right) => left.localeCompare(right, 'en')))
   assert.equal(manifest.finalized.electronRuntimeLicensesMatchNotices, true)
 })
 
