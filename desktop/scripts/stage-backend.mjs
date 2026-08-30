@@ -1,9 +1,10 @@
 import { existsSync } from 'node:fs'
-import { cp, mkdir, readFile, rm } from 'node:fs/promises'
+import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import crossSpawn from 'cross-spawn'
+import { enrichRuntimeRelease, javaProperty } from './lib/runtime-release.mjs'
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const desktopDirectory = path.resolve(scriptDirectory, '..')
@@ -95,7 +96,12 @@ async function stageRuntime(runtimeTarget) {
 async function verifyRuntime(runtimeTarget) {
   const javaName = process.platform === 'win32' ? 'java.exe' : 'java'
   const output = await capture(path.join(runtimeTarget, 'bin', javaName), ['-XshowSettings:properties', '-version'])
-  if (!/java\.version\s*=\s*17(?:\.|\s|$)/.test(output)) {
+  const identity = {
+    javaVersion: javaProperty(output, 'java.version'),
+    javaRuntimeVersion: javaProperty(output, 'java.runtime.version'),
+    implementor: javaProperty(output, 'java.vendor')
+  }
+  if (!/^17(?:\.|$)/.test(identity.javaVersion)) {
     throw new Error('桌面 Java Runtime 必须是 Java 17')
   }
   if (process.platform === 'win32' && !/os\.arch\s*=\s*(?:amd64|x86_64)(?:\s|$)/i.test(output)) {
@@ -104,13 +110,23 @@ async function verifyRuntime(runtimeTarget) {
   const releaseRuntimeRequired = ['true', '1'].includes(
     (process.env.FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME || '').toLowerCase()
   )
-  if (releaseRuntimeRequired && !/java\.vendor\s*=\s*Eclipse Adoptium(?:\s|$)/i.test(output)) {
+  if (releaseRuntimeRequired && identity.implementor !== 'Eclipse Adoptium') {
     throw new Error('正式发布只允许使用 Eclipse Temurin/Adoptium Java Runtime')
   }
   const requiredVersion = (process.env.FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION || '').trim()
-  if (requiredVersion && !output.includes(`java.version = ${requiredVersion}`)) {
+  if (requiredVersion && identity.javaVersion !== requiredVersion) {
     throw new Error(`Java Runtime 版本必须是 ${requiredVersion}`)
   }
+  if (publicLiteRelease && identity.javaRuntimeVersion !== '17.0.20.1+1') {
+    throw new Error(`公开 Lite Java Runtime build 未审核：${identity.javaRuntimeVersion}`)
+  }
+  return identity
+}
+
+async function recordRuntimeIdentity(runtimeTarget, identity) {
+  const releasePath = path.join(runtimeTarget, 'release')
+  const release = await readFile(releasePath, 'utf8')
+  await writeFile(releasePath, enrichRuntimeRelease(release, identity), 'utf8')
 }
 
 async function stageOcr(target) {
@@ -175,7 +191,8 @@ async function main() {
   await copyRequired(path.join(repositoryRoot, 'LICENSE'), path.join(destination, 'LICENSE'), '许可证')
   await copyRequired(path.join(repositoryRoot, 'THIRD_PARTY_NOTICES.md'), path.join(destination, 'THIRD_PARTY_NOTICES.md'), '第三方声明')
   await stageRuntime(path.join(destination, 'runtime'))
-  await verifyRuntime(path.join(destination, 'runtime'))
+  const runtimeIdentity = await verifyRuntime(path.join(destination, 'runtime'))
+  await recordRuntimeIdentity(path.join(destination, 'runtime'), runtimeIdentity)
   await stageLicenses()
   if (publicLiteRelease) {
     await run(process.execPath, [

@@ -3,6 +3,7 @@ import { access, readFile, readdir, stat } from 'node:fs/promises'
 import { spawnSync } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { javaProperty } from './lib/runtime-release.mjs'
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const desktopDirectory = path.resolve(scriptDirectory, '..')
@@ -81,7 +82,7 @@ function verifyForbiddenJavaLibraries(jarPath) {
 async function main() {
   const resources = locateResources()
   const javaName = process.platform === 'win32' ? 'java.exe' : 'java'
-  await requireFile(resources, `backend/runtime/bin/${javaName}`)
+  const runtimeJava = await requireFile(resources, `backend/runtime/bin/${javaName}`)
   const backendJar = await requireFile(resources, 'backend/app/fuyue-convert.jar', 1_000_000)
   await requireFile(resources, 'backend/application.yml')
   await requireFile(resources, 'backend/LICENSE')
@@ -105,8 +106,21 @@ async function main() {
     await requireFile(resources, 'backend/licenses/NSIS-LICENSE.txt')
     await requireFile(resources, 'backend/licenses/NSIS-PROVENANCE.txt')
     const runtimeRelease = await readFile(await requireFile(resources, 'backend/runtime/release'), 'utf8')
-    if (!/IMPLEMENTOR="Eclipse Adoptium"/.test(runtimeRelease) || !/JAVA_VERSION="17\.0\.20\.1"/.test(runtimeRelease)) {
+    if (!/IMPLEMENTOR="Eclipse Adoptium"/.test(runtimeRelease) ||
+        !/JAVA_VERSION="17\.0\.20\.1"/.test(runtimeRelease) ||
+        !/JAVA_RUNTIME_VERSION="17\.0\.20\.1\+1"/.test(runtimeRelease)) {
       throw new Error('公开 Lite 发布必须内置 Eclipse Temurin 17.0.20.1+1')
+    }
+    const runtimeCheck = spawnSync(runtimeJava, ['-XshowSettings:properties', '-version'], { encoding: 'utf8' })
+    if (runtimeCheck.error || runtimeCheck.status !== 0) {
+      throw new Error(`无法执行最终 Java Runtime：${runtimeCheck.error?.message || runtimeCheck.stderr || `退出码 ${runtimeCheck.status}`}`)
+    }
+    const runtimeOutput = `${runtimeCheck.stdout || ''}${runtimeCheck.stderr || ''}`
+    if (javaProperty(runtimeOutput, 'java.vendor') !== 'Eclipse Adoptium' ||
+        javaProperty(runtimeOutput, 'java.version') !== '17.0.20.1' ||
+        javaProperty(runtimeOutput, 'java.runtime.version') !== '17.0.20.1+1' ||
+        !/^(?:amd64|x86_64)$/i.test(javaProperty(runtimeOutput, 'os.arch'))) {
+      throw new Error('最终 Java Runtime 可执行文件未通过 Temurin 17.0.20.1+1 x64 策略')
     }
     verifyForbiddenJavaLibraries(backendJar)
     const manifestVerification = spawnSync(process.execPath, [

@@ -357,12 +357,16 @@ export async function generateRuntimeManifest({ repositoryRoot, desktopDirectory
   const runtimeRoot = path.join(backendRoot, 'runtime')
   const runtimeReleaseContent = await readFile(path.join(runtimeRoot, 'release'))
   const runtimeRelease = parseRuntimeRelease(runtimeReleaseContent.toString('utf8'))
-  const expectedRuntime = policy.components['eclipse-temurin'].version.replace(/\+\d+$/, '')
+  const expectedRuntimeBuild = policy.components['eclipse-temurin'].version
+  const expectedRuntime = expectedRuntimeBuild.replace(/\+\d+$/, '')
   if (strictWindows && runtimeRelease.JAVA_VERSION !== expectedRuntime) {
     throw new Error(`公开 Lite Runtime 版本未审核：${runtimeRelease.JAVA_VERSION}，要求 ${expectedRuntime}`)
   }
   if (strictWindows && runtimeRelease.IMPLEMENTOR !== 'Eclipse Adoptium') {
     throw new Error(`公开 Lite Runtime 不是 Eclipse Adoptium：${runtimeRelease.IMPLEMENTOR || 'unknown'}`)
+  }
+  if (strictWindows && runtimeRelease.JAVA_RUNTIME_VERSION !== expectedRuntimeBuild) {
+    throw new Error(`公开 Lite Runtime build 未审核：${runtimeRelease.JAVA_RUNTIME_VERSION || 'unknown'}`)
   }
   const runtimeTree = await hashDirectory(runtimeRoot)
   const runtimeLegalFiles = await listFiles(path.join(runtimeRoot, 'legal'))
@@ -651,9 +655,12 @@ export async function verifyRuntimeManifest(resourcesRoot) {
   }
   const temurin = manifest.components.find(item => item.id === 'eclipse-temurin')
   const actualRuntimeRelease = parseRuntimeRelease(await readFile(path.join(resourcesRoot, 'backend', 'runtime', 'release'), 'utf8'))
-  const expectedRuntimeVersion = policy.components['eclipse-temurin'].version.replace(/\+\d+$/, '')
-  if (actualRuntimeRelease.JAVA_VERSION !== expectedRuntimeVersion || actualRuntimeRelease.IMPLEMENTOR !== 'Eclipse Adoptium') {
-    throw new Error(`最终 Java Runtime 未通过 Temurin 策略：${actualRuntimeRelease.JAVA_VERSION} ${actualRuntimeRelease.IMPLEMENTOR || 'unknown'}`)
+  const expectedRuntimeBuild = policy.components['eclipse-temurin'].version
+  const expectedRuntimeVersion = expectedRuntimeBuild.replace(/\+\d+$/, '')
+  if (actualRuntimeRelease.JAVA_VERSION !== expectedRuntimeVersion ||
+      actualRuntimeRelease.JAVA_RUNTIME_VERSION !== expectedRuntimeBuild ||
+      actualRuntimeRelease.IMPLEMENTOR !== 'Eclipse Adoptium') {
+    throw new Error(`最终 Java Runtime 未通过 Temurin 策略：${actualRuntimeRelease.JAVA_VERSION} ${actualRuntimeRelease.JAVA_RUNTIME_VERSION || 'unknown'} ${actualRuntimeRelease.IMPLEMENTOR || 'unknown'}`)
   }
   for (const [key, value] of Object.entries(actualRuntimeRelease)) {
     if (temurin.runtimeRelease?.[key] !== value) throw new Error(`Java Runtime release 元数据不匹配：${key}`)
