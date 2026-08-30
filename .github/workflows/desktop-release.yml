@@ -58,6 +58,10 @@ jobs:
           cache: npm
           cache-dependency-path: desktop/package-lock.json
 
+      - name: Reject local-only samples and runtime artifacts
+        shell: pwsh
+        run: node scripts/check-local-only-files.mjs
+
       - name: Install desktop dependencies
         working-directory: desktop
         shell: pwsh
@@ -244,6 +248,9 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "22"
+
+      - name: Reject local-only samples and runtime artifacts
+        run: node scripts/check-local-only-files.mjs
 
       - name: Download Windows installer
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8

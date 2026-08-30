@@ -85,10 +85,14 @@ contracts. Avoid changing them silently.
 `qa-samples/input/` 默认是维护者本地语料，不会自动纳入 Git。不要提交
 `qa-samples/output/`、`work/`、`runtime-data/`、`report/` 或差异图。完整 HTTP QA 的
 必需/可选文件和许可边界见 [qa-samples/README.md](qa-samples/README.md)。
+CI 和桌面发布流程会运行隐私门禁；一旦这些本地目录中的文件被强制加入 Git，
+构建会直接失败。Docker 构建上下文也会完整排除 `qa-samples/`。
 
 Do not publish a fixture merely because it is already present on your machine.
 Prefer deterministic synthetic fixtures and include provenance, redistribution
 permission, privacy review, purpose, and checksum for every public binary file.
+CI and the desktop release workflow reject local-only fixtures or runtime output
+that is force-added to Git, and the Docker context excludes `qa-samples/` in full.
 
 新增运行时或构建依赖时，同时更新 `THIRD_PARTY_NOTICES.md`，并说明是否会进入 fat
 JAR、容器、桌面安装器或平台运行包。默认实现不得新增闭源或云端引擎。
