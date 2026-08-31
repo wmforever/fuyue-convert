@@ -7,13 +7,16 @@ Third-party libraries, fonts, runtimes, native tools, and generated application
 bundles remain subject to their own licenses. The project is therefore not a
 claim that every assembled binary is distributed solely under Apache-2.0.
 
-The official public binary path is restricted to the reviewed Windows x64 Lite
-desktop package. It excludes bundled OCR, Poppler, and LibreOffice. The release
+The official public binary path is restricted to the reviewed Windows x64,
+macOS Intel, and macOS Apple Silicon Lite desktop packages. They exclude
+bundled OCR, Poppler, and LibreOffice. The release
 workflow remains fail-closed unless the repository variable
 `FORMAT_CONVERTER_BINARY_RELEASE_APPROVED` is deliberately enabled for an
-audited tag. The workflow verifies the staged application and the payload
-installed by the final NSIS executable, and publishes checksums, component
-metadata, notices, and corresponding source artifacts with the installer.
+audited tag. The workflow verifies the staged applications, the payload
+installed by the final Windows executable, and both mounted macOS disk images.
+Component metadata, notices, and source records are embedded in each app;
+checksums are published in the Release notes and audit evidence remains in the
+workflow artifacts. The main Release contains only the three user installers.
 
 Historical v0.1.0 and v0.1.1 binary assets and expired workflow artifacts were
 withdrawn before the repository became public. Locally assembled packages are
@@ -43,7 +46,7 @@ unreviewed renderer.
 - Runtime location in platform packages: `app/ocr/`
 - License: Apache License 2.0
 
-When explicitly enabled for local verification, packaging scripts obtain the engine from the operating-system package manager, copy its required native runtime, and include only the selected `eng`, `chi_sim`, `chi_sim_vert`, and supporting `osd` data. Windows model downloads are pinned to a source commit and verified by SHA-256 before packaging. The official Windows x64 Lite package does not include this directory.
+When explicitly enabled for local verification, packaging scripts obtain the engine from the operating-system package manager, copy its required native runtime, and include only the selected `eng`, `chi_sim`, `chi_sim_vert`, and supporting `osd` data. Windows model downloads are pinned to a source commit and verified by SHA-256 before packaging. The official Lite packages do not include this directory.
 
 Tesseract packages also depend on native libraries such as Leptonica and image
 codec/archive libraries. Those libraries vary by operating system package
@@ -68,11 +71,13 @@ corresponding-source review.
 
 ## Java Runtime
 
-The official Windows x64 Lite build pins Eclipse Temurin 17.0.20.1+1, verifies
-the vendor and version, and preserves the complete `jlink` `legal/` tree. Its
-exact corresponding source archive and checksum are published beside the
-installer. A locally detected Oracle or otherwise unreviewed JDK must not be
-reused as a public runtime bundle merely because `jlink` can process it.
+The official Windows x64 and both native macOS Lite builds pin Eclipse Temurin
+17.0.20.1+1, verify vendor, version, build, and architecture, and preserve the
+complete `jlink` `legal/` tree. Each application embeds the exact binary/source
+provenance, source SHA-256, and a corresponding-source availability statement;
+the Release notes link the matching upstream source. A locally detected Oracle
+or otherwise unreviewed JDK must not be reused as a public runtime bundle merely
+because `jlink` can process it.
 
 ## Droid Sans Fallback
 

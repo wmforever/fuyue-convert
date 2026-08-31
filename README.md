@@ -10,15 +10,19 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 
 项目基于 Java 17、Spring Boot、Vue 3、Apache POI、PDFBox、Poppler、OFDRW 和 LibreOffice headless。它不会承诺所有格式都能做到“完全一致且完全可编辑”，而是把转换能力拆成明确的路线、质量等级和失败原因，让结果可以被自动验证，也方便社区逐步增强。
 
-> 自有源码采用 Apache-2.0；构建依赖继续适用各自许可证。官方 Windows x64 Lite 桌面版通过独立的运行时来源、许可、哈希和安装后冒烟门禁发布，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。
+> 自有源码采用 Apache-2.0；构建依赖继续适用各自许可证。官方 Windows x64、macOS Intel 与 macOS Apple Silicon Lite 桌面版通过独立的运行时来源、许可、哈希和安装后冒烟门禁发布，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。
 
 ## 直接下载桌面版
 
-[下载 Fuyue Convert v0.1.4（Windows 10/11 x64）](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.4/Fuyue-Convert-0.1.4-win-x64.exe)
+| 系统 | 下载 |
+| --- | --- |
+| Windows 10/11 x64 | [Fuyue-Convert-0.1.5-win-x64.exe](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-win-x64.exe) |
+| macOS 13+，Intel 芯片 | [Fuyue-Convert-0.1.5-macOS-Intel.dmg](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Intel.dmg) |
+| macOS 13+，Apple M 系列芯片 | [Fuyue-Convert-0.1.5-macOS-Apple-Silicon.dmg](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Apple-Silicon.dmg) |
 
-安装包内置 Eclipse Temurin Java Runtime，安装后可直接运行，不需要另外安装 Java。完整文件、`SHA256SUMS`、许可证、对应源码和测试材料见 [v0.1.4 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.4)。
+三个安装包均内置 Eclipse Temurin Java Runtime，不需要另外安装 Java。Release 下载列表只保留这三个用户安装文件；许可证、组件清单和来源记录内置在应用中，SHA-256 写在 [v0.1.5 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.5) 正文，审计材料保留在自动构建记录中。GitHub 自动生成的 Source code 两项无法隐藏。
 
-这是 Lite 版：不内置 OCR/Tesseract、Poppler 或 LibreOffice；PDF 基础路线有内置回退，OCR 路线会显示不可用，Office 高保真路线会使用电脑上已有的 LibreOffice。首个公开版本尚未做商业代码签名，Windows 可能显示 SmartScreen 或“未知发布者”提示。macOS/Linux 桌面安装包尚未开放。
+这是 Lite 版：不内置 OCR/Tesseract、Poppler 或 LibreOffice；PDF 基础路线有内置回退，OCR 路线会显示不可用，Office 高保真路线会使用电脑上已有的 LibreOffice。Windows 尚未做商业代码签名，可能显示 SmartScreen 或“未知发布者”。macOS 包采用 ad-hoc 签名且尚未经过 Apple 公证，首次打开如被拦截，请前往“系统设置 → 隐私与安全”确认“仍要打开”。
 
 ## 项目定位
 
@@ -129,7 +133,7 @@ npm ci
 npm run dev
 ```
 
-Windows x64 Lite 正式打包命令如下；普通用户请直接使用上面的 Release 安装包：
+Windows x64 Lite 正式打包命令如下；macOS Intel/Apple Silicon 使用对应原生 Mac 与相同的 Temurin/环境变量执行 `npm run dist:mac`。普通用户请直接使用上面的 Release 安装包：
 
 ```powershell
 cd desktop
@@ -157,7 +161,7 @@ bash scripts/package-runtime.sh
 - macOS/Linux：`fuyue-convert-<version>-<os>-<arch>.tar.gz`，解压后运行 `start.command` 或 `bin/start.sh`。
 - Windows：在 Windows 本机运行 `scripts/package-runtime.ps1`。脚本不会自动复制构建机上的 Poppler；运行时可使用 PDFBox 回退或由用户显式配置系统 `pdftoppm`。
 
-> 这些通用运行包只用于本地开发验收，不属于官方公开下载。当前官方二进制仅为上方的 Windows x64 Lite 桌面安装包；不要上传本机已有的 `dist/` 或 `desktop/release/` 产物。
+> 这些通用运行包只用于本地开发验收，不属于官方公开下载。官方桌面版仅为上方三个 Lite 安装包；不要上传本机已有的 `dist/`、`desktop/release/` 或 `qa-samples/` 产物。
 
 启动后访问：
 
@@ -200,7 +204,7 @@ FORMAT_CONVERTER_RESULT_TTL=24h
 
 服务默认只监听 `127.0.0.1`。远程部署设置 `SERVER_ADDRESS=0.0.0.0` 时必须同时配置至少 32 个字符且不含首尾空白的 `FORMAT_CONVERTER_API_TOKEN`，否则服务拒绝启动；只有外层网络已严格隔离时才可显式设置 `FORMAT_CONVERTER_ALLOW_INSECURE_REMOTE=true`。生产环境还应使用 TLS 反向代理，并通过 `X-Format-Converter-Token` 或 Bearer Token 调用任务 API。服务会执行文件数、单文件、单任务总上传量、总输出量和数据盘安全水位检查；Worker 堆限制不替代 Docker/cgroup 或 systemd 的 CPU、总内存和进程数限制。
 
-官方 Release 附带与最终安装内容对账的运行时组件清单、SBOM、`SHA256SUMS`、完整许可证、已知限制和测试报告；只生成依赖锁文件级 SBOM 不视为再分发审核完成。
+官方安装包内置与最终内容对账的运行时组件清单和完整许可证；SBOM、测试报告等审计材料保留在 Actions 构建记录中，三个安装文件的 SHA-256 写入 Release 正文。只生成依赖锁文件级 SBOM 不视为再分发审核完成。
 
 ## QA 验证
 

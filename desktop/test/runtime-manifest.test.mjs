@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, readFile, symlink, unlink, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -8,7 +8,8 @@ import {
   finalizeRuntimeManifest,
   hashDirectory,
   hashZipTree,
-  sha256
+  sha256,
+  verifyArtifact
 } from '../scripts/lib/runtime-manifest.mjs'
 import { openZip } from '../scripts/lib/zip-reader.mjs'
 
@@ -80,6 +81,35 @@ test('directory tree fingerprint changes when a staged file changes', async () =
   assert.notEqual(before.sha256, after.sha256)
 })
 
+test('macOS runtime tree fingerprints safe Temurin legal symlinks without ignoring them', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'fuyue-runtime-links-'))
+  const baseLegal = path.join(root, 'legal', 'java.base')
+  const compilerLegal = path.join(root, 'legal', 'java.compiler')
+  await mkdir(baseLegal, { recursive: true })
+  await mkdir(compilerLegal, { recursive: true })
+  await writeFile(path.join(baseLegal, 'ADDITIONAL_LICENSE_INFO'), 'additional terms')
+  await writeFile(path.join(baseLegal, 'LICENSE'), 'gpl terms')
+  const licenseLink = path.join(compilerLegal, 'ADDITIONAL_LICENSE_INFO')
+  await symlink('../java.base/ADDITIONAL_LICENSE_INFO', licenseLink)
+
+  const before = await hashDirectory(root, { allowSafeSymlinks: true })
+  assert.equal(before.linkCount, 1)
+  assert.deepEqual(before.links, [{
+    path: 'legal/java.compiler/ADDITIONAL_LICENSE_INFO',
+    target: '../java.base/ADDITIONAL_LICENSE_INFO'
+  }])
+  assert.equal((await readFile(licenseLink, 'utf8')), 'additional terms')
+
+  await unlink(licenseLink)
+  await symlink('../java.base/LICENSE', licenseLink)
+  const changed = await hashDirectory(root, { allowSafeSymlinks: true })
+  assert.notEqual(before.sha256, changed.sha256)
+
+  await unlink(licenseLink)
+  await symlink('/tmp', licenseLink)
+  await assert.rejects(() => hashDirectory(root, { allowSafeSymlinks: true }), /越界符号链接/)
+})
+
 test('a NOTICE-only Apache JAR still receives the complete reviewed license', () => {
   const result = completeLicenseEvidence({
     embeddedLicenses: [{ name: 'META-INF/NOTICE', text: 'copyright notice' }],
@@ -112,6 +142,7 @@ test('finalized application file set covers app.asar and excludes only its own m
     components: [{ id: 'electron' }]
   }))
   const manifest = await finalizeRuntimeManifest(resourcesRoot)
+  await verifyArtifact(resourcesRoot, manifest.components[0].artifact)
   const files = manifest.components[0].artifact.files.map(item => item.path)
   assert.ok(files.includes('resources/app.asar'))
   assert.ok(files.includes('resources/backend/payload.txt'))
@@ -139,6 +170,70 @@ test('finalization rejects Electron runtime licenses that do not match the packa
   await assert.rejects(() => finalizeRuntimeManifest(resourcesRoot), /Electron runtime 许可证与随包声明不一致/)
 })
 
+test('macOS finalization excludes only the manifest and outer re-sign mutable files', async () => {
+  const applicationRoot = await mkdtemp(path.join(os.tmpdir(), 'fuyue-finalize-macos-'))
+  const resourcesRoot = path.join(applicationRoot, 'Contents', 'Resources')
+  const backendRoot = path.join(resourcesRoot, 'backend')
+  await mkdir(path.join(applicationRoot, 'Contents', 'MacOS'), { recursive: true })
+  await mkdir(path.join(applicationRoot, 'Contents', '_CodeSignature'), { recursive: true })
+  await mkdir(path.join(applicationRoot, 'Contents', 'Frameworks', 'Example.framework', 'Versions', 'A'), { recursive: true })
+  await mkdir(path.join(applicationRoot, 'Contents', 'Frameworks', 'Example.framework', 'Versions', 'B'), { recursive: true })
+  await mkdir(path.join(resourcesRoot, 'licenses'), { recursive: true })
+  await mkdir(backendRoot, { recursive: true })
+  const runtimeRoot = path.join(backendRoot, 'runtime')
+  await mkdir(path.join(runtimeRoot, 'bin'), { recursive: true })
+  await mkdir(path.join(runtimeRoot, 'legal', 'java.base'), { recursive: true })
+  await mkdir(path.join(runtimeRoot, 'legal', 'java.compiler'), { recursive: true })
+  await writeFile(path.join(runtimeRoot, 'bin', 'java'), 'unsigned-java')
+  await writeFile(path.join(runtimeRoot, 'legal', 'java.base', 'LICENSE'), 'runtime-license')
+  await symlink('../java.base/LICENSE', path.join(runtimeRoot, 'legal', 'java.compiler', 'LICENSE'))
+  const stagedRuntimeTree = await hashDirectory(runtimeRoot, { allowSafeSymlinks: true })
+  await writeFile(path.join(runtimeRoot, 'bin', 'java'), 'signed-java')
+  await writeFile(path.join(applicationRoot, 'Contents', 'MacOS', 'Fuyue Convert'), 'signed-main')
+  await writeFile(path.join(applicationRoot, 'Contents', '_CodeSignature', 'CodeResources'), 'outer-seal')
+  await writeFile(path.join(applicationRoot, 'Contents', 'Frameworks', 'Example.framework', 'Versions', 'A', 'binary'), 'a')
+  await writeFile(path.join(applicationRoot, 'Contents', 'Frameworks', 'Example.framework', 'Versions', 'B', 'binary'), 'b')
+  const currentLink = path.join(applicationRoot, 'Contents', 'Frameworks', 'Example.framework', 'Versions', 'Current')
+  await symlink('A', currentLink)
+  await writeFile(path.join(resourcesRoot, 'app.asar'), 'asar')
+  await writeFile(path.join(resourcesRoot, 'licenses', 'ELECTRON-LICENSE.txt'), 'electron-license')
+  await writeFile(path.join(resourcesRoot, 'licenses', 'LICENSES.chromium.html'), 'chromium-licenses')
+  await writeFile(path.join(backendRoot, 'payload.txt'), 'backend')
+  await writeFile(path.join(backendRoot, 'RUNTIME-COMPONENTS.json'), JSON.stringify({
+    schemaVersion: 1,
+    profile: 'macos-x64-lite',
+    target: { platform: 'darwin', arch: 'x64' },
+    artifacts: { javaRuntimeTree: { path: 'backend/runtime', hashKind: 'directory-tree', ...stagedRuntimeTree } },
+    components: [
+      { id: 'electron' },
+      { id: 'eclipse-temurin', artifact: { path: 'backend/runtime', hashKind: 'directory-tree', ...stagedRuntimeTree } }
+    ]
+  }))
+  const manifest = await finalizeRuntimeManifest(resourcesRoot)
+  await verifyArtifact(resourcesRoot, manifest.components[0].artifact)
+  const files = manifest.components[0].artifact.files.map(item => item.path)
+  assert.ok(files.includes('Contents/Resources/app.asar'))
+  assert.ok(files.includes('Contents/Resources/backend/payload.txt'))
+  assert.ok(!files.includes('Contents/Resources/backend/RUNTIME-COMPONENTS.json'))
+  assert.ok(!files.includes('Contents/MacOS/Fuyue Convert'))
+  assert.ok(!files.includes('Contents/_CodeSignature/CodeResources'))
+  assert.deepEqual(manifest.finalized.resignMutableFilesExcluded,
+    ['Contents/MacOS/Fuyue Convert', 'Contents/_CodeSignature/**'])
+  assert.ok(manifest.components[0].artifact.links.some(link =>
+    link.path === 'Contents/Frameworks/Example.framework/Versions/Current' && link.target === 'A'))
+  assert.ok(manifest.components[0].artifact.links.some(link =>
+    link.path === 'Contents/Resources/backend/runtime/legal/java.compiler/LICENSE' &&
+    link.target === '../java.base/LICENSE'))
+  assert.equal(manifest.artifacts.javaRuntimeTree.stagedSha256, stagedRuntimeTree.sha256)
+  assert.notEqual(manifest.artifacts.javaRuntimeTree.sha256, stagedRuntimeTree.sha256)
+  assert.equal(manifest.components.find(item => item.id === 'eclipse-temurin').artifact.sha256,
+    manifest.artifacts.javaRuntimeTree.sha256)
+  await unlink(currentLink)
+  await symlink('B', currentLink)
+  await assert.rejects(() => verifyArtifact(resourcesRoot, manifest.components[0].artifact),
+    /符号链接集合与 manifest 不一致/)
+})
+
 test('reviewed policy keeps NSIS plug-ins out of the core-only installer profile', async () => {
   const policyPath = new URL('../licenses/runtime-policy.json', import.meta.url)
   const policy = JSON.parse(await readFile(policyPath, 'utf8'))
@@ -152,6 +247,12 @@ test('reviewed policy keeps NSIS plug-ins out of the core-only installer profile
   assert.equal(policy.components['liberation-sans'].version, '2.1.5')
   assert.equal(policy.components['liberation-sans'].artifactSha256,
     '76d04c18ea243f426b7de1f3ad208e927008f961dc5945e5aad352d0dfde8ee8')
+  assert.deepEqual(policy.profiles['macos-x64-lite'], {
+    platform: 'darwin',
+    arch: 'x64',
+    requiredComponentIds: policy.requiredComponentIds.filter(id => id !== 'nsis')
+  })
+  assert.equal(policy.profiles['macos-arm64-lite'].arch, 'arm64')
 })
 
 test('public installer pins its owned directory before recursive uninstall', async () => {

@@ -104,8 +104,10 @@ async function verifyRuntime(runtimeTarget) {
   if (!/^17(?:\.|$)/.test(identity.javaVersion)) {
     throw new Error('桌面 Java Runtime 必须是 Java 17')
   }
-  if (process.platform === 'win32' && !/os\.arch\s*=\s*(?:amd64|x86_64)(?:\s|$)/i.test(output)) {
-    throw new Error('Windows 桌面 Runtime 必须是 x64')
+  const runtimeArch = javaProperty(output, 'os.arch')
+  const expectedRuntimeArch = process.arch === 'arm64' ? /^(?:aarch64|arm64)$/i : /^(?:amd64|x86_64)$/i
+  if (!expectedRuntimeArch.test(runtimeArch)) {
+    throw new Error(`桌面 Runtime 架构 ${runtimeArch || 'unknown'} 与构建机 ${process.arch} 不一致`)
   }
   const releaseRuntimeRequired = ['true', '1'].includes(
     (process.env.FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME || '').toLowerCase()
@@ -147,6 +149,11 @@ async function stageOcr(target) {
 
 function assertPublicLiteRelease() {
   if (!publicLiteRelease) return
+  const supportedTarget = (process.platform === 'win32' && process.arch === 'x64') ||
+    (process.platform === 'darwin' && ['x64', 'arm64'].includes(process.arch))
+  if (!supportedTarget) {
+    throw new Error(`公开 Lite 发布不支持当前平台：${process.platform} ${process.arch}`)
+  }
   const bundleOcr = ['true', '1'].includes((process.env.FORMAT_CONVERTER_BUNDLE_OCR || '').toLowerCase())
   if (bundleOcr || process.env.FORMAT_CONVERTER_OCR_HOME || process.env.FORMAT_CONVERTER_POPPLER_HOME) {
     throw new Error('公开 Lite 发布不得捆绑 OCR 或 Poppler Runtime')
@@ -169,9 +176,17 @@ async function stageLicenses() {
   await copyRequired(path.join(repositoryRoot, 'task-service', 'src', 'main', 'resources', 'fonts', 'DroidSansFallback-NOTICE.txt'), path.join(licenses, 'DROID-SANS-FALLBACK-NOTICE.txt'), 'Droid Sans Fallback 声明')
   await copyRequired(path.join(repositoryRoot, 'task-service', 'src', 'main', 'resources', 'fonts', 'LiberationSans-LICENSE.txt'), path.join(licenses, 'LIBERATION-SANS-OFL-1.1.txt'), 'Liberation Sans 许可证')
   if (publicLiteRelease) {
-    await copyRequired(path.join(desktopDirectory, 'licenses', 'TEMURIN-RUNTIME.txt'), path.join(licenses, 'TEMURIN-RUNTIME.txt'), 'Temurin 来源记录')
-    await copyRequired(path.join(desktopDirectory, 'licenses', 'NSIS-LICENSE.txt'), path.join(licenses, 'NSIS-LICENSE.txt'), 'NSIS 许可证')
-    await copyRequired(path.join(desktopDirectory, 'licenses', 'NSIS-PROVENANCE.txt'), path.join(licenses, 'NSIS-PROVENANCE.txt'), 'NSIS 来源记录')
+    const temurinProvenance = process.platform === 'darwin'
+      ? `TEMURIN-RUNTIME-MACOS-${process.arch === 'arm64' ? 'ARM64' : 'X64'}.txt`
+      : 'TEMURIN-RUNTIME.txt'
+    await copyRequired(path.join(desktopDirectory, 'licenses', temurinProvenance), path.join(licenses, 'TEMURIN-RUNTIME.txt'), 'Temurin 来源记录')
+    if (process.platform === 'darwin') {
+      await copyRequired(path.join(desktopDirectory, 'licenses', 'TEMURIN-SOURCE-OFFER.txt'), path.join(licenses, 'TEMURIN-SOURCE-OFFER.txt'), 'Temurin 对应源码提供说明')
+    }
+    if (process.platform === 'win32') {
+      await copyRequired(path.join(desktopDirectory, 'licenses', 'NSIS-LICENSE.txt'), path.join(licenses, 'NSIS-LICENSE.txt'), 'NSIS 许可证')
+      await copyRequired(path.join(desktopDirectory, 'licenses', 'NSIS-PROVENANCE.txt'), path.join(licenses, 'NSIS-PROVENANCE.txt'), 'NSIS 来源记录')
+    }
   }
 }
 

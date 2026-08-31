@@ -26,6 +26,7 @@ electronFuses:
 directories:
   output: release
   buildResources: assets
+afterSign: scripts/after-sign.mjs
 files:
   - src/**/*
   - package.json
@@ -45,7 +46,10 @@ win:
   legalTrademarks: Fuyue Convert
 mac:
   target:
-    - dir
+    - dmg
   icon: assets/icon.png
   category: public.app-category.productivity
+  minimumSystemVersion: "13.0"
+  identity: "-"
+  notarize: false
 publish: null

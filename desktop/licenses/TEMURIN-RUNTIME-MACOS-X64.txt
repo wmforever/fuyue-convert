@@ -1,0 +1,26 @@
+Eclipse Temurin 17 runtime provenance for the official macOS Intel package
+=========================================================================
+
+Runtime version: Eclipse Temurin 17.0.20.1+1 (HotSpot, macOS x64)
+Binary archive:
+https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jdk_x64_mac_hotspot_17.0.20.1_1.tar.gz
+Binary SHA-256:
+c01975da12ed4235250ff891fe8bba73a9e73037d444b269c9d0922b5dbc8e0a
+
+Corresponding source archive:
+https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jdk-sources_17.0.20.1_1.tar.gz
+Source SHA-256:
+21e2a065d244ab048e737f21af5d1fc74daaeb6707de36477ead8db1dca71214
+
+Release page:
+https://github.com/adoptium/temurin17-binaries/releases/tag/jdk-17.0.20.1%2B1
+
+The desktop package contains a jlink image derived from that JDK. The complete
+module-specific legal notices produced by jlink are preserved under
+backend/runtime/legal/. In particular, backend/runtime/legal/java.base/LICENSE
+contains the OpenJDK GPLv2 + Classpath Exception license text.
+
+This provenance record describes the official macOS Intel Lite release build.
+Locally generated development packages may use a different JDK and must not be
+represented as an official binary.
+

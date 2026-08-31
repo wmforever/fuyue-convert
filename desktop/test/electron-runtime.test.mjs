@@ -78,3 +78,15 @@ test('Windows public runtime and electron-builder pin the reviewed Electron arch
   const packageMetadata = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'))
   assert.match(packageMetadata.scripts.pack, /^node scripts\/prepare-electron-runtime\.mjs && /)
 })
+
+test('macOS public runtimes pin both reviewed Electron archives and licenses', async () => {
+  const builderConfiguration = await readFile(new URL('../electron-builder.yml', import.meta.url), 'utf8')
+  for (const arch of ['x64', 'arm64']) {
+    const identity = electronRuntimeIdentity('44.0.0', 'darwin', arch)
+    assert.match(builderConfiguration, new RegExp(`${identity.archiveName}: ${identity.archiveSha256}`))
+    assert.equal(identity.licenseSha256,
+      '5154e165bd6c2cc0cfbcd8916498c7abab0497923bafcd5cb07673fe8480087d')
+    assert.equal(identity.chromiumLicensesSha256,
+      '4cbde8e3e7b29f451c78a44491fb32e2202884826fef47786a9cda5a36110525')
+  }
+})

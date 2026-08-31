@@ -2,6 +2,23 @@
   "schemaVersion": 1,
   "reviewedAt": "2026-08-30",
   "profile": "windows-x64-lite",
+  "profiles": {
+    "windows-x64-lite": {
+      "platform": "win32",
+      "arch": "x64",
+      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "nsis"]
+    },
+    "macos-x64-lite": {
+      "platform": "darwin",
+      "arch": "x64",
+      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party"]
+    },
+    "macos-arm64-lite": {
+      "platform": "darwin",
+      "arch": "arm64",
+      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party"]
+    }
+  },
   "description": "Fail-closed allow-list for every JAR nested in the public Lite desktop fat JAR. A dependency version change requires an explicit policy review.",
   "licenseFileSha256": {
     "desktop/licenses/java/BOUNCY-CASTLE-LICENSE.html": "edbbb10380b1271998b867a2e36b1cbee226e03d438726e1a91f80c5dde11849",

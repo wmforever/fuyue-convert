@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises'
+import { mkdir, readlink, readdir, readFile, realpath, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { openZip } from './zip-reader.mjs'
 
@@ -7,11 +7,50 @@ const LICENSE_ENTRY = /(^|\/)(?:LICENSE|LICENCE|NOTICE|COPYING|DEPENDENCIES)(?:[
 const FULL_LICENSE_ENTRY = /(^|\/)(?:LICENSE|LICENCE|COPYING)(?:[._-][^/]*)?$/i
 const MAX_LICENSE_BYTES = 2 * 1024 * 1024
 const RUNTIME_MANIFEST_APPLICATION_PATH = 'resources/backend/RUNTIME-COMPONENTS.json'
+const MAC_RUNTIME_MANIFEST_APPLICATION_PATH = 'Contents/Resources/backend/RUNTIME-COMPONENTS.json'
 const INSTALLER_GENERATED_UNINSTALLER = 'Uninstall Fuyue Convert.exe'
 const FORBIDDEN_INSTALLER_FILE = /(^|\/)(?:elevate\.exe|nsis7z\.dll|nsprocessw?\.dll|stdutils\.dll|uac\.dll|winshell\.dll)$/i
 
 export function sha256(content) {
   return createHash('sha256').update(content).digest('hex')
+}
+
+export function publicLiteProfile(platform, arch) {
+  if (platform === 'win32' && arch === 'x64') return 'windows-x64-lite'
+  if (platform === 'darwin' && arch === 'x64') return 'macos-x64-lite'
+  if (platform === 'darwin' && arch === 'arm64') return 'macos-arm64-lite'
+  throw new Error(`没有受支持的公开 Lite profile：${platform} ${arch}`)
+}
+
+function profileConfiguration(policy, profile) {
+  const configuration = policy.profiles?.[profile]
+  if (configuration) return configuration
+  if (profile === policy.profile) {
+    return {
+      platform: 'win32',
+      arch: 'x64',
+      requiredComponentIds: policy.requiredComponentIds
+    }
+  }
+  throw new Error(`运行时策略缺少 profile：${profile}`)
+}
+
+function manifestApplicationPath(profile) {
+  return profile.startsWith('macos-')
+    ? MAC_RUNTIME_MANIFEST_APPLICATION_PATH
+    : RUNTIME_MANIFEST_APPLICATION_PATH
+}
+
+function applicationRoot(resourcesRoot, profile) {
+  return profile.startsWith('macos-')
+    ? path.resolve(resourcesRoot, '..', '..')
+    : path.dirname(resourcesRoot)
+}
+
+function excludedApplicationFile(profile, relative) {
+  if (relative === manifestApplicationPath(profile)) return true
+  if (profile === 'windows-x64-lite') return relative === INSTALLER_GENERATED_UNINSTALLER
+  return relative === 'Contents/MacOS/Fuyue Convert' || relative.startsWith('Contents/_CodeSignature/')
 }
 
 function normalizeRelative(value) {
@@ -36,12 +75,60 @@ async function listFiles(root, prefix = '') {
   return files.sort((left, right) => left.localeCompare(right, 'en'))
 }
 
-export async function hashDirectory(root) {
-  const files = await listFiles(root)
-  return hashFileSet(root, files)
+async function listSafeTree(root, prefix = '', links = [], canonicalRoot = null) {
+  const trustedRoot = canonicalRoot || await realpath(root)
+  const directory = path.join(root, ...prefix.split('/').filter(Boolean))
+  const names = (await readdir(directory, { withFileTypes: true }))
+    .sort((left, right) => left.name.localeCompare(right.name, 'en'))
+  const files = []
+  for (const entry of names) {
+    const relative = prefix ? `${prefix}/${entry.name}` : entry.name
+    const target = path.join(root, ...relative.split('/'))
+    if (entry.isDirectory()) files.push(...await listSafeTree(root, relative, links, trustedRoot))
+    else if (entry.isFile()) files.push(relative)
+    else if (entry.isSymbolicLink()) {
+      const linkTarget = await readlink(target)
+      const resolved = path.resolve(path.dirname(target), linkTarget)
+      const relativeResolved = path.relative(root, resolved)
+      if (path.isAbsolute(linkTarget) || relativeResolved === '..' || relativeResolved.startsWith(`..${path.sep}`)) {
+        throw new Error(`目录树含越界符号链接：${target} -> ${linkTarget}`)
+      }
+      let canonicalTarget
+      try {
+        canonicalTarget = await realpath(resolved)
+      } catch {
+        throw new Error(`目录树含失效符号链接：${target} -> ${linkTarget}`)
+      }
+      const canonicalRelative = path.relative(trustedRoot, canonicalTarget)
+      if (canonicalRelative === '..' || canonicalRelative.startsWith(`..${path.sep}`)) {
+        throw new Error(`目录树符号链接最终指向根目录外部：${target} -> ${linkTarget}`)
+      }
+      links.push({ path: relative, target: linkTarget })
+    } else throw new Error(`目录清单不允许特殊文件：${target}`)
+  }
+  return files.sort((left, right) => left.localeCompare(right, 'en'))
 }
 
-async function hashFileSet(root, files) {
+async function applicationInventory(root, profile) {
+  if (!profile.startsWith('macos-')) return { files: await listFiles(root), links: [] }
+  const links = []
+  const files = await listSafeTree(root, '', links)
+  links.sort((left, right) => left.path.localeCompare(right.path, 'en'))
+  return { files, links }
+}
+
+export async function hashDirectory(root, { allowSafeSymlinks = false } = {}) {
+  if (!allowSafeSymlinks) {
+    const files = await listFiles(root)
+    return hashFileSet(root, files)
+  }
+  const links = []
+  const files = await listSafeTree(root, '', links)
+  links.sort((left, right) => left.path.localeCompare(right.path, 'en'))
+  return hashFileSet(root, files, links)
+}
+
+async function hashFileSet(root, files, links = []) {
   const digest = createHash('sha256')
   let totalBytes = 0
   const inventory = []
@@ -52,7 +139,15 @@ async function hashFileSet(root, files) {
     digest.update(relative).update('\0').update(String(content.length)).update('\0').update(fileSha256).update('\n')
     inventory.push({ path: relative, sha256: fileSha256, size: content.length })
   }
-  return { sha256: digest.digest('hex'), fileCount: files.length, totalBytes, files: inventory }
+  for (const link of links) digest.update('symlink\0').update(link.path).update('\0').update(link.target).update('\n')
+  return {
+    sha256: digest.digest('hex'),
+    fileCount: files.length,
+    linkCount: links.length,
+    totalBytes,
+    files: inventory,
+    links
+  }
 }
 
 export function hashZipTree(zip, prefix) {
@@ -275,11 +370,23 @@ async function collectLicenseFiles(backendRoot, desktopDirectory, runtimeLegalFi
   return files
 }
 
-export async function generateRuntimeManifest({ repositoryRoot, desktopDirectory, backendRoot, strictWindows = false }) {
+export async function generateRuntimeManifest({
+  repositoryRoot,
+  desktopDirectory,
+  backendRoot,
+  strictWindows = false,
+  publicTarget = null
+}) {
   const policySourcePath = path.join(desktopDirectory, 'licenses', 'runtime-policy.json')
   const policyContent = await readFile(policySourcePath)
   const policy = JSON.parse(policyContent.toString('utf8'))
   if (policy.schemaVersion !== 1) throw new Error('不支持的运行时审核策略版本')
+  const releaseTarget = publicTarget || (strictWindows ? { platform: 'win32', arch: 'x64' } : null)
+  const releaseProfile = releaseTarget ? publicLiteProfile(releaseTarget.platform, releaseTarget.arch) : null
+  const releaseProfileConfiguration = releaseProfile ? profileConfiguration(policy, releaseProfile) : null
+  if (releaseTarget && (releaseTarget.platform !== process.platform || releaseTarget.arch !== process.arch)) {
+    throw new Error(`公开 manifest 必须在目标原生 runner 生成：要求 ${releaseTarget.platform} ${releaseTarget.arch}，当前 ${process.platform} ${process.arch}`)
+  }
   const expectedProjectVersion = projectVersion(await readFile(path.join(repositoryRoot, 'pom.xml'), 'utf8'))
   const fallbackLicenses = new Map()
   for (const [relative, expectedSha256] of Object.entries(policy.licenseFileSha256 || {})) {
@@ -359,17 +466,27 @@ export async function generateRuntimeManifest({ repositoryRoot, desktopDirectory
   const runtimeRelease = parseRuntimeRelease(runtimeReleaseContent.toString('utf8'))
   const expectedRuntimeBuild = policy.components['eclipse-temurin'].version
   const expectedRuntime = expectedRuntimeBuild.replace(/\+\d+$/, '')
-  if (strictWindows && runtimeRelease.JAVA_VERSION !== expectedRuntime) {
+  if (releaseTarget && runtimeRelease.JAVA_VERSION !== expectedRuntime) {
     throw new Error(`公开 Lite Runtime 版本未审核：${runtimeRelease.JAVA_VERSION}，要求 ${expectedRuntime}`)
   }
-  if (strictWindows && runtimeRelease.IMPLEMENTOR !== 'Eclipse Adoptium') {
+  if (releaseTarget && runtimeRelease.IMPLEMENTOR !== 'Eclipse Adoptium') {
     throw new Error(`公开 Lite Runtime 不是 Eclipse Adoptium：${runtimeRelease.IMPLEMENTOR || 'unknown'}`)
   }
-  if (strictWindows && runtimeRelease.JAVA_RUNTIME_VERSION !== expectedRuntimeBuild) {
+  if (releaseTarget && runtimeRelease.JAVA_RUNTIME_VERSION !== expectedRuntimeBuild) {
     throw new Error(`公开 Lite Runtime build 未审核：${runtimeRelease.JAVA_RUNTIME_VERSION || 'unknown'}`)
   }
-  const runtimeTree = await hashDirectory(runtimeRoot)
-  const runtimeLegalFiles = await listFiles(path.join(runtimeRoot, 'legal'))
+  const macRuntime = releaseTarget?.platform === 'darwin'
+  const runtimeTree = await hashDirectory(runtimeRoot, { allowSafeSymlinks: macRuntime })
+  const runtimeLegalRoot = path.join(runtimeRoot, 'legal')
+  let runtimeLegalFiles
+  if (macRuntime) {
+    const legalLinks = []
+    const legalFiles = await listSafeTree(runtimeLegalRoot, '', legalLinks)
+    runtimeLegalFiles = [...legalFiles, ...legalLinks.map(link => link.path)]
+      .sort((left, right) => left.localeCompare(right, 'en'))
+  } else {
+    runtimeLegalFiles = await listFiles(runtimeLegalRoot)
+  }
   if (runtimeLegalFiles.length === 0) throw new Error('Java Runtime 未保留 legal/ 目录')
 
   const desktopLock = JSON.parse(await readFile(path.join(desktopDirectory, 'package-lock.json'), 'utf8'))
@@ -379,9 +496,6 @@ export async function generateRuntimeManifest({ repositoryRoot, desktopDirectory
   }
   const electronLicense = await readFile(path.join(desktopDirectory, 'node_modules', 'electron', 'LICENSE'))
   const chromiumLicenses = await readFile(path.join(desktopDirectory, 'node_modules', 'electron', 'dist', 'LICENSES.chromium.html'))
-  if (strictWindows) {
-    if (process.platform !== 'win32') throw new Error('公开 Windows manifest 必须在 Windows runner 生成')
-  }
 
   const droidArtifact = virtualNestedEntry(outerJar, outerPath, taskServiceEntry, 'fonts/DroidSansFallback.ttf')
   const liberationArtifact = virtualNestedEntry(outerJar, outerPath, taskServiceEntry, 'fonts/LiberationSans-Regular.ttf')
@@ -392,7 +506,6 @@ export async function generateRuntimeManifest({ repositoryRoot, desktopDirectory
     throw new Error(`Liberation Sans 字节未审核：${liberationArtifact.sha256}`)
   }
 
-  const nsisProvenance = await readFile(path.join(backendRoot, 'licenses', 'NSIS-PROVENANCE.txt'))
   const components = [
     component(policy, 'fuyue-convert', {
       type: 'application', version: expectedProjectVersion,
@@ -414,7 +527,7 @@ export async function generateRuntimeManifest({ repositoryRoot, desktopDirectory
     }),
     component(policy, 'eclipse-temurin', {
       type: 'java-runtime', runtimeRelease,
-      ...(strictWindows ? {} : {
+      ...(releaseTarget ? {} : {
         version: runtimeRelease.JAVA_VERSION,
         source: 'local-development-runtime',
         reviewStatus: 'unapproved-development-only'
@@ -427,19 +540,24 @@ export async function generateRuntimeManifest({ repositoryRoot, desktopDirectory
     }),
     component(policy, 'chromium-third-party', {
       type: 'license-inventory', artifact: fileArtifact('licenses/LICENSES.chromium.html', chromiumLicenses)
-    }),
-    component(policy, 'nsis', {
-      type: 'installer-build-tool', artifact: fileArtifact('backend/licenses/NSIS-PROVENANCE.txt', nsisProvenance),
-      forbiddenComponents: policy.forbiddenInstallerComponents
     })
   ]
-  const missingRequired = policy.requiredComponentIds.filter(id => !components.some(item => item.id === id))
+  if (!releaseProfile || releaseProfile === 'windows-x64-lite') {
+    const nsisProvenance = await readFile(path.join(backendRoot, 'licenses', 'NSIS-PROVENANCE.txt'))
+    components.push(component(policy, 'nsis', {
+      type: 'installer-build-tool', artifact: fileArtifact('backend/licenses/NSIS-PROVENANCE.txt', nsisProvenance),
+      forbiddenComponents: policy.forbiddenInstallerComponents
+    }))
+  }
+  const requiredComponents = releaseProfileConfiguration?.requiredComponentIds || policy.requiredComponentIds
+  const missingRequired = requiredComponents.filter(id => !components.some(item => item.id === id))
   if (missingRequired.length > 0) throw new Error(`manifest 缺少必需组件：${missingRequired.join(', ')}`)
 
   const licenseFiles = await collectLicenseFiles(backendRoot, desktopDirectory, runtimeLegalFiles)
   const manifest = {
     schemaVersion: 1,
-    profile: strictWindows ? policy.profile : 'development-unapproved',
+    profile: releaseProfile || 'development-unapproved',
+    target: releaseTarget ? { ...releaseTarget } : { platform: process.platform, arch: process.arch },
     projectVersion: expectedProjectVersion,
     policy: {
       path: 'backend/licenses/RUNTIME-POLICY.json',
@@ -465,32 +583,57 @@ export async function generateRuntimeManifest({ repositoryRoot, desktopDirectory
 export async function finalizeRuntimeManifest(resourcesRoot) {
   const manifestPath = path.join(resourcesRoot, 'backend', 'RUNTIME-COMPONENTS.json')
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
-  if (manifest.schemaVersion !== 1 || manifest.profile !== 'windows-x64-lite') {
-    throw new Error('只能 finalise Windows x64 Lite manifest')
+  if (manifest.schemaVersion !== 1 || !/^(?:windows-x64|macos-(?:x64|arm64))-lite$/.test(manifest.profile)) {
+    throw new Error('只能 finalise 受支持的公开 Lite manifest')
   }
-  const applicationRoot = path.dirname(resourcesRoot)
-  const packagedElectronLicensePairs = [
-    ['LICENSE.electron.txt', 'licenses/ELECTRON-LICENSE.txt'],
-    ['LICENSES.chromium.html', 'licenses/LICENSES.chromium.html']
-  ]
-  for (const [runtimeRelative, noticeRelative] of packagedElectronLicensePairs) {
-    const runtimeLicense = await readFile(path.join(applicationRoot, ...runtimeRelative.split('/')))
-    const noticeLicense = await readFile(path.join(resourcesRoot, ...noticeRelative.split('/')))
-    if (!runtimeLicense.equals(noticeLicense)) {
-      throw new Error(`Electron runtime 许可证与随包声明不一致：${runtimeRelative}`)
+  const targetApplicationRoot = applicationRoot(resourcesRoot, manifest.profile)
+  if (manifest.profile.startsWith('macos-')) {
+    const stagedRuntimeTree = manifest.artifacts?.javaRuntimeTree
+    const finalRuntimeTree = await hashDirectory(path.join(resourcesRoot, 'backend', 'runtime'), {
+      allowSafeSymlinks: true
+    })
+    const finalRuntimeArtifact = {
+      path: 'backend/runtime',
+      hashKind: 'directory-tree',
+      ...finalRuntimeTree,
+      stagedSha256: stagedRuntimeTree?.sha256 || null
+    }
+    manifest.artifacts.javaRuntimeTree = finalRuntimeArtifact
+    const temurin = manifest.components.find(item => item.id === 'eclipse-temurin')
+    if (!temurin) throw new Error('manifest 缺少 Eclipse Temurin 组件')
+    temurin.artifact = { ...finalRuntimeArtifact }
+  }
+  if (manifest.profile === 'windows-x64-lite') {
+    const packagedElectronLicensePairs = [
+      ['LICENSE.electron.txt', 'licenses/ELECTRON-LICENSE.txt'],
+      ['LICENSES.chromium.html', 'licenses/LICENSES.chromium.html']
+    ]
+    for (const [runtimeRelative, noticeRelative] of packagedElectronLicensePairs) {
+      const runtimeLicense = await readFile(path.join(targetApplicationRoot, ...runtimeRelative.split('/')))
+      const noticeLicense = await readFile(path.join(resourcesRoot, ...noticeRelative.split('/')))
+      if (!runtimeLicense.equals(noticeLicense)) {
+        throw new Error(`Electron runtime 许可证与随包声明不一致：${runtimeRelative}`)
+      }
     }
   }
-  const applicationFiles = await listFiles(applicationRoot)
-  if (applicationFiles.includes(INSTALLER_GENERATED_UNINSTALLER)) {
+  const inventory = await applicationInventory(targetApplicationRoot, manifest.profile)
+  const applicationFiles = inventory.files
+  if (manifest.profile === 'windows-x64-lite' && applicationFiles.includes(INSTALLER_GENERATED_UNINSTALLER)) {
     throw new Error('Electron unpacked 目录不得预置安装器生成的卸载程序')
   }
   const violations = applicationFiles.filter(relative => FORBIDDEN_INSTALLER_FILE.test(relative))
   if (violations.length > 0) throw new Error(`Electron 最终目录含禁止组件：${violations.join(', ')}`)
   const runtimeFiles = applicationFiles
-    .filter(relative => relative !== RUNTIME_MANIFEST_APPLICATION_PATH)
-  if (!runtimeFiles.includes('Fuyue Convert.exe')) throw new Error('Electron 最终目录缺少 Fuyue Convert.exe')
-  if (!runtimeFiles.includes('resources/app.asar')) throw new Error('Electron 最终目录缺少 resources/app.asar')
-  const runtime = await hashFileSet(applicationRoot, runtimeFiles)
+    .filter(relative => !excludedApplicationFile(manifest.profile, relative))
+  const executablePath = manifest.profile.startsWith('macos-')
+    ? 'Contents/MacOS/Fuyue Convert'
+    : 'Fuyue Convert.exe'
+  const asarPath = manifest.profile.startsWith('macos-')
+    ? 'Contents/Resources/app.asar'
+    : 'resources/app.asar'
+  if (!applicationFiles.includes(executablePath)) throw new Error(`Electron 最终目录缺少 ${executablePath}`)
+  if (!runtimeFiles.includes(asarPath)) throw new Error(`Electron 最终目录缺少 ${asarPath}`)
+  const runtime = await hashFileSet(targetApplicationRoot, runtimeFiles, inventory.links)
   const electron = manifest.components.find(item => item.id === 'electron')
   if (!electron) throw new Error('manifest 缺少 Electron 组件')
   electron.artifact = {
@@ -499,14 +642,19 @@ export async function finalizeRuntimeManifest(resourcesRoot) {
     sha256: runtime.sha256,
     fileCount: runtime.fileCount,
     totalBytes: runtime.totalBytes,
-    files: runtime.files
+    files: runtime.files,
+    links: runtime.links,
+    linkCount: runtime.linkCount
   }
   manifest.finalized = {
     electronRuntimeFileSet: true,
     electronRuntimeLicensesMatchNotices: true,
     forbiddenInstallerComponentsAbsentFromApplication: true,
-    excludedSelfReferentialManifest: RUNTIME_MANIFEST_APPLICATION_PATH,
-    installerGeneratedFile: INSTALLER_GENERATED_UNINSTALLER
+    excludedSelfReferentialManifest: manifestApplicationPath(manifest.profile),
+    installerGeneratedFile: manifest.profile === 'windows-x64-lite' ? INSTALLER_GENERATED_UNINSTALLER : null,
+    resignMutableFilesExcluded: manifest.profile.startsWith('macos-')
+      ? ['Contents/MacOS/Fuyue Convert', 'Contents/_CodeSignature/**']
+      : []
   }
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
   return manifest
@@ -516,7 +664,7 @@ function splitVirtualPath(value) {
   return value.split('!/').map(part => part.replace(/\/$/, ''))
 }
 
-async function verifyArtifact(resourcesRoot, artifact) {
+export async function verifyArtifact(resourcesRoot, artifact) {
   let actual
   if (artifact.hashKind === 'file') {
     const target = artifact.path.startsWith('$APP/')
@@ -525,7 +673,9 @@ async function verifyArtifact(resourcesRoot, artifact) {
     const content = await readFile(target)
     actual = { sha256: sha256(content), size: content.length }
   } else if (artifact.hashKind === 'directory-tree') {
-    actual = await hashDirectory(path.join(resourcesRoot, ...normalizeRelative(artifact.path).split('/')))
+    actual = await hashDirectory(path.join(resourcesRoot, ...normalizeRelative(artifact.path).split('/')), {
+      allowSafeSymlinks: Array.isArray(artifact.links) && artifact.links.length > 0
+    })
   } else if (artifact.hashKind === 'zip-tree') {
     const [outerPath, prefix] = splitVirtualPath(artifact.path)
     const outer = openZip(await readFile(path.join(resourcesRoot, ...normalizeRelative(outerPath).split('/'))))
@@ -536,28 +686,35 @@ async function verifyArtifact(resourcesRoot, artifact) {
     for (const entry of parts) content = openZip(content).read(entry)
     actual = { sha256: sha256(content), size: content.length }
   } else if (artifact.hashKind === 'application-file-set') {
-    const applicationRoot = path.dirname(resourcesRoot)
+    const manifest = JSON.parse(await readFile(path.join(resourcesRoot, 'backend', 'RUNTIME-COMPONENTS.json'), 'utf8'))
+    const targetApplicationRoot = applicationRoot(resourcesRoot, manifest.profile)
+    const installerGeneratedFile = manifest.profile === 'windows-x64-lite' ? INSTALLER_GENERATED_UNINSTALLER : null
+    if (manifest.finalized?.installerGeneratedFile !== installerGeneratedFile) {
+      throw new Error('Electron runtime manifest 的安装器动态文件声明无效')
+    }
     const declared = artifact.files.map(file => normalizeRelative(file.path))
     if (new Set(declared).size !== declared.length || JSON.stringify(declared) !== JSON.stringify(
       [...declared].sort((left, right) => left.localeCompare(right, 'en'))
     )) {
       throw new Error('Electron runtime manifest 文件集合必须唯一且有序')
     }
-    if (declared.includes(RUNTIME_MANIFEST_APPLICATION_PATH) || declared.includes(INSTALLER_GENERATED_UNINSTALLER)) {
+    if (declared.some(relative => excludedApplicationFile(manifest.profile, relative))) {
       throw new Error('Electron runtime manifest 含不允许自引用/动态生成的文件')
     }
-    const applicationFiles = await listFiles(applicationRoot)
+    const inventory = await applicationInventory(targetApplicationRoot, manifest.profile)
+    const applicationFiles = inventory.files
+    if (JSON.stringify(inventory.links) !== JSON.stringify(artifact.links || [])) {
+      throw new Error('Electron runtime 符号链接集合与 manifest 不一致')
+    }
     const violations = applicationFiles.filter(relative => FORBIDDEN_INSTALLER_FILE.test(relative))
     if (violations.length > 0) throw new Error(`Electron 最终目录含禁止组件：${violations.join(', ')}`)
-    if (applicationFiles.includes(INSTALLER_GENERATED_UNINSTALLER)) {
-      const uninstaller = await readFile(path.join(applicationRoot, INSTALLER_GENERATED_UNINSTALLER))
+    if (installerGeneratedFile && applicationFiles.includes(installerGeneratedFile)) {
+      const uninstaller = await readFile(path.join(targetApplicationRoot, installerGeneratedFile))
       if (uninstaller.length < 64 || uninstaller[0] !== 0x4d || uninstaller[1] !== 0x5a) {
         throw new Error('安装器生成的卸载程序不是有效的 Windows PE 文件')
       }
     }
-    const packaged = applicationFiles.filter(relative => (
-      relative !== RUNTIME_MANIFEST_APPLICATION_PATH && relative !== INSTALLER_GENERATED_UNINSTALLER
-    ))
+    const packaged = applicationFiles.filter(relative => !excludedApplicationFile(manifest.profile, relative))
     if (JSON.stringify(packaged) !== JSON.stringify(declared)) {
       const declaredSet = new Set(declared)
       const packagedSet = new Set(packaged)
@@ -565,7 +722,7 @@ async function verifyArtifact(resourcesRoot, artifact) {
       const extra = packaged.filter(relative => !declaredSet.has(relative))
       throw new Error(`Electron runtime 最终文件集合与 manifest 不一致（缺少：${missing.join(', ') || '无'}；新增：${extra.join(', ') || '无'}）`)
     }
-    actual = await hashFileSet(applicationRoot, packaged)
+    actual = await hashFileSet(targetApplicationRoot, packaged, inventory.links)
     for (let index = 0; index < artifact.files.length; index += 1) {
       const expectedFile = artifact.files[index]
       const actualFile = actual.files[index]
@@ -576,7 +733,7 @@ async function verifyArtifact(resourcesRoot, artifact) {
   } else {
     throw new Error(`未知产物哈希类型：${artifact.hashKind}`)
   }
-  for (const key of ['sha256', 'size', 'fileCount', 'totalBytes']) {
+  for (const key of ['sha256', 'size', 'fileCount', 'linkCount', 'totalBytes']) {
     if (artifact[key] !== undefined && actual[key] !== artifact[key]) {
       throw new Error(`产物 ${artifact.path} 的 ${key} 不匹配`)
     }
@@ -586,16 +743,27 @@ async function verifyArtifact(resourcesRoot, artifact) {
 export async function verifyRuntimeManifest(resourcesRoot) {
   const manifestPath = path.join(resourcesRoot, 'backend', 'RUNTIME-COMPONENTS.json')
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
-  if (manifest.schemaVersion !== 1 || manifest.profile !== 'windows-x64-lite') {
+  if (manifest.schemaVersion !== 1 || !/^(?:windows-x64|macos-(?:x64|arm64))-lite$/.test(manifest.profile)) {
     throw new Error('运行时 manifest schema/profile 无效')
   }
-  if (!manifest.finalized?.electronRuntimeFileSet ||
-      !manifest.finalized?.electronRuntimeLicensesMatchNotices) {
-    throw new Error('运行时 manifest 尚未完成最终 Electron 目录与许可证定稿')
-  }
-  if (manifest.finalized.excludedSelfReferentialManifest !== RUNTIME_MANIFEST_APPLICATION_PATH ||
-      manifest.finalized.installerGeneratedFile !== INSTALLER_GENERATED_UNINSTALLER) {
-    throw new Error('运行时 manifest 的最终文件集合排除项无效')
+  if (manifest.profile === 'windows-x64-lite') {
+    if (!manifest.finalized?.electronRuntimeFileSet ||
+        !manifest.finalized?.electronRuntimeLicensesMatchNotices) {
+      throw new Error('运行时 manifest 尚未完成最终 Electron 目录与许可证定稿')
+    }
+    if (manifest.finalized.excludedSelfReferentialManifest !== RUNTIME_MANIFEST_APPLICATION_PATH ||
+        manifest.finalized.installerGeneratedFile !== INSTALLER_GENERATED_UNINSTALLER) {
+      throw new Error('运行时 manifest 的最终文件集合排除项无效')
+    }
+  } else {
+    if (!manifest.finalized?.electronRuntimeFileSet ||
+        !manifest.finalized?.electronRuntimeLicensesMatchNotices ||
+        manifest.finalized.excludedSelfReferentialManifest !== MAC_RUNTIME_MANIFEST_APPLICATION_PATH ||
+        manifest.finalized.installerGeneratedFile !== null ||
+        JSON.stringify(manifest.finalized.resignMutableFilesExcluded) !==
+          JSON.stringify(['Contents/MacOS/Fuyue Convert', 'Contents/_CodeSignature/**'])) {
+      throw new Error('macOS manifest 尚未完成签名前文件集合定稿')
+    }
   }
   if (manifest.policy.path !== 'backend/licenses/RUNTIME-POLICY.json') {
     throw new Error(`运行时 manifest 的策略路径无效：${manifest.policy.path}`)
@@ -603,6 +771,10 @@ export async function verifyRuntimeManifest(resourcesRoot) {
   const packagedPolicy = await readFile(path.join(resourcesRoot, ...normalizeRelative(manifest.policy.path).split('/')))
   if (sha256(packagedPolicy) !== manifest.policy.sha256) throw new Error('随包运行时审核策略哈希不匹配')
   const policy = JSON.parse(packagedPolicy.toString('utf8'))
+  const selectedProfile = profileConfiguration(policy, manifest.profile)
+  if (manifest.target?.platform !== selectedProfile.platform || manifest.target?.arch !== selectedProfile.arch) {
+    throw new Error(`运行时 manifest target 与 profile 不一致：${manifest.profile}`)
+  }
   const outerJarPath = path.join(resourcesRoot, 'backend', 'app', 'fuyue-convert.jar')
   const outerJar = openZip(await readFile(outerJarPath))
   const actualLibraries = outerJar.entries
@@ -650,7 +822,7 @@ export async function verifyRuntimeManifest(resourcesRoot) {
   }
   const ids = new Set(manifest.components.map(item => item.id))
   if (ids.size !== manifest.components.length) throw new Error('最终 manifest 含重复组件 ID')
-  for (const required of policy.requiredComponentIds || []) {
+  for (const required of selectedProfile.requiredComponentIds || []) {
     const actual = manifest.components.find(item => item.id === required)
     if (!actual) throw new Error(`最终 manifest 缺少必需组件：${required}`)
     const reviewed = policy.components[required]
@@ -665,7 +837,7 @@ export async function verifyRuntimeManifest(resourcesRoot) {
   }
   for (const forbidden of policy.forbiddenInstallerComponents || []) {
     if (!policy.components[forbidden]) throw new Error(`审核策略缺少禁止组件定义：${forbidden}`)
-    if ((policy.requiredComponentIds || []).includes(forbidden)) throw new Error(`审核策略同时要求并禁止组件：${forbidden}`)
+    if ((selectedProfile.requiredComponentIds || []).includes(forbidden)) throw new Error(`审核策略同时要求并禁止组件：${forbidden}`)
     if (ids.has(forbidden)) throw new Error(`core-only 安装器 manifest 禁止组件：${forbidden}`)
   }
   const temurin = manifest.components.find(item => item.id === 'eclipse-temurin')

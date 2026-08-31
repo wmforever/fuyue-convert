@@ -12,7 +12,7 @@ $DistDir = Join-Path $RootDir "dist"
 [xml]$pom = Get-Content (Join-Path $RootDir "pom.xml")
 $Version = $pom.project.version
 if (-not $Version) { $Version = "0.0.0" }
-$AppVersion = "0.1.4"
+$AppVersion = "0.1.5"
 if ($Version -match "^\d+(\.\d+){0,2}") { $AppVersion = $Matches[0] }
 
 $Arch = $env:PROCESSOR_ARCHITECTURE

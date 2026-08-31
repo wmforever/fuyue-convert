@@ -19,6 +19,14 @@ const ELECTRON_RUNTIME_IDENTITIES = new Map([
     chromiumLicensesSha256: '4cbde8e3e7b29f451c78a44491fb32e2202884826fef47786a9cda5a36110525',
     licenseBytes: 1_096,
     chromiumLicensesBytes: 20_111_206
+  })],
+  ['44.0.0:darwin:arm64', Object.freeze({
+    archiveName: 'electron-v44.0.0-darwin-arm64.zip',
+    archiveSha256: '076d79742986e1b100b69ebecc691cb07368045e54c9087cef631b8622b76a80',
+    licenseSha256: ELECTRON_LICENSE_SHA256,
+    chromiumLicensesSha256: '4cbde8e3e7b29f451c78a44491fb32e2202884826fef47786a9cda5a36110525',
+    licenseBytes: 1_096,
+    chromiumLicensesBytes: 20_111_206
   })]
 ])
 

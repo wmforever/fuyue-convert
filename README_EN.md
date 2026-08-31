@@ -10,15 +10,19 @@ Fuyue Convert is an open-source document format conversion platform. It focuses 
 
 The project is built with Java 17, Spring Boot, Vue 3, Apache POI, PDFBox, Poppler, OFDRW, and LibreOffice headless. It does not promise that every format can be converted with perfect visual fidelity and full structural editability. Instead, each route has an explicit status, quality goal, and failure reason so results can be verified and improved by the community.
 
-> Project-authored source is Apache-2.0; build dependencies remain under their own licenses. The official Windows x64 Lite desktop build is released through dedicated provenance, license, hash, installed-payload, and smoke-test gates. See [Third-Party Notices](THIRD_PARTY_NOTICES.md).
+> Project-authored source is Apache-2.0; build dependencies remain under their own licenses. The official Windows x64, macOS Intel, and macOS Apple Silicon Lite desktop builds pass dedicated provenance, license, hash, installed-payload, and smoke-test gates. See [Third-Party Notices](THIRD_PARTY_NOTICES.md).
 
 ## Download the desktop app
 
-[Download Fuyue Convert v0.1.4 for Windows 10/11 x64](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.4/Fuyue-Convert-0.1.4-win-x64.exe)
+| System | Download |
+| --- | --- |
+| Windows 10/11 x64 | [Fuyue-Convert-0.1.5-win-x64.exe](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-win-x64.exe) |
+| macOS 13+, Intel | [Fuyue-Convert-0.1.5-macOS-Intel.dmg](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Intel.dmg) |
+| macOS 13+, Apple Silicon | [Fuyue-Convert-0.1.5-macOS-Apple-Silicon.dmg](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Apple-Silicon.dmg) |
 
-The installer includes an Eclipse Temurin Java Runtime, so no separate Java installation is required. See the [v0.1.4 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.4) for `SHA256SUMS`, licenses, corresponding source, and test evidence.
+All three packages include an Eclipse Temurin Java Runtime, so no separate Java installation is required. The Release asset list contains only these three user-facing installers. Licenses, component inventories, and provenance are embedded; SHA-256 values are in the [v0.1.5 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.5) notes, while audit evidence remains in the workflow run. GitHub's two automatic Source code entries cannot be hidden.
 
-This is a Lite build: OCR/Tesseract, Poppler, and LibreOffice are not bundled. Core PDF routes have a built-in fallback, OCR routes report unavailable, and high-fidelity Office routes use an existing local LibreOffice installation. The first public build is not commercially code-signed, so Windows may show SmartScreen or an unknown-publisher warning. macOS and Linux desktop installers are not yet published.
+This is a Lite build: OCR/Tesseract, Poppler, and LibreOffice are not bundled. Core PDF routes have a built-in fallback, OCR routes report unavailable, and high-fidelity Office routes use an existing local LibreOffice installation. Windows may show SmartScreen or an unknown-publisher warning. The macOS packages are ad-hoc signed and not Apple-notarized; if first launch is blocked, use System Settings → Privacy & Security → Open Anyway.
 
 ## Positioning
 
@@ -131,9 +135,10 @@ npm ci --no-audit --no-fund
 npm run dev
 ```
 
-The official Windows x64 Lite installer is produced by the audited tag workflow.
-Locally generated installers are development artifacts and are not official
-releases. See [desktop/README.md](desktop/README.md).
+The audited tag workflow produces exactly three official Lite installers:
+Windows x64, macOS Intel, and macOS Apple Silicon. Locally generated installers
+are development artifacts and are not official releases. See
+[desktop/README.md](desktop/README.md).
 
 ## Local Runtime Package Build
 
@@ -148,7 +153,7 @@ Generated files are placed under `dist/`:
 - macOS/Linux: `fuyue-convert-<version>-<os>-<arch>.tar.gz`, then run `start.command` or `bin/start.sh`.
 - Windows: run `scripts/package-runtime.ps1` locally. The script no longer copies an arbitrary Poppler installation from the build machine; use the PDFBox fallback or explicitly configure a system `pdftoppm` at runtime.
 
-> These generic runtime packages are for local engineering validation and are not official public downloads. The current official binary is the Windows x64 Lite desktop installer linked above. Do not upload existing local `dist/` or `desktop/release/` artifacts.
+> These generic runtime packages are for local engineering validation and are not official public downloads. Official desktop binaries are limited to the three Lite installers linked above. Do not upload existing local `dist/`, `desktop/release/`, or `qa-samples/` artifacts.
 
 After startup, open:
 
