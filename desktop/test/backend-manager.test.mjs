@@ -17,6 +17,11 @@ test('resolveBackendLayout uses the packaged resource contract', () => {
   const layout = resolveBackendLayout('/application/resources', 'win32')
   assert.equal(layout.java, path.join('/application/resources', 'backend', 'runtime', 'bin', 'java.exe'))
   assert.equal(layout.jar, path.join('/application/resources', 'backend', 'app', 'fuyue-convert.jar'))
+  assert.deepEqual(layout.officeCandidates, [path.join('/application/resources', 'backend', 'app',
+    'libreoffice', 'program', 'soffice.exe')])
+  const macLayout = resolveBackendLayout('/application/resources', 'darwin')
+  assert.deepEqual(macLayout.officeCandidates, [path.join('/application/resources', 'backend', 'app',
+    'libreoffice', 'LibreOffice.app', 'Contents', 'MacOS', 'soffice')])
 })
 
 test('waitForBackend accepts an UP actuator response', async t => {

@@ -12,11 +12,17 @@ const backendRoot = backendArgument
   : path.join(desktopDirectory, '.runtime', 'backend')
 const publicLiteRelease = argumentsList.includes('--public-lite') ||
   ['true', '1'].includes((process.env.FORMAT_CONVERTER_PUBLIC_LITE_RELEASE || '').toLowerCase())
-const publicTarget = publicLiteRelease
+const publicFullRelease = argumentsList.includes('--public-full') ||
+  ['true', '1'].includes((process.env.FORMAT_CONVERTER_PUBLIC_FULL_RELEASE || '').toLowerCase())
+if (publicLiteRelease && publicFullRelease) throw new Error('Lite 与 Full manifest 不能同时生成')
+const publicTarget = publicLiteRelease || publicFullRelease
   ? { platform: process.platform, arch: process.arch }
   : null
 
-generateRuntimeManifest({ repositoryRoot, desktopDirectory, backendRoot, publicTarget })
+generateRuntimeManifest({
+  repositoryRoot, desktopDirectory, backendRoot, publicTarget,
+  edition: publicFullRelease ? 'full' : 'lite'
+})
   .then(manifest => {
     console.log(`运行时许可与组件清单已生成：${path.join(backendRoot, 'RUNTIME-COMPONENTS.json')}`)
     console.log(`fat JAR 运行时库：${manifest.javaRuntimeLibraries.length} 个，许可证文件：${manifest.licenseFiles.length} 个`)

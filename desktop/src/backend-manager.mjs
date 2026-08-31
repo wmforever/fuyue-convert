@@ -36,7 +36,10 @@ export function resolveBackendLayout(resourcesPath, platform = process.platform)
     popplerCandidates: [
       path.join(root, 'app', 'poppler', 'bin', popplerName),
       path.join(root, 'app', 'poppler', popplerName)
-    ]
+    ],
+    officeCandidates: platform === 'win32'
+      ? [path.join(root, 'app', 'libreoffice', 'program', 'soffice.exe')]
+      : [path.join(root, 'app', 'libreoffice', 'LibreOffice.app', 'Contents', 'MacOS', 'soffice')]
   }
 }
 
@@ -163,6 +166,7 @@ export async function startBackend({ resourcesPath, userDataPath, apiToken, logg
   }
 
   const poppler = layout.popplerCandidates.find(candidate => existsSync(candidate))
+  const office = layout.officeCandidates.find(candidate => existsSync(candidate))
   const environment = {
     ...process.env,
     FORMAT_CONVERTER_API_TOKEN: apiToken,
@@ -172,6 +176,7 @@ export async function startBackend({ resourcesPath, userDataPath, apiToken, logg
     FORMAT_CONVERTER_AUTO_OPEN_BROWSER: 'false'
   }
   if (poppler) environment.PDFTOPPM_BIN = poppler
+  if (office) environment.FORMAT_CONVERTER_OFFICE_BINARY = office
 
   const child = spawn(layout.java, argumentsList, {
     cwd: layout.root,

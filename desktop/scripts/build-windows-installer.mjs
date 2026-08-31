@@ -12,7 +12,9 @@ const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const desktopDirectory = path.resolve(scriptDirectory, '..')
 const packageMetadata = JSON.parse(await readFile(path.join(desktopDirectory, 'package.json'), 'utf8'))
 const sourceDirectory = path.join(desktopDirectory, 'release', 'win-unpacked')
-const installer = path.join(desktopDirectory, 'release', `Fuyue-Convert-${packageMetadata.version}-win-x64.exe`)
+const fullRelease = ['true', '1'].includes((process.env.FORMAT_CONVERTER_PUBLIC_FULL_RELEASE || '').toLowerCase())
+const installer = path.join(desktopDirectory, 'release',
+  `Fuyue-Convert-${packageMetadata.version}-win-x64${fullRelease ? '-Full' : ''}.exe`)
 const nsisScript = path.join(desktopDirectory, 'installer', 'windows-lite.nsi')
 
 if (process.platform !== 'win32' || process.arch !== 'x64') {

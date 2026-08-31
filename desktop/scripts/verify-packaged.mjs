@@ -6,6 +6,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { javaProperty } from './lib/runtime-release.mjs'
 import { electronRuntimeIdentity } from './lib/electron-runtime.mjs'
+import { verifyLibreOfficeRuntime } from './lib/libreoffice-runtime.mjs'
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const desktopDirectory = path.resolve(scriptDirectory, '..')
@@ -15,6 +16,9 @@ const requireOcr = argumentsList.includes('--require-ocr')
 const requireInstaller = argumentsList.includes('--require-installer')
 const requireMacArtifacts = argumentsList.includes('--require-mac-artifacts')
 const publicLiteRelease = argumentsList.includes('--public-lite')
+const publicFullRelease = argumentsList.includes('--public-full')
+if (publicLiteRelease && publicFullRelease) throw new Error('Lite 与 Full 校验不能同时启用')
+const publicRelease = publicLiteRelease || publicFullRelease
 const requestedArch = argumentsList.find(argument => argument.startsWith('--arch='))?.slice('--arch='.length) || process.arch
 
 function locateResources() {
@@ -163,15 +167,22 @@ async function main() {
   await requireFile(resources, 'licenses/ELECTRON-LICENSE.txt')
   await requireFile(resources, 'licenses/LICENSES.chromium.html', 1_000_000)
 
-  if (publicLiteRelease) {
+  if (publicRelease) {
     const targetPlatform = process.platform === 'win32' ? 'win32' : 'darwin'
     if (!['x64', 'arm64'].includes(requestedArch) ||
         (targetPlatform === 'win32' && requestedArch !== 'x64')) {
-      throw new Error(`不支持的公开 Lite 校验目标：${targetPlatform} ${requestedArch}`)
+      throw new Error(`不支持的公开桌面校验目标：${targetPlatform} ${requestedArch}`)
     }
     if (requireOcr) throw new Error('Lite 发布不得要求内置 OCR')
     assertMissing(resources, 'backend/app/ocr')
     assertMissing(resources, 'backend/app/poppler')
+    if (publicLiteRelease) assertMissing(resources, 'backend/app/libreoffice')
+    if (publicFullRelease) {
+      await requireFile(resources, 'backend/licenses/LIBREOFFICE-LICENSE.txt', 100_000)
+      await requireFile(resources, 'backend/licenses/LIBREOFFICE-PROVENANCE.json')
+      await verifyLibreOfficeRuntime(path.join(resources, 'backend', 'app', 'libreoffice'),
+        targetPlatform, requestedArch, { execute: false })
+    }
     await verifyPublicElectronLicenses(resources, electronVersion, targetPlatform, requestedArch)
     await assertForbiddenInstallerFilesMissing(targetPlatform === 'darwin' ? macApplicationRoot(resources) : path.dirname(resources))
     await requireFile(resources, 'backend/licenses/TEMURIN-RUNTIME.txt')
@@ -187,7 +198,7 @@ async function main() {
     if (!/IMPLEMENTOR="Eclipse Adoptium"/.test(runtimeRelease) ||
         !/JAVA_VERSION="17\.0\.20\.1"/.test(runtimeRelease) ||
         !/JAVA_RUNTIME_VERSION="17\.0\.20\.1\+1"/.test(runtimeRelease)) {
-      throw new Error('公开 Lite 发布必须内置 Eclipse Temurin 17.0.20.1+1')
+      throw new Error('公开桌面版必须内置 Eclipse Temurin 17.0.20.1+1')
     }
     const runtimeCheck = spawnSync(runtimeJava, ['-XshowSettings:properties', '-version'], { encoding: 'utf8' })
     if (runtimeCheck.error || runtimeCheck.status !== 0) {
@@ -224,13 +235,13 @@ async function main() {
   if (requireInstaller) {
     if (process.platform !== 'win32') throw new Error('NSIS 安装器只能在 Windows 构建产物中校验')
     await requireFile(path.join(desktopDirectory, 'release'),
-      `Fuyue-Convert-${desktopPackage.version}-win-x64.exe`, 1_000_000)
+      `Fuyue-Convert-${desktopPackage.version}-win-x64${publicFullRelease ? '-Full' : ''}.exe`, 1_000_000)
   }
   if (requireMacArtifacts) {
     if (process.platform !== 'darwin') throw new Error('DMG 只能在 macOS 构建产物中校验')
     const label = requestedArch === 'arm64' ? 'Apple-Silicon' : 'Intel'
     await requireFile(path.join(desktopDirectory, 'release'),
-      `Fuyue-Convert-${desktopPackage.version}-macOS-${label}.dmg`, 1_000_000)
+      `Fuyue-Convert-${desktopPackage.version}-macOS-${label}${publicFullRelease ? '-Full' : ''}.dmg`, 1_000_000)
   }
   console.log(`桌面包结构与许可证校验通过：${resources}`)
 }

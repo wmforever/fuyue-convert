@@ -13,7 +13,10 @@ export default async function afterSign(context) {
   const publicLiteRelease = ['true', '1'].includes(
     (process.env.FORMAT_CONVERTER_PUBLIC_LITE_RELEASE || '').toLowerCase()
   )
-  if (!publicLiteRelease || context.electronPlatformName !== 'darwin') return
+  const publicFullRelease = ['true', '1'].includes(
+    (process.env.FORMAT_CONVERTER_PUBLIC_FULL_RELEASE || '').toLowerCase()
+  )
+  if ((!publicLiteRelease && !publicFullRelease) || context.electronPlatformName !== 'darwin') return
 
   const application = path.join(context.appOutDir, `${context.packager.appInfo.productFilename}.app`)
   const resources = path.join(application, 'Contents', 'Resources')

@@ -5,6 +5,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import crossSpawn from 'cross-spawn'
 import { enrichRuntimeRelease, javaProperty } from './lib/runtime-release.mjs'
+import { verifyLibreOfficeRuntime } from './lib/libreoffice-runtime.mjs'
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const desktopDirectory = path.resolve(scriptDirectory, '..')
@@ -15,9 +16,12 @@ const skipBuild = argumentsSet.has('--skip-build')
 const publicLiteRelease = ['true', '1'].includes(
   (process.env.FORMAT_CONVERTER_PUBLIC_LITE_RELEASE || '').toLowerCase()
 )
+const publicFullRelease = ['true', '1'].includes(
+  (process.env.FORMAT_CONVERTER_PUBLIC_FULL_RELEASE || '').toLowerCase()
+)
 
 if (argumentsSet.has('--help')) {
-  console.log(`用法: node scripts/stage-backend.mjs [--skip-build]\n\n环境变量:\n  FORMAT_CONVERTER_RUNTIME_HOME          已生成的 jlink Runtime\n  FORMAT_CONVERTER_OCR_HOME              可选 OCR 目录\n  FORMAT_CONVERTER_POPPLER_HOME          可选 Poppler 目录\n  FORMAT_CONVERTER_PUBLIC_LITE_RELEASE   正式 Lite 发布门禁（禁止 OCR/Poppler）`)
+  console.log(`用法: node scripts/stage-backend.mjs [--skip-build]\n\n环境变量:\n  FORMAT_CONVERTER_RUNTIME_HOME          已生成的 jlink Runtime\n  FORMAT_CONVERTER_OCR_HOME              可选 OCR 目录\n  FORMAT_CONVERTER_POPPLER_HOME          可选 Poppler 目录\n  FORMAT_CONVERTER_PUBLIC_LITE_RELEASE   正式 Lite 发布门禁（禁止 Office/OCR/Poppler）\n  FORMAT_CONVERTER_PUBLIC_FULL_RELEASE   正式 Full 发布门禁（内置 LibreOffice）\n  FORMAT_CONVERTER_LIBREOFFICE_HOME      已审核的 LibreOffice Runtime 根目录`)
   process.exit(0)
 }
 
@@ -61,13 +65,13 @@ async function assertVersionSync(version) {
 
 async function copyRequired(source, target, label) {
   if (!existsSync(source)) throw new Error(`${label}不存在：${source}`)
-  await cp(source, target, { recursive: true })
+  await cp(source, target, { recursive: true, verbatimSymlinks: true })
 }
 
 async function copyOptional(source, target, label) {
   if (!source) return
   if (!existsSync(source)) throw new Error(`${label}不存在：${source}`)
-  await cp(source, target, { recursive: true })
+  await cp(source, target, { recursive: true, verbatimSymlinks: true })
   console.log(`已加入 ${label}: ${source}`)
 }
 
@@ -119,8 +123,8 @@ async function verifyRuntime(runtimeTarget) {
   if (requiredVersion && identity.javaVersion !== requiredVersion) {
     throw new Error(`Java Runtime 版本必须是 ${requiredVersion}`)
   }
-  if (publicLiteRelease && identity.javaRuntimeVersion !== '17.0.20.1+1') {
-    throw new Error(`公开 Lite Java Runtime build 未审核：${identity.javaRuntimeVersion}`)
+  if ((publicLiteRelease || publicFullRelease) && identity.javaRuntimeVersion !== '17.0.20.1+1') {
+    throw new Error(`公开桌面 Java Runtime build 未审核：${identity.javaRuntimeVersion}`)
   }
   return identity
 }
@@ -147,22 +151,29 @@ async function stageOcr(target) {
   }
 }
 
-function assertPublicLiteRelease() {
-  if (!publicLiteRelease) return
+function assertPublicRelease() {
+  if (!publicLiteRelease && !publicFullRelease) return
+  if (publicLiteRelease && publicFullRelease) throw new Error('Lite 与 Full 正式发布模式不能同时启用')
   const supportedTarget = (process.platform === 'win32' && process.arch === 'x64') ||
     (process.platform === 'darwin' && ['x64', 'arm64'].includes(process.arch))
   if (!supportedTarget) {
-    throw new Error(`公开 Lite 发布不支持当前平台：${process.platform} ${process.arch}`)
+    throw new Error(`公开桌面发布不支持当前平台：${process.platform} ${process.arch}`)
   }
   const bundleOcr = ['true', '1'].includes((process.env.FORMAT_CONVERTER_BUNDLE_OCR || '').toLowerCase())
   if (bundleOcr || process.env.FORMAT_CONVERTER_OCR_HOME || process.env.FORMAT_CONVERTER_POPPLER_HOME) {
-    throw new Error('公开 Lite 发布不得捆绑 OCR 或 Poppler Runtime')
+    throw new Error('公开桌面发布不得捆绑 OCR 或 Poppler Runtime')
   }
   if (!['true', '1'].includes((process.env.FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME || '').toLowerCase())) {
-    throw new Error('公开 Lite 发布必须启用 Temurin Runtime 门禁')
+    throw new Error('公开桌面发布必须启用 Temurin Runtime 门禁')
   }
   if ((process.env.FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION || '').trim() !== '17.0.20.1') {
-    throw new Error('公开 Lite v0.1.4 必须锁定 Temurin 17.0.20.1+1')
+    throw new Error('公开桌面版必须锁定 Temurin 17.0.20.1+1')
+  }
+  if (publicLiteRelease && process.env.FORMAT_CONVERTER_LIBREOFFICE_HOME) {
+    throw new Error('公开 Lite 发布不得捆绑 LibreOffice')
+  }
+  if (publicFullRelease && !process.env.FORMAT_CONVERTER_LIBREOFFICE_HOME) {
+    throw new Error('公开 Full 发布必须提供已审核的 LibreOffice Runtime')
   }
 }
 
@@ -175,7 +186,14 @@ async function stageLicenses() {
   await copyRequired(path.join(repositoryRoot, 'frontend', 'node_modules', 'pdfjs-dist', 'LICENSE'), path.join(licenses, 'PDFJS-APACHE-2.0.txt'), 'PDF.js 许可证')
   await copyRequired(path.join(repositoryRoot, 'task-service', 'src', 'main', 'resources', 'fonts', 'DroidSansFallback-NOTICE.txt'), path.join(licenses, 'DROID-SANS-FALLBACK-NOTICE.txt'), 'Droid Sans Fallback 声明')
   await copyRequired(path.join(repositoryRoot, 'task-service', 'src', 'main', 'resources', 'fonts', 'LiberationSans-LICENSE.txt'), path.join(licenses, 'LIBERATION-SANS-OFL-1.1.txt'), 'Liberation Sans 许可证')
-  if (publicLiteRelease) {
+  if (publicFullRelease) {
+    const officeRoot = path.resolve(process.env.FORMAT_CONVERTER_LIBREOFFICE_HOME)
+    const verified = await verifyLibreOfficeRuntime(officeRoot)
+    await copyRequired(verified.license, path.join(licenses, 'LIBREOFFICE-LICENSE.txt'), 'LibreOffice 完整许可证清单')
+    await copyRequired(path.join(officeRoot, 'FUYUE-LIBREOFFICE-PROVENANCE.json'),
+      path.join(licenses, 'LIBREOFFICE-PROVENANCE.json'), 'LibreOffice 来源记录')
+  }
+  if (publicLiteRelease || publicFullRelease) {
     const temurinProvenance = process.platform === 'darwin'
       ? `TEMURIN-RUNTIME-MACOS-${process.arch === 'arm64' ? 'ARM64' : 'X64'}.txt`
       : 'TEMURIN-RUNTIME.txt'
@@ -191,7 +209,7 @@ async function stageLicenses() {
 }
 
 async function main() {
-  assertPublicLiteRelease()
+  assertPublicRelease()
   const version = await projectVersion()
   await assertVersionSync(version)
   const maven = process.env.MAVEN_BIN || (process.platform === 'win32' ? 'mvn.cmd' : 'mvn')
@@ -209,10 +227,14 @@ async function main() {
   const runtimeIdentity = await verifyRuntime(path.join(destination, 'runtime'))
   await recordRuntimeIdentity(path.join(destination, 'runtime'), runtimeIdentity)
   await stageLicenses()
-  if (publicLiteRelease) {
+  if (publicFullRelease) {
+    await copyRequired(process.env.FORMAT_CONVERTER_LIBREOFFICE_HOME,
+      path.join(destination, 'app', 'libreoffice'), 'LibreOffice Runtime')
+  }
+  if (publicLiteRelease || publicFullRelease) {
     await run(process.execPath, [
       path.join(scriptDirectory, 'generate-runtime-manifest.mjs'),
-      '--public-lite'
+      publicFullRelease ? '--public-full' : '--public-lite'
     ], desktopDirectory)
   }
 

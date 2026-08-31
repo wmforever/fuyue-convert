@@ -9,6 +9,7 @@ const desktopDirectory = path.resolve(scriptDirectory, '..')
 const argumentsList = process.argv.slice(2)
 const dmgArgument = argumentsList.find(argument => !argument.startsWith('--'))
 const arch = argumentsList.find(argument => argument.startsWith('--arch='))?.slice('--arch='.length) || process.arch
+const publicFullRelease = argumentsList.includes('--public-full')
 
 function run(command, args, options = {}) {
   return new Promise((resolve, reject) => {
@@ -37,10 +38,10 @@ async function main() {
     const resources = path.join(mountPoint, 'Fuyue Convert.app', 'Contents', 'Resources')
     await run(process.execPath, [
       path.join(scriptDirectory, 'verify-packaged.mjs'), resources,
-      '--public-lite', `--arch=${arch}`
+      publicFullRelease ? '--public-full' : '--public-lite', `--arch=${arch}`
     ])
   } finally {
-    if (attached) await run('/usr/bin/hdiutil', ['detach', mountPoint]).catch(() => {})
+    if (attached) await run('/usr/bin/hdiutil', ['detach', mountPoint, '-force']).catch(() => {})
     await rm(temporaryRoot, { recursive: true, force: true })
   }
   console.log(`DMG 挂载内容、运行时 manifest 与签名校验通过：${dmg}`)

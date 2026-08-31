@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { mkdir, readlink, readdir, readFile, realpath, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { openZip } from './zip-reader.mjs'
+import { libreOfficeDescriptor } from './libreoffice-runtime.mjs'
 
 const LICENSE_ENTRY = /(^|\/)(?:LICENSE|LICENCE|NOTICE|COPYING|DEPENDENCIES)(?:[._-][^/]*)?$/i
 const FULL_LICENSE_ENTRY = /(^|\/)(?:LICENSE|LICENCE|COPYING)(?:[._-][^/]*)?$/i
@@ -15,12 +16,15 @@ export function sha256(content) {
   return createHash('sha256').update(content).digest('hex')
 }
 
-export function publicLiteProfile(platform, arch) {
-  if (platform === 'win32' && arch === 'x64') return 'windows-x64-lite'
-  if (platform === 'darwin' && arch === 'x64') return 'macos-x64-lite'
-  if (platform === 'darwin' && arch === 'arm64') return 'macos-arm64-lite'
-  throw new Error(`没有受支持的公开 Lite profile：${platform} ${arch}`)
+export function publicReleaseProfile(platform, arch, edition = 'lite') {
+  if (!['lite', 'full'].includes(edition)) throw new Error(`无效桌面版型：${edition}`)
+  if (platform === 'win32' && arch === 'x64') return `windows-x64-${edition}`
+  if (platform === 'darwin' && arch === 'x64') return `macos-x64-${edition}`
+  if (platform === 'darwin' && arch === 'arm64') return `macos-arm64-${edition}`
+  throw new Error(`没有受支持的公开 ${edition} profile：${platform} ${arch}`)
 }
+
+export const publicLiteProfile = (platform, arch) => publicReleaseProfile(platform, arch, 'lite')
 
 function profileConfiguration(policy, profile) {
   const configuration = policy.profiles?.[profile]
@@ -49,7 +53,7 @@ function applicationRoot(resourcesRoot, profile) {
 
 function excludedApplicationFile(profile, relative) {
   if (relative === manifestApplicationPath(profile)) return true
-  if (profile === 'windows-x64-lite') return relative === INSTALLER_GENERATED_UNINSTALLER
+  if (profile.startsWith('windows-x64-')) return relative === INSTALLER_GENERATED_UNINSTALLER
   return relative === 'Contents/MacOS/Fuyue Convert' || relative.startsWith('Contents/_CodeSignature/')
 }
 
@@ -378,14 +382,15 @@ export async function generateRuntimeManifest({
   desktopDirectory,
   backendRoot,
   strictWindows = false,
-  publicTarget = null
+  publicTarget = null,
+  edition = 'lite'
 }) {
   const policySourcePath = path.join(desktopDirectory, 'licenses', 'runtime-policy.json')
   const policyContent = await readFile(policySourcePath)
   const policy = JSON.parse(policyContent.toString('utf8'))
   if (policy.schemaVersion !== 1) throw new Error('不支持的运行时审核策略版本')
   const releaseTarget = publicTarget || (strictWindows ? { platform: 'win32', arch: 'x64' } : null)
-  const releaseProfile = releaseTarget ? publicLiteProfile(releaseTarget.platform, releaseTarget.arch) : null
+  const releaseProfile = releaseTarget ? publicReleaseProfile(releaseTarget.platform, releaseTarget.arch, edition) : null
   const releaseProfileConfiguration = releaseProfile ? profileConfiguration(policy, releaseProfile) : null
   if (releaseTarget && (releaseTarget.platform !== process.platform || releaseTarget.arch !== process.arch)) {
     throw new Error(`公开 manifest 必须在目标原生 runner 生成：要求 ${releaseTarget.platform} ${releaseTarget.arch}，当前 ${process.platform} ${process.arch}`)
@@ -545,11 +550,31 @@ export async function generateRuntimeManifest({
       type: 'license-inventory', artifact: fileArtifact('licenses/LICENSES.chromium.html', chromiumLicenses)
     })
   ]
-  if (!releaseProfile || releaseProfile === 'windows-x64-lite') {
+  if (!releaseProfile || releaseProfile.startsWith('windows-x64-')) {
     const nsisProvenance = await readFile(path.join(backendRoot, 'licenses', 'NSIS-PROVENANCE.txt'))
     components.push(component(policy, 'nsis', {
       type: 'installer-build-tool', artifact: fileArtifact('backend/licenses/NSIS-PROVENANCE.txt', nsisProvenance),
       forbiddenComponents: policy.forbiddenInstallerComponents
+    }))
+  }
+  if (releaseProfile?.endsWith('-full')) {
+    const libreOfficeRoot = path.join(backendRoot, 'app', 'libreoffice')
+    const libreOfficeTree = await hashDirectory(libreOfficeRoot, {
+      allowSafeSymlinks: releaseTarget?.platform === 'darwin'
+    })
+    const provenance = JSON.parse(await readFile(path.join(libreOfficeRoot, 'FUYUE-LIBREOFFICE-PROVENANCE.json'), 'utf8'))
+    const reviewedOffice = libreOfficeDescriptor(releaseTarget.platform, releaseTarget.arch)
+    if (provenance.version !== policy.components.libreoffice.version ||
+        provenance.platform !== releaseTarget.platform || provenance.arch !== releaseTarget.arch ||
+        provenance.binaryPackage?.sha256 !== reviewedOffice.sha256 ||
+        provenance.binaryPackage?.size !== reviewedOffice.size ||
+        provenance.binaryPackage?.url !== reviewedOffice.url) {
+      throw new Error('LibreOffice Runtime 来源记录与 Full profile 不一致')
+    }
+    components.push(component(policy, 'libreoffice', {
+      type: 'office-runtime',
+      provenance,
+      artifact: { path: 'backend/app/libreoffice', hashKind: 'directory-tree', ...libreOfficeTree }
     }))
   }
   const requiredComponents = releaseProfileConfiguration?.requiredComponentIds || policy.requiredComponentIds
@@ -586,8 +611,8 @@ export async function generateRuntimeManifest({
 export async function finalizeRuntimeManifest(resourcesRoot) {
   const manifestPath = path.join(resourcesRoot, 'backend', 'RUNTIME-COMPONENTS.json')
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
-  if (manifest.schemaVersion !== 1 || !/^(?:windows-x64|macos-(?:x64|arm64))-lite$/.test(manifest.profile)) {
-    throw new Error('只能 finalise 受支持的公开 Lite manifest')
+  if (manifest.schemaVersion !== 1 || !/^(?:windows-x64|macos-(?:x64|arm64))-(?:lite|full)$/.test(manifest.profile)) {
+    throw new Error('只能 finalise 受支持的公开桌面 manifest')
   }
   const targetApplicationRoot = applicationRoot(resourcesRoot, manifest.profile)
   if (manifest.profile.startsWith('macos-')) {
@@ -605,8 +630,16 @@ export async function finalizeRuntimeManifest(resourcesRoot) {
     const temurin = manifest.components.find(item => item.id === 'eclipse-temurin')
     if (!temurin) throw new Error('manifest 缺少 Eclipse Temurin 组件')
     temurin.artifact = { ...finalRuntimeArtifact }
+    if (manifest.profile.endsWith('-full')) {
+      const officeTree = await hashDirectory(path.join(resourcesRoot, 'backend', 'app', 'libreoffice'), {
+        allowSafeSymlinks: true
+      })
+      const office = manifest.components.find(item => item.id === 'libreoffice')
+      if (!office) throw new Error('Full manifest 缺少 LibreOffice 组件')
+      office.artifact = { path: 'backend/app/libreoffice', hashKind: 'directory-tree', ...officeTree }
+    }
   }
-  if (manifest.profile === 'windows-x64-lite') {
+  if (manifest.profile.startsWith('windows-x64-')) {
     const packagedElectronLicensePairs = [
       ['LICENSE.electron.txt', 'licenses/ELECTRON-LICENSE.txt'],
       ['LICENSES.chromium.html', 'licenses/LICENSES.chromium.html']
@@ -621,7 +654,7 @@ export async function finalizeRuntimeManifest(resourcesRoot) {
   }
   const inventory = await applicationInventory(targetApplicationRoot, manifest.profile)
   const applicationFiles = inventory.files
-  if (manifest.profile === 'windows-x64-lite' && applicationFiles.includes(INSTALLER_GENERATED_UNINSTALLER)) {
+  if (manifest.profile.startsWith('windows-x64-') && applicationFiles.includes(INSTALLER_GENERATED_UNINSTALLER)) {
     throw new Error('Electron unpacked 目录不得预置安装器生成的卸载程序')
   }
   const violations = applicationFiles.filter(relative => FORBIDDEN_INSTALLER_FILE.test(relative))
@@ -654,7 +687,7 @@ export async function finalizeRuntimeManifest(resourcesRoot) {
     electronRuntimeLicensesMatchNotices: true,
     forbiddenInstallerComponentsAbsentFromApplication: true,
     excludedSelfReferentialManifest: manifestApplicationPath(manifest.profile),
-    installerGeneratedFile: manifest.profile === 'windows-x64-lite' ? INSTALLER_GENERATED_UNINSTALLER : null,
+    installerGeneratedFile: manifest.profile.startsWith('windows-x64-') ? INSTALLER_GENERATED_UNINSTALLER : null,
     resignMutableFilesExcluded: manifest.profile.startsWith('macos-')
       ? ['Contents/MacOS/Fuyue Convert', 'Contents/_CodeSignature/**']
       : []
@@ -691,7 +724,7 @@ export async function verifyArtifact(resourcesRoot, artifact) {
   } else if (artifact.hashKind === 'application-file-set') {
     const manifest = JSON.parse(await readFile(path.join(resourcesRoot, 'backend', 'RUNTIME-COMPONENTS.json'), 'utf8'))
     const targetApplicationRoot = applicationRoot(resourcesRoot, manifest.profile)
-    const installerGeneratedFile = manifest.profile === 'windows-x64-lite' ? INSTALLER_GENERATED_UNINSTALLER : null
+    const installerGeneratedFile = manifest.profile.startsWith('windows-x64-') ? INSTALLER_GENERATED_UNINSTALLER : null
     if (manifest.finalized?.installerGeneratedFile !== installerGeneratedFile) {
       throw new Error('Electron runtime manifest 的安装器动态文件声明无效')
     }
@@ -746,10 +779,10 @@ export async function verifyArtifact(resourcesRoot, artifact) {
 export async function verifyRuntimeManifest(resourcesRoot) {
   const manifestPath = path.join(resourcesRoot, 'backend', 'RUNTIME-COMPONENTS.json')
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
-  if (manifest.schemaVersion !== 1 || !/^(?:windows-x64|macos-(?:x64|arm64))-lite$/.test(manifest.profile)) {
+  if (manifest.schemaVersion !== 1 || !/^(?:windows-x64|macos-(?:x64|arm64))-(?:lite|full)$/.test(manifest.profile)) {
     throw new Error('运行时 manifest schema/profile 无效')
   }
-  if (manifest.profile === 'windows-x64-lite') {
+  if (manifest.profile.startsWith('windows-x64-')) {
     if (!manifest.finalized?.electronRuntimeFileSet ||
         !manifest.finalized?.electronRuntimeLicensesMatchNotices) {
       throw new Error('运行时 manifest 尚未完成最终 Electron 目录与许可证定稿')

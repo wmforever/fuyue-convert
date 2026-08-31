@@ -17,6 +17,21 @@
       "platform": "darwin",
       "arch": "arm64",
       "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party"]
+    },
+    "windows-x64-full": {
+      "platform": "win32",
+      "arch": "x64",
+      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "nsis", "libreoffice"]
+    },
+    "macos-x64-full": {
+      "platform": "darwin",
+      "arch": "x64",
+      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "libreoffice"]
+    },
+    "macos-arm64-full": {
+      "platform": "darwin",
+      "arch": "arm64",
+      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "libreoffice"]
     }
   },
   "description": "Fail-closed allow-list for every JAR nested in the public Lite desktop fat JAR. A dependency version change requires an explicit policy review.",
@@ -376,6 +391,13 @@
       "sourceArchive": "https://github.com/nsis-dev/nsis/archive/refs/tags/v312.tar.gz",
       "sourceSha256": "5ee95daa11e3c3a40581cf9824598b5871048942d0ed802561c321621624fe8e",
       "licensePath": "backend/licenses/NSIS-LICENSE.txt"
+    },
+    "libreoffice": {
+      "version": "26.2.5.2",
+      "spdx": "MPL-2.0 AND LicenseRef-LibreOffice-Third-Party",
+      "source": "https://download.documentfoundation.org/libreoffice/src/26.2.5/libreoffice-26.2.5.2.tar.xz",
+      "sourceSha256": "8ec785ee1fd1a1d9b9d8eba1c8ff7556695ca8f02e1f7a26bef8cd540f669fea",
+      "licensePath": "backend/licenses/LIBREOFFICE-LICENSE.txt"
     },
     "nsis-stdutils": {
       "version": "1.14+2018-10-27",

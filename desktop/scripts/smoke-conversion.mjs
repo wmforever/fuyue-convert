@@ -3,6 +3,10 @@ import path from 'node:path'
 const debugPort = Number(process.argv[2] || 9227)
 const inputPath = path.resolve(process.argv[3] || 'test/fixtures/smoke.txt')
 const closeApplication = process.argv.includes('--close-app')
+const option = name => process.argv.find(argument => argument.startsWith(`--${name}=`))?.slice(name.length + 3)
+const routeId = option('route') || 'txt-to-docx'
+const sourceLabel = option('source-label') || '纯文本 TXT'
+const targetLabel = option('target-label') || 'Word DOCX'
 const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
 async function waitForPageTarget() {
@@ -112,23 +116,23 @@ try {
   const routeSelected = await evaluate(`(() => {
     const input = document.querySelector('.route-search')
     if (!input) return false
-    input.value = 'txt-to-docx'
+    input.value = ${JSON.stringify(routeId)}
     input.dispatchEvent(new Event('input', { bubbles: true }))
     return true
   })()`)
   if (!routeSelected) throw new Error('无法打开转换路线搜索')
   const clickedRoute = await waitForEvaluation(`(() => {
-    const route = document.querySelector('.route-option[data-route-id="txt-to-docx"]')
+    const route = document.querySelector('.route-option[data-route-id=${JSON.stringify(routeId)}]')
     if (!route || route.disabled) return false
     route?.click()
     return true
   })()`, 40)
-  if (!clickedRoute) throw new Error('没有找到 TXT → Word DOCX 路线')
+  if (!clickedRoute) throw new Error(`没有找到 ${routeId} 路线`)
 
   const fileInputReady = await waitForEvaluation(`(() => {
     const formats = document.querySelector('.route-formats')?.textContent || ''
     const input = document.querySelector('input[type="file"]')
-    return formats.includes('纯文本 TXT') && formats.includes('Word DOCX') && Boolean(input && !input.disabled)
+    return formats.includes(${JSON.stringify(sourceLabel)}) && formats.includes(${JSON.stringify(targetLabel)}) && Boolean(input && !input.disabled)
   })()`, 40)
   if (!fileInputReady) throw new Error('没有找到文件输入框')
   const documentTree = await command('DOM.getDocument', { depth: -1, pierce: true })
