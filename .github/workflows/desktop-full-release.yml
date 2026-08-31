@@ -357,7 +357,7 @@ jobs:
           done
           cp full-artifacts/* checksum-assets/
           (cd checksum-assets && sha256sum * | LC_ALL=C sort) >> release-notes.md
-          echo '\`\`\`' >> release-notes.md
+          echo '```' >> release-notes.md
           gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
             --title "$RELEASE_TAG · Lite + Full" --notes-file release-notes.md
 
