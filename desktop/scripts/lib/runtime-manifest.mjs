@@ -103,7 +103,10 @@ async function listSafeTree(root, prefix = '', links = [], canonicalRoot = null)
       if (canonicalRelative === '..' || canonicalRelative.startsWith(`..${path.sep}`)) {
         throw new Error(`目录树符号链接最终指向根目录外部：${target} -> ${linkTarget}`)
       }
-      links.push({ path: relative, target: linkTarget })
+      // Node returns Windows-created link targets with backslashes. The manifest
+      // is platform-neutral JSON, so keep its path identity stable across the
+      // Windows source checks and the native macOS packaging runners.
+      links.push({ path: relative, target: linkTarget.replaceAll('\\', '/') })
     } else throw new Error(`目录清单不允许特殊文件：${target}`)
   }
   return files.sort((left, right) => left.localeCompare(right, 'en'))
