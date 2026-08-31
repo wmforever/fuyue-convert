@@ -60,8 +60,10 @@ public final class LibreOfficeConverter implements FileConverter {
                 "--nofirststartwizard", "--nolockcheck",
                 "-env:UserInstallation=" + profileDir.toUri(),
                 "--convert-to", convertTo, "--outdir", outDir.toString(), input.path().toString());
+        String processOutput;
         try {
-            ConversionGuards.runProcess(command, workDir.resolve("libreoffice.log"), timeout, "LibreOffice 转换");
+            processOutput = ConversionGuards.runProcess(command, workDir.resolve("libreoffice.log"), timeout,
+                    "LibreOffice 转换");
         } catch (ExternalProcessException error) {
             log.warn("LibreOffice route={} failed reason={} exit={} detail={}", route.id(), error.reason(),
                     error.exitCode(), ErrorMessageSanitizer.from(error));
@@ -69,7 +71,19 @@ public final class LibreOfficeConverter implements FileConverter {
             throw error;
         }
         progress.update(TaskStage.PACKAGING, 90);
-        Path produced = findProducedFile(outDir, route.targetFormat());
+        Duration outputWait = timeout.compareTo(Duration.ofSeconds(30)) < 0 ? timeout : Duration.ofSeconds(30);
+        Path produced;
+        try {
+            produced = awaitProducedFile(outDir, route.targetFormat(), outputWait);
+        } catch (IOException error) {
+            String engineOutput = ErrorMessageSanitizer.sanitize(processOutput);
+            log.warn("LibreOffice route={} produced no stable output engineOutput={}", route.id(),
+                    engineOutput);
+            if (!engineOutput.isBlank()) {
+                throw new IOException(error.getMessage() + "；LibreOffice 输出：" + engineOutput, error);
+            }
+            throw error;
+        }
         ConversionGuards.requireNonEmptyOutputFile(produced, limits, "LibreOffice");
         Integer pageCount = validateOutput(produced, route.targetFormat(), limits);
         UofDocxCompatibilityFixer.RepairResult repair =
@@ -189,7 +203,37 @@ public final class LibreOfficeConverter implements FileConverter {
         throw new IOException("LibreOffice 生成的 UOF 不含文档根元素");
     }
 
-    private Path findProducedFile(Path outDir, DocumentFormat targetFormat) throws IOException {
+    static Path awaitProducedFile(Path outDir, DocumentFormat targetFormat, Duration wait)
+            throws IOException, InterruptedException {
+        long deadline = System.nanoTime() + wait.toNanos();
+        IOException lastFailure = null;
+        long previousSize = -1;
+        int stableChecks = 0;
+        do {
+            try {
+                Path produced = findProducedFile(outDir, targetFormat);
+                long size = Files.size(produced);
+                if (size > 0 && size == previousSize) {
+                    stableChecks++;
+                    if (stableChecks >= 2) return produced;
+                } else {
+                    stableChecks = 0;
+                    previousSize = size;
+                }
+                lastFailure = null;
+            } catch (IOException error) {
+                if (error.getMessage() != null && error.getMessage().contains("生成了多个")) throw error;
+                lastFailure = error;
+                previousSize = -1;
+                stableChecks = 0;
+            }
+            if (System.nanoTime() < deadline) Thread.sleep(100);
+        } while (System.nanoTime() < deadline);
+        if (lastFailure != null) throw lastFailure;
+        throw new IOException("LibreOffice 未生成稳定的 ." + targetFormat.extension() + " 文件");
+    }
+
+    private static Path findProducedFile(Path outDir, DocumentFormat targetFormat) throws IOException {
         try (var files = Files.list(outDir)) {
             List<Path> produced = files.filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
                     .filter(path -> targetFormat.acceptsFileName(path.getFileName().toString()))

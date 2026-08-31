@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.time.Duration;
 import java.util.EnumSet;
+import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -57,6 +58,27 @@ class LibreOfficeFailureContractTest {
         assertTrue(error.getMessage().contains("文件结构无效"));
         assertFalse(error.getMessage().contains("source file could not be loaded"));
         assertFalse(error.getMessage().contains("sensitive-path"));
+    }
+
+    @Test
+    void waitsForAnAsynchronouslyProducedStableOfficeFile() throws Exception {
+        Path outputDirectory = Files.createDirectories(temp.resolve("delayed-output"));
+        Path output = outputDirectory.resolve("result.pdf");
+        CompletableFuture<Void> writer = CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(300);
+                Files.writeString(output, "%PDF-1.7 delayed", StandardCharsets.US_ASCII);
+            } catch (Exception error) {
+                throw new RuntimeException(error);
+            }
+        });
+
+        Path produced = LibreOfficeConverter.awaitProducedFile(
+                outputDirectory, DocumentFormat.PDF, Duration.ofSeconds(2));
+
+        writer.join();
+        assertEquals(output, produced);
+        assertTrue(Files.size(produced) > 0);
     }
 
     private LibreOfficeConverter converter(Path binary) {
