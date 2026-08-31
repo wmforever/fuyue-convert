@@ -21,7 +21,7 @@ test('Full releases pin official LibreOffice packages for all public architectur
   assert.match(LIBREOFFICE_SOURCE.url, /libreoffice-26\.2\.5\.2\.tar\.xz$/)
   assert.match(LIBREOFFICE_SOURCE.sha256, /^[a-f0-9]{64}$/)
   assert.equal(libreOfficeBinary('/office', 'win32'),
-    path.join('/office', 'program', 'soffice.com'))
+    path.join('/office', 'program', 'soffice.exe'))
   assert.equal(libreOfficeVersionBinary('/office', 'win32'),
     path.join('/office', 'program', 'soffice.com'))
   assert.equal(libreOfficeBinary('/office', 'darwin'),

@@ -48,12 +48,14 @@ export function libreOfficeDescriptor(platform = process.platform, arch = proces
 
 export function libreOfficeBinary(runtimeRoot, platform = process.platform) {
   return platform === 'win32'
-    ? path.join(runtimeRoot, 'program', 'soffice.com')
+    ? path.join(runtimeRoot, 'program', 'soffice.exe')
     : path.join(runtimeRoot, 'LibreOffice.app', 'Contents', 'MacOS', 'soffice')
 }
 
 export function libreOfficeVersionBinary(runtimeRoot, platform = process.platform) {
-  return libreOfficeBinary(runtimeRoot, platform)
+  return platform === 'win32'
+    ? path.join(runtimeRoot, 'program', 'soffice.com')
+    : libreOfficeBinary(runtimeRoot, platform)
 }
 
 export function libreOfficeLicense(runtimeRoot, platform = process.platform) {
@@ -99,9 +101,9 @@ export async function verifyLibreOfficeRuntime(runtimeRoot, platform = process.p
   await access(binary)
   let output = `LibreOffice ${LIBREOFFICE_VERSION}`
   if (execute) {
-    // On Windows soffice.exe is the GUI-subsystem launcher and can keep a
-    // headless CI process waiting even after it has handed work to soffice.bin.
-    // LibreOffice ships soffice.com specifically for console invocation.
+    // The desktop backend has no Windows console, so conversions use the GUI
+    // launcher and wait for their output file. Version probing runs in CI and
+    // uses the console launcher so its text and exit status are observable.
     const versionBinary = libreOfficeVersionBinary(runtimeRoot, platform)
     await access(versionBinary)
     const result = spawnSync(versionBinary, ['--headless', '--version'], { encoding: 'utf8', timeout: 60_000 })
