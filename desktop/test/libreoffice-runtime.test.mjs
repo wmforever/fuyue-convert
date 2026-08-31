@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import test from 'node:test'
 import {
-  LIBREOFFICE_SOURCE, LIBREOFFICE_VERSION, libreOfficeBinary, libreOfficeDescriptor
+  LIBREOFFICE_SOURCE, LIBREOFFICE_VERSION, libreOfficeBinary, libreOfficeDescriptor,
+  libreOfficeVersionBinary
 } from '../scripts/lib/libreoffice-runtime.mjs'
 import { publicReleaseProfile } from '../scripts/lib/runtime-manifest.mjs'
 
@@ -18,9 +20,12 @@ test('Full releases pin official LibreOffice packages for all public architectur
   }
   assert.match(LIBREOFFICE_SOURCE.url, /libreoffice-26\.2\.5\.2\.tar\.xz$/)
   assert.match(LIBREOFFICE_SOURCE.sha256, /^[a-f0-9]{64}$/)
-  assert.equal(libreOfficeBinary('/office', 'win32'), '/office/program/soffice.exe')
+  assert.equal(libreOfficeBinary('/office', 'win32'),
+    path.join('/office', 'program', 'soffice.exe'))
+  assert.equal(libreOfficeVersionBinary('/office', 'win32'),
+    path.join('/office', 'program', 'soffice.com'))
   assert.equal(libreOfficeBinary('/office', 'darwin'),
-    '/office/LibreOffice.app/Contents/MacOS/soffice')
+    path.join('/office', 'LibreOffice.app', 'Contents', 'MacOS', 'soffice'))
 })
 
 test('runtime policy requires LibreOffice only in Full profiles', async () => {

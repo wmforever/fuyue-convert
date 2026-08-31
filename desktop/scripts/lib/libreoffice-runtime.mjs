@@ -52,6 +52,12 @@ export function libreOfficeBinary(runtimeRoot, platform = process.platform) {
     : path.join(runtimeRoot, 'LibreOffice.app', 'Contents', 'MacOS', 'soffice')
 }
 
+export function libreOfficeVersionBinary(runtimeRoot, platform = process.platform) {
+  return platform === 'win32'
+    ? path.join(runtimeRoot, 'program', 'soffice.com')
+    : libreOfficeBinary(runtimeRoot, platform)
+}
+
 export function libreOfficeLicense(runtimeRoot, platform = process.platform) {
   return platform === 'win32'
     ? path.join(runtimeRoot, 'program', 'license.txt')
@@ -95,7 +101,12 @@ export async function verifyLibreOfficeRuntime(runtimeRoot, platform = process.p
   await access(binary)
   let output = `LibreOffice ${LIBREOFFICE_VERSION}`
   if (execute) {
-    const result = spawnSync(binary, ['--headless', '--version'], { encoding: 'utf8', timeout: 60_000 })
+    // On Windows soffice.exe is the GUI-subsystem launcher and can keep a
+    // headless CI process waiting even after it has handed work to soffice.bin.
+    // LibreOffice ships soffice.com specifically for console invocation.
+    const versionBinary = libreOfficeVersionBinary(runtimeRoot, platform)
+    await access(versionBinary)
+    const result = spawnSync(versionBinary, ['--headless', '--version'], { encoding: 'utf8', timeout: 60_000 })
     output = `${result.stdout || ''}${result.stderr || ''}`.trim()
     if (result.error || result.status !== 0 || !output.includes(`LibreOffice ${LIBREOFFICE_VERSION}`)) {
       throw new Error(`内置 LibreOffice 版本校验失败：${output || result.error?.message || `退出码 ${result.status}`}`)
