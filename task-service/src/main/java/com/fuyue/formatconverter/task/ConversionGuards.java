@@ -69,13 +69,27 @@ final class ConversionGuards {
         try {
             long deadline = System.nanoTime() + timeout.toNanos();
             finished = false;
+            boolean parentFinished = false;
             while (System.nanoTime() < deadline) {
                 observeDescendants(process, observedDescendants);
+                if (parentFinished) {
+                    if (process.exitValue() != 0 || observedDescendants.stream().noneMatch(ProcessHandle::isAlive)) {
+                        finished = true;
+                        break;
+                    }
+                    Thread.sleep(Math.min(100L, Math.max(1L,
+                            TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime()))));
+                    continue;
+                }
                 long remainingMillis = Math.max(1L,
                         TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime()));
                 if (process.waitFor(Math.min(200L, remainingMillis), TimeUnit.MILLISECONDS)) {
-                    finished = true;
-                    break;
+                    observeDescendants(process, observedDescendants);
+                    parentFinished = true;
+                    if (process.exitValue() != 0 || observedDescendants.stream().noneMatch(ProcessHandle::isAlive)) {
+                        finished = true;
+                        break;
+                    }
                 }
             }
         } catch (InterruptedException e) {

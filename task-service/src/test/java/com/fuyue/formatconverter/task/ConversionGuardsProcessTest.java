@@ -53,6 +53,18 @@ class ConversionGuardsProcessTest {
                 "timed-out child process must not survive");
     }
 
+    @Test
+    void successfulWrapperWaitsForItsObservedChildOutput() throws Exception {
+        Path output = temp.resolve("child-output.txt");
+        List<String> command = javaCommand(SuccessfulWrapperMain.class, output.toString());
+
+        ConversionGuards.runProcess(command, temp.resolve("wrapper.log"),
+                Duration.ofSeconds(5), "包装进程测试");
+
+        assertTrue(Files.isRegularFile(output), "successful child output must exist before returning");
+        assertTrue(Files.readString(output).contains("complete"));
+    }
+
     private List<String> javaCommand(Class<?> mainClass, String... arguments) {
         Path java = Path.of(System.getProperty("java.home"), "bin",
                 System.getProperty("os.name", "").toLowerCase().contains("win") ? "java.exe" : "java");
@@ -84,6 +96,23 @@ class ConversionGuardsProcessTest {
     public static final class SleepingChildMain {
         public static void main(String[] args) throws Exception {
             Thread.sleep(60_000);
+        }
+    }
+
+    public static final class SuccessfulWrapperMain {
+        public static void main(String[] args) throws Exception {
+            Path java = Path.of(System.getProperty("java.home"), "bin",
+                    System.getProperty("os.name", "").toLowerCase().contains("win") ? "java.exe" : "java");
+            new ProcessBuilder(java.toString(), "-cp", System.getProperty("java.class.path"),
+                    DelayedOutputChildMain.class.getName(), args[0]).start();
+            Thread.sleep(400);
+        }
+    }
+
+    public static final class DelayedOutputChildMain {
+        public static void main(String[] args) throws Exception {
+            Thread.sleep(900);
+            Files.writeString(Path.of(args[0]), "complete", StandardCharsets.UTF_8);
         }
     }
 }

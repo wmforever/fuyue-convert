@@ -160,7 +160,10 @@ try {
       status: document.querySelector('.task-panel .status-row strong')?.textContent,
       progress: document.querySelector('.task-panel .status-row b')?.textContent,
       download: document.querySelector('.actions .primary')?.textContent.replace(/\\s+/g, ' ').trim(),
-      failed: Boolean(document.querySelector('.task-panel.failed'))
+      failed: Boolean(document.querySelector('.task-panel.failed')),
+      error: document.querySelector('.task-panel .task-error')?.textContent.replace(/\\s+/g, ' ').trim(),
+      fileResults: [...document.querySelectorAll('.task-panel .file-panel li')]
+        .map(item => item.textContent.replace(/\\s+/g, ' ').trim())
     }))()`)
     if (result.download?.startsWith('下载 ') || result.failed) break
   }
