@@ -60,6 +60,7 @@ public final class LibreOfficeConverter implements FileConverter {
                 "--nofirststartwizard", "--nolockcheck",
                 "-env:UserInstallation=" + profileDir.toUri(),
                 "--convert-to", convertTo, "--outdir", outDir.toString(), input.path().toString());
+        long deadline = System.nanoTime() + timeout.toNanos();
         String processOutput;
         try {
             processOutput = ConversionGuards.runProcess(command, workDir.resolve("libreoffice.log"), timeout,
@@ -71,7 +72,7 @@ public final class LibreOfficeConverter implements FileConverter {
             throw error;
         }
         progress.update(TaskStage.PACKAGING, 90);
-        Duration outputWait = timeout.compareTo(Duration.ofSeconds(30)) < 0 ? timeout : Duration.ofSeconds(30);
+        Duration outputWait = Duration.ofNanos(Math.max(1L, deadline - System.nanoTime()));
         Path produced;
         try {
             produced = awaitProducedFile(outDir, route.targetFormat(), outputWait);

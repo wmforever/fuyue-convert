@@ -107,7 +107,24 @@ jobs:
             $Executable = Join-Path $InstallDir "Fuyue Convert.exe"
             $AppProcess = Start-Process $Executable -ArgumentList "--remote-debugging-port=9227" -PassThru
             node scripts/smoke-conversion.mjs 9227 $Docx --route=docx-to-pdf "--source-label=Word DOCX" "--target-label=PDF" --close-app
-            if ($LASTEXITCODE -ne 0) { throw "Bundled Office DOCX to PDF smoke failed" }
+            $SmokeExit = $LASTEXITCODE
+            if ($SmokeExit -ne 0) {
+              Write-Host "Bundled Office process diagnostics:"
+              Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+                $_.Name -like "soffice*" -or $_.Name -eq "soffice.bin"
+              } | Select-Object ProcessId, ParentProcessId, Name, ExecutablePath, CommandLine | Format-List
+              $TaskRoot = Join-Path $env:APPDATA "Fuyue Convert\data\tasks"
+              if (Test-Path $TaskRoot) {
+                Write-Host "Bundled Office task diagnostics:"
+                Get-ChildItem $TaskRoot -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
+                  $_.Name -in @("libreoffice.log", "worker.log", "worker-response.json", "manifest.json")
+                } | ForEach-Object {
+                  Write-Host "--- $($_.FullName)"
+                  Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
+                }
+              }
+              throw "Bundled Office DOCX to PDF smoke failed"
+            }
             if (-not $AppProcess.WaitForExit(60000)) { throw "Full desktop app did not exit" }
           } finally {
             if ($AppProcess -and -not $AppProcess.HasExited) { Stop-Process -Id $AppProcess.Id -Force -ErrorAction SilentlyContinue }

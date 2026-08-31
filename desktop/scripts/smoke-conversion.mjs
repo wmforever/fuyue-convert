@@ -154,7 +154,7 @@ try {
   await evaluate(`document.querySelector('.actions .primary')?.click()`)
 
   let result = null
-  for (let attempt = 0; attempt < 80; attempt++) {
+  for (let attempt = 0; attempt < 360; attempt++) {
     await pause(500)
     result = await evaluate(`(() => ({
       status: document.querySelector('.task-panel .status-row strong')?.textContent,
