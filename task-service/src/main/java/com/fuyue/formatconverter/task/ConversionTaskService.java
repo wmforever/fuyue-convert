@@ -798,7 +798,24 @@ public final class ConversionTaskService implements AutoCloseable {
         }
     }
 
-    @Override public void close() { cleaner.shutdownNow(); executor.shutdownNow(); }
+    @Override
+    public void close() {
+        cleaner.shutdownNow();
+        executor.shutdownNow();
+        awaitShutdown(cleaner, "cleaner");
+        awaitShutdown(executor, "converter");
+    }
+
+    private void awaitShutdown(ExecutorService service, String name) {
+        try {
+            if (!service.awaitTermination(5, TimeUnit.SECONDS)) {
+                log.warn("{} executor did not stop within the shutdown grace period", name);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Interrupted while waiting for {} executor shutdown", name);
+        }
+    }
 
     private record InputFile(String displayName, String contentType, long size, Path path) {}
     private record TaskPlan(FileConverter converter, ConversionRoute route) {}
