@@ -49,11 +49,26 @@ function run(command, args) {
   })
 }
 
+async function runWithRetry(command, args, attempts = 3) {
+  let lastError
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await run(command, args)
+    } catch (error) {
+      lastError = error
+      if (attempt === attempts) break
+      console.warn(`准备桌面依赖失败，将重试（${attempt}/${attempts}）：${error.message}`)
+      await new Promise(resolve => setTimeout(resolve, attempt * 5_000))
+    }
+  }
+  throw lastError
+}
+
 export async function buildMac() {
   const edition = assertPublicMacEnvironment()
   const packageMetadata = JSON.parse(await readFile(path.join(desktopDirectory, 'package.json'), 'utf8'))
   const descriptor = macBuildDescriptor(process.platform, process.arch, packageMetadata.version, edition)
-  await run(process.execPath, [path.join(scriptDirectory, 'prepare-electron-runtime.mjs')])
+  await runWithRetry(process.execPath, [path.join(scriptDirectory, 'prepare-electron-runtime.mjs')])
   await run(process.execPath, [path.join(scriptDirectory, 'stage-backend.mjs')])
   await run(path.join(desktopDirectory, 'node_modules', '.bin', 'electron-builder'), [
     '--mac', descriptor.archFlag

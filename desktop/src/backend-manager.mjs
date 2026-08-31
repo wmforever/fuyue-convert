@@ -38,7 +38,7 @@ export function resolveBackendLayout(resourcesPath, platform = process.platform)
       path.join(root, 'app', 'poppler', popplerName)
     ],
     officeCandidates: platform === 'win32'
-      ? [path.join(root, 'app', 'libreoffice', 'program', 'soffice.exe')]
+      ? [path.join(root, 'app', 'libreoffice', 'program', 'soffice.com')]
       : [path.join(root, 'app', 'libreoffice', 'LibreOffice.app', 'Contents', 'MacOS', 'soffice')]
   }
 }

@@ -13,12 +13,27 @@ function run(command, args) {
   })
 }
 
+async function runWithRetry(command, args, attempts = 3) {
+  let lastError
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await run(command, args)
+    } catch (error) {
+      lastError = error
+      if (attempt === attempts) break
+      console.warn(`准备桌面依赖失败，将重试（${attempt}/${attempts}）：${error.message}`)
+      await new Promise(resolve => setTimeout(resolve, attempt * 5_000))
+    }
+  }
+  throw lastError
+}
+
 async function main() {
   await run(process.execPath, [path.join(scriptDirectory, 'require-windows.mjs')])
   process.env.FORMAT_CONVERTER_PUBLIC_LITE_RELEASE = 'false'
   process.env.FORMAT_CONVERTER_PUBLIC_FULL_RELEASE = 'true'
-  await run(process.execPath, [path.join(scriptDirectory, 'prepare-electron-runtime.mjs')])
-  await run(process.execPath, [path.join(scriptDirectory, 'prepare-libreoffice-runtime.mjs')])
+  await runWithRetry(process.execPath, [path.join(scriptDirectory, 'prepare-electron-runtime.mjs')])
+  await runWithRetry(process.execPath, [path.join(scriptDirectory, 'prepare-libreoffice-runtime.mjs')])
   process.env.FORMAT_CONVERTER_LIBREOFFICE_HOME = path.join(desktopDirectory, '.runtime', 'libreoffice')
   await run(process.execPath, [path.join(scriptDirectory, 'stage-backend.mjs')])
   await run(path.join(desktopDirectory, 'node_modules', '.bin', 'electron-builder'), ['--win', 'dir', '--x64'])

@@ -48,14 +48,12 @@ export function libreOfficeDescriptor(platform = process.platform, arch = proces
 
 export function libreOfficeBinary(runtimeRoot, platform = process.platform) {
   return platform === 'win32'
-    ? path.join(runtimeRoot, 'program', 'soffice.exe')
+    ? path.join(runtimeRoot, 'program', 'soffice.com')
     : path.join(runtimeRoot, 'LibreOffice.app', 'Contents', 'MacOS', 'soffice')
 }
 
 export function libreOfficeVersionBinary(runtimeRoot, platform = process.platform) {
-  return platform === 'win32'
-    ? path.join(runtimeRoot, 'program', 'soffice.com')
-    : libreOfficeBinary(runtimeRoot, platform)
+  return libreOfficeBinary(runtimeRoot, platform)
 }
 
 export function libreOfficeLicense(runtimeRoot, platform = process.platform) {
