@@ -8,15 +8,16 @@ bundles remain subject to their own licenses. The project is therefore not a
 claim that every assembled binary is distributed solely under Apache-2.0.
 
 The official public binary path is restricted to the reviewed Windows x64,
-macOS Intel, and macOS Apple Silicon Lite desktop packages. They exclude
-bundled OCR, Poppler, and LibreOffice. The release
+macOS Intel, and macOS Apple Silicon Lite and Full desktop packages. Both
+editions exclude bundled OCR and Poppler. Lite excludes LibreOffice; Full pins
+and embeds the official LibreOffice 26.2.5.2 runtime. The release
 workflow remains fail-closed unless the repository variable
 `FORMAT_CONVERTER_BINARY_RELEASE_APPROVED` is deliberately enabled for an
 audited tag. The workflow verifies the staged applications, the payload
 installed by the final Windows executable, and both mounted macOS disk images.
 Component metadata, notices, and source records are embedded in each app;
 checksums are published in the Release notes and audit evidence remains in the
-workflow artifacts. The main Release contains only the three user installers.
+workflow artifacts. The main Release contains only the six user installers.
 
 Historical v0.1.0 and v0.1.1 binary assets and expired workflow artifacts were
 withdrawn before the repository became public. Locally assembled packages are
@@ -71,13 +72,29 @@ corresponding-source review.
 
 ## Java Runtime
 
-The official Windows x64 and both native macOS Lite builds pin Eclipse Temurin
+The official Windows x64 and both native macOS Lite and Full builds pin Eclipse Temurin
 17.0.20.1+1, verify vendor, version, build, and architecture, and preserve the
 complete `jlink` `legal/` tree. Each application embeds the exact binary/source
 provenance, source SHA-256, and a corresponding-source availability statement;
 the Release notes link the matching upstream source. A locally detected Oracle
 or otherwise unreviewed JDK must not be reused as a public runtime bundle merely
 because `jlink` can process it.
+
+## LibreOffice (Full edition only)
+
+- Product version: LibreOffice 26.2.5.2 (release 26.2.5)
+- License: Mozilla Public License 2.0 plus the third-party terms enumerated in
+  LibreOffice's complete bundled `LICENSE` file
+- Official binaries: `download.documentfoundation.org/libreoffice/stable/26.2.5/`
+- Corresponding source directory: `download.documentfoundation.org/libreoffice/src/26.2.5/`
+- The four reviewed source archives and their SHA-256 values are embedded in
+  `LIBREOFFICE-SOURCE-OFFER.txt`
+
+The Full build preserves the complete official LibreOffice application/runtime,
+its license inventory, version, architecture, binary-package URL, size, and
+SHA-256. The packaged runtime is automatically selected by the desktop backend.
+Lite does not contain this component and may use a separately installed
+LibreOffice. Neither edition includes Microsoft Office.
 
 ## Droid Sans Fallback
 

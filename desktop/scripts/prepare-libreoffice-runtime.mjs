@@ -7,7 +7,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import crossSpawn from 'cross-spawn'
 import {
-  LIBREOFFICE_SOURCE, libreOfficeDescriptor, locateWindowsLibreOfficeRoot,
+  LIBREOFFICE_SOURCES, libreOfficeDescriptor, locateWindowsLibreOfficeRoot,
   hashFile, verifyLibreOfficeRuntime
 } from './lib/libreoffice-runtime.mjs'
 
@@ -106,7 +106,7 @@ async function main() {
         sha256: descriptor.sha256,
         size: descriptor.size
       },
-      correspondingSource: LIBREOFFICE_SOURCE,
+      correspondingSources: LIBREOFFICE_SOURCES,
       versionOutput: verified.versionOutput
     }, null, 2)}\n`, 'utf8')
     console.log(`LibreOffice Full Runtime 已准备并验证：${outputRoot}`)

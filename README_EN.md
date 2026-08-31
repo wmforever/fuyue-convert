@@ -10,19 +10,19 @@ Fuyue Convert is an open-source document format conversion platform. It focuses 
 
 The project is built with Java 17, Spring Boot, Vue 3, Apache POI, PDFBox, Poppler, OFDRW, and LibreOffice headless. It does not promise that every format can be converted with perfect visual fidelity and full structural editability. Instead, each route has an explicit status, quality goal, and failure reason so results can be verified and improved by the community.
 
-> Project-authored source is Apache-2.0; build dependencies remain under their own licenses. The official Windows x64, macOS Intel, and macOS Apple Silicon Lite desktop builds pass dedicated provenance, license, hash, installed-payload, and smoke-test gates. See [Third-Party Notices](THIRD_PARTY_NOTICES.md).
+> Project-authored source is Apache-2.0; build dependencies remain under their own licenses. Official Windows x64, macOS Intel, and macOS Apple Silicon builds are available in both Lite and Full editions and pass dedicated provenance, license, hash, installed-payload, and smoke-test gates. See [Third-Party Notices](THIRD_PARTY_NOTICES.md).
 
 ## Download the desktop app
 
-| System | Download |
-| --- | --- |
-| Windows 10/11 x64 | [Fuyue-Convert-0.1.5-win-x64.exe](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-win-x64.exe) |
-| macOS 13+, Intel | [Fuyue-Convert-0.1.5-macOS-Intel.dmg](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Intel.dmg) |
-| macOS 13+, Apple Silicon | [Fuyue-Convert-0.1.5-macOS-Apple-Silicon.dmg](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Apple-Silicon.dmg) |
+| System | Lite (without Office) | Full (bundled Office) |
+| --- | --- | --- |
+| Windows 10/11 x64 | [Download Lite EXE](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-win-x64.exe) | [Download Full EXE](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-win-x64-Full.exe) |
+| macOS 13+, Intel | [Download Lite DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Intel.dmg) | [Download Full DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Intel-Full.dmg) |
+| macOS 13+, Apple Silicon | [Download Lite DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Apple-Silicon.dmg) | [Download Full DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Apple-Silicon-Full.dmg) |
 
-All three packages include an Eclipse Temurin Java Runtime, so no separate Java installation is required. The Release asset list contains only these three user-facing installers. Licenses, component inventories, and provenance are embedded; SHA-256 values are in the [v0.1.5 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.5) notes, while audit evidence remains in the workflow run. GitHub's two automatic Source code entries cannot be hidden.
+All six packages include an Eclipse Temurin Java Runtime. Lite is smaller and does not bundle LibreOffice. Full bundles the pinned LibreOffice 26.2.5.2 runtime so Office-engine routes work out of the box. Neither edition bundles OCR/Tesseract or Poppler. Licenses, component inventories, and provenance are embedded; SHA-256 values are in the [v0.1.5 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.5) notes.
 
-This is a Lite build: OCR/Tesseract, Poppler, and LibreOffice are not bundled. Core PDF routes have a built-in fallback, OCR routes report unavailable, and high-fidelity Office routes use an existing local LibreOffice installation. Windows may show SmartScreen or an unknown-publisher warning. The macOS packages are ad-hoc signed and not Apple-notarized; if first launch is blocked, use System Settings → Privacy & Security → Open Anyway.
+Lite uses an existing local LibreOffice installation for high-fidelity Office routes; Full automatically uses its bundled engine. Windows may show SmartScreen or an unknown-publisher warning. The macOS packages are ad-hoc signed and not Apple-notarized; if first launch is blocked, use System Settings → Privacy & Security → Open Anyway.
 
 ## Positioning
 

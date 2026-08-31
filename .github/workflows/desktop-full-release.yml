@@ -1,0 +1,360 @@
+name: Add Full desktop editions
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing release tag to receive the three Full installers
+        required: true
+        default: v0.1.5
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-full-release-${{ inputs.release_tag }}
+  cancel-in-progress: false
+
+env:
+  TEMURIN_VERSION: "17.0.20+101"
+  TEMURIN_RUNTIME_VERSION: "17.0.20.1"
+
+jobs:
+  package_windows:
+    name: Package Windows x64 Full
+    if: >-
+      vars.FORMAT_CONVERTER_BINARY_RELEASE_APPROVED == 'true' &&
+      vars.FORMAT_CONVERTER_BINARY_RELEASE_APPROVED_SHA == github.sha
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout approved source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Verify requested version
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          $Version = (Get-Content desktop\package.json -Raw | ConvertFrom-Json).version
+          if ($env:RELEASE_TAG -ne "v$Version") { throw "Release tag/version mismatch" }
+
+      - name: Set up pinned Temurin 17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.TEMURIN_VERSION }}
+          architecture: x64
+          java-package: jdk
+          check-latest: false
+          verify-signature: true
+          cache: maven
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Install, check, and package Full
+        working-directory: desktop
+        shell: pwsh
+        env:
+          FORMAT_CONVERTER_BUNDLE_OCR: "false"
+          FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME: "true"
+          FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION: ${{ env.TEMURIN_RUNTIME_VERSION }}
+        run: |
+          node ..\scripts\check-local-only-files.mjs
+          npm ci --no-audit --no-fund
+          npm run check
+          npm test
+          npm run dist:win:full
+          npm run verify:package -- --public-full --require-installer
+
+      - name: Install and run real bundled-Office conversion
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $Version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $Installer = Resolve-Path "release\Fuyue-Convert-$Version-win-x64-Full.exe"
+          $InstallDir = Join-Path $env:LOCALAPPDATA "Programs\Fuyue Convert"
+          $AppProcess = $null
+          try {
+            $Install = Start-Process $Installer -ArgumentList "/S" -Wait -PassThru
+            if ($Install.ExitCode -ne 0) { throw "Full installer failed: $($Install.ExitCode)" }
+            node scripts/verify-packaged.mjs (Join-Path $InstallDir "resources") --public-full
+            if ($LASTEXITCODE -ne 0) { throw "Installed Full payload verification failed" }
+
+            $Office = Join-Path $InstallDir "resources\backend\app\libreoffice\program\soffice.exe"
+            $SmokeRoot = Join-Path $env:RUNNER_TEMP "fuyue-full-office-smoke"
+            New-Item $SmokeRoot -ItemType Directory -Force | Out-Null
+            $Profile = Join-Path $SmokeRoot "profile"
+            New-Item $Profile -ItemType Directory -Force | Out-Null
+            $ProfileUri = ([Uri]$Profile).AbsoluteUri
+            & $Office "-env:UserInstallation=$ProfileUri" --headless --convert-to docx --outdir $SmokeRoot test\fixtures\smoke.txt
+            if ($LASTEXITCODE -ne 0) { throw "Bundled LibreOffice could not create smoke DOCX" }
+            $Docx = Join-Path $SmokeRoot "smoke.docx"
+            if (-not (Test-Path $Docx)) { throw "Smoke DOCX was not created" }
+
+            $Executable = Join-Path $InstallDir "Fuyue Convert.exe"
+            $AppProcess = Start-Process $Executable -ArgumentList "--remote-debugging-port=9227" -PassThru
+            node scripts/smoke-conversion.mjs 9227 $Docx --route=docx-to-pdf "--source-label=Word DOCX" "--target-label=PDF" --close-app
+            if ($LASTEXITCODE -ne 0) { throw "Bundled Office DOCX to PDF smoke failed" }
+            if (-not $AppProcess.WaitForExit(60000)) { throw "Full desktop app did not exit" }
+          } finally {
+            if ($AppProcess -and -not $AppProcess.HasExited) { Stop-Process -Id $AppProcess.Id -Force -ErrorAction SilentlyContinue }
+            Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+              $_.ExecutablePath -and $_.ExecutablePath.StartsWith($InstallDir, [StringComparison]::OrdinalIgnoreCase)
+            } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+            $Uninstaller = Get-ChildItem $InstallDir -Filter "Uninstall*.exe" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($Uninstaller) {
+              $Uninstall = Start-Process $Uninstaller.FullName -ArgumentList "/S" -Wait -PassThru
+              if ($Uninstall.ExitCode -ne 0) { throw "Full uninstaller failed: $($Uninstall.ExitCode)" }
+            }
+          }
+
+      - name: Upload only the Windows Full installer
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: fuyue-convert-Windows-x64-Full
+          path: desktop/release/Fuyue-Convert-*-win-x64-Full.exe
+          if-no-files-found: error
+          compression-level: 0
+
+  package_macos:
+    name: Package macOS ${{ matrix.label }} Full
+    if: >-
+      vars.FORMAT_CONVERTER_BINARY_RELEASE_APPROVED == 'true' &&
+      vars.FORMAT_CONVERTER_BINARY_RELEASE_APPROVED_SHA == github.sha
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - runner: macos-15-intel
+            arch: x64
+            java_arch: x64
+            machine_arch: x86_64
+            label: Intel
+            suffix: macOS-Intel-Full
+          - runner: macos-15
+            arch: arm64
+            java_arch: aarch64
+            machine_arch: arm64
+            label: Apple-Silicon
+            suffix: macOS-Apple-Silicon-Full
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Checkout approved source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Verify native runner and requested version
+        env:
+          EXPECTED_ARCH: ${{ matrix.machine_arch }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = "$EXPECTED_ARCH"
+          version="$(node -p "require('./desktop/package.json').version")"
+          test "$RELEASE_TAG" = "v$version"
+
+      - name: Set up pinned Temurin 17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.TEMURIN_VERSION }}
+          architecture: ${{ matrix.java_arch }}
+          java-package: jdk
+          check-latest: false
+          verify-signature: true
+          cache: maven
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Install, check, and package Full
+        working-directory: desktop
+        env:
+          FORMAT_CONVERTER_BUNDLE_OCR: "false"
+          FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME: "true"
+          FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION: ${{ env.TEMURIN_RUNTIME_VERSION }}
+        run: |
+          set -euo pipefail
+          node ../scripts/check-local-only-files.mjs
+          npm ci --no-audit --no-fund
+          npm run check
+          npm test
+          npm run dist:mac:full
+
+      - name: Install DMG and run real bundled-Office conversion
+        working-directory: desktop
+        env:
+          PACKAGE_ARCH: ${{ matrix.arch }}
+          ARTIFACT_SUFFIX: ${{ matrix.suffix }}
+        run: |
+          set -euo pipefail
+          dmg="$(find release -maxdepth 1 -name "Fuyue-Convert-*-$ARTIFACT_SUFFIX.dmg" -print -quit)"
+          test -n "$dmg"
+          mount_point="$RUNNER_TEMP/fuyue-full-dmg-$PACKAGE_ARCH"
+          install_root="$RUNNER_TEMP/fuyue-full-installed-$PACKAGE_ARCH"
+          installed_app="$install_root/Fuyue Convert.app"
+          mkdir -p "$mount_point" "$install_root"
+          attached=false
+          app_pid=""
+          cleanup() {
+            set +e
+            if [ -n "$app_pid" ]; then kill "$app_pid" 2>/dev/null; fi
+            pkill -f "$installed_app/" 2>/dev/null || true
+            if [ "$attached" = true ]; then hdiutil detach "$mount_point" -force >/dev/null 2>&1; fi
+            rm -rf "$mount_point" "$install_root"
+          }
+          trap cleanup EXIT
+          hdiutil attach "$dmg" -readonly -nobrowse -mountpoint "$mount_point"
+          attached=true
+          ditto "$mount_point/Fuyue Convert.app" "$installed_app"
+          hdiutil detach "$mount_point"
+          attached=false
+
+          resources="$installed_app/Contents/Resources"
+          node scripts/verify-packaged.mjs "$resources" --public-full --arch="$PACKAGE_ARCH"
+          office="$resources/backend/app/libreoffice/LibreOffice.app/Contents/MacOS/soffice"
+          smoke_root="$RUNNER_TEMP/fuyue-full-office-$PACKAGE_ARCH"
+          mkdir -p "$smoke_root/profile"
+          "$office" "-env:UserInstallation=file://$smoke_root/profile" --headless \
+            --convert-to docx --outdir "$smoke_root" test/fixtures/smoke.txt
+          test -f "$smoke_root/smoke.docx"
+
+          executable="$installed_app/Contents/MacOS/Fuyue Convert"
+          "$executable" --remote-debugging-port=9227 >"$RUNNER_TEMP/fuyue-full-$PACKAGE_ARCH.log" 2>&1 &
+          app_pid=$!
+          node scripts/smoke-conversion.mjs 9227 "$smoke_root/smoke.docx" \
+            --route=docx-to-pdf '--source-label=Word DOCX' '--target-label=PDF' --close-app
+          for attempt in {1..240}; do
+            if ! kill -0 "$app_pid" 2>/dev/null; then break; fi
+            sleep 0.25
+          done
+          if kill -0 "$app_pid" 2>/dev/null; then cat "$RUNNER_TEMP/fuyue-full-$PACKAGE_ARCH.log"; exit 1; fi
+          wait "$app_pid"
+          app_pid=""
+
+      - name: Upload only the macOS Full installer
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: fuyue-convert-macOS-${{ matrix.arch }}-Full
+          path: desktop/release/Fuyue-Convert-*-${{ matrix.suffix }}.dmg
+          if-no-files-found: error
+          compression-level: 0
+
+  publish:
+    name: Append exactly three Full installers
+    runs-on: ubuntu-latest
+    needs: [package_windows, package_macos]
+    if: >-
+      vars.FORMAT_CONVERTER_BINARY_RELEASE_APPROVED == 'true' &&
+      vars.FORMAT_CONVERTER_BINARY_RELEASE_APPROVED_SHA == github.sha
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout approved source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Download Full installers
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: fuyue-convert-*-Full
+          path: full-artifacts
+          merge-multiple: true
+
+      - name: Verify existing Lite assets and exact Full allowlist
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./desktop/package.json').version")"
+          lite=(
+            "Fuyue-Convert-$version-win-x64.exe"
+            "Fuyue-Convert-$version-macOS-Intel.dmg"
+            "Fuyue-Convert-$version-macOS-Apple-Silicon.dmg"
+          )
+          full=(
+            "Fuyue-Convert-$version-win-x64-Full.exe"
+            "Fuyue-Convert-$version-macOS-Intel-Full.dmg"
+            "Fuyue-Convert-$version-macOS-Apple-Silicon-Full.dmg"
+          )
+          mapfile -t existing < <(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | LC_ALL=C sort)
+          mapfile -t expected_lite < <(printf '%s\n' "${lite[@]}" | LC_ALL=C sort)
+          for file in "${lite[@]}"; do
+            printf '%s\n' "${existing[@]}" | grep -Fx -- "$file" >/dev/null
+          done
+          for file in "${full[@]}"; do
+            if printf '%s\n' "${existing[@]}" | grep -Fx -- "$file" >/dev/null; then
+              gh release delete-asset "$RELEASE_TAG" "$file" --repo "$GITHUB_REPOSITORY" --yes
+            fi
+          done
+          mapfile -t remaining < <(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | LC_ALL=C sort)
+          diff -u <(printf '%s\n' "${expected_lite[@]}") <(printf '%s\n' "${remaining[@]}")
+          tag_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" --jq '.object.sha')"
+          if [ "$tag_sha" != "$GITHUB_SHA" ]; then
+            echo "Release tag points to $tag_sha, but approved Full source is $GITHUB_SHA" >&2
+            exit 1
+          fi
+          for file in "${full[@]}"; do test -f "full-artifacts/$file"; done
+          mapfile -t actual_full < <(find full-artifacts -maxdepth 1 -type f -printf '%f\n' | LC_ALL=C sort)
+          mapfile -t expected_full < <(printf '%s\n' "${full[@]}" | LC_ALL=C sort)
+          diff -u <(printf '%s\n' "${expected_full[@]}") <(printf '%s\n' "${actual_full[@]}")
+
+          upload=()
+          for file in "${full[@]}"; do upload+=("full-artifacts/$file"); done
+          gh release upload "$RELEASE_TAG" "${upload[@]}" --repo "$GITHUB_REPOSITORY"
+          cat > release-notes.md <<EOF
+          ## 直接下载
+
+          - Lite：体积较小，不内置 LibreOffice；Office 路线使用电脑上已有的 LibreOffice。
+          - Full：内置 LibreOffice 26.2.5.2，DOCX/XLSX/PPTX/WPS/ET/DPS/UOF 相关 Office 路线开箱可用。
+          - 两种版本都不内置 OCR/Tesseract 或 Poppler。
+          - macOS 包为 ad-hoc 签名且未经过 Apple 公证，首次打开请在“系统设置 → 隐私与安全”中选择“仍要打开”。
+
+          LibreOffice 对应源码：[The Document Foundation 官方源码包](https://download.documentfoundation.org/libreoffice/src/26.2.5/libreoffice-26.2.5.2.tar.xz)，SHA-256：\`8ec785ee1fd1a1d9b9d8eba1c8ff7556695ca8f02e1f7a26bef8cd540f669fea\`。
+
+          ## 六个安装包 SHA-256
+
+          \`\`\`text
+          EOF
+          mkdir -p checksum-assets
+          for file in "${lite[@]}"; do
+            gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern "$file" --dir checksum-assets
+          done
+          cp full-artifacts/* checksum-assets/
+          (cd checksum-assets && sha256sum * | LC_ALL=C sort) >> release-notes.md
+          echo '\`\`\`' >> release-notes.md
+          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --title "$RELEASE_TAG · Lite + Full" --notes-file release-notes.md
+
+      - name: Verify the final six-asset release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./desktop/package.json').version")"
+          expected="$RUNNER_TEMP/expected.txt"
+          actual="$RUNNER_TEMP/actual.txt"
+          printf '%s\n' \
+            "Fuyue-Convert-$version-macOS-Apple-Silicon-Full.dmg" \
+            "Fuyue-Convert-$version-macOS-Apple-Silicon.dmg" \
+            "Fuyue-Convert-$version-macOS-Intel-Full.dmg" \
+            "Fuyue-Convert-$version-macOS-Intel.dmg" \
+            "Fuyue-Convert-$version-win-x64-Full.exe" \
+            "Fuyue-Convert-$version-win-x64.exe" | LC_ALL=C sort > "$expected"
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets \
+            --jq '.assets[].name' | LC_ALL=C sort > "$actual"
+          diff -u "$expected" "$actual"

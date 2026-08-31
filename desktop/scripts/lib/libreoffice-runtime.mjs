@@ -27,11 +27,18 @@ const DESCRIPTORS = {
   }
 }
 
-export const LIBREOFFICE_SOURCE = {
-  url: 'https://download.documentfoundation.org/libreoffice/src/26.2.5/libreoffice-26.2.5.2.tar.xz',
-  sha256: '8ec785ee1fd1a1d9b9d8eba1c8ff7556695ca8f02e1f7a26bef8cd540f669fea',
-  size: 292259528
-}
+export const LIBREOFFICE_SOURCES = [
+  ['libreoffice-26.2.5.2.tar.xz', '8ec785ee1fd1a1d9b9d8eba1c8ff7556695ca8f02e1f7a26bef8cd540f669fea', 292259528],
+  ['libreoffice-dictionaries-26.2.5.2.tar.xz', '81f70748287ae25e4b142b3aa5b595daec3d61dad03eb1453cdb35ff837909e3', 62313292],
+  ['libreoffice-help-26.2.5.2.tar.xz', '73fbe02eb53408e11121da9a170bc4a9c2250b5baaa8851c65b3f70e88841703', 58404968],
+  ['libreoffice-translations-26.2.5.2.tar.xz', '44f1dbdefe0dab21293297cacb8af8d6a7bece4ce95ded7f25c24837bd067fb7', 235069428]
+].map(([fileName, sha256, size]) => ({
+  fileName,
+  url: `https://download.documentfoundation.org/libreoffice/src/26.2.5/${fileName}`,
+  sha256,
+  size
+}))
+export const LIBREOFFICE_SOURCE = LIBREOFFICE_SOURCES[0]
 
 export function libreOfficeDescriptor(platform = process.platform, arch = process.arch) {
   const descriptor = DESCRIPTORS[`${platform}-${arch}`]

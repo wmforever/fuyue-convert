@@ -1,0 +1,24 @@
+Fuyue Convert - LibreOffice corresponding source offer
+=======================================================
+
+The Full desktop edition includes the official LibreOffice 26.2.5.2 runtime.
+The complete source set published by The Document Foundation is available at:
+
+https://download.documentfoundation.org/libreoffice/src/26.2.5/
+
+libreoffice-26.2.5.2.tar.xz
+SHA-256: 8ec785ee1fd1a1d9b9d8eba1c8ff7556695ca8f02e1f7a26bef8cd540f669fea
+
+libreoffice-dictionaries-26.2.5.2.tar.xz
+SHA-256: 81f70748287ae25e4b142b3aa5b595daec3d61dad03eb1453cdb35ff837909e3
+
+libreoffice-help-26.2.5.2.tar.xz
+SHA-256: 73fbe02eb53408e11121da9a170bc4a9c2250b5baaa8851c65b3f70e88841703
+
+libreoffice-translations-26.2.5.2.tar.xz
+SHA-256: 44f1dbdefe0dab21293297cacb8af8d6a7bece4ce95ded7f25c24837bd067fb7
+
+For at least three years after distribution of a Full binary, a copy of the
+same corresponding source may also be requested through the public project
+issue tracker at https://github.com/wmforever/fuyue-convert/issues . No charge
+beyond the reasonable cost of physically providing the source will be required.

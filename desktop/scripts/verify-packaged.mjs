@@ -180,6 +180,7 @@ async function main() {
     if (publicFullRelease) {
       await requireFile(resources, 'backend/licenses/LIBREOFFICE-LICENSE.txt', 100_000)
       await requireFile(resources, 'backend/licenses/LIBREOFFICE-PROVENANCE.json')
+      await requireFile(resources, 'backend/licenses/LIBREOFFICE-SOURCE-OFFER.txt')
       await verifyLibreOfficeRuntime(path.join(resources, 'backend', 'app', 'libreoffice'),
         targetPlatform, requestedArch, { execute: false })
     }

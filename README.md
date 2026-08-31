@@ -10,19 +10,19 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 
 项目基于 Java 17、Spring Boot、Vue 3、Apache POI、PDFBox、Poppler、OFDRW 和 LibreOffice headless。它不会承诺所有格式都能做到“完全一致且完全可编辑”，而是把转换能力拆成明确的路线、质量等级和失败原因，让结果可以被自动验证，也方便社区逐步增强。
 
-> 自有源码采用 Apache-2.0；构建依赖继续适用各自许可证。官方 Windows x64、macOS Intel 与 macOS Apple Silicon Lite 桌面版通过独立的运行时来源、许可、哈希和安装后冒烟门禁发布，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。
+> 自有源码采用 Apache-2.0；构建依赖继续适用各自许可证。官方 Windows x64、macOS Intel 与 macOS Apple Silicon 均提供 Lite 与 Full 桌面版，并通过独立的运行时来源、许可、哈希和安装后冒烟门禁，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。
 
 ## 直接下载桌面版
 
-| 系统 | 下载 |
-| --- | --- |
-| Windows 10/11 x64 | [Fuyue-Convert-0.1.5-win-x64.exe](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-win-x64.exe) |
-| macOS 13+，Intel 芯片 | [Fuyue-Convert-0.1.5-macOS-Intel.dmg](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Intel.dmg) |
-| macOS 13+，Apple M 系列芯片 | [Fuyue-Convert-0.1.5-macOS-Apple-Silicon.dmg](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Apple-Silicon.dmg) |
+| 系统 | Lite（不带 Office） | Full（内置 Office） |
+| --- | --- | --- |
+| Windows 10/11 x64 | [下载 Lite EXE](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-win-x64.exe) | [下载 Full EXE](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-win-x64-Full.exe) |
+| macOS 13+，Intel 芯片 | [下载 Lite DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Intel.dmg) | [下载 Full DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Intel-Full.dmg) |
+| macOS 13+，Apple M 系列芯片 | [下载 Lite DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Apple-Silicon.dmg) | [下载 Full DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Apple-Silicon-Full.dmg) |
 
-三个安装包均内置 Eclipse Temurin Java Runtime，不需要另外安装 Java。Release 下载列表只保留这三个用户安装文件；许可证、组件清单和来源记录内置在应用中，SHA-256 写在 [v0.1.5 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.5) 正文，审计材料保留在自动构建记录中。GitHub 自动生成的 Source code 两项无法隐藏。
+六个安装包均内置 Eclipse Temurin Java Runtime，不需要另外安装 Java。Lite 体积较小，不内置 LibreOffice；Full 内置经过版本与哈希锁定的 LibreOffice 26.2.5.2，Office 引擎路线开箱可用。两种版本都不内置 OCR/Tesseract 或 Poppler。许可证、组件清单和来源记录内置在应用中，SHA-256 写在 [v0.1.5 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.5) 正文。
 
-这是 Lite 版：不内置 OCR/Tesseract、Poppler 或 LibreOffice；PDF 基础路线有内置回退，OCR 路线会显示不可用，Office 高保真路线会使用电脑上已有的 LibreOffice。Windows 尚未做商业代码签名，可能显示 SmartScreen 或“未知发布者”。macOS 包采用 ad-hoc 签名且尚未经过 Apple 公证，首次打开如被拦截，请前往“系统设置 → 隐私与安全”确认“仍要打开”。
+Lite 的 Office 高保真路线会使用电脑上已有的 LibreOffice；Full 自动使用包内 Office 引擎。Windows 尚未做商业代码签名，可能显示 SmartScreen 或“未知发布者”。macOS 包采用 ad-hoc 签名且尚未经过 Apple 公证，首次打开如被拦截，请前往“系统设置 → 隐私与安全”确认“仍要打开”。
 
 ## 项目定位
 

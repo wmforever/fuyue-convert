@@ -6,7 +6,7 @@
 2. 外部 Office 引擎、系统字体、Poppler 版本和操作系统都会影响视觉结果。
 3. 默认已使用独立 JVM Worker 实现硬超时和进程树清理；`worker-max-memory-mb` 只限制 Java 堆，CPU、总内存和外部 Office 进程的 OS 级限制需要 Docker/cgroup 或 systemd 配合。
 4. 批量任务中单个文件失败不会中断其他文件，调用方需要检查每个 `TaskFileResult`。
-5. 官方公开二进制提供 Windows 10/11 x64、macOS 13+ Intel 和 macOS 13+ Apple Silicon 三个 Lite 桌面安装包，均不内置 OCR、Poppler 或 LibreOffice；本地 `jpackage`/WiX、OCR 扩展包及 Linux 包不属于官方发行版。v0.1.5 Windows 尚未做商业代码签名，SmartScreen 可能显示未知发布者；macOS 仅作 ad-hoc 签名且未经过 Apple 公证，首次打开需由用户在“系统设置 → 隐私与安全”确认“仍要打开”。后续广泛分发仍应补 Developer ID/Windows 代码签名、公证与可信时间戳。
+5. 官方公开二进制为 Windows 10/11 x64、macOS 13+ Intel 和 macOS 13+ Apple Silicon 分别提供 Lite 与 Full：Lite 不内置 LibreOffice，Full 固定内置 LibreOffice 26.2.5.2；两者均不内置 OCR 或 Poppler。本地 `jpackage`/WiX、OCR 扩展包及 Linux 包不属于官方发行版。v0.1.5 Windows 尚未做商业代码签名，SmartScreen 可能显示未知发布者；macOS 仅作 ad-hoc 签名且未经过 Apple 公证，首次打开需由用户在“系统设置 → 隐私与安全”确认“仍要打开”。后续广泛分发仍应补 Developer ID/Windows 代码签名、公证与可信时间戳。
 
 ## OFD
 

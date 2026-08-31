@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-08-30",
+  "reviewedAt": "2026-08-31",
   "profile": "windows-x64-lite",
   "profiles": {
     "windows-x64-lite": {
@@ -34,7 +34,7 @@
       "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "libreoffice"]
     }
   },
-  "description": "Fail-closed allow-list for every JAR nested in the public Lite desktop fat JAR. A dependency version change requires an explicit policy review.",
+  "description": "Fail-closed allow-list for public Lite and Full desktop runtimes. Full additionally requires the reviewed LibreOffice component; every dependency change requires explicit review.",
   "licenseFileSha256": {
     "desktop/licenses/java/BOUNCY-CASTLE-LICENSE.html": "edbbb10380b1271998b867a2e36b1cbee226e03d438726e1a91f80c5dde11849",
     "desktop/licenses/java/CURVESAPI-LICENSE.txt": "126424394603617f06ed957255a1f6569ed54f58eec15891ade42405566cc4bc",
@@ -397,7 +397,7 @@
       "spdx": "MPL-2.0 AND LicenseRef-LibreOffice-Third-Party",
       "source": "https://download.documentfoundation.org/libreoffice/src/26.2.5/libreoffice-26.2.5.2.tar.xz",
       "sourceSha256": "8ec785ee1fd1a1d9b9d8eba1c8ff7556695ca8f02e1f7a26bef8cd540f669fea",
-      "licensePath": "backend/licenses/LIBREOFFICE-LICENSE.txt"
+      "licensePath": ["backend/licenses/LIBREOFFICE-LICENSE.txt", "backend/licenses/LIBREOFFICE-SOURCE-OFFER.txt"]
     },
     "nsis-stdutils": {
       "version": "1.14+2018-10-27",

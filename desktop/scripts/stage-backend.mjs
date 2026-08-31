@@ -192,6 +192,8 @@ async function stageLicenses() {
     await copyRequired(verified.license, path.join(licenses, 'LIBREOFFICE-LICENSE.txt'), 'LibreOffice 完整许可证清单')
     await copyRequired(path.join(officeRoot, 'FUYUE-LIBREOFFICE-PROVENANCE.json'),
       path.join(licenses, 'LIBREOFFICE-PROVENANCE.json'), 'LibreOffice 来源记录')
+    await copyRequired(path.join(desktopDirectory, 'licenses', 'LIBREOFFICE-SOURCE-OFFER.txt'),
+      path.join(licenses, 'LIBREOFFICE-SOURCE-OFFER.txt'), 'LibreOffice 对应源码提供说明')
   }
   if (publicLiteRelease || publicFullRelease) {
     const temurinProvenance = process.platform === 'darwin'
