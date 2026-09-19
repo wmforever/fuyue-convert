@@ -2,6 +2,7 @@ package com.fuyue.formatconverter.task;
 
 import com.fuyue.formatconverter.parser.ParseLimits;
 import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 
 import javax.imageio.ImageIO;
@@ -122,6 +123,13 @@ final class ConversionGuards {
         } catch (InvalidPasswordException e) {
             throw new ConversionFailureException("PDF_PASSWORD_REQUIRED",
                     "PDF 已加密，需要密码；当前任务 API 不接收密码。");
+        }
+    }
+
+    static void requireUnsignedPdf(PDDocument document, String operation) throws ConversionFailureException {
+        if (!document.getSignatureDictionaries().isEmpty()) {
+            throw new ConversionFailureException("PDF_SIGNATURE_PRESENT",
+                    "PDF 包含数字签名；" + operation + "会使签名失效，已拒绝处理");
         }
     }
 

@@ -86,19 +86,14 @@ public final class OfdrwParser implements OfdParser {
 
     @Override public String name() { return "OFDRW 2.3.9"; }
 
-    private boolean requiresOcr(List<TextBlock> texts, List<ImageBlock> images, Rect pageBox) {
-        List<ImageBlock> contentImages = images.stream()
-                .filter(image -> !"SIGNATURE".equalsIgnoreCase(image.role()))
-                .toList();
-        if (contentImages.isEmpty()) return false;
-        int characters = texts.stream().map(TextBlock::text)
-                .mapToInt(value -> (int) value.codePoints().filter(codePoint -> !Character.isWhitespace(codePoint)).count())
-                .sum();
-        if (characters == 0) return true;
-        double pageArea = Math.max(1d, pageBox.width() * pageBox.height());
-        double largestCoverage = contentImages.stream().map(ImageBlock::box)
-                .mapToDouble(box -> box.intersectionArea(pageBox) / pageArea).max().orElse(0d);
-        return characters < 20 && largestCoverage >= 0.5d;
+    private boolean requiresOcr(List<TextBlock> texts, List<ImageBlock> images, Rect pageBox)
+            throws OfdParseException {
+        try {
+            return ScannedContentDetector.requiresOcr(texts, images, pageBox);
+        } catch (ScannedContentDetector.AnalysisLimitException e) {
+            throw new OfdParseException("OCR_IMAGE_LIMIT_EXCEEDED",
+                    "OFD 页面图片候选过多，拒绝不完整转换", e);
+        }
     }
 
     private int parseBlocks(List<PageBlockType> blocks, int page, int z, ResourceManage resources,

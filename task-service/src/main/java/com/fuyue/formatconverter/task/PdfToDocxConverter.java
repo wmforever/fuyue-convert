@@ -35,10 +35,10 @@ public final class PdfToDocxConverter implements FileConverter {
         this.ocr = ocr;
         this.route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.DOCX,
                 ocr == null ? "将文字型 PDF 转换为可编辑 Word，恢复文字、基础段落、页面尺寸和方向。"
-                        : "恢复 PDF 真实文字，并以本地 Tesseract 将扫描页识别为可编辑 Word 文字。",
+                        : "恢复 PDF 真实文字，并以本地 Tesseract 叠加可编辑文字，同时保留扫描源图防止漏内容。",
                 QualityLevel.BETA, ConversionStrategy.EDITABLE,
                 ocr == null ? List.of() : List.of("tesseract"),
-                List.of(ocr == null ? "扫描型 PDF 需要 OCR" : "OCR 页必须人工复核",
+                List.of(ocr == null ? "扫描型 PDF 需要 OCR" : "OCR 页保留扫描图层且文字必须人工复核",
                         "嵌入图片、复杂矢量图形、字体替代、阅读顺序和复杂表格仍需更多样本验证"));
     }
 
@@ -53,9 +53,6 @@ public final class PdfToDocxConverter implements FileConverter {
                 : parser.parseForEditableOcr(input.path(), input.displayName(), limits);
         if (ocr != null) {
             parsed = ocr.recognizeMissingPages(input.path(), parsed, workDir.resolve("pdf-ocr"), limits, progress);
-            // OCR uses extracted images as input only. Do not write them back into the
-            // DOCX, otherwise a text-backed PDF still looks like an image document.
-            parsed = withoutSourceImages(parsed);
         }
         progress.update(TaskStage.RECOGNIZING, 50);
         List<ConversionWarning> warnings = new ArrayList<>(parsed.warnings());
@@ -73,12 +70,4 @@ public final class PdfToDocxConverter implements FileConverter {
         return input.replaceFirst("(?i)\\.pdf$", "") + ".docx";
     }
 
-    private DocumentModel withoutSourceImages(DocumentModel document) {
-        List<PageModel> pages = document.pages().stream()
-                .map(page -> new PageModel(page.pageNumber(), page.physicalBox(), page.textBlocks(), page.lines(),
-                        List.of(), page.paragraphs(), page.tables(), page.warnings()))
-                .toList();
-        return new DocumentModel(document.sourceName(), document.parserName(), document.sourcePageCount(),
-                pages, document.warnings());
-    }
 }

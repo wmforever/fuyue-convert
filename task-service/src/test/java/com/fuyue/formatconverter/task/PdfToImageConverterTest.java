@@ -53,6 +53,26 @@ class PdfToImageConverterTest {
     }
 
     @Test
+    void taskDpiOverridesTheConverterDefaultAndIsValidatedBeforeRendering() throws Exception {
+        Path source = temp.resolve("task-dpi.pdf");
+        try (PDDocument pdf = new PDDocument()) {
+            pdf.addPage(new PDPage(new PDRectangle(72, 36)));
+            pdf.save(source.toFile());
+        }
+        Path output = temp.resolve("task-dpi.png");
+        ConversionOptions options = ConversionOptions.fromRequest(null, null, null, null,
+                null, null, null, null, null, 72);
+        new PdfToPngConverter(null, 200).convert(
+                new ConversionInput("task-dpi.pdf", "application/pdf", Files.size(source), source, options),
+                temp.resolve("task-dpi-work"), output, ParseLimits.defaults(), (stage, percent) -> { });
+
+        var image = ImageIO.read(output.toFile());
+        assertEquals(72, image.getWidth());
+        assertEquals(36, image.getHeight());
+        assertEquals(72d, ImageMetadataReader.read(output, DocumentFormat.PNG).dpiX(), 0.1d);
+    }
+
+    @Test
     void rendersDeviceCmykPdfToRgbJpegAndWritesJfifDpi() throws Exception {
         Path source = temp.resolve("cmyk.pdf");
         try (PDDocument pdf = new PDDocument()) {

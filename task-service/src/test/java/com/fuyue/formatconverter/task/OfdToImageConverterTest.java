@@ -99,6 +99,23 @@ class OfdToImageConverterTest {
     }
 
     @Test
+    void taskDpiOverridesTheDefaultForOfdImageExport() throws Exception {
+        Path source = temp.resolve("task-dpi.ofd");
+        try (OFDDoc document = new OFDDoc(source)) {
+            document.addVPage(textPage(100d, 50d, "清晰度测试"));
+        }
+        ConversionOptions options = ConversionOptions.fromRequest(null, null, null, null,
+                null, null, null, null, null, 72);
+        ConversionOutput converted = new OfdToPngConverter(new SafeOfdExtractor(), new OfdrwParser(), null)
+                .convert(new ConversionInput("task-dpi.ofd", "application/ofd", Files.size(source), source, options),
+                        temp.resolve("task-dpi-work"), temp.resolve("task-dpi.png"), ParseLimits.defaults(),
+                        (stage, percent) -> { });
+        BufferedImage image = ImageIO.read(converted.path().toFile());
+        assertDimensions(image, 283, 142);
+        assertEmbeddedDpi(converted.path(), DocumentFormat.PNG, 72d);
+    }
+
+    @Test
     void fixedLayoutPdfDoesNotClaimOcrIsRequiredForImageOnlyPage() throws Exception {
         Path red = raster("pdf-red.png", Color.RED);
         Path source = temp.resolve("image-only.ofd");

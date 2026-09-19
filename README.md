@@ -43,18 +43,18 @@ Lite 的 Office 高保真路线会使用电脑上已有的 LibreOffice；Full �
 
 | 路线 | 状态 | 默认策略 | 说明 |
 | --- | --- | --- | --- |
-| OFD -> DOCX/TXT/PDF/PNG/JPG | beta | 结构/版式 | DOCX/TXT 使用结构化解析；含中日韩文字的 DOCX 嵌入已许可的回退字体，避免换机后文字不可见。未配置 OCR 时扫描页严格失败，配置本地 Tesseract 后对扫描图像补充坐标文字。PDF/PNG/JPEG 按源坐标绘制文字、图片、路径和普通图片型签章；嵌套 OFD 签章外观会明确警告并跳过，正文仍保留。图片固定为 160 DPI，多页输出 ZIP。 |
+| OFD -> DOCX/TXT/PDF/PNG/JPG | beta | 结构/版式 | DOCX/TXT 使用结构化解析；含中日韩文字的 DOCX 嵌入已许可的回退字体，避免换机后文字不可见。未配置 OCR 时扫描页严格失败，配置本地 Tesseract 后对扫描区域补充坐标文字，DOCX 同时保留扫描源视觉层。PDF/PNG/JPEG 按源坐标绘制文字、图片、路径和普通图片型签章；嵌套 OFD 签章外观会明确警告并跳过，正文仍保留。图片默认 160 DPI，可按任务选择 36-600 DPI，多页输出 ZIP。 |
 | OFD -> XLSX | experimental | 数据优先 | 将高置信度有线规则表格写成真实单元格、分页工作表和合并区域；未识别到可靠表格返回 `NO_TABLE_FOUND`，扫描页返回 `OCR_REQUIRED`。 |
 | CSV <-> XLSX | stable | 数据优先 | CSV 支持 UTF-8/UTF-16 BOM/GB18030 与逗号、TAB、分号、竖线识别；输入统一写成文本以阻断公式注入。XLSX 公式导出缓存结果，日期按单元格格式输出，多工作表分别导出 CSV ZIP。 |
 | DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用隔离的 headless profile 转换，校验真实 PDF 页数；本地字体会影响结果。 |
 | TXT -> DOCX/PDF | stable | 内容优先 | 支持 UTF-8、带 BOM 的 UTF-16 和严格 GB18030 解码；换页符生成真实分页，PDF 按字形宽度进行 CJK 换行。DOCX 未显式配置东亚字体时按需嵌入内置许可字体，显式配置时保持指定字体。 |
 | DOCX -> TXT | beta | 内容提取 | 按正文对象顺序提取段落和表格，并带标签追加页眉页脚、文本框、脚注尾注、批注及修订文字；不保留版式。 |
-| PDF -> TXT | beta | 内容提取 | 按页面坐标和多栏顺序提取文字并保留换页；默认对扫描页返回 `OCR_REQUIRED`，显式配置本地 OCR 后仅识别缺少文字的内容页。 |
+| PDF -> TXT | beta | 内容提取 | 按页面坐标和多栏顺序提取文字并保留换页；默认对扫描页以及“少量原生文字＋大幅扫描区域”返回 `OCR_REQUIRED`，显式配置本地 OCR 后只补齐缺少文字层的区域。 |
 | PDF -> PNG/JPG | stable | 版式渲染 | 默认 160 DPI（可配置 36-600）；PNG 保留透明画布，JPEG 转为 RGB 并使用 0.9 质量；多页自动输出 ZIP。 |
-| PDF -> DOCX | beta | 可编辑优先 | 恢复真实文字、基础段落、页面尺寸和方向；含中日韩文字时嵌入已许可的 Droid Sans Fallback，仍不嵌入整页图。默认严格拒绝扫描页，显式配置本地 OCR 后把扫描页识别为带坐标的可编辑文字。 |
+| PDF -> DOCX | beta | 可编辑优先 | 恢复真实文字、基础段落、页面尺寸和方向；含中日韩文字时嵌入已许可的 Droid Sans Fallback。默认严格拒绝缺少文字层的整页或大幅扫描区域；显式配置本地 OCR 后叠加带坐标的可编辑文字，并保留扫描源视觉层和普通照片，避免部分识别导致内容丢失。 |
 | PDF -> OFD | experimental | 版式优先 | 生成真实 OFD 包；160 DPI 页面图像层保留视觉，文字型 PDF 同时写入源坐标 OFD 文字对象。优先使用 Poppler 并保留 PDFBox 回退；复杂对象尚未逐项结构化重建。 |
 | PDF 压缩/水印 | beta | 保真优先 | 压缩支持无损、均衡和强力三级策略，先预览源 PDF，完成后再逐页预览真实压缩结果；水印支持中英文文字、不透明度、角度、颜色、位置、平铺和页码范围，并提供本地实时效果预览。修改已提交的设置后会明确要求重新生成，避免把旧结果当成新设置下载。两者均拒绝修改带数字签名的 PDF。 |
-| PDF 合并/拆分 | stable | 保真优先 | 合并按上传顺序输出单个 PDF，可切换检查每个源文件并在重排后保持预览绑定；拆分按页输出编号连续的 ZIP，可逐页确认选择范围并在提交前阻止越界页码。两类操作都会重写 PDF，不保留数字签名有效性。 |
+| PDF 合并/拆分 | stable | 保真优先 | 合并按上传顺序输出单个 PDF，可切换检查每个源文件并在重排后保持预览绑定；拆分按页输出编号连续的 ZIP，可逐页确认选择范围并在提交前阻止越界页码。两类操作都会重写 PDF；检测到数字签名时返回 `PDF_SIGNATURE_PRESENT`，不生成签名失效的结果。 |
 | PNG/JPG -> PDF | stable | 版式优先 | 读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。同格式多图按上传顺序合并为多页 PDF，网页端展示源图页序，转换完成后逐页展示真实 PDF 结果。 |
 | PNG/JPG -> TXT/DOCX | experimental/按需 | OCR 提取 | 可显式配置系统 Tesseract；经许可审核的运行包未来也可内置固定 OCR 运行时。TXT 输出识别文字，DOCX 将坐标文字映射到 `DocumentModel` 后生成真实可编辑文本；两者均返回页级置信度和 OCR 警告。 |
 | WPS/ET/DPS/UOF -> OOXML | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |
@@ -67,9 +67,10 @@ Lite 的 Office 高保真路线会使用电脑上已有的 LibreOffice；Full �
 - LibreOffice：用于 DOCX/XLSX/PPTX/WPS/ET/DPS/UOF 与 PDF 相关的 Office 引擎转换；图片转 PDF 使用内置 PDFBox 路线以稳定处理 DPI 和 EXIF。
 - Poppler：用于 PDF 渲染为 PNG/JPEG 和视觉回归比较。
 - `FORMAT_CONVERTER_IMAGE_DPI`：PDF 图片导出的渲染分辨率，默认 `160`，允许 `36-600`；异常配置会在启动转换器时明确失败。
+- `FORMAT_CONVERTER_OFD_IMAGE_DPI`：OFD 图片导出的服务默认渲染分辨率，默认 `160`，允许 `36-600`；API 的 `imageDpi` 可按任务覆盖。
 - `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION`：可选的 LibreOffice 版本锁定片段（如 `24.8`）；实际 `--version` 不匹配时 Office 引擎会标记为不可用，版本可在 `/api/health` 和 `/api/diagnostics` 查看。
 - 源码/独立 JAR 模式可设置 `FORMAT_CONVERTER_OCR_ENABLED=true`，用 `FORMAT_CONVERTER_TESSERACT_BINARY` 指定系统 Tesseract（留空则从 `PATH` 查找）。OCR 只在图片 OCR 路线或检测出的扫描页上执行，不参与普通原生文字转换。设置 `FORMAT_CONVERTER_OCR_ENABLED=false` 可强制关闭；状态接口通过 `ocr.bundled` 标识当前是否使用经过审核的内置运行时。
-- OCR 不参与固定版式渲染，也不替换 PDF/OFD 原生文字解析。混合文档逐页处理：有原生文字的页保留原对象，只有扫描页进入 OCR；页面模型不连续时返回 `OCR_PAGE_MISSING`，无文字、低于最低置信度、超时和资源终止分别返回 `OCR_NO_TEXT`、`OCR_LOW_CONFIDENCE`、`OCR_TIMEOUT`、`OCR_RESOURCE_EXHAUSTED`，不会生成不完整结果。
+- OCR 不参与固定版式渲染，也不替换 PDF/OFD 原生文字解析。混合文档按页内区域处理：保留原生文字、扫描源视觉层和普通照片，只对缺少文字层的扫描区域 OCR。页面模型不连续、图像无法安全提取/解码、无新增文字、低于最低置信度、超时和资源终止都返回稳定错误码，不会生成悄悄缺内容的结果。
 - 系统字体：仍会影响 Office 输出的分页、行距和文字替换。PDF/OFD -> DOCX 对中日韩文字嵌入项目已声明许可的回退字体，以保证基本字形可见；源字体的字宽与设计仍可能不同。基础 PDF 输出路线也内置中文回退字体，可通过 `FORMAT_CONVERTER_PDF_FONT` 指定 TrueType 字体。TXT -> DOCX 可通过 `FORMAT_CONVERTER_DOCX_FONT` 和 `FORMAT_CONVERTER_DOCX_CJK_FONT` 配置西文及东亚字体名；未显式配置东亚字体时同样按需嵌入内置字体。
 
 质量标准和已提交的测试摘要见 [docs/quality-standard.md](docs/quality-standard.md) 与 [docs/test-report.md](docs/test-report.md)。完整 QA 会在本地生成被忽略的 `qa-samples/report/qa-report.md`。
@@ -125,6 +126,10 @@ npm run dev
 
 `desktop/` 提供独立 Electron 外壳，界面采用深色本地工作台布局。Electron 不重写转换逻辑：生产模式会启动内置 Java Runtime 与 Spring Boot 服务，并加载同源的本地页面。
 
+在桌面版手动下载任务结果时，Electron 主进程只接收 `taskId`，从本地后端校验已完成任务，并将结果以流式方式写入系统“另存为”对话框选定的位置；成功后会记住上次保存目录。普通网页环境没有桌面桥接时，仍使用浏览器下载。
+
+使用偏好会记住自动下载、PDF 默认压缩等级，以及每种源格式上次选择的可用目标路线。桌面版将偏好写入 Electron `userData`，纯网页版写入当前浏览器的 `localStorage`；已失效或当前不可用的路线不会被自动恢复。
+
 开发预览（先保持 Java 服务与 Vite 运行）：
 
 ```bash
@@ -146,7 +151,7 @@ npm run dist:win
 npm run verify:package -- --public-lite --require-installer
 ```
 
-桌面模式使用随机回环端口和每次启动随机生成的 API Token；Token 只由 Electron 主进程注入本地任务请求，不暴露给页面脚本。用户文件与任务数据写入系统 `userData` 目录，关闭窗口时会优先触发后端优雅关闭。正式发布还会校验最终 EXE、静默安装后的真实资源、转换结果和退出后的残留进程；本地自行生成的安装器不属于官方发行版。详细说明见 [desktop/README.md](desktop/README.md)。
+桌面模式使用随机回环端口和每次启动随机生成的 API Token；Token 只由 Electron 主进程注入本地任务请求，不暴露给页面脚本。用户文件、任务数据与桌面偏好写入系统 `userData` 目录，关闭窗口时会优先触发后端优雅关闭。正式发布还会校验最终 EXE、静默安装后的真实资源、转换结果和退出后的残留进程；本地自行生成的安装器不属于官方发行版。详细说明见 [desktop/README.md](desktop/README.md)。
 
 ## 本地运行包构建
 

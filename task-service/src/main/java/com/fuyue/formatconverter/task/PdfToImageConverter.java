@@ -57,7 +57,7 @@ abstract class PdfToImageConverter implements FileConverter {
         }
         this.route = ConversionRoute.of(DocumentFormat.PDF, targetFormat, description,
                 QualityLevel.STABLE, ConversionStrategy.FIDELITY, List.of(),
-                List.of("多页 PDF 输出 ZIP", "默认 160 DPI，可通过 FORMAT_CONVERTER_IMAGE_DPI 配置 36-600 DPI"));
+                List.of("多页 PDF 输出 ZIP", "可按任务选择 36-600 DPI；默认 160 DPI，可通过 FORMAT_CONVERTER_IMAGE_DPI 配置 36-600 DPI"));
         this.targetFormat = targetFormat;
         this.imageFormat = imageFormat;
         this.popplerFlag = popplerFlag;
@@ -70,23 +70,24 @@ abstract class PdfToImageConverter implements FileConverter {
     @Override
     public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
+        float dpi = input.options().imageDpi() == null ? renderDpi : input.options().imageDpi();
         Files.createDirectories(workDir);
         // pdftoppm cannot emit transparent PNG. PDFBox ARGB is used for PNG so an empty PDF
         // page remains transparent instead of being silently flattened to white.
         if (targetFormat == DocumentFormat.JPG && popplerBinary != null) {
-            return convertWithPoppler(input, workDir, outputPath, limits, progress);
+            return convertWithPoppler(input, workDir, outputPath, limits, progress, dpi);
         }
-        return convertWithPdfBox(input, workDir, outputPath, limits, progress);
+        return convertWithPdfBox(input, workDir, outputPath, limits, progress, dpi);
     }
 
     private ConversionOutput convertWithPoppler(ConversionInput input, Path workDir, Path outputPath,
-                                                ParseLimits limits, ConversionProgress progress) throws Exception {
-        int pageCount = validatePdfForRender(input.path(), limits);
+                                                ParseLimits limits, ConversionProgress progress, float dpi) throws Exception {
+        int pageCount = validatePdfForRender(input.path(), limits, dpi);
         progress.update(TaskStage.RENDERING, 30);
         Path renderDir = Files.createDirectories(workDir.resolve("poppler"));
         Path prefix = renderDir.resolve("page");
         List<String> command = new ArrayList<>(List.of(popplerBinary.toString(), "-r",
-                formatDpi(renderDpi), "-cropbox", popplerFlag));
+                formatDpi(dpi), "-cropbox", popplerFlag));
         if (targetFormat == DocumentFormat.JPG) command.addAll(List.of("-jpegopt", "quality=90,optimize=y"));
         command.add(input.path().toString());
         command.add(prefix.toString());
@@ -105,9 +106,9 @@ abstract class PdfToImageConverter implements FileConverter {
     }
 
     private ConversionOutput convertWithPdfBox(ConversionInput input, Path workDir, Path outputPath,
-                                               ParseLimits limits, ConversionProgress progress) throws Exception {
+                                               ParseLimits limits, ConversionProgress progress, float dpi) throws Exception {
         progress.update(TaskStage.PARSING, 20);
-        int validatedPages = validatePdfForRender(input.path(), limits);
+        int validatedPages = validatePdfForRender(input.path(), limits, dpi);
         try (var document = Loader.loadPDF(input.path().toFile())) {
             PDFRenderer renderer = new PDFRenderer(document);
             int pages = document.getNumberOfPages();
@@ -116,7 +117,7 @@ abstract class PdfToImageConverter implements FileConverter {
             if (pages != validatedPages) throw new IOException("PDF 校验与渲染页数不一致");
             if (pages == 1) {
                 progress.update(TaskStage.RENDERING, 70);
-                writePage(renderer, 0, outputPath);
+                writePage(renderer, 0, outputPath, dpi);
                 ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "PDF 单页 " + targetFormat.label());
                 return new ConversionOutput(outputPath, outputName(input.displayName()), 1, List.of());
             }
@@ -125,7 +126,7 @@ abstract class PdfToImageConverter implements FileConverter {
             for (int i = 0; i < pages; i++) {
                 progress.update(TaskStage.RENDERING, 20 + (int) ((i + 1) * 65.0 / Math.max(1, pages)));
                 Path pageImage = workDir.resolve(pageFileName(i + 1));
-                writePage(renderer, i, pageImage);
+                writePage(renderer, i, pageImage, dpi);
                 ConversionGuards.requireNonEmptyOutputFile(pageImage, limits, "PDF 单页 " + targetFormat.label());
                 totalImageBytes += Files.size(pageImage);
                 if (totalImageBytes > limits.maxExpandedBytes()) {
@@ -138,13 +139,14 @@ abstract class PdfToImageConverter implements FileConverter {
         }
     }
 
-    private void writePage(PDFRenderer renderer, int pageIndex, Path outputPath) throws IOException {
-        BufferedImage image = renderer.renderImageWithDPI(pageIndex, renderDpi,
+    private void writePage(PDFRenderer renderer, int pageIndex, Path outputPath, float dpi) throws IOException {
+        BufferedImage image = renderer.renderImageWithDPI(pageIndex, dpi,
                 targetFormat == DocumentFormat.PNG ? ImageType.ARGB : ImageType.RGB);
-        writeImageWithDpi(image, outputPath);
+        try { writeImageWithDpi(image, outputPath, dpi); }
+        finally { image.flush(); }
     }
 
-    private void writeImageWithDpi(BufferedImage image, Path outputPath) throws IOException {
+    private void writeImageWithDpi(BufferedImage image, Path outputPath, float dpi) throws IOException {
         var writers = ImageIO.getImageWritersByFormatName(imageFormat);
         if (!writers.hasNext()) throw new IOException("当前 Java ImageIO 不支持写入 " + targetFormat.label());
         ImageWriter writer = writers.next();
@@ -157,34 +159,34 @@ abstract class PdfToImageConverter implements FileConverter {
             }
             IIOMetadata metadata = writer.getDefaultImageMetadata(
                     ImageTypeSpecifier.createFromRenderedImage(image), params);
-            if (targetFormat == DocumentFormat.PNG) applyPngDpi(metadata);
-            else applyJpegDpi(metadata);
+            if (targetFormat == DocumentFormat.PNG) applyPngDpi(metadata, dpi);
+            else applyJpegDpi(metadata, dpi);
             writer.write(null, new IIOImage(image, null, metadata), params);
         } finally {
             writer.dispose();
         }
     }
 
-    private void applyPngDpi(IIOMetadata metadata) throws IOException {
+    private void applyPngDpi(IIOMetadata metadata, float dpi) throws IOException {
         String format = "javax_imageio_png_1.0";
         IIOMetadataNode root = (IIOMetadataNode) metadata.getAsTree(format);
         IIOMetadataNode physical = child(root, "pHYs");
-        int pixelsPerMeter = Math.max(1, Math.round(renderDpi / 0.0254f));
+        int pixelsPerMeter = Math.max(1, Math.round(dpi / 0.0254f));
         physical.setAttribute("pixelsPerUnitXAxis", Integer.toString(pixelsPerMeter));
         physical.setAttribute("pixelsPerUnitYAxis", Integer.toString(pixelsPerMeter));
         physical.setAttribute("unitSpecifier", "meter");
         metadata.setFromTree(format, root);
     }
 
-    private void applyJpegDpi(IIOMetadata metadata) throws IOException {
+    private void applyJpegDpi(IIOMetadata metadata, float dpi) throws IOException {
         String format = "javax_imageio_jpeg_image_1.0";
         IIOMetadataNode root = (IIOMetadataNode) metadata.getAsTree(format);
         IIOMetadataNode jfif = descendant(root, "app0JFIF");
         if (jfif == null) return;
-        int dpi = Math.max(1, Math.min(65_535, Math.round(renderDpi)));
+        int density = Math.max(1, Math.min(65_535, Math.round(dpi)));
         jfif.setAttribute("resUnits", "1");
-        jfif.setAttribute("Xdensity", Integer.toString(dpi));
-        jfif.setAttribute("Ydensity", Integer.toString(dpi));
+        jfif.setAttribute("Xdensity", Integer.toString(density));
+        jfif.setAttribute("Ydensity", Integer.toString(density));
         metadata.setFromTree(format, root);
     }
 
@@ -206,7 +208,7 @@ abstract class PdfToImageConverter implements FileConverter {
         return null;
     }
 
-    private int validatePdfForRender(Path input, ParseLimits limits) throws Exception {
+    private int validatePdfForRender(Path input, ParseLimits limits, float dpi) throws Exception {
         try (var document = Loader.loadPDF(input.toFile())) {
             int pages = document.getNumberOfPages();
             if (pages <= 0) throw new IOException("PDF 没有可转换页面");
@@ -217,7 +219,7 @@ abstract class PdfToImageConverter implements FileConverter {
                 float userUnit = pdfPage.getUserUnit();
                 if (!Float.isFinite(userUnit) || userUnit <= 0) userUnit = 1f;
                 ConversionGuards.requireRenderBounds(crop.getWidth() * userUnit,
-                        crop.getHeight() * userUnit, renderDpi, limits);
+                        crop.getHeight() * userUnit, dpi, limits);
             }
             return pages;
         } catch (InvalidPasswordException e) {

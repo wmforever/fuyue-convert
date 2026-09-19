@@ -37,10 +37,10 @@ public final class OfdToDocxConverter implements FileConverter {
         this.ocr = ocr;
         this.route = ConversionRoute.of(DocumentFormat.OFD, DocumentFormat.DOCX,
                 ocr == null ? "将文字型 OFD 转换为可编辑 Word 文档，保留段落、表格、图片和页面方向。"
-                        : "恢复 OFD 结构化对象，并将扫描图像文字识别为可编辑 Word 文字。",
+                        : "恢复 OFD 结构化对象，在保留扫描源视觉层的同时叠加可编辑 Word 文字。",
                 QualityLevel.BETA, ConversionStrategy.EDITABLE,
                 ocr == null ? List.of() : List.of("tesseract"),
-                List.of(ocr == null ? "扫描页未配置 OCR 时严格失败" : "OCR 页必须人工复核",
+                List.of(ocr == null ? "扫描页未配置 OCR 时严格失败" : "OCR 页保留扫描源图且文字必须人工复核",
                         "复杂签章和厂商私有扩展需要更多样本验证"));
     }
 
@@ -53,6 +53,7 @@ public final class OfdToDocxConverter implements FileConverter {
         SafeOfdPackage safe = extractor.extract(input.path(), workDir, limits);
         progress.update(TaskStage.PARSING, 15);
         DocumentModel parsed = parser.parse(safe, input.displayName(), limits);
+        OfdContentGuards.requireImagesExtracted(parsed);
         if (ocr != null) {
             parsed = ocr.recognizeRequiredPages(parsed, workDir.resolve("ofd-ocr"), limits, progress);
         }

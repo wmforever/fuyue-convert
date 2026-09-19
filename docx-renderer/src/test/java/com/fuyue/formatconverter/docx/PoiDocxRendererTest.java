@@ -10,6 +10,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STSectionMark;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipFile;
@@ -148,6 +149,35 @@ class PoiDocxRendererTest {
         }
     }
 
+    @Test void placesOnlyOcrBackgroundImagesBehindEditableText() throws Exception {
+        byte[] pixel = Base64.getDecoder().decode(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=");
+        TextBlock editable = text("ocr-text", 15, 20, "可编辑 OCR 文字");
+        List<ImageBlock> images = List.of(
+                new ImageBlock("scan-background", 1, new Rect(0, 0, 210, 297),
+                        "image/png", pixel, "OCR_SCAN_BACKGROUND", -99),
+                new ImageBlock("page-background", 1, new Rect(0, 0, 210, 297),
+                        "image/png", pixel, "OCR_PAGE_BACKGROUND", -98),
+                new ImageBlock("ordinary-photo", 1, new Rect(20, 40, 40, 30),
+                        "image/png", pixel, "PDF_IMAGE", -97));
+        PageModel page = new PageModel(1, new Rect(0, 0, 210, 297), List.of(editable), List.of(), images,
+                List.of(new ParagraphModel(editable.box(), List.of(editable), ParagraphModel.Alignment.LEFT, 0)),
+                List.of(), List.of());
+        Path output = temp.resolve("ocr-background-layering.docx");
+
+        new PoiDocxRenderer().render(new DocumentModel("ocr.pdf", "test", 1, List.of(page), List.of()), output);
+
+        try (ZipFile archive = new ZipFile(output.toFile())) {
+            String xml = new String(archive.getInputStream(archive.getEntry("word/document.xml")).readAllBytes());
+            assertTrue(xml.contains("可编辑 OCR 文字"));
+            assertTrue(imageShape(xml, "scan-background").contains("z-index:-251658752"));
+            assertTrue(imageShape(xml, "page-background").contains("z-index:-251658752"));
+            assertFalse(imageShape(xml, "ordinary-photo").contains("z-index:-"));
+            assertTrue(imageShape(xml, "ordinary-photo").contains("z-index:1"),
+                    "普通图片继续使用原有的正层级钳制语义");
+        }
+    }
+
     @Test void tableOnOnePageDoesNotSwitchTheWholeDocumentToFlowLayout() throws Exception {
         PageModel first = pageWithText(1, new Rect(0, 0, 210, 297), "第一页固定正文");
         BorderStyle border = BorderStyle.solid(0.2, ColorValue.BLACK);
@@ -265,5 +295,14 @@ class PoiDocxRendererTest {
         int count = 0;
         for (int at = value.indexOf(needle); at >= 0; at = value.indexOf(needle, at + needle.length())) count++;
         return count;
+    }
+
+    private String imageShape(String xml, String title) {
+        int titleAt = xml.indexOf("title=\"" + title + "\"");
+        assertTrue(titleAt >= 0, "missing image: " + title);
+        int start = xml.lastIndexOf("<v:shape", titleAt);
+        int end = xml.indexOf("</v:shape>", titleAt);
+        assertTrue(start >= 0 && end >= 0, "missing VML shape: " + title);
+        return xml.substring(start, end);
     }
 }

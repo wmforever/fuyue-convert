@@ -9,6 +9,7 @@ import com.fuyue.formatconverter.model.LineElement;
 import com.fuyue.formatconverter.model.Point;
 import com.fuyue.formatconverter.model.PageModel;
 import com.fuyue.formatconverter.model.Rect;
+import com.fuyue.formatconverter.model.ScannedContentDetector;
 import com.fuyue.formatconverter.model.TextBlock;
 import com.fuyue.formatconverter.model.Transform2D;
 import com.fuyue.formatconverter.model.WarningCode;
@@ -16,13 +17,9 @@ import com.fuyue.formatconverter.parser.ParseLimits;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
-import org.apache.pdfbox.pdmodel.graphics.PDXObject;
-import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImage;
 import org.apache.pdfbox.contentstream.PDFGraphicsStreamEngine;
 import org.apache.pdfbox.util.Matrix;
@@ -42,7 +39,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import javax.imageio.ImageIO;
 
 /** Extracts editable PDF text objects into the shared millimetre-based layout model. */
@@ -68,6 +64,12 @@ public final class PdfLayoutParser {
     /** Parses editable page geometry while allowing an explicitly configured OCR engine to fill scanned pages. */
     public DocumentModel parseForEditableOcr(Path source, String displayName, ParseLimits limits) throws IOException {
         return parse(source, displayName, limits, ParseMode.EDITABLE_OCR);
+    }
+
+    /** Parses extraction geometry while allowing OCR without applying Word's page-size limit. */
+    public DocumentModel parseForTextExtractionOcr(Path source, String displayName, ParseLimits limits)
+            throws IOException {
+        return parse(source, displayName, limits, ParseMode.TEXT_EXTRACTION_OCR);
     }
 
     private DocumentModel parse(Path source, String displayName, ParseLimits limits,
@@ -96,22 +98,44 @@ public final class PdfLayoutParser {
 
             List<PageModel> pages = new ArrayList<>(pageCount);
             for (PageState state : states) {
-                if (mode.requiresExtractableText() && !state.hasEditableText() && state.hasVisibleContent()) {
-                    throw new ConversionFailureException("OCR_REQUIRED",
-                            "PDF 第 " + state.pageNumber() + " 页未检测到可编辑文字，可能是扫描件或纯图片 PDF；请先接入 OCR。");
-                }
                 List<ConversionWarning> warnings = new ArrayList<>();
                 PageGraphics pageGraphics = graphics.getOrDefault(state.pageNumber(), PageGraphics.EMPTY);
+                if (pageGraphics.imageExtractionFailed()
+                        && (mode.requiresExtractableText() || mode.acceptsOcr())) {
+                    throw new ConversionFailureException("PDF_IMAGE_EXTRACTION_FAILED",
+                            "PDF 第 " + state.pageNumber()
+                                    + " 页包含无法安全提取的图片，拒绝生成可能缺失内容的结果。");
+                }
+                boolean imageRequiresOcr;
+                try {
+                    imageRequiresOcr = ScannedContentDetector.requiresOcr(
+                            state.texts(), pageGraphics.images(), state.pageBox());
+                } catch (ScannedContentDetector.AnalysisLimitException e) {
+                    throw new ConversionFailureException("OCR_IMAGE_LIMIT_EXCEEDED",
+                            "PDF 第 " + state.pageNumber() + " 页图片候选过多，拒绝不完整转换。");
+                }
+                boolean requiresOcr = !state.hasEditableText() && state.hasVisibleContent()
+                        || imageRequiresOcr;
+                if (mode.requiresExtractableText() && requiresOcr) {
+                    throw new ConversionFailureException("OCR_REQUIRED",
+                            "PDF 第 " + state.pageNumber()
+                                    + " 页包含缺少可编辑文字层的扫描图像内容；请先接入 OCR。");
+                }
+                if (mode.acceptsOcr() && requiresOcr) {
+                    warnings.add(ConversionWarning.of(WarningCode.OCR_REQUIRED,
+                            "PDF 第 " + state.pageNumber()
+                                    + " 页包含缺少可编辑文字层的扫描图像内容，需要 OCR。",
+                            state.pageNumber()));
+                }
                 if (state.scale() < 0.9999d) {
                     warnings.add(ConversionWarning.of(WarningCode.OFFICE_COMPATIBILITY_LAYOUT,
                             "PDF 第 " + state.pageNumber() + " 页尺寸超过 Word 22 英寸上限，已按 "
                                     + String.format(Locale.ROOT, "%.1f", state.scale() * 100d)
                                     + "% 等比缩小页面、文字与布局。", state.pageNumber()));
                 }
-                if (mode.enforceWordPageLimit() && state.hasEditableText() && state.hasImageObjects()
-                        && pageGraphics.images().isEmpty()) {
+                if (pageGraphics.imageExtractionFailed()) {
                     warnings.add(ConversionWarning.of(WarningCode.IMAGE_EXTRACTION_FAILED,
-                            "PDF 第 " + state.pageNumber() + " 页包含图片；当前可编辑路线仅恢复文字，图片尚未写入 Word。",
+                            "PDF 第 " + state.pageNumber() + " 页有实际绘制的图片无法提取，请复核输出。",
                             state.pageNumber()));
                 }
                 pages.add(new PageModel(state.pageNumber(), state.pageBox(), state.texts(), pageGraphics.lines(), pageGraphics.images(),
@@ -141,8 +165,7 @@ public final class PdfLayoutParser {
         double scaledUnit = userUnit * scale;
         return new PageState(pageNumber,
                 new Rect(0, 0, pointsToMm(widthPoints * scale), pointsToMm(heightPoints * scale)), scaledUnit, rotation,
-                hasVisibleContent(page), hasImageObjects(page.getResources(),
-                        java.util.Collections.newSetFromMap(new IdentityHashMap<>())), new ArrayList<>(), scale);
+                hasVisibleContent(page), new ArrayList<>(), scale);
     }
 
     private boolean hasVisibleContent(PDPage page) throws IOException {
@@ -156,27 +179,19 @@ public final class PdfLayoutParser {
         return !page.getAnnotations().isEmpty();
     }
 
-    private boolean hasImageObjects(PDResources resources, Set<Object> visited) throws IOException {
-        if (resources == null || !visited.add(resources.getCOSObject())) return false;
-        for (var name : resources.getXObjectNames()) {
-            PDXObject object = resources.getXObject(name);
-            if (object instanceof PDImageXObject) return true;
-            if (object instanceof PDFormXObject form && hasImageObjects(form.getResources(), visited)) return true;
-        }
-        return false;
-    }
-
     private Map<Integer, PageGraphics> extractGraphics(PDDocument document, List<PageState> states, int maxEntries) {
         Map<Integer, PageGraphics> result = new java.util.HashMap<>();
         for (int index = 0; index < states.size(); index++) {
             PageState state = states.get(index);
+            PdfGraphicsCollector collector = new PdfGraphicsCollector(document.getPage(index), state, maxEntries);
             try {
-                PdfGraphicsCollector collector = new PdfGraphicsCollector(document.getPage(index), state, maxEntries);
                 collector.processPage(document.getPage(index));
-                result.put(state.pageNumber(), collector.graphics());
             } catch (Exception ignored) {
-                result.put(state.pageNumber(), PageGraphics.EMPTY);
+                // Keep the successfully collected objects and the explicit image
+                // decode-failure flag. Unrelated vector parsing failures must not be
+                // mistaken for an unreferenced image resource.
             }
+            result.put(state.pageNumber(), collector.graphics());
         }
         return result;
     }
@@ -188,21 +203,25 @@ public final class PdfLayoutParser {
     }
 
     private enum ParseMode {
-        EDITABLE_WORD(true, true),
-        EDITABLE_OCR(false, true),
-        TEXT_EXTRACTION(true, false),
-        FIXED_LAYOUT(false, false);
+        EDITABLE_WORD(true, true, false),
+        EDITABLE_OCR(false, true, true),
+        TEXT_EXTRACTION(true, false, false),
+        TEXT_EXTRACTION_OCR(false, false, true),
+        FIXED_LAYOUT(false, false, false);
 
         private final boolean requiresExtractableText;
         private final boolean enforceWordPageLimit;
+        private final boolean acceptsOcr;
 
-        ParseMode(boolean requiresExtractableText, boolean enforceWordPageLimit) {
+        ParseMode(boolean requiresExtractableText, boolean enforceWordPageLimit, boolean acceptsOcr) {
             this.requiresExtractableText = requiresExtractableText;
             this.enforceWordPageLimit = enforceWordPageLimit;
+            this.acceptsOcr = acceptsOcr;
         }
 
         boolean requiresExtractableText() { return requiresExtractableText; }
         boolean enforceWordPageLimit() { return enforceWordPageLimit; }
+        boolean acceptsOcr() { return acceptsOcr; }
     }
 
     private static final class LayoutTextStripper extends PDFTextStripper {
@@ -357,15 +376,15 @@ public final class PdfLayoutParser {
     }
 
     private record PageState(int pageNumber, Rect pageBox, double userUnit, int rotation,
-                             boolean hasVisibleContent, boolean hasImageObjects,
-                             List<TextBlock> texts, double scale) {
+                             boolean hasVisibleContent, List<TextBlock> texts, double scale) {
         private boolean hasEditableText() {
             return texts.stream().anyMatch(text -> !text.text().isBlank());
         }
     }
 
-    private record PageGraphics(List<LineElement> lines, List<ImageBlock> images) {
-        private static final PageGraphics EMPTY = new PageGraphics(List.of(), List.of());
+    private record PageGraphics(List<LineElement> lines, List<ImageBlock> images,
+                                boolean imageExtractionFailed) {
+        private static final PageGraphics EMPTY = new PageGraphics(List.of(), List.of(), false);
         private PageGraphics {
             lines = List.copyOf(lines);
             images = List.copyOf(images);
@@ -379,6 +398,7 @@ public final class PdfLayoutParser {
         private final Path2D.Float path = new Path2D.Float();
         private final List<LineElement> lines = new ArrayList<>();
         private final List<ImageBlock> images = new ArrayList<>();
+        private boolean imageExtractionFailed;
         private int entries;
 
         private PdfGraphicsCollector(PDPage source, PageState page, int maxEntries) {
@@ -387,7 +407,7 @@ public final class PdfLayoutParser {
             this.maxEntries = Math.max(1, maxEntries);
         }
 
-        private PageGraphics graphics() { return new PageGraphics(lines, images); }
+        private PageGraphics graphics() { return new PageGraphics(lines, images, imageExtractionFailed); }
 
         @Override public void appendRectangle(Point2D p0, Point2D p1, Point2D p2, Point2D p3) {
             path.moveTo(p0.getX(), p0.getY()); path.lineTo(p1.getX(), p1.getY());
@@ -395,18 +415,28 @@ public final class PdfLayoutParser {
         }
 
         @Override public void drawImage(PDImage image) throws IOException {
-            if (++entries > maxEntries) throw new IOException("PDF 图形对象数量超过限制");
-            ByteArrayOutputStream data = new ByteArrayOutputStream();
-            if (!ImageIO.write(image.getImage(), "png", data)) return;
-            Matrix matrix = getGraphicsState().getCurrentTransformationMatrix();
-            float width = Math.abs(matrix.getScalingFactorX());
-            float height = Math.abs(matrix.getScalingFactorY());
-            float x = matrix.getTranslateX();
-            float y = matrix.getTranslateY();
-            Rect box = rect(x, y, width, height);
-            if (box.width() > 0.1d && box.height() > 0.1d) {
-                images.add(new ImageBlock("pdf-p%d-image-%d".formatted(page.pageNumber(), entries), page.pageNumber(), box,
-                        "image/png", data.toByteArray(), "PDF_IMAGE", -100 + entries));
+            if (++entries > maxEntries) {
+                imageExtractionFailed = true;
+                throw new IOException("PDF 图形对象数量超过限制");
+            }
+            try {
+                ByteArrayOutputStream data = new ByteArrayOutputStream();
+                if (!ImageIO.write(image.getImage(), "png", data)) {
+                    imageExtractionFailed = true;
+                    return;
+                }
+                Matrix matrix = getGraphicsState().getCurrentTransformationMatrix();
+                float width = Math.abs(matrix.getScalingFactorX());
+                float height = Math.abs(matrix.getScalingFactorY());
+                float x = matrix.getTranslateX();
+                float y = matrix.getTranslateY();
+                Rect box = rect(x, y, width, height);
+                if (box.width() > 0.1d && box.height() > 0.1d) {
+                    images.add(new ImageBlock("pdf-p%d-image-%d".formatted(page.pageNumber(), entries),
+                            page.pageNumber(), box, "image/png", data.toByteArray(), "PDF_IMAGE", -100 + entries));
+                }
+            } catch (IOException | RuntimeException ignored) {
+                imageExtractionFailed = true;
             }
         }
 

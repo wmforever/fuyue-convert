@@ -49,7 +49,7 @@ final class PdfCompressConverter implements FileConverter {
         int optimizedImages = 0;
         progress.update(TaskStage.PARSING, 20);
         try (PDDocument document = Loader.loadPDF(input.path().toFile())) {
-            requireUnsigned(document);
+            ConversionGuards.requireUnsignedPdf(document, "压缩重写");
             if (mode != PdfCompressionMode.LOSSLESS) {
                 optimizedImages = optimizeImages(document, mode,
                         (done, total) -> progress.update(TaskStage.RENDERING,
@@ -101,13 +101,6 @@ final class PdfCompressConverter implements FileConverter {
             PDXObject object = resources.getXObject(name);
             if (object instanceof PDImageXObject image) images.add(image.getCOSObject());
             else if (object instanceof PDFormXObject form) collectImages(form.getResources(), seenResources, images);
-        }
-    }
-
-    private void requireUnsigned(PDDocument document) throws IOException {
-        if (!document.getSignatureDictionaries().isEmpty()) {
-            throw new ConversionFailureException("PDF_SIGNATURE_PRESENT",
-                    "PDF 包含数字签名；压缩重写会使签名失效，已拒绝处理");
         }
     }
 

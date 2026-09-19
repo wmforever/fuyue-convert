@@ -5,6 +5,7 @@ import com.fuyue.formatconverter.table.PageLayoutAnalyzer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
@@ -15,7 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -92,6 +95,32 @@ class PdfToTextConverterTest {
     }
 
     @Test
+    void longNativeHeaderAndFullPageScanStillRequiresOcr() throws Exception {
+        Path source = temp.resolve("same-page-mixed.pdf");
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage(PDRectangle.A4);
+            document.addPage(page);
+            BufferedImage scan = scannedBodyImage();
+            try (PDPageContentStream content = new PDPageContentStream(document, page,
+                    PDPageContentStream.AppendMode.APPEND, true)) {
+                content.drawImage(LosslessFactory.createFromImage(document, scan), 0, 0,
+                        page.getMediaBox().getWidth(), page.getMediaBox().getHeight());
+            }
+            addText(document, page, 45, 790, "LONG NATIVE HEADER OR WATERMARK 2026");
+            document.save(source.toFile());
+        }
+        Path output = temp.resolve("same-page-mixed.txt");
+
+        ConversionFailureException failure = assertThrows(ConversionFailureException.class,
+                () -> converter().convert(input(source), temp.resolve("same-page-work"), output,
+                        ParseLimits.defaults(), (stage, percent) -> { }));
+
+        assertEquals("OCR_REQUIRED", failure.code());
+        assertTrue(failure.getMessage().contains("第 1 页"));
+        assertFalse(Files.exists(output));
+    }
+
+    @Test
     void genuinelyBlankPageCanProduceEmptyTextWithoutPretendingItWasScanned() throws Exception {
         Path source = temp.resolve("blank.pdf");
         try (PDDocument document = new PDDocument()) {
@@ -106,6 +135,53 @@ class PdfToTextConverterTest {
         assertEquals(1, converted.pageCount());
         assertTrue(Files.exists(output));
         assertEquals("", Files.readString(output));
+    }
+
+    @Test
+    void unusedImageResourceDoesNotCauseFalseExtractionFailure() throws Exception {
+        Path source = temp.resolve("unused-image-resource.pdf");
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage(PDRectangle.A4);
+            page.setResources(new PDResources());
+            document.addPage(page);
+            BufferedImage unused = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
+            page.getResources().add(LosslessFactory.createFromImage(document, unused));
+            addText(document, page, 50, 760, "ONLY REFERENCED TEXT");
+            document.save(source.toFile());
+        }
+        Path output = temp.resolve("unused-image-resource.txt");
+
+        ConversionOutput converted = converter().convert(input(source), temp.resolve("unused-resource-work"),
+                output, ParseLimits.defaults(), (stage, percent) -> { });
+
+        assertEquals(1, converted.pageCount());
+        assertTrue(Files.readString(output).contains("ONLY REFERENCED TEXT"));
+    }
+
+    @Test
+    void noTextPageWithTooManyDrawnRasterCandidatesReturnsStableLimitCode() throws Exception {
+        Path source = temp.resolve("too-many-drawn-images.pdf");
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage(PDRectangle.A4);
+            document.addPage(page);
+            BufferedImage raster = new BufferedImage(20, 20, BufferedImage.TYPE_INT_RGB);
+            var pdfImage = LosslessFactory.createFromImage(document, raster);
+            try (PDPageContentStream content = new PDPageContentStream(document, page)) {
+                for (int index = 0; index < 65; index++) {
+                    content.drawImage(pdfImage, 0, 0,
+                            page.getMediaBox().getWidth(), page.getMediaBox().getHeight());
+                }
+            }
+            document.save(source.toFile());
+        }
+        Path output = temp.resolve("too-many-drawn-images.txt");
+
+        ConversionFailureException failure = assertThrows(ConversionFailureException.class,
+                () -> converter().convert(input(source), temp.resolve("too-many-images-work"), output,
+                        ParseLimits.defaults(), (stage, percent) -> { }));
+
+        assertEquals("OCR_IMAGE_LIMIT_EXCEEDED", failure.code());
+        assertFalse(Files.exists(output));
     }
 
     @Test
@@ -153,6 +229,21 @@ class PdfToTextConverterTest {
         try (PDPageContentStream content = new PDPageContentStream(document, page)) {
             content.drawImage(pdfImage, 0, 0, page.getMediaBox().getWidth(), page.getMediaBox().getHeight());
         }
+    }
+
+    private BufferedImage scannedBodyImage() {
+        BufferedImage image = new BufferedImage(1000, 1300, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = image.createGraphics();
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(0, 0, image.getWidth(), image.getHeight());
+        graphics.setColor(Color.BLACK);
+        graphics.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 72));
+        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        graphics.drawString("SCANNED BODY 2026", 90, 240);
+        graphics.drawString("CONTENT MUST SURVIVE", 90, 520);
+        graphics.dispose();
+        return image;
     }
 
     private PdfToTextConverter converter() {

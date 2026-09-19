@@ -14,11 +14,22 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
                                 Boolean watermarkTiled,
                                 String watermarkPages,
                                 String watermarkColor,
-                                String splitPages) {
+                                String splitPages,
+                                Integer imageDpi) {
+    public ConversionOptions(PdfCompressionMode compressionMode, String watermarkText,
+                             Double watermarkOpacity, Double watermarkAngle, WatermarkPosition watermarkPosition,
+                             Boolean watermarkTiled, String watermarkPages, String watermarkColor, String splitPages) {
+        this(compressionMode, watermarkText, watermarkOpacity, watermarkAngle, watermarkPosition,
+                watermarkTiled, watermarkPages, watermarkColor, splitPages, null);
+    }
+
     private static final Pattern PAGE_RANGE = Pattern.compile("(?i)all|(?:[1-9]\\d*(?:-[1-9]\\d*)?)(?:,(?:[1-9]\\d*(?:-[1-9]\\d*)?))*");
     private static final Pattern HEX_COLOR = Pattern.compile("#[0-9a-fA-F]{6}");
 
     public ConversionOptions {
+        if (imageDpi != null && (imageDpi < 36 || imageDpi > 600)) {
+            throw new IllegalArgumentException("图片清晰度必须为 36-600 DPI");
+        }
         compressionMode = compressionMode == null ? PdfCompressionMode.LOSSLESS : compressionMode;
         watermarkText = watermarkText == null || watermarkText.isBlank() ? "CONFIDENTIAL" : watermarkText.strip();
         watermarkOpacity = watermarkOpacity == null ? 0.18d : watermarkOpacity;
@@ -73,9 +84,18 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
                                                 String watermarkPosition, Boolean watermarkTiled,
                                                 String watermarkPages, String watermarkColor,
                                                 String splitPages) {
+        return fromRequest(compressionMode, watermarkText, watermarkOpacity, watermarkAngle,
+                watermarkPosition, watermarkTiled, watermarkPages, watermarkColor, splitPages, null);
+    }
+
+    public static ConversionOptions fromRequest(String compressionMode, String watermarkText,
+                                                Double watermarkOpacity, Double watermarkAngle,
+                                                String watermarkPosition, Boolean watermarkTiled,
+                                                String watermarkPages, String watermarkColor,
+                                                String splitPages, Integer imageDpi) {
         return new ConversionOptions(PdfCompressionMode.from(compressionMode), watermarkText,
                 watermarkOpacity, watermarkAngle, WatermarkPosition.from(watermarkPosition),
-                watermarkTiled, watermarkPages, watermarkColor, splitPages);
+                watermarkTiled, watermarkPages, watermarkColor, splitPages, imageDpi);
     }
 
     public boolean appliesWatermarkToPage(int pageNumber) {

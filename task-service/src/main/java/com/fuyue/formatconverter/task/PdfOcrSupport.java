@@ -4,6 +4,7 @@ import com.fuyue.formatconverter.model.ConversionWarning;
 import com.fuyue.formatconverter.model.DocumentModel;
 import com.fuyue.formatconverter.model.ImageBlock;
 import com.fuyue.formatconverter.model.PageModel;
+import com.fuyue.formatconverter.model.ScannedContentDetector;
 import com.fuyue.formatconverter.model.TextBlock;
 import com.fuyue.formatconverter.model.WarningCode;
 import com.fuyue.formatconverter.parser.ParseLimits;
@@ -47,11 +48,28 @@ final class PdfOcrSupport {
             PDFRenderer renderer = new PDFRenderer(pdf);
             for (int index = 0; index < parsed.pages().size(); index++) {
                 PageModel page = parsed.pages().get(index);
-                if (!page.textBlocks().isEmpty() || !hasVisibleContent(pdf.getPage(index))) {
-                    pages.add(recognizeEmbeddedImages(page, workDir, limits));
+                boolean visibleContent = hasVisibleContent(pdf.getPage(index));
+                List<ImageBlock> requiredImages;
+                try {
+                    requiredImages = ScannedContentDetector.imagesRequiringOcr(
+                            page.textBlocks(), page.images(), page.physicalBox());
+                } catch (ScannedContentDetector.AnalysisLimitException e) {
+                    throw new ConversionFailureException("OCR_IMAGE_LIMIT_EXCEEDED",
+                            "PDF 第 " + page.pageNumber() + " 页图片候选过多，拒绝不完整转换。");
+                }
+                if (!visibleContent) {
+                    pages.add(page);
+                    continue;
+                }
+                if (!page.textBlocks().isEmpty() && requiredImages.isEmpty()) {
+                    pages.add(page);
                     continue;
                 }
                 requireAvailable(page.pageNumber());
+                if (!page.textBlocks().isEmpty()) {
+                    pages.add(recognizeRequiredImages(page, requiredImages, workDir, limits));
+                    continue;
+                }
                 var pdfPage = pdf.getPage(index);
                 var crop = pdfPage.getCropBox();
                 double unit = pdfPage.getUserUnit();
@@ -66,33 +84,42 @@ final class PdfOcrSupport {
                         "png", image.toFile())) {
                     throw new java.io.IOException("无法写入 PDF OCR 页面图片");
                 }
+                ConversionGuards.requireTotalSize(List.of(image), limits, "PDF OCR 页面图片");
                 TesseractOcrConverter.RecognitionResult recognized = ocr.recognizeLayoutResult(
                         image, workDir.resolve("page-%04d".formatted(page.pageNumber())), page.pageNumber(),
                         page.physicalBox(), limits);
                 ocr.requireUsableResult(recognized, "PDF 第 " + page.pageNumber() + " 页");
-                List<ConversionWarning> warnings = new ArrayList<>(page.warnings());
+                List<ConversionWarning> warnings = withoutOcrRequired(page.warnings());
                 warnings.addAll(ocr.warningsFor(recognized, page.pageNumber(),
                         "PDF 第 " + page.pageNumber() + " 页"));
-                pages.add(new PageModel(page.pageNumber(), page.physicalBox(), recognized.blocks(), page.lines(),
-                        page.images(), List.of(), List.of(), warnings));
+                ImageBlock renderedPage = new ImageBlock(
+                        "pdf-p%d-rendered-background".formatted(page.pageNumber()),
+                        page.pageNumber(), page.physicalBox(), "image/png", Files.readAllBytes(image),
+                        "OCR_PAGE_BACKGROUND", Integer.MIN_VALUE);
+                pages.add(new PageModel(page.pageNumber(), page.physicalBox(), recognized.blocks(), List.of(),
+                        List.of(renderedPage), List.of(), List.of(), warnings));
             }
         }
         return new DocumentModel(parsed.sourceName(), parsed.parserName() + (ocr == null ? "" : " + Tesseract"),
                 parsed.sourcePageCount(), pages, documentWarnings);
     }
 
-    /** Adds editable OCR text for image-only content while preserving native PDF text. */
-    private PageModel recognizeEmbeddedImages(PageModel page, Path workDir, ParseLimits limits) throws Exception {
-        if (ocr == null || page.images().isEmpty()) return page;
+    /** OCRs every image region that the parser classified as required; failure is fatal. */
+    private PageModel recognizeRequiredImages(PageModel page, List<ImageBlock> requiredImages,
+                                               Path workDir, ParseLimits limits) throws Exception {
+        if (requiredImages.isEmpty()) return page;
         List<TextBlock> texts = new ArrayList<>(page.textBlocks());
-        List<ConversionWarning> warnings = new ArrayList<>(page.warnings());
+        List<ConversionWarning> warnings = withoutOcrRequired(page.warnings());
         int imageIndex = 0;
-        for (ImageBlock image : page.images()) {
-            if (image.data().length == 0 || image.box().width() < 4d || image.box().height() < 4d) continue;
-            if (isTextBackedBackground(page, image)) continue;
+        for (ImageBlock image : requiredImages) {
+            byte[] data = image.data();
+            if (data.length == 0 || image.box().width() < 4d || image.box().height() < 4d) {
+                throw new ConversionFailureException("OCR_IMAGE_INVALID",
+                        "PDF 第 " + page.pageNumber() + " 页包含无法读取的必需 OCR 图像区域");
+            }
             Path source = workDir.resolve("pdf-image-ocr-%04d-%03d.png".formatted(page.pageNumber(), ++imageIndex));
-            Files.write(source, image.data());
             try {
+                Files.write(source, data);
                 Path prepared = OcrImageNormalizer.downscaleForOcr(source,
                         workDir.resolve("pdf-image-ocr-%04d-%03d-small.png".formatted(page.pageNumber(), imageIndex)),
                         EMBEDDED_IMAGE_OCR_MAX_EDGE);
@@ -100,40 +127,45 @@ final class PdfOcrSupport {
                 TesseractOcrConverter.RecognitionResult recognized = ocr.recognizeLayoutResult(prepared,
                         workDir.resolve("image-%04d-%03d".formatted(page.pageNumber(), imageIndex)),
                         page.pageNumber(), image.box(), limits);
-                if (recognized.blocks().isEmpty()) continue;
-                List<TextBlock> additions = recognized.blocks().stream()
-                        .filter(block -> !duplicatesNativeText(block, texts)).toList();
-                if (additions.isEmpty()) continue;
-                texts.addAll(additions);
+                ocr.requireUsableResult(recognized,
+                        "PDF 第 " + page.pageNumber() + " 页图片 " + imageIndex);
+                List<TextBlock> beyondNative = recognized.blocks().stream()
+                        .filter(block -> !OcrTextDeduplicator.duplicates(block, page.textBlocks())).toList();
+                if (beyondNative.isEmpty()) {
+                    throw new ConversionFailureException("OCR_NO_NEW_TEXT",
+                            "PDF 第 " + page.pageNumber() + " 页图片 " + imageIndex
+                                    + " 缺少原生文字层，但 OCR 未补充出新文字");
+                }
+                for (TextBlock block : beyondNative) {
+                    if (!OcrTextDeduplicator.duplicates(block, texts)) texts.add(block);
+                }
                 warnings.addAll(ocr.warningsFor(recognized, page.pageNumber(),
                         "PDF 第 " + page.pageNumber() + " 页图片 " + imageIndex));
-            } catch (Exception ignored) {
-                warnings.add(ConversionWarning.of(WarningCode.OCR_REQUIRED,
-                        "PDF 第 " + page.pageNumber() + " 页有图片文字未能自动识别，建议人工复核。", page.pageNumber()));
+            } catch (ConversionFailureException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new ConversionFailureException("OCR_IMAGE_FAILED",
+                        "PDF 第 " + page.pageNumber() + " 页图片 " + imageIndex + " OCR 处理失败");
             }
         }
-        return new PageModel(page.pageNumber(), page.physicalBox(), texts, page.lines(), page.images(),
+        return new PageModel(page.pageNumber(), page.physicalBox(), texts, page.lines(),
+                withOcrBackgroundRole(page.images(), requiredImages),
                 List.of(), List.of(), warnings);
     }
 
-    private boolean duplicatesNativeText(TextBlock candidate, List<TextBlock> existing) {
-        String normalized = candidate.text().replaceAll("\\s+", "");
-        return existing.stream().anyMatch(text -> {
-            String current = text.text().replaceAll("\\s+", "");
-            double overlap = candidate.box().intersectionArea(text.box());
-            double smallerArea = Math.max(0.01d, Math.min(candidate.box().width() * candidate.box().height(),
-                    text.box().width() * text.box().height()));
-            return normalized.equals(current) || overlap / smallerArea > 0.7d;
-        });
+    private List<ImageBlock> withOcrBackgroundRole(List<ImageBlock> images, List<ImageBlock> ocrSources) {
+        java.util.Set<ImageBlock> sources = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        sources.addAll(ocrSources);
+        return images.stream().map(image -> sources.contains(image)
+                ? new ImageBlock(image.id(), image.pageNumber(), image.box(), image.mimeType(), image.data(),
+                "OCR_SCAN_BACKGROUND", image.zOrder())
+                : image).toList();
     }
 
-    private boolean isTextBackedBackground(PageModel page, ImageBlock image) {
-        int characters = page.textBlocks().stream().map(TextBlock::text)
-                .mapToInt(text -> (int) text.codePoints().filter(codePoint -> !Character.isWhitespace(codePoint)).count())
-                .sum();
-        double pageArea = Math.max(1d, page.physicalBox().width() * page.physicalBox().height());
-        double coverage = image.box().intersectionArea(page.physicalBox()) / pageArea;
-        return characters >= 80 && coverage >= 0.65d;
+    private List<ConversionWarning> withoutOcrRequired(List<ConversionWarning> warnings) {
+        return warnings.stream()
+                .filter(warning -> warning.code() != WarningCode.OCR_REQUIRED)
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
     }
 
     private void requireAvailable(int pageNumber) throws ConversionFailureException {

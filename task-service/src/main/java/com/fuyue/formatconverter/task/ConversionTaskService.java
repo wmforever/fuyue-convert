@@ -26,6 +26,11 @@ import java.util.zip.ZipOutputStream;
 
 public final class ConversionTaskService implements AutoCloseable {
     private static final Logger log = LoggerFactory.getLogger(ConversionTaskService.class);
+    private static final Duration FILE_WORKER_STOP_GRACE = Duration.ofSeconds(1);
+    private static final Duration DEFERRED_CLEANUP_RETRY = Duration.ofMillis(250);
+    private static final String DEFERRED_CLEANUP_DETAIL =
+            "转换线程未在中止宽限期内退出，临时文件已保留并将在其退出后清理";
+    private static final String DEFERRED_CLEANUP_COMPLETED_DETAIL = "转换线程已退出，临时文件已清理";
     private final TaskServiceConfig config;
     private final List<FileConverter> converters;
     private final List<ConversionRoute> plannedRoutes;
@@ -163,6 +168,7 @@ public final class ConversionTaskService implements AutoCloseable {
 
     public List<TaskSnapshot> listTasks(int limit) {
         if (limit < 1 || limit > 100) throw new IllegalArgumentException("任务记录数量必须在 1 到 100 之间");
+        removeExpiredRecords(Instant.now());
         return tasks.values().stream()
                 .map(TaskRecord::snapshot)
                 .sorted(Comparator.comparing(TaskSnapshot::updatedAt).reversed())
@@ -177,8 +183,11 @@ public final class ConversionTaskService implements AutoCloseable {
         TaskSnapshot current = record.snapshot();
         if (isTerminal(current.status())) return current;
         record.cancellationRequested.set(true);
+        String message = hasDeferredFileCleanup(record)
+                ? "任务已取消；" + DEFERRED_CLEANUP_DETAIL
+                : "任务已取消";
         update(record, TaskStatus.CANCELLED, TaskStage.CANCELLED, current.progress(), "TASK_CANCELLED",
-                "任务已取消", current.warnings(), current.files(), false, null);
+                message, current.warnings(), current.files(), false, null);
         Future<?> execution = record.execution;
         if (execution != null) execution.cancel(true);
         executor.purge();
@@ -202,32 +211,39 @@ public final class ConversionTaskService implements AutoCloseable {
 
     public DownloadArtifact download(String taskId) {
         TaskRecord record = record(taskId);
-        TaskSnapshot snapshot = record.snapshot();
-        if (!snapshot.downloadReady() || record.downloadPath == null || !Files.isRegularFile(record.downloadPath)) {
-            throw new IllegalStateException("任务结果尚不可下载");
+        synchronized (record.lifecycleLock) {
+            if (tasks.get(taskId) != record) throw new TaskNotFoundException(taskId);
+            return downloadArtifact(record);
         }
-        String type = snapshot.downloadName().endsWith(".zip") ? "application/zip"
-                : snapshot.targetFormat().contentType();
-        return new DownloadArtifact(record.downloadPath, snapshot.downloadName(), type);
+    }
+
+    public DownloadLease acquireDownload(String taskId) {
+        TaskRecord record = record(taskId);
+        DownloadArtifact artifact;
+        synchronized (record.lifecycleLock) {
+            if (tasks.get(taskId) != record) throw new TaskNotFoundException(taskId);
+            artifact = downloadArtifact(record);
+            record.downloadLeases++;
+        }
+        return new DownloadLease(artifact, () -> releaseDownload(record));
     }
 
     public void delete(String taskId) {
-        TaskRecord record = tasks.remove(taskId);
-        if (record == null) throw new TaskNotFoundException(taskId);
-        record.deleteRequested.set(true);
-        record.cancellationRequested.set(true);
-        Future<?> execution = record.execution;
-        if (execution != null && !execution.isDone()) {
-            execution.cancel(true);
-            executor.purge();
+        TaskRecord record = record(taskId);
+        boolean deleteNow;
+        synchronized (record.lifecycleLock) {
+            if (!tasks.remove(taskId, record)) throw new TaskNotFoundException(taskId);
+            deleteNow = requestRecordDeletion(record);
         }
-        if (!record.executionStarted.get()) {
-            deleteTree(record.taskDir);
-        }
+        executor.purge();
+        if (deleteNow) deleteTree(record.taskDir);
     }
 
     private void convert(TaskRecord record) {
-        record.executionStarted.set(true);
+        synchronized (record.lifecycleLock) {
+            if (record.deleteRequested.get()) return;
+            record.executionStarted.set(true);
+        }
         Instant deadline = Instant.now().plus(config.timeout());
         List<TaskFileResult> results = new ArrayList<>();
         List<ConversionWarning> warnings = new ArrayList<>();
@@ -275,11 +291,13 @@ public final class ConversionTaskService implements AutoCloseable {
                     results.add(new TaskFileResult(input.displayName, false, null, parsedPageCount, code, safeError(e),
                             record.route.sourceFormat(), record.route.targetFormat()));
                     log.warn("taskId={} fileIndex={} conversion failed code={}", record.id, i, code);
-                    if (produced != null) try { Files.deleteIfExists(produced); } catch (IOException ignored) { }
-                    try { Files.deleteIfExists(output); } catch (IOException ignored) { }
+                    if (!isFileCleanupDeferred(record, work)) {
+                        if (produced != null) try { Files.deleteIfExists(produced); } catch (IOException ignored) { }
+                        try { Files.deleteIfExists(output); } catch (IOException ignored) { }
+                    }
                 } finally {
                     fileActive.set(false);
-                    deleteTree(work);
+                    if (!isFileCleanupDeferred(record, work)) deleteTree(work);
                 }
             }
             checkCancellation(record);
@@ -287,7 +305,7 @@ public final class ConversionTaskService implements AutoCloseable {
                 TaskFileResult firstFailure = results.stream().filter(result -> !result.success()).findFirst()
                         .orElse(new TaskFileResult("PDF", false, null, null, "PDF_MERGE_INPUT_INVALID",
                                 "存在无法读取的 PDF", record.route.sourceFormat(), record.route.targetFormat()));
-                deleteTree(record.taskDir.resolve("output"));
+                if (!hasDeferredFileCleanup(record)) deleteTree(record.taskDir.resolve("output"));
                 String detail = firstFailure.errorMessage() == null || firstFailure.errorMessage().isBlank()
                         ? "存在无法读取的 PDF"
                         : firstFailure.errorMessage();
@@ -350,10 +368,13 @@ public final class ConversionTaskService implements AutoCloseable {
                         true, "converted-to-" + record.route.targetFormat().extension() + ".zip");
             }
         } catch (CancellationException e) {
+            String message = hasDeferredFileCleanup(record)
+                    ? "任务已取消；" + DEFERRED_CLEANUP_DETAIL
+                    : "任务已取消";
             update(record, TaskStatus.CANCELLED, TaskStage.CANCELLED, record.snapshot().progress(),
-                    "TASK_CANCELLED", "任务已取消", warnings, results, false, null);
+                    "TASK_CANCELLED", message, warnings, results, false, null);
         } catch (Exception e) {
-            String code = e instanceof ConversionFailureException failure ? failure.code() : "TASK_FAILED";
+            String code = failureCode(e);
             update(record, TaskStatus.FAILED, TaskStage.FAILED, 100, code, safeError(e),
                     warnings, results, false, null);
             log.error("taskId={} failed at task level type={} reason={}", record.id,
@@ -364,8 +385,8 @@ public final class ConversionTaskService implements AutoCloseable {
             log.error("taskId={} converter crashed type={}", record.id, e.getClass().getSimpleName());
         } finally {
             record.executionStarted.set(false);
-            if (record.deleteRequested.get()) deleteTree(record.taskDir);
-            else if (record.snapshot().status() == TaskStatus.SUCCESS) deleteInputs(record);
+            if (claimRecordDeletion(record)) deleteTree(record.taskDir);
+            else if (claimSuccessfulInputCleanup(record)) deleteInputs(record);
         }
     }
 
@@ -414,11 +435,25 @@ public final class ConversionTaskService implements AutoCloseable {
         ExecutorService single = Executors.newSingleThreadExecutor(namedFactory("format-file-"));
         Future<ConversionOutput> future = single.submit(() ->
                 record.converter.convert(input, work, output, config.parseLimits(), progress));
+        boolean stopRequested = false;
         try {
             return future.get(remainingMillis, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
-            future.cancel(true);
-            throw new TimeoutException("转换超时");
+            stopRequested = true;
+            boolean deferred = stopFileWorker(record, input.displayName(), work, output, future, single);
+            String message = deferred
+                    ? "转换超时；" + DEFERRED_CLEANUP_DETAIL
+                    : "转换超时";
+            throw new TimeoutException(message);
+        } catch (InterruptedException e) {
+            stopRequested = true;
+            stopFileWorker(record, input.displayName(), work, output, future, single);
+            Thread.currentThread().interrupt();
+            throw e;
+        } catch (CancellationException e) {
+            stopRequested = true;
+            stopFileWorker(record, input.displayName(), work, output, future, single);
+            throw e;
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof Exception exception) throw exception;
@@ -427,8 +462,112 @@ public final class ConversionTaskService implements AutoCloseable {
             }
             throw new RuntimeException(cause);
         } finally {
-            single.shutdownNow();
+            if (!stopRequested) single.shutdownNow();
         }
+    }
+
+    private boolean stopFileWorker(TaskRecord record, String displayName, Path work, Path output,
+                                   Future<?> future, ExecutorService worker) {
+        future.cancel(true);
+        worker.shutdownNow();
+        boolean interrupted = false;
+        try {
+            if (worker.awaitTermination(FILE_WORKER_STOP_GRACE.toMillis(), TimeUnit.MILLISECONDS)) return false;
+        } catch (InterruptedException e) {
+            interrupted = true;
+        } finally {
+            if (interrupted) Thread.currentThread().interrupt();
+        }
+        registerDeferredFileCleanup(record, displayName, work, output, worker);
+        return true;
+    }
+
+    private void registerDeferredFileCleanup(TaskRecord record, String displayName, Path work, Path output,
+                                             ExecutorService worker) {
+        Path normalizedWork = work.toAbsolutePath().normalize();
+        synchronized (record.lifecycleLock) {
+            if (!record.deferredWorkDirs.add(normalizedWork)) return;
+        }
+        log.warn("taskId={} converter did not stop within {}ms file={}; deferring work/output cleanup",
+                record.id, FILE_WORKER_STOP_GRACE.toMillis(), safeName(displayName));
+        exposeDeferredCancellationDiagnostic(record);
+        scheduleDeferredFileCleanup(record, normalizedWork, output.toAbsolutePath().normalize(), worker);
+    }
+
+    private void exposeDeferredCancellationDiagnostic(TaskRecord record) {
+        if (!record.cancellationRequested.get()) return;
+        TaskSnapshot current = record.snapshot();
+        update(record, TaskStatus.CANCELLED, TaskStage.CANCELLED, current.progress(), "TASK_CANCELLED",
+                "任务已取消；" + DEFERRED_CLEANUP_DETAIL, current.warnings(), current.files(), false, null);
+    }
+
+    private void scheduleDeferredFileCleanup(TaskRecord record, Path work, Path output, ExecutorService worker) {
+        try {
+            cleaner.schedule(() -> {
+                if (!worker.isTerminated()) {
+                    scheduleDeferredFileCleanup(record, work, output, worker);
+                    return;
+                }
+                try { Files.deleteIfExists(output); }
+                catch (IOException e) { log.warn("taskId={} deferred output cleanup failed", record.id); }
+                deleteTree(work);
+                boolean deleteTask;
+                boolean deleteInputs;
+                boolean cleanupCompleted;
+                synchronized (record.lifecycleLock) {
+                    record.deferredWorkDirs.remove(work);
+                    cleanupCompleted = record.deferredWorkDirs.isEmpty();
+                    deleteTask = claimRecordDeletion(record);
+                    deleteInputs = !deleteTask && claimSuccessfulInputCleanup(record);
+                }
+                if (deleteTask) deleteTree(record.taskDir);
+                else {
+                    if (cleanupCompleted) exposeDeferredCleanupCompleted(record);
+                    if (deleteInputs) deleteInputs(record);
+                }
+                log.info("taskId={} deferred converter cleanup completed", record.id);
+            }, DEFERRED_CLEANUP_RETRY.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (RejectedExecutionException e) {
+            // During service shutdown it is safer to leave diagnostic artifacts for startup/TTL cleanup
+            // than to race an in-process converter that may still be writing them.
+            log.warn("taskId={} deferred cleanup scheduler is unavailable; retained task artifacts", record.id);
+        }
+    }
+
+    private boolean isFileCleanupDeferred(TaskRecord record, Path work) {
+        synchronized (record.lifecycleLock) {
+            return record.deferredWorkDirs.contains(work.toAbsolutePath().normalize());
+        }
+    }
+
+    private boolean hasDeferredFileCleanup(TaskRecord record) {
+        synchronized (record.lifecycleLock) {
+            return !record.deferredWorkDirs.isEmpty();
+        }
+    }
+
+    private void exposeDeferredCleanupCompleted(TaskRecord record) {
+        TaskSnapshot current = record.snapshot();
+        if (!isTerminal(current.status()) || !containsDeferredCleanupDetail(current.errorMessage(), current.files())) return;
+        update(record, current.status(), current.stage(), current.progress(), current.errorCode(),
+                completedCleanupMessage(current.errorMessage()), current.warnings(),
+                completedCleanupFiles(current.files()), current.downloadReady(), current.downloadName());
+    }
+
+    private boolean containsDeferredCleanupDetail(String message, List<TaskFileResult> files) {
+        return (message != null && message.contains(DEFERRED_CLEANUP_DETAIL))
+                || files.stream().anyMatch(file -> file.errorMessage() != null
+                        && file.errorMessage().contains(DEFERRED_CLEANUP_DETAIL));
+    }
+
+    private String completedCleanupMessage(String message) {
+        return message == null ? null : message.replace(DEFERRED_CLEANUP_DETAIL, DEFERRED_CLEANUP_COMPLETED_DETAIL);
+    }
+
+    private List<TaskFileResult> completedCleanupFiles(List<TaskFileResult> files) {
+        return files.stream().map(file -> new TaskFileResult(file.fileName(), file.success(), file.outputName(),
+                file.pageCount(), file.errorCode(), completedCleanupMessage(file.errorMessage()),
+                file.sourceFormat(), file.targetFormat())).toList();
     }
 
     private synchronized void update(TaskRecord record, TaskStatus status, TaskStage stage, int progress,
@@ -437,8 +576,15 @@ public final class ConversionTaskService implements AutoCloseable {
         if (record.deleteRequested.get()) return;
         if (record.cancellationRequested.get() && status != TaskStatus.CANCELLED) return;
         TaskSnapshot old = record.snapshot;
+        if (isTerminal(old.status()) && old.status() != status) return;
+        if (!hasDeferredFileCleanup(record) && containsDeferredCleanupDetail(errorMessage, files)) {
+            errorMessage = completedCleanupMessage(errorMessage);
+            files = completedCleanupFiles(files);
+        }
         Instant updatedAt = Instant.now();
-        Instant expiresAt = isTerminal(status) ? updatedAt.plus(config.resultTtl()) : old.expiresAt();
+        boolean sameTerminalStatus = isTerminal(old.status()) && old.status() == status;
+        Instant expiresAt = sameTerminalStatus ? old.expiresAt()
+                : isTerminal(status) ? updatedAt.plus(config.resultTtl()) : old.expiresAt();
         record.snapshot = new TaskSnapshot(record.id, status, stage, Math.max(0, Math.min(100, progress)),
                 errorCode, errorMessage, List.copyOf(warnings), List.copyOf(files), ready, downloadName,
                 old.sourceFormat(), old.targetFormat(),
@@ -505,12 +651,12 @@ public final class ConversionTaskService implements AutoCloseable {
                         Path outputDir = directory.resolve("output");
                         String recoveredDownloadName = snapshot.downloadName();
                         DocumentFormat recoveredTargetFormat = snapshot.targetFormat();
-                        try (var files = Files.list(outputDir)) {
-                            record.downloadPath = files.filter(Files::isRegularFile)
-                                    .filter(path -> recoveredDownloadName != null &&
-                                            (recoveredDownloadName.endsWith(".zip") ? path.toString().endsWith(".zip") :
-                                                    path.toString().endsWith("." + recoveredTargetFormat.extension())))
-                                    .findFirst().orElse(null);
+                        record.downloadPath = recoverDownloadPath(outputDir, recoveredDownloadName,
+                                recoveredTargetFormat);
+                        if (record.downloadPath == null) {
+                            snapshot = missingRecoveredResult(snapshot);
+                            record.snapshot = snapshot;
+                            persistRecoveredSnapshot(manifest, snapshot);
                         }
                     }
                     tasks.put(snapshot.taskId(), record);
@@ -518,6 +664,36 @@ public final class ConversionTaskService implements AutoCloseable {
                     log.warn("Could not recover task manifest at {}", directory.getFileName());
                 }
             }
+        }
+    }
+
+    private Path recoverDownloadPath(Path outputDir, String downloadName, DocumentFormat targetFormat) {
+        if (downloadName == null || targetFormat == null || !Files.isDirectory(outputDir)) return null;
+        try (var files = Files.list(outputDir)) {
+            String suffix = downloadName.endsWith(".zip") ? ".zip" : "." + targetFormat.extension();
+            return files.filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(suffix))
+                    .sorted()
+                    .findFirst().orElse(null);
+        } catch (IOException e) {
+            log.warn("Could not inspect recovered task output at {}", outputDir.getFileName());
+            return null;
+        }
+    }
+
+    private TaskSnapshot missingRecoveredResult(TaskSnapshot snapshot) {
+        Instant now = Instant.now();
+        return new TaskSnapshot(snapshot.taskId(), TaskStatus.FAILED, TaskStage.FAILED, 100,
+                "RESULT_MISSING", "任务结果文件缺失，无法下载；请重新提交转换",
+                snapshot.warnings(), snapshot.files(), false, null, snapshot.sourceFormat(), snapshot.targetFormat(),
+                snapshot.createdAt(), now, snapshot.expiresAt());
+    }
+
+    private void persistRecoveredSnapshot(Path manifest, TaskSnapshot snapshot) {
+        try {
+            json.writeValue(manifest.toFile(), snapshot);
+        } catch (IOException e) {
+            log.warn("Could not persist recovered task state at {}", manifest.getParent().getFileName());
         }
     }
 
@@ -540,25 +716,91 @@ public final class ConversionTaskService implements AutoCloseable {
 
     private void cleanupExpiredSafely() {
         try {
-            Instant now = Instant.now();
-            for (TaskRecord task : List.copyOf(tasks.values())) {
-                if (isTerminal(task.snapshot().status()) && task.snapshot().expiresAt().isBefore(now)
-                        && tasks.remove(task.id, task)) {
-                    task.deleteRequested.set(true);
-                    task.cancellationRequested.set(true);
-                    Future<?> execution = task.execution;
-                    if (execution != null && !execution.isDone()) execution.cancel(true);
-                    if (!task.executionStarted.get()) deleteTree(task.taskDir);
-                }
-            }
+            removeExpiredRecords(Instant.now());
             executor.purge();
         } catch (Exception e) { log.error("Task cleanup failed reason={}", safeError(e)); }
+    }
+
+    private void removeExpiredRecords(Instant now) {
+        for (TaskRecord task : List.copyOf(tasks.values())) removeIfExpired(task, now);
+    }
+
+    private boolean removeIfExpired(TaskRecord record, Instant now) {
+        boolean deleteNow;
+        synchronized (record.lifecycleLock) {
+            TaskSnapshot snapshot = record.snapshot();
+            if (tasks.get(record.id) != record || !isTerminal(snapshot.status())
+                    || snapshot.expiresAt().isAfter(now)) {
+                return false;
+            }
+            if (!tasks.remove(record.id, record)) return false;
+            deleteNow = requestRecordDeletion(record);
+        }
+        if (deleteNow) deleteTree(record.taskDir);
+        return true;
+    }
+
+    private boolean requestRecordDeletion(TaskRecord record) {
+        record.deleteRequested.set(true);
+        record.cancellationRequested.set(true);
+        Future<?> execution = record.execution;
+        if (execution != null && !execution.isDone()) execution.cancel(true);
+        return claimRecordDeletion(record);
+    }
+
+    private boolean claimRecordDeletion(TaskRecord record) {
+        synchronized (record.lifecycleLock) {
+            if (!record.deleteRequested.get() || record.executionStarted.get()
+                    || record.downloadLeases != 0 || !record.deferredWorkDirs.isEmpty()
+                    || record.deletionStarted) {
+                return false;
+            }
+            record.deletionStarted = true;
+            return true;
+        }
+    }
+
+    private boolean claimSuccessfulInputCleanup(TaskRecord record) {
+        synchronized (record.lifecycleLock) {
+            if (record.inputCleanupStarted || record.deleteRequested.get() || record.executionStarted.get()
+                    || !record.deferredWorkDirs.isEmpty()
+                    || record.snapshot().status() != TaskStatus.SUCCESS) {
+                return false;
+            }
+            record.inputCleanupStarted = true;
+            return true;
+        }
+    }
+
+    private void releaseDownload(TaskRecord record) {
+        boolean deleteNow;
+        synchronized (record.lifecycleLock) {
+            if (record.downloadLeases <= 0) return;
+            record.downloadLeases--;
+            deleteNow = claimRecordDeletion(record);
+        }
+        if (deleteNow) deleteTree(record.taskDir);
+    }
+
+    private DownloadArtifact downloadArtifact(TaskRecord record) {
+        TaskSnapshot snapshot = record.snapshot();
+        if (!snapshot.downloadReady() || record.downloadPath == null || !Files.isRegularFile(record.downloadPath)) {
+            throw new IllegalStateException("任务结果尚不可下载");
+        }
+        String type = snapshot.downloadName().endsWith(".zip") ? "application/zip"
+                : snapshot.targetFormat().contentType();
+        return new DownloadArtifact(record.downloadPath, snapshot.downloadName(), type);
     }
 
     private TaskRecord record(String taskId) {
         try { UUID.fromString(taskId); } catch (Exception e) { throw new TaskNotFoundException(taskId); }
         TaskRecord value = tasks.get(taskId);
         if (value == null) throw new TaskNotFoundException(taskId);
+        // Expired records deliberately use the same not-found contract as cleaned records,
+        // so API behavior does not depend on whether the hourly cleanup has already run.
+        if (removeIfExpired(value, Instant.now()) || tasks.get(taskId) != value) {
+            throw new TaskNotFoundException(taskId);
+        }
         return value;
     }
     private Path taskDir(String taskId) {
@@ -800,6 +1042,10 @@ public final class ConversionTaskService implements AutoCloseable {
 
     @Override
     public void close() {
+        // In-process converters cannot be forcibly killed when they ignore interruption. Closing the cleaner first
+        // prevents delayed cleanup jobs from mutating files after close returns. A converter still alive after the
+        // bounded stop grace may itself keep writing its retained diagnostic artifacts; a restarted service recovers
+        // the task and removes those artifacts through normal TTL cleanup instead of racing that old worker.
         cleaner.shutdownNow();
         executor.shutdownNow();
         awaitShutdown(cleaner, "cleaner");
@@ -831,6 +1077,11 @@ public final class ConversionTaskService implements AutoCloseable {
         private final AtomicBoolean cancellationRequested = new AtomicBoolean();
         private final AtomicBoolean deleteRequested = new AtomicBoolean();
         private final AtomicBoolean executionStarted = new AtomicBoolean();
+        private final Object lifecycleLock = new Object();
+        private final Set<Path> deferredWorkDirs = new HashSet<>();
+        private int downloadLeases;
+        private boolean deletionStarted;
+        private boolean inputCleanupStarted;
         private volatile Future<?> execution;
         private TaskRecord(String id, Path taskDir, List<InputFile> inputs, TaskSnapshot snapshot,
                            FileConverter converter, ConversionRoute route, ConversionOptions options) {

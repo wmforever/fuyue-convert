@@ -4,6 +4,7 @@ import com.fuyue.formatconverter.model.ConversionWarning;
 import com.fuyue.formatconverter.model.DocumentModel;
 import com.fuyue.formatconverter.model.ImageBlock;
 import com.fuyue.formatconverter.model.PageModel;
+import com.fuyue.formatconverter.model.ScannedContentDetector;
 import com.fuyue.formatconverter.model.TextBlock;
 import com.fuyue.formatconverter.model.WarningCode;
 import com.fuyue.formatconverter.parser.ParseLimits;
@@ -42,42 +43,92 @@ final class OfdOcrSupport {
                 pages.add(page);
                 continue;
             }
+            List<ImageBlock> requiredImages;
+            try {
+                requiredImages = ScannedContentDetector.imagesRequiringOcr(
+                        page.textBlocks(), page.images(), page.physicalBox());
+            } catch (ScannedContentDetector.AnalysisLimitException e) {
+                throw new ConversionFailureException("OCR_IMAGE_LIMIT_EXCEEDED",
+                        "OFD 第 " + page.pageNumber() + " 页图片候选过多，拒绝不完整转换。");
+            }
             requireAvailable(page.pageNumber());
+            boolean strictRegions = !requiredImages.isEmpty();
+            List<ImageBlock> candidates = strictRegions
+                    ? requiredImages : ScannedContentDetector.contentImages(page.images());
             List<TextBlock> recognized = new ArrayList<>();
+            List<TextBlock> allTexts = new ArrayList<>(page.textBlocks());
+            List<ImageBlock> ocrSources = new ArrayList<>();
             double confidenceTotal = 0d;
             int wordCount = 0;
             int imageIndex = 0;
-            for (ImageBlock image : page.images()) {
-                if ("SIGNATURE".equalsIgnoreCase(image.role()) || image.data().length == 0) continue;
-                ocr.requireImageWithinOcrLimit(image.data());
-                var decoded = ImageIO.read(new ByteArrayInputStream(image.data()));
-                if (decoded == null) continue;
-                Path pageWork = Files.createDirectories(workDir.resolve("page-%04d".formatted(page.pageNumber())));
-                Path raster = pageWork.resolve("image-%04d.png".formatted(++imageIndex));
-                if (!ImageIO.write(decoded, "png", raster.toFile())) continue;
-                progress.update(TaskStage.RECOGNIZING,
-                        30 + (int) (page.pageNumber() * 35d / Math.max(1, parsed.sourcePageCount())));
-                TesseractOcrConverter.RecognitionResult result = ocr.recognizeLayoutResult(raster,
-                        pageWork.resolve("ocr-" + imageIndex), page.pageNumber(), image.box(), limits);
-                for (TextBlock block : result.blocks()) {
-                    recognized.add(new TextBlock(block.id() + "-i" + imageIndex, block.pageNumber(), block.box(),
-                            block.text(), block.baselineY(), block.style(), recognized.size() + 1,
-                            block.textOffsetXmm(), block.textOffsetYmm(), block.advancesMm(), block.transform()));
+            for (ImageBlock image : candidates) {
+                int currentImage = ++imageIndex;
+                try {
+                    byte[] data = image.data();
+                    if (data.length == 0) {
+                        if (strictRegions) throw new ConversionFailureException("OCR_IMAGE_INVALID",
+                                "OFD 第 " + page.pageNumber() + " 页包含无法读取的必需 OCR 图像区域");
+                        continue;
+                    }
+                    ocr.requireImageWithinOcrLimit(data);
+                    var decoded = ImageIO.read(new ByteArrayInputStream(data));
+                    if (decoded == null) {
+                        if (strictRegions) throw new ConversionFailureException("OCR_IMAGE_INVALID",
+                                "OFD 第 " + page.pageNumber() + " 页包含无法解码的必需 OCR 图像区域");
+                        continue;
+                    }
+                    Path pageWork = Files.createDirectories(workDir.resolve("page-%04d".formatted(page.pageNumber())));
+                    Path raster = pageWork.resolve("image-%04d.png".formatted(currentImage));
+                    if (!ImageIO.write(decoded, "png", raster.toFile())) {
+                        if (strictRegions) throw new ConversionFailureException("OCR_IMAGE_INVALID",
+                                "OFD 第 " + page.pageNumber() + " 页必需 OCR 图像无法标准化");
+                        continue;
+                    }
+                    progress.update(TaskStage.RECOGNIZING,
+                            30 + (int) (page.pageNumber() * 35d / Math.max(1, parsed.sourcePageCount())));
+                    TesseractOcrConverter.RecognitionResult result = ocr.recognizeLayoutResult(raster,
+                            pageWork.resolve("ocr-" + currentImage), page.pageNumber(), image.box(), limits);
+                    ocrSources.add(image);
+                    if (strictRegions) {
+                        ocr.requireUsableResult(result,
+                                "OFD 第 " + page.pageNumber() + " 页图片 " + currentImage);
+                    }
+                    List<TextBlock> beyondNative = result.blocks().stream()
+                            .filter(block -> !OcrTextDeduplicator.duplicates(block, page.textBlocks()))
+                            .toList();
+                    if (strictRegions && beyondNative.isEmpty()) {
+                        throw new ConversionFailureException("OCR_NO_NEW_TEXT",
+                                "OFD 第 " + page.pageNumber() + " 页图片 " + currentImage
+                                        + " 缺少原生文字层，但 OCR 未补充出新文字");
+                    }
+                    for (TextBlock block : beyondNative) {
+                        if (OcrTextDeduplicator.duplicates(block, allTexts)) continue;
+                        TextBlock addition = new TextBlock(
+                                block.id() + "-i" + currentImage, block.pageNumber(), block.box(),
+                                block.text(), block.baselineY(), block.style(), recognized.size() + 1,
+                                block.textOffsetXmm(), block.textOffsetYmm(), block.advancesMm(), block.transform());
+                        recognized.add(addition);
+                        allTexts.add(addition);
+                    }
+                    confidenceTotal += result.confidence() * result.wordCount();
+                    wordCount += result.wordCount();
+                } catch (ConversionFailureException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new ConversionFailureException("OCR_IMAGE_FAILED",
+                            "OFD 第 " + page.pageNumber() + " 页图片 " + currentImage + " OCR 处理失败");
                 }
-                confidenceTotal += result.confidence() * result.wordCount();
-                wordCount += result.wordCount();
             }
             TesseractOcrConverter.RecognitionResult pageResult = new TesseractOcrConverter.RecognitionResult(
                     recognized, wordCount == 0 ? 0d : confidenceTotal / wordCount, wordCount);
             ocr.requireUsableResult(pageResult, "OFD 第 " + page.pageNumber() + " 页");
-            List<TextBlock> allTexts = new ArrayList<>(page.textBlocks());
-            allTexts.addAll(recognized);
             List<ConversionWarning> warnings = page.warnings().stream()
                     .filter(warning -> warning.code() != WarningCode.OCR_REQUIRED)
                     .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
             warnings.addAll(ocr.warningsFor(pageResult, page.pageNumber(),
                     "OFD 第 " + page.pageNumber() + " 页"));
-            pages.add(new PageModel(page.pageNumber(), page.physicalBox(), allTexts, page.lines(), page.images(),
+            pages.add(new PageModel(page.pageNumber(), page.physicalBox(), allTexts, page.lines(),
+                    withOcrBackgroundRole(page.images(), ocrSources),
                     List.of(), List.of(), warnings));
         }
         return new DocumentModel(parsed.sourceName(), parsed.parserName() + (ocr == null ? "" : " + Tesseract"),
@@ -106,4 +157,14 @@ final class OfdOcrSupport {
     private boolean requiresOcr(PageModel page) {
         return page.warnings().stream().anyMatch(warning -> warning.code() == WarningCode.OCR_REQUIRED);
     }
+
+    private List<ImageBlock> withOcrBackgroundRole(List<ImageBlock> images, List<ImageBlock> ocrSources) {
+        java.util.Set<ImageBlock> sources = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        sources.addAll(ocrSources);
+        return images.stream().map(image -> sources.contains(image)
+                ? new ImageBlock(image.id(), image.pageNumber(), image.box(), image.mimeType(), image.data(),
+                "OCR_SCAN_BACKGROUND", image.zOrder())
+                : image).toList();
+    }
+
 }

@@ -43,18 +43,18 @@ Status legend:
 
 | Route | Status | Default strategy | Notes |
 | --- | --- | --- | --- |
-| OFD -> DOCX/TXT/PDF/PNG/JPG | beta | structure/layout | DOCX and TXT use structured parsing. DOCX files containing CJK text embed a licensed fallback font so glyphs remain visible on another machine. Scanned pages fail when OCR is not configured; local Tesseract can add positioned text from scan images. PDF/PNG/JPEG paint text, images, paths, and ordinary image-based seals at source coordinates. Embedded-OFD seal appearances are skipped with an explicit warning while body content is preserved. Multi-page images are zipped. |
+| OFD -> DOCX/TXT/PDF/PNG/JPG | beta | structure/layout | DOCX and TXT use structured parsing. DOCX files containing CJK text embed a licensed fallback font so glyphs remain visible on another machine. Scanned pages fail when OCR is not configured; local Tesseract adds positioned text for scan regions while DOCX retains the source scan visual layer. PDF/PNG/JPEG paint text, images, paths, and ordinary image-based seals at source coordinates. Embedded-OFD seal appearances are skipped with an explicit warning while body content is preserved. Images default to 160 DPI and support a per-task 36-600 DPI override; multi-page images are zipped. |
 | OFD -> XLSX | experimental | data first | Writes high-confidence bordered grid tables as real cells, per-page worksheets, and merged regions. It returns `NO_TABLE_FOUND` when no reliable table is found and `OCR_REQUIRED` for scanned pages. |
 | CSV <-> XLSX | stable | data first | CSV supports UTF-8, BOM-marked UTF-16, GB18030, and comma/TAB/semicolon/pipe detection. Inputs stay text to prevent formula injection. XLSX exports cached formula results, formatted dates, and multi-sheet CSV ZIPs. |
 | DOCX/XLSX/PPTX -> PDF | beta | layout first | Uses an isolated LibreOffice headless profile when available and validates the actual PDF page count. Local fonts affect visual output. |
 | TXT -> DOCX/PDF | stable | content first | Supports UTF-8, BOM-marked UTF-16, and strict GB18030 decoding. Form feeds create real page breaks and PDF wraps CJK by glyph width. DOCX embeds the licensed fallback on demand unless an explicit East Asian font is configured. |
 | DOCX -> TXT | beta | text extraction | Extracts paragraphs and tables in body order, then labeled headers, footers, text boxes, footnotes, endnotes, comments, and tracked revisions; layout is not retained. |
-| PDF -> TXT | beta | extraction | Extracts text by page coordinates and multi-column reading order with page boundaries. Scanned pages fail with `OCR_REQUIRED` by default; explicit local OCR fills only content pages that have no real text. |
+| PDF -> TXT | beta | extraction | Extracts text by page coordinates and multi-column reading order with page boundaries. Scanned pages and same-page large scan regions with only sparse native text fail with `OCR_REQUIRED` by default; explicit local OCR fills only regions without a usable text layer. |
 | PDF -> PNG/JPG | stable | rendering | Defaults to 160 DPI (configurable from 36-600); PNG preserves a transparent canvas, JPEG converts to RGB at 0.9 quality, and multi-page output is zipped. |
-| PDF -> DOCX | beta | editability first | Restores real text, basic paragraphs, page sizes, and orientation. CJK output embeds the licensed Droid Sans Fallback while still avoiding full-page images. Scanned pages fail by default; explicit local OCR converts them to positioned editable text. |
+| PDF -> DOCX | beta | editability first | Restores real text, basic paragraphs, page sizes, and orientation. CJK output embeds the licensed Droid Sans Fallback. Full-page and large scan regions without a text layer fail by default; explicit local OCR overlays positioned editable text while retaining the source scan visual layer and ordinary photos so partial recognition cannot silently discard content. |
 | PDF -> OFD | experimental | fidelity first | Produces a real OFD package. A 160-DPI page image preserves appearance, while text PDFs also receive source-positioned OFD text objects. Poppler is preferred with a PDFBox fallback; complex objects are not yet reconstructed individually. |
 | PDF compression/watermark | beta | fidelity first | Compression provides lossless, balanced, and strong modes, with source preview and real-result preview after completion. Watermarks support bilingual text, opacity, angle, color, position, tiling, page ranges, and a local live preview. Editing submitted settings requires regeneration. Both routes reject digitally signed PDFs. |
-| PDF merge/split | stable | fidelity first | Merge follows upload order and keeps source preview bound during reordering. Split previews and validates page ranges before producing a numbered ZIP. Both operations rewrite the PDF and do not preserve digital-signature validity. |
+| PDF merge/split | stable | fidelity first | Merge follows upload order and keeps source preview bound during reordering. Split previews and validates page ranges before producing a numbered ZIP. Both operations rewrite the PDF; digitally signed inputs fail with `PDF_SIGNATURE_PRESENT` instead of producing an invalidated signature. |
 | PNG/JPG -> PDF | stable | layout first | Reads PNG pHYs, JPEG JFIF/EXIF DPI, and EXIF orientation; transparent PNG composition is preserved. Missing DPI defaults to 96 with a warning. Same-format batches merge in upload order, show source-image order, and preview the real PDF result after conversion. |
 | PNG/JPG -> TXT/DOCX | experimental/on demand | OCR extraction | Source/JAR deployments can use an explicitly configured system Tesseract. A future reviewed runtime may bundle a fixed OCR engine. TXT emits recognized text; DOCX maps positioned OCR text through `DocumentModel` to real editable text. Both expose page confidence and OCR warnings. |
 | WPS/ET/DPS/UOF -> OOXML | experimental | compatibility first | Depends on LibreOffice import support. UOF is converted directly to editable DOCX, so pagination and object positions may change. |
@@ -66,9 +66,10 @@ External dependencies:
 - LibreOffice: used for Office-engine conversions involving DOCX/XLSX/PPTX/WPS/ET/DPS/UOF and PDF. Image-to-PDF uses the built-in PDFBox route for deterministic DPI and EXIF handling.
 - Poppler: used for PDF to PNG/JPEG rendering and visual regression checks.
 - `FORMAT_CONVERTER_IMAGE_DPI`: PDF image-export resolution, default `160`, allowed range `36-600`; invalid configuration fails explicitly when the converter starts.
+- `FORMAT_CONVERTER_OFD_IMAGE_DPI`: OFD image-export default resolution, default `160`, allowed range `36-600`; API `imageDpi` can override it per task.
 - `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION`: optional LibreOffice version lock fragment such as `24.8`. A mismatching `--version` marks the Office engine unavailable; the detected version is exposed by `/api/health` and `/api/diagnostics`.
 - Source/standalone-JAR deployments can set `FORMAT_CONVERTER_OCR_ENABLED=true` and optionally select a system Tesseract binary. OCR is invoked only by explicit image OCR routes or detected scan pages. Set the value to `false` to disable it. Health and diagnostics expose `ocr.bundled` when a reviewed built-in runtime is present, along with versions, models, limits, confidence thresholds, and capability errors.
-- OCR never replaces native PDF/OFD parsing and is not used for fixed-layout rendering. Mixed documents are processed page by page. Missing page models, no recognized text, confidence below the hard threshold, timeouts, and resource termination return `OCR_PAGE_MISSING`, `OCR_NO_TEXT`, `OCR_LOW_CONFIDENCE`, `OCR_TIMEOUT`, and `OCR_RESOURCE_EXHAUSTED` instead of publishing partial output.
+- OCR never replaces native PDF/OFD parsing and is not used for fixed-layout rendering. Mixed documents are processed by region within each page: native text, source scan visuals, and ordinary photos are retained, while only scan regions without a usable text layer enter OCR. Missing page models, unsafe image extraction/decoding, no new text, low confidence, timeouts, and resource termination return stable errors instead of silently publishing incomplete content.
 - System fonts still affect pagination, line spacing, and font substitution in Office output. PDF/OFD-to-DOCX embeds the project's licensed CJK fallback to keep basic glyphs visible, although its metrics and design may differ from the source font. Basic PDF output routes also include fallback fonts, and a custom TrueType font can be selected with `FORMAT_CONVERTER_PDF_FONT`. TXT -> DOCX font names can be configured with `FORMAT_CONVERTER_DOCX_FONT` and `FORMAT_CONVERTER_DOCX_CJK_FONT`; without an explicit East Asian font, it also embeds the bundled fallback on demand.
 
 See [docs/quality-standard.md](docs/quality-standard.md) for quality definitions.
@@ -126,6 +127,17 @@ npm run dev
 `desktop/` is an independent Electron shell with a local dark-workbench UI. It
 starts the same Java/Spring conversion service on a random loopback port rather
 than reimplementing converters in JavaScript.
+
+When a user manually downloads a completed result in the desktop app, the
+Electron main process receives only its `taskId`, validates it with the local
+backend, opens the system Save As dialog, and streams the result directly to the
+selected file. The last successfully used directory is remembered. A regular
+web session without the desktop bridge continues to use browser downloads.
+
+Preferences cover automatic downloads, the default PDF compression level, and
+the last available target route selected for each source format. The desktop app
+stores them under Electron `userData`; the web app uses the current browser's
+`localStorage`. A remembered route is restored only while it remains available.
 
 Development preview, with Java and Vite already running:
 

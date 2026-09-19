@@ -59,6 +59,7 @@ public final class OfdToTextConverter implements FileConverter {
         SafeOfdPackage safe = extractor.extract(input.path(), workDir, limits);
         progress.update(TaskStage.PARSING, 15);
         DocumentModel parsed = parser.parse(safe, input.displayName(), limits);
+        OfdContentGuards.requireImagesExtracted(parsed);
         if (ocr != null) {
             parsed = ocr.recognizeRequiredPages(parsed, workDir.resolve("ofd-ocr"), limits, progress);
         }

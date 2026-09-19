@@ -38,7 +38,7 @@ final class PdfWatermarkConverter implements FileConverter {
         int markedPages = 0;
         progress.update(TaskStage.PARSING, 15);
         try (PDDocument document = Loader.loadPDF(input.path().toFile())) {
-            requireUnsigned(document);
+            ConversionGuards.requireUnsignedPdf(document, "添加水印");
             FontSet fonts = loadFonts(document);
             Color color = Color.decode(options.watermarkColor());
             for (int index = 0; index < document.getNumberOfPages(); index++) {
@@ -190,13 +190,6 @@ final class PdfWatermarkConverter implements FileConverter {
         try (InputStream input = PdfWatermarkConverter.class.getResourceAsStream(resource)) {
             if (input == null) throw new IOException("内置水印字体缺失：" + resource);
             return PDType0Font.load(document, input);
-        }
-    }
-
-    private void requireUnsigned(PDDocument document) throws IOException {
-        if (!document.getSignatureDictionaries().isEmpty()) {
-            throw new ConversionFailureException("PDF_SIGNATURE_PRESENT",
-                    "PDF 包含数字签名；添加水印会使签名失效，已拒绝处理");
         }
     }
 

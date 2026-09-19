@@ -22,6 +22,14 @@ v0.1.5 同时提供跨平台 Lite 与 Full：
 
 Windows 暂未做商业代码签名，可能显示 SmartScreen 或“未知发布者”。macOS 当前为 ad-hoc 签名且未经过 Apple 公证，首次启动如被 Gatekeeper 拦截，请前往“系统设置 → 隐私与安全”选择“仍要打开”。六个安装文件的 SHA-256 都写在 Release 正文。
 
+## 保存结果与使用偏好
+
+- 用户手动点击下载时，渲染页只向 Electron 主进程传入 `taskId`。主进程会向本地后端查询任务元数据、确认结果已可下载，再打开系统“另存为”对话框。
+- 主进程从回环后端流式下载到同目录临时文件，传输完整后再替换目标文件；大文件不需经过渲染页整体缓冲。
+- 成功保存后记住目标目录；已记录目录不存在时回退到系统下载目录。普通网页环境没有桌面桥接时，仍由浏览器处理下载。
+- 自动下载、PDF 默认压缩等级和“源格式 → 上次选择的可用目标格式”会保存为偏好。桌面版写入 Electron `userData/desktop-preferences.json`，纯网页版写入当前浏览器的 `localStorage`。
+- 只有当前仍标记为 `available` 的目标路线会被恢复；损坏、旧版本或不合法的偏好值会回退到安全默认值，不影响应用启动。
+
 ## 开发预览
 
 先启动现有 Vite 与 Java 服务，再运行：
@@ -101,4 +109,4 @@ gh variable delete FORMAT_CONVERTER_BINARY_RELEASE_APPROVED_SHA
 
 ## 运行安全
 
-应用启动时使用随机回环端口与随机 API Token，文件数据写入 Electron `userData`，退出时先请求 Spring Boot 优雅关闭，再清理残留进程树。正式发布前，Windows 需完成安装/卸载，两个 Mac 架构需完成 DMG 挂载/复制/删除；三者都必须完成真实转换、下载、优雅退出和无残留进程验收。
+应用启动时使用随机回环端口与随机 API Token，文件数据与偏好设置写入 Electron `userData`，退出时先请求 Spring Boot 优雅关闭，再清理残留进程树。正式发布前，Windows 需完成安装/卸载，两个 Mac 架构需完成 DMG 挂载/复制/删除；三者都必须完成真实转换、下载、优雅退出和无残留进程验收。

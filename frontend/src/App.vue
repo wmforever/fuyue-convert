@@ -2,7 +2,15 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ImageCollectionPreview from './components/ImageCollectionPreview.vue'
 import PdfPreview from './components/PdfPreview.vue'
+import { imageDpiChoices, imageExportOptions, isImageExportRoute } from './imageExportOptions.js'
+import { normalizeNativeSaveResult, shouldUseNativeSave } from './downloadTransport.js'
 import { blocksPdfSubmission, loadPdfJs, pdfPreviewError } from './pdfPreviewRuntime.js'
+import {
+  findRememberedRoute,
+  readPreferences,
+  rememberRouteTarget,
+  writePreferences
+} from './preferences.js'
 
 const fallbackConversions = [{
   id: 'ofd-to-docx',
@@ -47,6 +55,7 @@ const historyMessage = ref('')
 const downloadingTaskId = ref('')
 const compressionMode = ref('balanced')
 const splitPages = ref('all')
+const imageDpi = ref('')
 const watermarkText = ref('机密资料')
 const watermarkOpacity = ref(0.18)
 const watermarkAngle = ref(35)
@@ -83,7 +92,9 @@ const resultPreviewState = ref('empty')
 const resultPreviewError = ref('')
 const autoDownload = ref(false)
 const preferenceMessage = ref('')
+const targetBySource = ref(Object.create(null))
 const desktopRuntime = ref(false)
+const nativeSaveAvailable = ref(false)
 const limits = ref({ maxFileSize: 50 * 1024 * 1024, maxFilesPerTask: 100, maxTaskUploadBytes: 250 * 1024 * 1024 })
 let pollTimer
 let historyTimer
@@ -118,7 +129,8 @@ const isPdfSplitRoute = computed(() => selectedRoute.value?.targetFormat === 'pd
 const isPdfInputRoute = computed(() => selectedRoute.value?.sourceFormat === 'pdf')
 const isImageToPdfRoute = computed(() => ['png', 'jpg'].includes(selectedRoute.value?.sourceFormat)
   && selectedRoute.value?.targetFormat === 'pdf')
-const hasToolOptions = computed(() => isPdfCompressRoute.value || isPdfWatermarkRoute.value || isPdfSplitRoute.value)
+const isImageExport = computed(() => isImageExportRoute(selectedRoute.value))
+const hasToolOptions = computed(() => isPdfCompressRoute.value || isPdfWatermarkRoute.value || isPdfSplitRoute.value || isImageExport.value)
 const watermarkPagesValid = computed(() => validWatermarkPages(watermarkPages.value))
 const watermarkPreviewFile = computed(() => isPdfWatermarkRoute.value ? files.value[0] || null : null)
 const watermarkPreviewPending = computed(() => Boolean(watermarkPreviewFile.value)
@@ -426,6 +438,7 @@ function fileIdentity(file) {
 }
 
 function currentRouteOptions() {
+  if (isImageExport.value) return imageExportOptions(imageDpi.value)
   if (isPdfWatermarkRoute.value) return currentWatermarkSettings()
   if (isPdfCompressRoute.value) return { compressionMode: compressionMode.value }
   if (isPdfSplitRoute.value) return { splitPages: splitPages.value.replace(/\s+/g, '').toLowerCase() }
@@ -444,6 +457,7 @@ const batchSettingsDirty = computed(() => ['SUCCESS', 'FAILED', 'CANCELLED'].inc
   && submittedBatchFingerprint.value
   && currentBatchFingerprint() !== submittedBatchFingerprint.value)
 const dirtySettingsLabel = computed(() => {
+  if (isImageExport.value) return '图片清晰度'
   if (isPdfWatermarkRoute.value) return '水印设置'
   if (isPdfCompressRoute.value) return '压缩设置'
   if (isPdfSplitRoute.value) return '拆分页码'
@@ -713,6 +727,8 @@ function selectRoute(route) {
   if (busy.value || route.status !== 'available') return
   if (route.id !== selectedRouteId.value && (files.value.length || task.value)) startNewBatch()
   selectedRouteId.value = route.id
+  targetBySource.value = rememberRouteTarget(targetBySource.value, route)
+  void persistPreferences()
   routeSearch.value = ''
   closeRoutePicker()
 }
@@ -720,6 +736,10 @@ function selectRoute(route) {
 function selectPickerSource(source) {
   pickerSource.value = source
   routeSearch.value = ''
+  if (['popular', 'pdf-tools', 'beta'].includes(source)
+      || busy.value || files.value.length || task.value) return
+  const rememberedRoute = findRememberedRoute(conversions.value, targetBySource.value, source)
+  if (rememberedRoute) selectedRouteId.value = rememberedRoute.id
 }
 
 async function navigate(view) {
@@ -924,24 +944,36 @@ async function retryHistoryTask(item) {
   }
 }
 
-function loadPreferences() {
+function preferenceStorageOptions() {
+  let storage
+  try { storage = window.localStorage } catch (_) { /* native storage may still work */ }
+  return { desktopBridge: window.formatConverterDesktop, storage }
+}
+
+async function loadPreferences() {
   try {
-    const stored = JSON.parse(localStorage.getItem('format-converter-preferences') || '{}')
-    autoDownload.value = stored.autoDownload === true
-    if (['lossless', 'balanced', 'strong'].includes(stored.compressionMode)) compressionMode.value = stored.compressionMode
+    const stored = await readPreferences(preferenceStorageOptions())
+    autoDownload.value = stored.autoDownload
+    compressionMode.value = stored.compressionMode
+    targetBySource.value = stored.targetBySource
   } catch (_) { /* use safe defaults */ }
 }
 
-function savePreferences() {
+async function persistPreferences(showMessage = false) {
   try {
-    localStorage.setItem('format-converter-preferences', JSON.stringify({
+    await writePreferences({
       autoDownload: autoDownload.value,
-      compressionMode: compressionMode.value
-    }))
-    preferenceMessage.value = '偏好已保存到当前设备'
+      compressionMode: compressionMode.value,
+      targetBySource: targetBySource.value
+    }, preferenceStorageOptions())
+    if (showMessage) preferenceMessage.value = '偏好已保存到当前设备'
   } catch (_) {
-    preferenceMessage.value = '当前环境无法保存偏好'
+    if (showMessage) preferenceMessage.value = '当前环境无法保存偏好'
   }
+}
+
+function savePreferences() {
+  void persistPreferences(true)
 }
 
 function onDocumentClick(event) {
@@ -1003,11 +1035,18 @@ async function loadCapabilities() {
         : routes
       capabilityMessage.value = ''
       conversions.value = nextRoutes
-      if (!hasActiveBatch && !nextRoutes.some(route => route.id === selectedRouteId.value)) {
-        selectedRouteId.value = nextRoutes[0].id
-      }
-      if (!hasActiveBatch && selectedRoute.value?.status !== 'available' && availableRoutes.value.length) {
-        selectedRouteId.value = availableRoutes.value[0].id
+      if (!hasActiveBatch) {
+        const rememberedRoute = findRememberedRoute(nextRoutes, targetBySource.value, previousRoute?.sourceFormat)
+        if (rememberedRoute) {
+          selectedRouteId.value = rememberedRoute.id
+        } else {
+          if (!nextRoutes.some(route => route.id === selectedRouteId.value)) {
+            selectedRouteId.value = nextRoutes[0].id
+          }
+          if (selectedRoute.value?.status !== 'available' && availableRoutes.value.length) {
+            selectedRouteId.value = availableRoutes.value[0].id
+          }
+        }
       }
     }
   } catch (_) {
@@ -1155,6 +1194,9 @@ async function submit() {
   const data = new FormData()
   files.value.forEach(file => data.append('files', file))
   data.append('targetFormat', selectedRoute.value.targetFormat)
+  if (isImageExport.value) {
+    for (const [key, value] of Object.entries(imageExportOptions(imageDpi.value))) data.append(key, value)
+  }
   if (isPdfCompressRoute.value) data.append('compressionMode', compressionMode.value)
   if (isPdfSplitRoute.value) data.append('splitPages', splitPages.value)
   if (isPdfWatermarkRoute.value) {
@@ -1323,6 +1365,20 @@ async function downloadTask(item, { silent = false } = {}) {
   if (!item?.taskId || downloadingTaskId.value) return
   downloadingTaskId.value = item.taskId
   try {
+    if (shouldUseNativeSave({ silent, desktopBridge: window.formatConverterDesktop })) {
+      const saved = normalizeNativeSaveResult(await window.formatConverterDesktop.saveTaskResult(item.taskId))
+      if (saved.status === 'cancelled') {
+        const text = '已取消保存'
+        if (activeView.value === 'history') historyMessage.value = text
+        else message.value = text
+        return
+      }
+      const text = `已保存 ${saved.fileName}`
+      if (activeView.value === 'history') historyMessage.value = text
+      else message.value = text
+      return
+    }
+
     const downloadUrl = `/api/tasks/${item.taskId}/download`
     const response = await fetch(downloadUrl, { method: 'HEAD', cache: 'no-store' })
     if (!response.ok) throw responseError(response, `下载失败（${response.status}）`)
@@ -1444,9 +1500,9 @@ watch(() => [task.value?.taskId, task.value?.status, task.value?.downloadReady, 
 
 onMounted(() => {
   desktopRuntime.value = Boolean(window.formatConverterDesktop)
-  loadPreferences()
+  nativeSaveAvailable.value = typeof window.formatConverterDesktop?.saveTaskResult === 'function'
   loadRecentTasks()
-  loadCapabilities().finally(() => loadTaskHistory())
+  loadPreferences().finally(() => loadCapabilities().finally(() => loadTaskHistory()))
   loadLimits()
   healthTimer = setInterval(loadLimits, 30000)
   document.addEventListener('click', onDocumentClick)
@@ -1591,7 +1647,7 @@ onBeforeUnmount(() => {
               <time>{{ formatTaskTime(item.updatedAt) }}</time><em :class="item.status.toLowerCase()">{{ recentStatusLabel(item.status) }}</em>
               <span class="history-actions">
                 <button type="button" @click="openHistoryTask(item)">查看</button>
-                <button v-if="item.downloadReady" type="button" :disabled="downloadingTaskId === item.taskId" @click="downloadTask(item)">{{ downloadingTaskId === item.taskId ? '下载中' : '下载' }}</button>
+                <button v-if="item.downloadReady" type="button" :disabled="downloadingTaskId === item.taskId" @click="downloadTask(item)">{{ downloadingTaskId === item.taskId ? (nativeSaveAvailable ? '保存中' : '下载中') : (nativeSaveAvailable ? '另存为' : '下载') }}</button>
                 <button v-if="['FAILED', 'CANCELLED'].includes(item.status)" type="button" @click="retryHistoryTask(item)">重试</button>
                 <button v-if="['SUCCESS', 'FAILED', 'CANCELLED'].includes(item.status)" type="button" class="danger" @click="deleteHistoryTask(item)">删除</button>
               </span>
@@ -1737,10 +1793,20 @@ onBeforeUnmount(() => {
       <div v-if="hasToolOptions" class="tool-options-section">
         <div class="field-heading">
           <span class="field-number">02</span>
-          <div><label>{{ isPdfCompressRoute ? '压缩设置' : (isPdfSplitRoute ? '拆分范围' : '水印设置') }}</label><small>根据使用场景调整处理参数</small></div>
+          <div><label>{{ isImageExport ? '图片清晰度' : (isPdfCompressRoute ? '压缩设置' : (isPdfSplitRoute ? '拆分范围' : '水印设置')) }}</label><small>根据使用场景调整处理参数</small></div>
         </div>
 
-        <div v-if="isPdfCompressRoute" class="compression-options" role="radiogroup" aria-label="PDF 压缩等级">
+        <div v-if="isImageExport" class="compression-options" role="radiogroup" aria-label="图片清晰度">
+          <label v-for="choice in imageDpiChoices" :key="choice.value" :class="{ selected: imageDpi === choice.value }">
+            <input v-model="imageDpi" type="radio" :value="choice.value" :disabled="busy" />
+            <span class="option-check"></span>
+            <strong>{{ choice.label }}</strong>
+            <small>{{ choice.detail }}</small>
+          </label>
+          <p class="option-notice"><span>i</span> DPI 越高，输出像素和文件体积越大；多页文档按页导出 ZIP。提高 DPI 无法恢复源扫描图中缺失的细节。</p>
+        </div>
+
+        <div v-else-if="isPdfCompressRoute" class="compression-options" role="radiogroup" aria-label="PDF 压缩等级">
           <label :class="{ selected: compressionMode === 'lossless' }">
             <input v-model="compressionMode" type="radio" value="lossless" :disabled="busy" @change="savePreferences" />
             <span class="option-check"></span>
@@ -2021,7 +2087,7 @@ onBeforeUnmount(() => {
       <div class="actions">
         <button v-if="!task" class="primary" :disabled="!canSubmit" @click="submit">开始转换 <span aria-hidden="true">→</span></button>
         <button v-if="batchSettingsDirty" class="primary" :disabled="!canSubmit" @click="regenerateCurrentBatch">按当前设置重新生成 <span aria-hidden="true">↻</span></button>
-        <button v-if="task?.downloadReady" :class="batchSettingsDirty ? 'secondary' : 'primary'" :disabled="downloadingTaskId === task.taskId" @click="download">{{ downloadingTaskId === task.taskId ? '正在下载…' : (batchSettingsDirty ? '下载上次结果' : `下载 ${task.downloadName}`) }} <span aria-hidden="true">↓</span></button>
+        <button v-if="task?.downloadReady" :class="batchSettingsDirty ? 'secondary' : 'primary'" :disabled="downloadingTaskId === task.taskId" @click="download">{{ downloadingTaskId === task.taskId ? (nativeSaveAvailable ? '正在保存…' : '正在下载…') : (batchSettingsDirty ? (nativeSaveAvailable ? '另存上次结果' : '下载上次结果') : `${nativeSaveAvailable ? '另存为' : '下载'} ${task.downloadName}`) }} <span aria-hidden="true">↓</span></button>
         <button v-if="busy && !task" class="secondary" @click="cancelUpload">取消上传</button>
         <button v-if="task && ['WAITING', 'CONVERTING'].includes(task.status)" class="secondary" @click="cancelTask">取消任务</button>
         <button v-if="task && ['FAILED', 'CANCELLED'].includes(task.status)" class="secondary" @click="retryTask">{{ batchSettingsDirty ? '重试上次任务' : '重试' }}</button>

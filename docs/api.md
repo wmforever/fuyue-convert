@@ -49,6 +49,7 @@ PDF 工具可选参数：
 - `watermarkTiled`：是否在整页平铺水印；
 - `watermarkPages`：`all`、`1`、`1-3` 或 `1,3-5` 形式的页码范围；
 - `watermarkColor`：`#RRGGBB` 形式的颜色。
+- `imageDpi`：PDF/OFD 导出 PNG/JPEG 时的任务级清晰度，整数 `36-600`；省略时使用服务默认值。DPI 越高，像素、内存和输出体积越大。
 
 成功返回 HTTP 202 和任务快照。快照中包含 `sourceFormat`、`targetFormat`、任务状态、进度、警告和文件级结果。
 
@@ -115,7 +116,7 @@ GET /api/tasks/{taskId}
 - `FAILED`
 - `CANCELLED`
 
-`stage` 提供内部阶段，`progress` 为 0 到 100。`warnings` 是非致命限制，例如字体替代、OCR 低置信度或图像层保真兜底。OCR 警告的 `confidence` 为 0-1 的页面平均置信度，非 OCR 警告为 `null`。`files` 给出每个文件的成功或失败结果；成功结果中的 `pageCount` 是目标文档实际写入页数。OCR 常见稳定失败码包括 `OCR_REQUIRED`、`OCR_ENGINE_UNAVAILABLE`、`OCR_LANGUAGE_MISSING`、`OCR_PAGE_MISSING`、`OCR_NO_TEXT`、`OCR_LOW_CONFIDENCE`、`OCR_TIMEOUT`、`OCR_CAPACITY_EXCEEDED`、`OCR_RESOURCE_EXHAUSTED` 和 `OCR_ENGINE_FAILED`。
+`stage` 提供内部阶段，`progress` 为 0 到 100。`warnings` 是非致命限制，例如字体替代、OCR 低置信度或图像层保真兜底。OCR 警告的 `confidence` 为 0-1 的页面平均置信度，非 OCR 警告为 `null`。`files` 给出每个文件的成功或失败结果；成功结果中的 `pageCount` 是目标文档实际写入页数。OCR 常见稳定失败码包括 `OCR_REQUIRED`、`OCR_ENGINE_UNAVAILABLE`、`OCR_LANGUAGE_MISSING`、`OCR_PAGE_MISSING`、`OCR_NO_TEXT`、`OCR_NO_NEW_TEXT`、`OCR_IMAGE_INVALID`、`OCR_IMAGE_FAILED`、`OCR_IMAGE_LIMIT_EXCEEDED`、`OCR_LOW_CONFIDENCE`、`OCR_TIMEOUT`、`OCR_CAPACITY_EXCEEDED`、`OCR_RESOURCE_EXHAUSTED` 和 `OCR_ENGINE_FAILED`。PDF/OFD 图像对象无法安全提取时分别返回 `PDF_IMAGE_EXTRACTION_FAILED`、`OFD_IMAGE_EXTRACTION_FAILED`；签名 PDF 被压缩、水印、合并或拆分路线拒绝时返回 `PDF_SIGNATURE_PRESENT`。服务重启恢复历史任务时若发现下载结果文件缺失，会将任务标记为 `FAILED` 并返回 `RESULT_MISSING`，避免继续展示不可用的下载状态。
 
 ## 下载
 

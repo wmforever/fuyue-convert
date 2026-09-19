@@ -309,16 +309,45 @@ class PdfUtilityConverterTest {
 
     @Test
     void signedPdfIsRejectedBeforeModification() throws Exception {
-        Path signed = temp.resolve("signed.pdf");
-        try (PDDocument document = new PDDocument()) {
-            document.addPage(new PDPage());
-            document.addSignature(new PDSignature());
-            document.save(signed.toFile());
-        }
+        Path signed = signedPdf("signed.pdf");
         ConversionFailureException error = assertThrows(ConversionFailureException.class, () ->
                 new PdfWatermarkConverter().convert(input(signed), temp.resolve("signed-work"),
                         temp.resolve("signed-output.pdf"), ParseLimits.defaults(), (stage, progress) -> { }));
         assertEquals("PDF_SIGNATURE_PRESENT", error.code());
+    }
+
+    @Test
+    void signedPdfIsRejectedBeforeSplitCreatesAnArchive() throws Exception {
+        Path signed = signedPdf("signed-split.pdf");
+        Path output = temp.resolve("signed-pages.zip");
+
+        ConversionFailureException error = assertThrows(ConversionFailureException.class, () ->
+                new PdfSplitConverter().convert(input(signed), temp.resolve("signed-split-work"), output,
+                        ParseLimits.defaults(), (stage, progress) -> { }));
+
+        assertEquals("PDF_SIGNATURE_PRESENT", error.code());
+        assertFalse(Files.exists(output));
+    }
+
+    @Test
+    void signedMergeInputFailsTheWholeTaskWithStableErrorCode() throws Exception {
+        Path unsigned = pdf("unsigned-merge.pdf", 1);
+        Path signed = signedPdf("signed-merge.pdf");
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("signed-merge-data"), 1, 2,
+                Duration.ofSeconds(20), Duration.ofHours(1), ParseLimits.defaults());
+
+        try (ConversionTaskService service = new ConversionTaskService(config,
+                List.of(new PdfMergeInputConverter()))) {
+            TaskSnapshot created = service.createTask(List.of(
+                    upload("unsigned-merge.pdf", unsigned), upload("signed-merge.pdf", signed)),
+                    DocumentFormat.PDF_MERGED);
+            TaskSnapshot finished = await(service, created.taskId());
+
+            assertEquals(TaskStatus.FAILED, finished.status());
+            assertEquals("PDF_SIGNATURE_PRESENT", finished.errorCode());
+            assertFalse(finished.downloadReady());
+            assertEquals("PDF_SIGNATURE_PRESENT", finished.files().get(1).errorCode());
+        }
     }
 
     @Test
@@ -353,6 +382,16 @@ class PdfUtilityConverterTest {
         Path path = temp.resolve(name);
         try (PDDocument document = new PDDocument()) {
             for (int index = 0; index < pages; index++) document.addPage(new PDPage());
+            document.save(path.toFile());
+        }
+        return path;
+    }
+
+    private Path signedPdf(String name) throws Exception {
+        Path path = temp.resolve(name);
+        try (PDDocument document = new PDDocument()) {
+            document.addPage(new PDPage());
+            document.addSignature(new PDSignature());
             document.save(path.toFile());
         }
         return path;

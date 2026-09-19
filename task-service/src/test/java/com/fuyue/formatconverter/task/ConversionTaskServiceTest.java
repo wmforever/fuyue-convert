@@ -36,9 +36,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -163,6 +169,41 @@ class ConversionTaskServiceTest {
             assertEquals(secondTask.taskId(), latest.get(0).taskId());
             assertThrows(IllegalArgumentException.class, () -> service.listTasks(0));
             assertThrows(IllegalArgumentException.class, () -> service.listTasks(101));
+        }
+    }
+
+    @Test void recoveryMarksSuccessfulTaskWithMissingOutputAsFailed() throws Exception {
+        FileConverter converter = new FileConverter() {
+            @Override public ConversionRoute route() {
+                return ConversionRoute.of(DocumentFormat.TXT, DocumentFormat.DOCX, "recovery test converter");
+            }
+
+            @Override public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                                       ParseLimits limits, ConversionProgress progress) throws Exception {
+                Files.createDirectories(outputPath.toAbsolutePath().getParent());
+                Files.writeString(outputPath, "result", StandardCharsets.UTF_8);
+                return new ConversionOutput(outputPath, "result.docx", 1, List.of());
+            }
+        };
+        Path dataRoot = temp.resolve("missing-result-recovery-data");
+        TaskServiceConfig config = new TaskServiceConfig(dataRoot, 1, 2,
+                Duration.ofSeconds(10), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] input = "recover me".getBytes(StandardCharsets.UTF_8);
+        String taskId;
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(converter))) {
+            TaskSnapshot created = service.createTask(List.of(new UploadPayload("recover.txt", "text/plain",
+                    input.length, () -> new ByteArrayInputStream(input))), DocumentFormat.DOCX);
+            TaskSnapshot finished = await(service, created.taskId());
+            assertEquals(TaskStatus.SUCCESS, finished.status(), finished.errorMessage());
+            taskId = created.taskId();
+        }
+
+        Files.delete(dataRoot.resolve("tasks").resolve(taskId).resolve("output/result-0001.docx"));
+        try (ConversionTaskService recovered = new ConversionTaskService(config, List.of(converter))) {
+            TaskSnapshot missing = recovered.get(taskId);
+            assertEquals(TaskStatus.FAILED, missing.status());
+            assertEquals("RESULT_MISSING", missing.errorCode());
+            assertFalse(missing.downloadReady());
         }
     }
 
@@ -826,6 +867,236 @@ class ConversionTaskServiceTest {
         }
     }
 
+    @Test void timeoutDefersCleanupUntilConverterThatIgnoresInterruptActuallyStops() throws Exception {
+        CountDownLatch started = new CountDownLatch(1);
+        CountDownLatch stopped = new CountDownLatch(1);
+        AtomicBoolean release = new AtomicBoolean();
+        FileConverter stubborn = new FileConverter() {
+            @Override public ConversionRoute route() {
+                return ConversionRoute.of(DocumentFormat.TXT, DocumentFormat.DOCX,
+                        "interrupt-ignoring test converter");
+            }
+
+            @Override
+            public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                            ParseLimits limits, ConversionProgress progress) throws Exception {
+                Files.createDirectories(workDir);
+                Files.writeString(workDir.resolve("converter-alive.txt"), "alive", StandardCharsets.UTF_8);
+                started.countDown();
+                while (!release.get()) {
+                    try { Thread.sleep(10); }
+                    catch (InterruptedException ignored) { /* deliberately emulate a broken in-process converter */ }
+                }
+                Files.writeString(outputPath, "late output", StandardCharsets.UTF_8);
+                stopped.countDown();
+                return new ConversionOutput(outputPath, "late.docx", null, List.of());
+            }
+        };
+        Path dataRoot = temp.resolve("stubborn-timeout-data");
+        TaskServiceConfig config = new TaskServiceConfig(dataRoot, 1, 2,
+                Duration.ofMillis(500), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] text = "timeout me".getBytes(StandardCharsets.UTF_8);
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(stubborn))) {
+            try {
+                TaskSnapshot created = service.createTask(List.of(new UploadPayload("timeout.txt", "text/plain",
+                        text.length, () -> new ByteArrayInputStream(text))), DocumentFormat.DOCX);
+                assertTrue(started.await(5, TimeUnit.SECONDS));
+
+                TaskSnapshot failed = await(service, created.taskId());
+                Path taskDir = dataRoot.resolve("tasks").resolve(created.taskId());
+                Path workDir = taskDir.resolve("work/file-0001");
+                Path output = taskDir.resolve("output/result-0001.docx");
+
+                assertEquals(TaskStatus.FAILED, failed.status());
+                assertEquals("CONVERSION_TIMEOUT", failed.errorCode());
+                assertTrue(failed.errorMessage().contains("临时文件已保留"), failed.errorMessage());
+                assertTrue(Files.isRegularFile(workDir.resolve("converter-alive.txt")),
+                        "still-running converter work must not be deleted");
+                Instant originalExpiry = failed.expiresAt();
+
+                release.set(true);
+                assertTrue(stopped.await(5, TimeUnit.SECONDS));
+                waitUntilMissing(workDir);
+                waitUntilMissing(output);
+                TaskSnapshot cleaned = awaitErrorMessage(service, created.taskId(), "临时文件已清理");
+                assertEquals(originalExpiry, cleaned.expiresAt(), "diagnostic updates must not extend result TTL");
+                assertTrue(cleaned.files().get(0).errorMessage().contains("临时文件已清理"));
+            } finally {
+                release.set(true);
+            }
+        }
+    }
+
+    @Test void cancellationDefersCleanupAndExposesDiagnosticWhenConverterIgnoresInterrupt() throws Exception {
+        CountDownLatch started = new CountDownLatch(1);
+        CountDownLatch stopped = new CountDownLatch(1);
+        AtomicBoolean release = new AtomicBoolean();
+        FileConverter stubborn = new FileConverter() {
+            @Override public ConversionRoute route() {
+                return ConversionRoute.of(DocumentFormat.TXT, DocumentFormat.DOCX,
+                        "cancel-resistant test converter");
+            }
+
+            @Override
+            public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                            ParseLimits limits, ConversionProgress progress) throws Exception {
+                Files.createDirectories(workDir);
+                Files.writeString(workDir.resolve("converter-alive.txt"), "alive", StandardCharsets.UTF_8);
+                Files.writeString(outputPath, "partial output", StandardCharsets.UTF_8);
+                started.countDown();
+                while (!release.get()) {
+                    try { Thread.sleep(10); }
+                    catch (InterruptedException ignored) { /* deliberately emulate a broken in-process converter */ }
+                }
+                Files.writeString(outputPath, "late output", StandardCharsets.UTF_8);
+                stopped.countDown();
+                return new ConversionOutput(outputPath, "late.docx", null, List.of());
+            }
+        };
+        Path dataRoot = temp.resolve("stubborn-cancel-data");
+        TaskServiceConfig config = new TaskServiceConfig(dataRoot, 1, 2,
+                Duration.ofMinutes(1), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] text = "cancel me".getBytes(StandardCharsets.UTF_8);
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(stubborn))) {
+            try {
+                TaskSnapshot created = service.createTask(List.of(new UploadPayload("cancel.txt", "text/plain",
+                        text.length, () -> new ByteArrayInputStream(text))), DocumentFormat.DOCX);
+                assertTrue(started.await(5, TimeUnit.SECONDS));
+                Path taskDir = dataRoot.resolve("tasks").resolve(created.taskId());
+                Path workDir = taskDir.resolve("work/file-0001");
+                Path output = taskDir.resolve("output/result-0001.docx");
+
+                assertEquals(TaskStatus.CANCELLED, service.cancel(created.taskId()).status());
+                TaskSnapshot diagnostic = awaitErrorMessage(service, created.taskId(), "临时文件已保留");
+
+                assertEquals(TaskStatus.CANCELLED, diagnostic.status());
+                assertEquals("TASK_CANCELLED", diagnostic.errorCode());
+                assertTrue(Files.isRegularFile(workDir.resolve("converter-alive.txt")),
+                        "cancelled converter work must remain while its thread is alive");
+                assertEquals("partial output", Files.readString(output, StandardCharsets.UTF_8),
+                        "partial output must not be deleted while the converter can still write it");
+                Instant originalExpiry = diagnostic.expiresAt();
+
+                release.set(true);
+                assertTrue(stopped.await(5, TimeUnit.SECONDS));
+                waitUntilMissing(workDir);
+                waitUntilMissing(output);
+                TaskSnapshot cleaned = awaitErrorMessage(service, created.taskId(), "临时文件已清理");
+                assertEquals(originalExpiry, cleaned.expiresAt(), "diagnostic updates must not extend result TTL");
+            } finally {
+                release.set(true);
+            }
+        }
+    }
+
+    @Test void staleProgressThatResumesAfterFailureCannotRestoreConvertingStatus() throws Exception {
+        CountDownLatch converterStarted = new CountDownLatch(1);
+        CountDownLatch allowFailure = new CountDownLatch(1);
+        CountDownLatch staleProgressPastActiveCheck = new CountDownLatch(1);
+        CountDownLatch resumeStaleProgress = new CountDownLatch(1);
+        AtomicReference<Throwable> staleProgressFailure = new AtomicReference<>();
+        FileConverter failing = new FileConverter() {
+            @Override public ConversionRoute route() {
+                return ConversionRoute.of(DocumentFormat.TXT, DocumentFormat.DOCX, "stale progress test converter");
+            }
+
+            @Override
+            public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                            ParseLimits limits, ConversionProgress progress) throws Exception {
+                converterStarted.countDown();
+                allowFailure.await();
+                throw new IOException("expected test failure");
+            }
+        };
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("stale-progress-data"), 1, 2,
+                Duration.ofSeconds(10), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] text = "fail after stale progress".getBytes(StandardCharsets.UTF_8);
+        Thread staleProgress = null;
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(failing))) {
+            try {
+                TaskSnapshot created = service.createTask(List.of(new UploadPayload("stale.txt", "text/plain",
+                        text.length, () -> new ByteArrayInputStream(text))), DocumentFormat.DOCX);
+                assertTrue(converterStarted.await(5, TimeUnit.SECONDS));
+                Object taskRecord = taskRecord(service, created.taskId());
+
+                // This thread represents a callback that already observed fileActive=true and then stalled
+                // immediately before entering update(...).
+                staleProgress = new Thread(() -> {
+                    staleProgressPastActiveCheck.countDown();
+                    try {
+                        resumeStaleProgress.await();
+                        TaskSnapshot failedSnapshot = service.get(created.taskId());
+                        invokeProgressUpdate(service, taskRecord, failedSnapshot);
+                    } catch (Throwable error) {
+                        staleProgressFailure.set(error);
+                    }
+                }, "stale-progress-test");
+                staleProgress.start();
+                assertTrue(staleProgressPastActiveCheck.await(5, TimeUnit.SECONDS));
+
+                allowFailure.countDown();
+                TaskSnapshot failed = await(service, created.taskId());
+                assertEquals(TaskStatus.FAILED, failed.status());
+                Instant originalExpiry = failed.expiresAt();
+
+                resumeStaleProgress.countDown();
+                staleProgress.join(5_000);
+                assertFalse(staleProgress.isAlive());
+                assertNull(staleProgressFailure.get(), () -> "stale progress failed: " + staleProgressFailure.get());
+                TaskSnapshot afterStaleProgress = service.get(created.taskId());
+                assertEquals(TaskStatus.FAILED, afterStaleProgress.status());
+                assertEquals(TaskStage.FAILED, afterStaleProgress.stage());
+                assertEquals(originalExpiry, afterStaleProgress.expiresAt());
+            } finally {
+                allowFailure.countDown();
+                resumeStaleProgress.countDown();
+                if (staleProgress != null) staleProgress.join(5_000);
+            }
+        }
+    }
+
+    @Test void multiFileDeadlineKeepsStableConversionTimeoutCode() throws Exception {
+        CountDownLatch firstStarted = new CountDownLatch(1);
+        AtomicInteger calls = new AtomicInteger();
+        FileConverter blocking = new FileConverter() {
+            @Override public ConversionRoute route() {
+                return ConversionRoute.of(DocumentFormat.TXT, DocumentFormat.DOCX,
+                        "multi-file deadline test converter");
+            }
+
+            @Override
+            public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                            ParseLimits limits, ConversionProgress progress) throws Exception {
+                calls.incrementAndGet();
+                firstStarted.countDown();
+                new CountDownLatch(1).await();
+                throw new AssertionError("timeout did not interrupt converter");
+            }
+        };
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("multi-timeout-data"), 1, 2,
+                Duration.ofMillis(500), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] text = "timeout".getBytes(StandardCharsets.UTF_8);
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(blocking))) {
+            TaskSnapshot created = service.createTask(List.of(
+                    new UploadPayload("first.txt", "text/plain", text.length, () -> new ByteArrayInputStream(text)),
+                    new UploadPayload("second.txt", "text/plain", text.length, () -> new ByteArrayInputStream(text))
+            ), DocumentFormat.DOCX);
+            assertTrue(firstStarted.await(5, TimeUnit.SECONDS));
+
+            TaskSnapshot failed = await(service, created.taskId());
+
+            assertEquals(TaskStatus.FAILED, failed.status());
+            assertEquals("CONVERSION_TIMEOUT", failed.errorCode());
+            assertEquals(1, calls.get(), "deadline must be checked before launching the second file converter");
+            assertEquals(1, failed.files().size());
+            assertEquals("CONVERSION_TIMEOUT", failed.files().get(0).errorCode());
+        }
+    }
+
     @Test void retriesFailedTaskFromRetainedOriginalUploadAfterRestart() throws Exception {
         TextToDocxConverter delegate = new TextToDocxConverter();
         FileConverter failing = new FileConverter() {
@@ -860,6 +1131,75 @@ class ConversionTaskServiceTest {
             try (XWPFDocument word = new XWPFDocument(Files.newInputStream(service.download(retried.taskId()).path()))) {
                 assertTrue(word.getParagraphs().stream().anyMatch(p -> p.getText().contains("retry retained input")));
             }
+        }
+    }
+
+    @Test void expiredTasksAreRejectedByStatusDownloadAndHistory() throws Exception {
+        Path dataRoot = temp.resolve("expired-access-data");
+        TaskServiceConfig config = new TaskServiceConfig(dataRoot, 1, 2,
+                Duration.ofSeconds(5), Duration.ofMillis(300), ParseLimits.defaults());
+        byte[] text = "expires".getBytes(StandardCharsets.UTF_8);
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(fixedTextConverter("result")))) {
+            TaskSnapshot statusTask = await(service, service.createTask(List.of(new UploadPayload(
+                    "status.txt", "text/plain", text.length, () -> new ByteArrayInputStream(text))),
+                    DocumentFormat.DOCX).taskId());
+            TaskSnapshot downloadTask = await(service, service.createTask(List.of(new UploadPayload(
+                    "download.txt", "text/plain", text.length, () -> new ByteArrayInputStream(text))),
+                    DocumentFormat.DOCX).taskId());
+            waitUntilExpired(statusTask.expiresAt().isAfter(downloadTask.expiresAt())
+                    ? statusTask.expiresAt() : downloadTask.expiresAt());
+
+            assertThrows(TaskNotFoundException.class, () -> service.get(statusTask.taskId()));
+            assertThrows(TaskNotFoundException.class, () -> service.download(downloadTask.taskId()));
+            assertTrue(service.listTasks(10).isEmpty());
+            assertFalse(Files.exists(dataRoot.resolve("tasks").resolve(statusTask.taskId())));
+            assertFalse(Files.exists(dataRoot.resolve("tasks").resolve(downloadTask.taskId())));
+        }
+    }
+
+    @Test void deleteDefersResultRemovalUntilActiveDownloadLeaseCloses() throws Exception {
+        Path dataRoot = temp.resolve("leased-delete-data");
+        TaskServiceConfig config = new TaskServiceConfig(dataRoot, 1, 2,
+                Duration.ofSeconds(5), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] text = "lease".getBytes(StandardCharsets.UTF_8);
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(fixedTextConverter("leased-result")))) {
+            TaskSnapshot finished = await(service, service.createTask(List.of(new UploadPayload(
+                    "lease.txt", "text/plain", text.length, () -> new ByteArrayInputStream(text))),
+                    DocumentFormat.DOCX).taskId());
+            Path taskDirectory = dataRoot.resolve("tasks").resolve(finished.taskId());
+            DownloadLease lease = service.acquireDownload(finished.taskId());
+
+            service.delete(finished.taskId());
+
+            assertThrows(TaskNotFoundException.class, () -> service.get(finished.taskId()));
+            assertEquals("leased-result", Files.readString(lease.artifact().path(), StandardCharsets.UTF_8));
+            assertTrue(Files.exists(taskDirectory));
+            lease.close();
+            assertFalse(Files.exists(taskDirectory));
+        }
+    }
+
+    @Test void expiryDefersResultRemovalUntilActiveDownloadLeaseCloses() throws Exception {
+        Path dataRoot = temp.resolve("leased-expiry-data");
+        TaskServiceConfig config = new TaskServiceConfig(dataRoot, 1, 2,
+                Duration.ofSeconds(5), Duration.ofMillis(300), ParseLimits.defaults());
+        byte[] text = "lease expiry".getBytes(StandardCharsets.UTF_8);
+
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(fixedTextConverter("leased-expiry-result")))) {
+            TaskSnapshot finished = await(service, service.createTask(List.of(new UploadPayload(
+                    "lease-expiry.txt", "text/plain", text.length, () -> new ByteArrayInputStream(text))),
+                    DocumentFormat.DOCX).taskId());
+            Path taskDirectory = dataRoot.resolve("tasks").resolve(finished.taskId());
+            DownloadLease lease = service.acquireDownload(finished.taskId());
+            waitUntilExpired(finished.expiresAt());
+
+            assertThrows(TaskNotFoundException.class, () -> service.get(finished.taskId()));
+            assertEquals("leased-expiry-result", Files.readString(lease.artifact().path(), StandardCharsets.UTF_8));
+            assertTrue(Files.exists(taskDirectory));
+            lease.close();
+            assertFalse(Files.exists(taskDirectory));
         }
     }
 
@@ -944,5 +1284,43 @@ class ConversionTaskServiceTest {
         }
         fail("task did not finish");
         return null;
+    }
+
+    private void waitUntilExpired(Instant expiresAt) throws InterruptedException {
+        while (!Instant.now().isAfter(expiresAt)) Thread.sleep(5);
+    }
+
+    private void waitUntilMissing(Path path) throws InterruptedException {
+        for (int i = 0; i < 500 && Files.exists(path); i++) Thread.sleep(10);
+        assertFalse(Files.exists(path), "deferred cleanup did not remove " + path.getFileName());
+    }
+
+    private TaskSnapshot awaitErrorMessage(ConversionTaskService service, String taskId, String expected)
+            throws InterruptedException {
+        for (int i = 0; i < 500; i++) {
+            TaskSnapshot snapshot = service.get(taskId);
+            if (snapshot.errorMessage() != null && snapshot.errorMessage().contains(expected)) return snapshot;
+            Thread.sleep(10);
+        }
+        fail("task diagnostic did not contain " + expected);
+        return null;
+    }
+
+    private Object taskRecord(ConversionTaskService service, String taskId) throws Exception {
+        var tasksField = ConversionTaskService.class.getDeclaredField("tasks");
+        tasksField.setAccessible(true);
+        Object record = ((Map<?, ?>) tasksField.get(service)).get(taskId);
+        assertNotNull(record);
+        return record;
+    }
+
+    private void invokeProgressUpdate(ConversionTaskService service, Object taskRecord, TaskSnapshot snapshot)
+            throws Exception {
+        var update = Arrays.stream(ConversionTaskService.class.getDeclaredMethods())
+                .filter(method -> method.getName().equals("update") && method.getParameterCount() == 10)
+                .findFirst().orElseThrow();
+        update.setAccessible(true);
+        update.invoke(service, taskRecord, TaskStatus.CONVERTING, TaskStage.PARSING, 77, null, null,
+                snapshot.warnings(), snapshot.files(), false, null);
     }
 }

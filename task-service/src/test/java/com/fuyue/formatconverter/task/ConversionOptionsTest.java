@@ -54,5 +54,7 @@ class ConversionOptionsTest {
                 null, null, null, null, null, null, null, null, "3-1"));
         assertThrows(ConversionFailureException.class, () -> ConversionOptions.fromRequest(
                 null, null, null, null, null, null, null, null, "8").splitPageNumbers(3));
+        assertThrows(IllegalArgumentException.class, () -> ConversionOptions.fromRequest(
+                null, null, null, null, null, null, null, null, null, 601));
     }
 }

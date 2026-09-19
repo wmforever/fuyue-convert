@@ -20,6 +20,7 @@ import java.util.Locale;
  * one output page while text remains editable inside text boxes.
  */
 final class FixedLayoutDocxRenderer {
+    private static final int BEHIND_TEXT_Z_INDEX = -251658752;
     private int shapeSequence = 1;
 
     /**
@@ -186,13 +187,21 @@ final class FixedLayoutDocxRenderer {
     private void addImage(XWPFDocument docx, XWPFParagraph anchor, ImageBlock image) throws Exception {
         if (image.data().length == 0) return;
         String relationId = docx.addPictureData(image.data(), pictureType(image.mimeType()));
+        String position = isOcrBackground(image)
+                ? positionStyle(image.box(), BEHIND_TEXT_Z_INDEX, 0, true)
+                : positionStyle(image.box(), image.zOrder());
         String xml = "<v:shape xmlns:v=\"urn:schemas-microsoft-com:vml\" " +
                 "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" " +
                 "id=\"" + attr(shapeId("image", image.id())) + "\" style=\"" +
-                attr(positionStyle(image.box(), image.zOrder())) + "\" filled=\"f\" stroked=\"f\">" +
+                attr(position) + "\" filled=\"f\" stroked=\"f\">" +
                 "<v:imagedata r:id=\"" + attr(relationId) + "\" title=\"" + attr(image.id()) + "\"/>" +
                 "</v:shape>";
         appendShape(anchor, xml);
+    }
+
+    private boolean isOcrBackground(ImageBlock image) {
+        return "OCR_SCAN_BACKGROUND".equals(image.role())
+                || "OCR_PAGE_BACKGROUND".equals(image.role());
     }
 
     private void addTable(XWPFParagraph anchor, TableModel table, int zOrder) throws Exception {
@@ -388,12 +397,16 @@ final class FixedLayoutDocxRenderer {
     }
 
     private String positionStyle(Rect box, int zOrder, double rotationDegrees) {
+        return positionStyle(box, zOrder, rotationDegrees, false);
+    }
+
+    private String positionStyle(Rect box, int zOrder, double rotationDegrees, boolean preserveNegativeZOrder) {
         return "position:absolute;" +
                 "margin-left:" + pt(box.x()) + "pt;" +
                 "margin-top:" + pt(box.y()) + "pt;" +
                 "width:" + pt(Math.max(0.05, box.width())) + "pt;" +
                 "height:" + pt(Math.max(0.05, box.height())) + "pt;" +
-                "z-index:" + Math.max(1, zOrder + 1) + ";" +
+                "z-index:" + (preserveNegativeZOrder ? zOrder : Math.max(1, zOrder + 1)) + ";" +
                 (Math.abs(rotationDegrees) < 0.01 ? "" : "rotation:" +
                         String.format(Locale.ROOT, "%.3f", rotationDegrees) + ";") +
                 "mso-position-horizontal-relative:page;" +

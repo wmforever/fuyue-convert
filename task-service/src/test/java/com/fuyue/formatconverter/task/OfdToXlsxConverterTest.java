@@ -19,6 +19,7 @@ import org.ofdrw.layout.element.Img;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import org.ofdrw.layout.element.canvas.Canvas;
@@ -98,6 +99,38 @@ class OfdToXlsxConverterTest {
 
         ConversionFailureException failure = assertThrows(ConversionFailureException.class,
                 () -> converter().convert(input(source), temp.resolve("scan-work"), output,
+                        ParseLimits.defaults(), (stage, percent) -> { }));
+
+        assertEquals("OCR_REQUIRED", failure.code());
+        assertTrue(failure.getMessage().contains("第 1 页"));
+        assertTrue(Files.notExists(output));
+    }
+
+    @Test
+    void rejectsLargeScannedTableRegionWhenSamePageOnlyHasSparseNativeHeader() throws Exception {
+        Path png = temp.resolve("same-page-scan.png");
+        BufferedImage raster = new BufferedImage(1000, 700, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = raster.createGraphics();
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(0, 0, raster.getWidth(), raster.getHeight());
+        graphics.setColor(Color.BLACK);
+        graphics.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 64));
+        graphics.drawString("SCANNED TABLE BODY", 80, 220);
+        graphics.drawString("A1    B1    C1", 80, 430);
+        graphics.dispose();
+        ImageIO.write(raster, "png", png.toFile());
+        Img image = new Img(110d, 70d, png);
+        image.setPosition(Position.Absolute).setBox(5d, 14d, 110d, 70d);
+        Path source = temp.resolve("same-page-scan.ofd");
+        try (OFDDoc document = new OFDDoc(source)) {
+            document.addVPage(new VirtualPage(120d, 90d)
+                    .add(image)
+                    .add(paragraph("表头", 5, 2, 25, 8)));
+        }
+        Path output = temp.resolve("same-page-scan.xlsx");
+
+        ConversionFailureException failure = assertThrows(ConversionFailureException.class,
+                () -> converter().convert(input(source), temp.resolve("same-page-scan-work"), output,
                         ParseLimits.defaults(), (stage, percent) -> { }));
 
         assertEquals("OCR_REQUIRED", failure.code());

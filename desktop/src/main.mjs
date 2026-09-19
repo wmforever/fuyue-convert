@@ -3,6 +3,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { app, BrowserWindow, clipboard, dialog, ipcMain, session, shell } from 'electron'
 import { startBackend, stopBackend } from './backend-manager.mjs'
+import { DesktopPreferencesStore, publicDesktopPreferencesError } from './desktop-preferences.mjs'
+import { NativeSaveService, publicNativeSaveError } from './native-save.mjs'
 import { isSafeExternalUrl, isTrustedRendererFrame, isTrustedTaskRequest, isTrustedUrl } from './security.mjs'
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url))
@@ -16,21 +18,65 @@ let backendReady = false
 let backendStarting = false
 let startupAbortController = null
 let trustedRendererOrigin = null
+let nativeSaveService = null
+let desktopPreferencesStore = null
+let activeNativeSavePromise = null
 
 if (!singleInstance) app.quit()
 
-ipcMain.handle('format-converter:copy-text', (event, value) => {
+function assertTrustedMainFrame(event, action) {
   const frameUrl = event.senderFrame?.url || event.sender.getURL()
   if (!mainWindow || mainWindow.isDestroyed() || event.sender !== mainWindow.webContents
       || !event.senderFrame || event.senderFrame !== event.sender.mainFrame
       || !isTrustedRendererFrame(frameUrl, trustedRendererOrigin)) {
-    throw new Error('拒绝非可信页面的剪贴板写入')
+    throw new Error(`拒绝非可信页面的${action}`)
   }
+}
+
+ipcMain.handle('format-converter:copy-text', (event, value) => {
+  assertTrustedMainFrame(event, '剪贴板写入')
   if (typeof value !== 'string' || value.length < 1 || value.length > 262_144) {
     throw new Error('复制文本为空或超过 256 KiB 限制')
   }
   clipboard.writeText(value)
   return true
+})
+
+ipcMain.handle('format-converter:save-task-result', async (event, request) => {
+  assertTrustedMainFrame(event, '文件保存')
+  if (!nativeSaveService) throw new Error('桌面保存服务尚未就绪')
+  const operation = nativeSaveService.saveTaskResult(request)
+  if (!activeNativeSavePromise) activeNativeSavePromise = operation
+  try {
+    return await operation
+  } catch (error) {
+    if (!quitting) console.error(`[native-save] ${error?.code || error?.name || 'SAVE_FAILED'}`)
+    throw new Error(publicNativeSaveError(error))
+  } finally {
+    if (activeNativeSavePromise === operation) activeNativeSavePromise = null
+  }
+})
+
+ipcMain.handle('format-converter:get-preferences', async event => {
+  assertTrustedMainFrame(event, '偏好设置读取')
+  if (!desktopPreferencesStore) throw new Error('桌面偏好设置服务尚未就绪')
+  try {
+    return await desktopPreferencesStore.getPreferences()
+  } catch (error) {
+    console.error(`[desktop-preferences] ${error?.code || error?.name || 'PREFERENCES_FAILED'}`)
+    throw new Error(publicDesktopPreferencesError(error))
+  }
+})
+
+ipcMain.handle('format-converter:update-preferences', async (event, patch) => {
+  assertTrustedMainFrame(event, '偏好设置写入')
+  if (!desktopPreferencesStore) throw new Error('桌面偏好设置服务尚未就绪')
+  try {
+    return await desktopPreferencesStore.updatePreferences(patch)
+  } catch (error) {
+    console.error(`[desktop-preferences] ${error?.code || error?.name || 'PREFERENCES_FAILED'}`)
+    throw new Error(publicDesktopPreferencesError(error))
+  }
 })
 
 function rendererSecurity(targetSession, backendOrigin, rendererOrigin, apiToken, trustedWebContents) {
@@ -72,8 +118,19 @@ function createWindow(rendererUrl, backendOrigin, apiToken) {
     }
   })
   const allowedOrigins = new Set([new URL(rendererUrl).origin])
-  trustedRendererOrigin = new URL(rendererUrl).origin
+  const rendererOrigin = new URL(rendererUrl).origin
+  trustedRendererOrigin = rendererOrigin
   if (backendOrigin) allowedOrigins.add(backendOrigin)
+
+  desktopPreferencesStore = new DesktopPreferencesStore({ userDataPath: app.getPath('userData') })
+  nativeSaveService = new NativeSaveService({
+    dialog,
+    getParentWindow: () => window,
+    backendOrigin: backendOrigin || rendererOrigin,
+    apiToken,
+    preferencesStore: desktopPreferencesStore,
+    fallbackDirectory: app.getPath('downloads')
+  })
 
   const guardRendererNavigation = (event, navigationUrl) => {
     if (!isTrustedUrl(navigationUrl, allowedOrigins)) event.preventDefault()
@@ -85,7 +142,12 @@ function createWindow(rendererUrl, backendOrigin, apiToken) {
     return { action: 'deny' }
   })
   window.once('ready-to-show', () => window.show())
-  window.on('closed', () => { mainWindow = null })
+  window.on('closed', () => {
+    mainWindow = null
+    nativeSaveService?.cancelActiveSave()
+    nativeSaveService = null
+    desktopPreferencesStore = null
+  })
   rendererSecurity(window.webContents.session, backendOrigin, new URL(rendererUrl).origin, apiToken, window.webContents)
   void window.loadURL(rendererUrl).catch(async error => {
     if (quitting) return
@@ -163,6 +225,8 @@ async function shutdownApplication() {
   if (quitting) return
   quitting = true
   startupAbortController?.abort()
+  nativeSaveService?.cancelActiveSave()
+  await activeNativeSavePromise?.catch(() => {})
   await stopBackend(backend || undefined)
   app.quit()
 }

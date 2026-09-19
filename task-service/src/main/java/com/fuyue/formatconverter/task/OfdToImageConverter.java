@@ -34,7 +34,6 @@ import java.util.zip.ZipOutputStream;
 
 /** Renders the parsed OFD fixed-layout model to one image per page. */
 abstract class OfdToImageConverter implements FileConverter {
-    private static final float RENDER_DPI = 160f;
     private static final float JPEG_QUALITY = 0.9f;
 
     private final SafeOfdExtractor extractor;
@@ -44,26 +43,39 @@ abstract class OfdToImageConverter implements FileConverter {
     private final DocumentFormat targetFormat;
     private final String imageFormat;
     private final Path popplerBinary;
+    private final float renderDpi;
 
     protected OfdToImageConverter(DocumentFormat targetFormat, String imageFormat, String description,
                                   SafeOfdExtractor extractor, OfdParser parser) {
         this(targetFormat, imageFormat, description, extractor, parser,
-                PdfToImageConverter.discoverPoppler().orElse(null));
+                PdfToImageConverter.discoverPoppler().orElse(null), configuredDpi());
     }
 
     protected OfdToImageConverter(DocumentFormat targetFormat, String imageFormat, String description,
                                   SafeOfdExtractor extractor, OfdParser parser, Path popplerBinary) {
+        this(targetFormat, imageFormat, description, extractor, parser, popplerBinary, configuredDpi());
+    }
+
+    protected OfdToImageConverter(DocumentFormat targetFormat, String imageFormat, String description,
+                                  SafeOfdExtractor extractor, OfdParser parser, Path popplerBinary,
+                                  float renderDpi) {
         if (targetFormat != DocumentFormat.PNG && targetFormat != DocumentFormat.JPG) {
             throw new IllegalArgumentException("OFD 渲染图片仅支持 PNG/JPEG");
+        }
+        if (!Float.isFinite(renderDpi) || renderDpi < 36 || renderDpi > 600) {
+            throw new IllegalArgumentException("OFD 图片渲染 DPI 必须在 36-600 之间");
         }
         this.targetFormat = targetFormat;
         this.imageFormat = imageFormat;
         this.extractor = java.util.Objects.requireNonNull(extractor, "extractor");
         this.parser = java.util.Objects.requireNonNull(parser, "parser");
         this.popplerBinary = popplerBinary == null ? null : popplerBinary.toAbsolutePath().normalize();
-        this.route = ConversionRoute.of(DocumentFormat.OFD, targetFormat, description,
+        this.renderDpi = renderDpi;
+        this.route = ConversionRoute.of(DocumentFormat.OFD, targetFormat, description + " 当前 "
+                        + formatDpi(renderDpi) + " DPI。",
                 QualityLevel.BETA, ConversionStrategy.FIDELITY, List.of(),
-                List.of("固定以 160 DPI 输出", "多页 OFD 输出 ZIP", "嵌套 OFD 签章外观会明确警告并跳过",
+                List.of("可按任务选择 36-600 DPI；默认 160 DPI，可通过 FORMAT_CONVERTER_OFD_IMAGE_DPI 配置 36-600 DPI",
+                        "多页 OFD 输出 ZIP", "嵌套 OFD 签章外观会明确警告并跳过",
                         "复杂填充、渐变、透明度和部分弧线路径仍受固定版式渲染器限制"));
     }
 
@@ -72,6 +84,7 @@ abstract class OfdToImageConverter implements FileConverter {
     @Override
     public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
+        float dpi = input.options().imageDpi() == null ? renderDpi : input.options().imageDpi();
         Files.createDirectories(workDir);
         progress.update(TaskStage.PARSING, 15);
         var safe = extractor.extract(input.path(), workDir, limits);
@@ -80,7 +93,7 @@ abstract class OfdToImageConverter implements FileConverter {
             ConversionGuards.requireRenderBounds(
                     page.physicalBox().width() * 72d / 25.4d,
                     page.physicalBox().height() * 72d / 25.4d,
-                    RENDER_DPI, limits);
+                    dpi, limits);
         }
 
         Path intermediatePdf = workDir.resolve("ofd-fixed-layout.pdf");
@@ -88,7 +101,7 @@ abstract class OfdToImageConverter implements FileConverter {
         fixedLayoutRenderer.render(parsed, intermediatePdf);
         ConversionGuards.requireNonEmptyOutputFile(intermediatePdf, limits, "OFD 图片渲染中间 PDF");
 
-        List<Path> pages = renderPages(intermediatePdf, parsed.pages().size(), workDir, limits, progress);
+        List<Path> pages = renderPages(intermediatePdf, parsed.pages().size(), workDir, limits, progress, dpi);
         List<ConversionWarning> warnings = new ArrayList<>();
         parsed.warnings().stream()
                 .filter(warning -> warning.code() != WarningCode.OCR_REQUIRED)
@@ -115,19 +128,19 @@ abstract class OfdToImageConverter implements FileConverter {
     }
 
     private List<Path> renderPages(Path pdf, int expectedPages, Path workDir, ParseLimits limits,
-                                   ConversionProgress progress) throws Exception {
+                                   ConversionProgress progress, float dpi) throws Exception {
         if (popplerBinary != null) {
-            return renderPagesWithPoppler(pdf, expectedPages, workDir, limits, progress);
+            return renderPagesWithPoppler(pdf, expectedPages, workDir, limits, progress, dpi);
         }
-        return renderPagesWithPdfBox(pdf, expectedPages, workDir, limits, progress);
+        return renderPagesWithPdfBox(pdf, expectedPages, workDir, limits, progress, dpi);
     }
 
     private List<Path> renderPagesWithPoppler(Path pdf, int expectedPages, Path workDir, ParseLimits limits,
-                                              ConversionProgress progress) throws Exception {
+                                              ConversionProgress progress, float dpi) throws Exception {
         Path renderDir = Files.createDirectories(workDir.resolve("poppler"));
         Path prefix = renderDir.resolve("page");
         List<String> command = new ArrayList<>(List.of(popplerBinary.toString(), "-r",
-                String.format(Locale.ROOT, "%.2f", RENDER_DPI),
+                formatDpi(dpi),
                 targetFormat == DocumentFormat.JPG ? "-jpeg" : "-png"));
         if (targetFormat == DocumentFormat.JPG) command.addAll(List.of("-jpegopt", "quality=90,optimize=y"));
         command.add(pdf.toString());
@@ -159,7 +172,7 @@ abstract class OfdToImageConverter implements FileConverter {
     }
 
     private List<Path> renderPagesWithPdfBox(Path pdf, int expectedPages, Path workDir, ParseLimits limits,
-                                             ConversionProgress progress) throws IOException {
+                                             ConversionProgress progress, float dpi) throws IOException {
         List<Path> pages = new ArrayList<>(expectedPages);
         try (var document = Loader.loadPDF(pdf.toFile())) {
             if (document.getNumberOfPages() != expectedPages) {
@@ -167,10 +180,10 @@ abstract class OfdToImageConverter implements FileConverter {
             }
             PDFRenderer renderer = new PDFRenderer(document);
             for (int index = 0; index < expectedPages; index++) {
-                BufferedImage image = renderer.renderImageWithDPI(index, RENDER_DPI, ImageType.RGB);
+                BufferedImage image = renderer.renderImageWithDPI(index, dpi, ImageType.RGB);
                 Path page = workDir.resolve(pageFileName(index + 1));
                 try {
-                    writeImage(image, page);
+                    writeImage(image, page, dpi);
                 } finally {
                     image.flush();
                 }
@@ -202,7 +215,7 @@ abstract class OfdToImageConverter implements FileConverter {
         }
     }
 
-    private void writeImage(BufferedImage image, Path output) throws IOException {
+    private void writeImage(BufferedImage image, Path output, float dpi) throws IOException {
         Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(imageFormat);
         if (!writers.hasNext()) throw new IOException("当前 Java ImageIO 不支持写入 " + targetFormat.label());
         ImageWriter writer = writers.next();
@@ -220,34 +233,34 @@ abstract class OfdToImageConverter implements FileConverter {
             }
             IIOMetadata metadata = writer.getDefaultImageMetadata(
                     ImageTypeSpecifier.createFromRenderedImage(image), parameters);
-            if (targetFormat == DocumentFormat.PNG) applyPngDpi(metadata);
-            else applyJpegDpi(metadata);
+            if (targetFormat == DocumentFormat.PNG) applyPngDpi(metadata, dpi);
+            else applyJpegDpi(metadata, dpi);
             writer.write(null, new IIOImage(image, null, metadata), parameters);
         } finally {
             writer.dispose();
         }
     }
 
-    private void applyPngDpi(IIOMetadata metadata) throws IOException {
+    private void applyPngDpi(IIOMetadata metadata, float dpi) throws IOException {
         String format = "javax_imageio_png_1.0";
         IIOMetadataNode root = (IIOMetadataNode) metadata.getAsTree(format);
         IIOMetadataNode physical = child(root, "pHYs");
-        int pixelsPerMeter = Math.max(1, Math.round(RENDER_DPI / 0.0254f));
+        int pixelsPerMeter = Math.max(1, Math.round(dpi / 0.0254f));
         physical.setAttribute("pixelsPerUnitXAxis", Integer.toString(pixelsPerMeter));
         physical.setAttribute("pixelsPerUnitYAxis", Integer.toString(pixelsPerMeter));
         physical.setAttribute("unitSpecifier", "meter");
         metadata.setFromTree(format, root);
     }
 
-    private void applyJpegDpi(IIOMetadata metadata) throws IOException {
+    private void applyJpegDpi(IIOMetadata metadata, float dpi) throws IOException {
         String format = "javax_imageio_jpeg_image_1.0";
         IIOMetadataNode root = (IIOMetadataNode) metadata.getAsTree(format);
         IIOMetadataNode jfif = descendant(root, "app0JFIF");
         if (jfif == null) return;
-        int dpi = Math.max(1, Math.min(65_535, Math.round(RENDER_DPI)));
+        int density = Math.max(1, Math.min(65_535, Math.round(dpi)));
         jfif.setAttribute("resUnits", "1");
-        jfif.setAttribute("Xdensity", Integer.toString(dpi));
-        jfif.setAttribute("Ydensity", Integer.toString(dpi));
+        jfif.setAttribute("Xdensity", Integer.toString(density));
+        jfif.setAttribute("Ydensity", Integer.toString(density));
         metadata.setFromTree(format, root);
     }
 
@@ -277,6 +290,22 @@ abstract class OfdToImageConverter implements FileConverter {
                 out.closeEntry();
             }
         }
+    }
+
+    private static float configuredDpi() {
+        String value = System.getenv("FORMAT_CONVERTER_OFD_IMAGE_DPI");
+        if (value == null || value.isBlank()) return 160f;
+        try {
+            float dpi = Float.parseFloat(value.strip());
+            if (!Float.isFinite(dpi) || dpi < 36 || dpi > 600) throw new NumberFormatException();
+            return dpi;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("FORMAT_CONVERTER_OFD_IMAGE_DPI 必须是 36-600 之间的数字");
+        }
+    }
+
+    private static String formatDpi(float dpi) {
+        return String.format(Locale.ROOT, "%.2f", dpi);
     }
 
     private String singleOutputName(String input) {
