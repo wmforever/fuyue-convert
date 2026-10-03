@@ -298,6 +298,10 @@ public final class ConversionTaskService implements AutoCloseable {
                         if (produced != null) try { Files.deleteIfExists(produced); } catch (IOException ignored) { }
                         try { Files.deleteIfExists(output); } catch (IOException ignored) { }
                     }
+                    // Future waits use whole milliseconds and can expire just
+                    // before the absolute Instant deadline. A consumed task
+                    // budget must not create a phantom result for another file.
+                    if (e instanceof TaskDeadlineExceededException) throw e;
                 } finally {
                     fileActive.set(false);
                     if (!isFileCleanupDeferred(record, work)) deleteTree(work);
@@ -435,7 +439,7 @@ public final class ConversionTaskService implements AutoCloseable {
                                                 ConversionInput input, Path work, Path output,
                                                 Instant deadline, ConversionProgress progress) throws Exception {
         long remainingMillis = Duration.between(Instant.now(), deadline).toMillis();
-        if (remainingMillis <= 0) throw new TimeoutException("转换超时");
+        if (remainingMillis <= 0) throw new TaskDeadlineExceededException("转换超时");
         ExecutorService single = Executors.newSingleThreadExecutor(namedFactory("format-file-"));
         Future<ConversionOutput> future = single.submit(() ->
                 converter.convert(input, work, output, config.parseLimits(), progress));
@@ -448,7 +452,7 @@ public final class ConversionTaskService implements AutoCloseable {
             String message = deferred
                     ? "转换超时；" + DEFERRED_CLEANUP_DETAIL
                     : "转换超时";
-            throw new TimeoutException(message);
+            throw new TaskDeadlineExceededException(message);
         } catch (InterruptedException e) {
             stopRequested = true;
             stopFileWorker(record, input.displayName(), work, output, future, single);
@@ -1068,6 +1072,10 @@ public final class ConversionTaskService implements AutoCloseable {
             Thread.currentThread().interrupt();
             log.warn("Interrupted while waiting for {} executor shutdown", name);
         }
+    }
+
+    private static final class TaskDeadlineExceededException extends TimeoutException {
+        private TaskDeadlineExceededException(String message) { super(message); }
     }
 
     private record InputFile(String displayName, String contentType, long size, Path path,

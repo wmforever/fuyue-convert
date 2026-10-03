@@ -153,6 +153,30 @@ RSS **335348 KiB**. These observations share the same timing limitations.
 
 ## Validation and reproduction
 
+### Task deadline follow-up
+
+The quality batch is commit `087d6c8c692b1454f4371a71898ec022f47640e7`.
+Its [CI run](https://github.com/wmforever/fuyue-convert/actions/runs/37112671768)
+passed OCR and Office integration but exposed an existing task-deadline race:
+`multiFileDeadlineKeepsStableConversionTimeoutCode` saw two file results despite
+only one converter call. Millisecond-truncated `Future.get` can time out just
+before the absolute `Instant` deadline, admitting an unattempted second-file
+timeout result.
+
+The follow-up marks service-owned deadline exhaustion with a private
+`TimeoutException` subtype and stops the batch after recording the current file.
+It retains `CONVERSION_TIMEOUT`, timeout durations, cleanup and interruption.
+An independent converter-local timeout still permits the next file when budget
+remains. The new deterministic local-timeout regression and all **45** task-service
+lifecycle tests pass; the original deadline assertion is unchanged. OCR, word
+geometry, source pixels and reading-order classes are unchanged from 087.
+
+The 40-case matrix and JAR hashes above identify the quality batch precisely.
+The follow-up clean build has a separate `iteration3-deadline-provenance.json`
+record and reruns six unchanged representative HTTP inputs. Latest full-suite,
+artifact identity and exact-head CI evidence are recorded in the draft PR; an
+old quality-matrix JAR is not relabelled as the follow-up artifact.
+
 Final clean Maven: **384 tests, 383 passed, zero failures/errors, one optional
 real signed-OFD skip**. New coverage/order regressions pass alongside sparse ink,
 numeric/conflict, original coordinates, blank pages, masking, dense/pixel limits,

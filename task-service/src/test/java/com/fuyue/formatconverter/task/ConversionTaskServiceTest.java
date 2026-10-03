@@ -1097,6 +1097,36 @@ class ConversionTaskServiceTest {
         }
     }
 
+    @Test void converterLocalTimeoutDoesNotConsumeRemainingBatchBudget() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        TextToDocxConverter delegate = new TextToDocxConverter();
+        FileConverter localTimeout = new FileConverter() {
+            @Override public ConversionRoute route() { return delegate.route(); }
+            @Override public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                                      ParseLimits limits, ConversionProgress progress) throws Exception {
+                if (calls.getAndIncrement() == 0) throw new java.util.concurrent.TimeoutException("converter-local timeout");
+                return delegate.convert(input, workDir, outputPath, limits, progress);
+            }
+        };
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("local-timeout-data"), 1, 2,
+                Duration.ofSeconds(5), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] text = "remaining file 2026".getBytes(StandardCharsets.UTF_8);
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(localTimeout))) {
+            TaskSnapshot created = service.createTask(List.of(
+                    new UploadPayload("first.txt", "text/plain", text.length, () -> new ByteArrayInputStream(text)),
+                    new UploadPayload("second.txt", "text/plain", text.length, () -> new ByteArrayInputStream(text))
+            ), DocumentFormat.DOCX);
+            TaskSnapshot result = await(service, created.taskId());
+            assertEquals(TaskStatus.SUCCESS, result.status());
+            assertEquals(2, calls.get());
+            assertEquals(2, result.files().size());
+            assertEquals("CONVERSION_TIMEOUT", result.files().get(0).errorCode());
+            assertFalse(result.files().get(0).success());
+            assertTrue(result.files().get(1).success());
+            assertTrue(result.warnings().stream().anyMatch(w -> w.code() == com.fuyue.formatconverter.model.WarningCode.PARTIAL_BATCH_OUTPUT));
+        }
+    }
+
     @Test void retriesFailedTaskFromRetainedOriginalUploadAfterRestart() throws Exception {
         TextToDocxConverter delegate = new TextToDocxConverter();
         FileConverter failing = new FileConverter() {
