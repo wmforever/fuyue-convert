@@ -1,5 +1,7 @@
 # Fuyue Convert
 
+Cloud development handoff, verified baseline, synthetic samples, build commands, and acceptance criteria: [docs/cloud-handoff.md](docs/cloud-handoff.md) (Chinese).
+
 [Simplified Chinese](README.md) | [English](README_EN.md)
 
 [![CI](https://github.com/wmforever/fuyue-convert/actions/workflows/ci.yml/badge.svg)](https://github.com/wmforever/fuyue-convert/actions/workflows/ci.yml)

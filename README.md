@@ -75,6 +75,7 @@ Lite 的 Office 高保真路线会使用电脑上已有的 LibreOffice；Full �
 
 质量标准和已提交的测试摘要见 [docs/quality-standard.md](docs/quality-standard.md) 与 [docs/test-report.md](docs/test-report.md)。完整 QA 会在本地生成被忽略的 `qa-samples/report/qa-report.md`。
 OCR 是否需要安装、不同运行方式的依赖责任和启用示例见 [docs/ocr-deployment.md](docs/ocr-deployment.md)。
+云端接续开发的验证基线、合成样本生成、构建命令和后续验收标准见 [docs/cloud-handoff.md](docs/cloud-handoff.md)。
 
 ## 快速开始
 
