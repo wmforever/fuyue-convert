@@ -57,6 +57,33 @@ class OcrContrastEnhancementTest {
     }
 
     @Test
+    void enhancesSparseLowContrastInkWithoutTreatingThePageAsBlank() {
+        BufferedImage image = new BufferedImage(600, 400, BufferedImage.TYPE_INT_RGB);
+        var graphics = image.createGraphics();
+        graphics.setColor(new Color(160, 160, 160)); graphics.fillRect(0, 0, 600, 400);
+        graphics.setColor(new Color(130, 130, 130)); graphics.fillRect(180, 120, 60, 10);
+        graphics.dispose();
+        int originalInk = image.getRGB(200, 125), originalPaper = image.getRGB(200, 110);
+        BufferedImage enhanced = OcrContrastEnhancer.enhance(image);
+        assertNotNull(enhanced, "a small low-contrast label on a mostly empty page must still be enhanced");
+        assertEquals(image.getWidth(), enhanced.getWidth()); assertEquals(image.getHeight(), enhanced.getHeight());
+        assertTrue(enhanced.getRaster().getSample(200, 125, 0) < 55, "sparse ink remains visible at its source position");
+        assertTrue(enhanced.getRaster().getSample(200, 110, 0) >= 245, "paper stays clear");
+        assertEquals(originalInk, image.getRGB(200, 125)); assertEquals(originalPaper, image.getRGB(200, 110));
+        image.flush(); enhanced.flush();
+    }
+
+    @Test
+    void isolatedDarkPixelsDoNotTriggerSparseInkRecovery() {
+        BufferedImage image = new BufferedImage(600, 400, BufferedImage.TYPE_INT_RGB);
+        var graphics = image.createGraphics(); graphics.setColor(new Color(160, 160, 160));
+        graphics.fillRect(0, 0, 600, 400); graphics.dispose();
+        for (int index = 0; index < 20; index++) image.setRGB(20 + index * 25, 40 + index * 13, Color.BLACK.getRGB());
+        assertNull(OcrContrastEnhancer.enhance(image), "isolated dirt on a near-empty page is not enough evidence for a retry");
+        image.flush();
+    }
+
+    @Test
     void skipsExtremeAspectRatioWithoutAllocatingWideHistogramArrays() {
         BufferedImage image = new BufferedImage(32769, 1, BufferedImage.TYPE_INT_RGB);
         assertNull(OcrContrastEnhancer.enhance(image));

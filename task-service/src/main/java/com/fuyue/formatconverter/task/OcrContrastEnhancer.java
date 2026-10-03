@@ -40,7 +40,22 @@ final class OcrContrastEnhancer {
             count += contrastHistogram[contrast];
             if (count >= target) break;
         }
-        if (contrast < 4) return null; // Blank/near-uniform pages do not merit another OCR process.
+        if (contrast < 4) {
+            // A short label can occupy less than 1% of a mostly blank page. Its ink
+            // must not disappear into the whole-page paper percentile (or depend on
+            // the host font's stroke density). Use the meaningful contrast tail only
+            // when enough non-paper pixels remain to exclude isolated dirt.
+            long inkPixels = 0;
+            for (int value = 4; value < 256; value++) inkPixels += contrastHistogram[value];
+            long minimumInk = Math.max(64L, ((long) width * height + 99_999L) / 100_000L);
+            if (inkPixels < minimumInk) return null;
+            long inkTarget = (long) Math.ceil(inkPixels * .90);
+            long inkCount = 0;
+            for (contrast = 4; contrast < 255; contrast++) {
+                inkCount += contrastHistogram[contrast];
+                if (inkCount >= inkTarget) break;
+            }
+        }
         contrast = Math.max(12, contrast);
         BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
         byte[] output = new byte[width];
