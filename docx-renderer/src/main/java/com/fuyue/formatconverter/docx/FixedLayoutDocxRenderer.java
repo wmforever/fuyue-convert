@@ -353,6 +353,10 @@ final class FixedLayoutDocxRenderer {
     private void addImage(XWPFDocument docx, XWPFParagraph anchor, ImageBlock image) throws Exception {
         if (image.data().length == 0) return;
         String relationId = docx.addPictureData(image.data(), pictureType(image.mimeType()));
+        if (isOcrBackground(image)) {
+            addScanBackground(anchor, image, relationId);
+            return;
+        }
         String position = isOcrBackground(image)
                 ? positionStyle(image.box(), BEHIND_TEXT_Z_INDEX, 0, true)
                 : positionStyle(image.box(), image.zOrder());
@@ -363,6 +367,34 @@ final class FixedLayoutDocxRenderer {
                 "<v:imagedata r:id=\"" + attr(relationId) + "\" title=\"" + attr(image.id()) + "\"/>" +
                 "</v:shape>";
         appendShape(anchor, xml);
+    }
+
+    private void addScanBackground(XWPFParagraph anchor, ImageBlock image, String relationId) throws Exception {
+        Rect box = image.box();
+        long x = Math.round(box.x() * 36000), y = Math.round(box.y() * 36000);
+        long width = Math.max(1, Math.round(box.width() * 36000));
+        long height = Math.max(1, Math.round(box.height() * 36000));
+        int id = shapeSequence++;
+        String xml = "<wp:anchor xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" "
+                + "xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" "
+                + "xmlns:pic=\"http://schemas.openxmlformats.org/drawingml/2006/picture\" "
+                + "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" "
+                + "distT=\"0\" distB=\"0\" distL=\"0\" distR=\"0\" simplePos=\"0\" relativeHeight=\"0\" "
+                + "behindDoc=\"1\" locked=\"0\" layoutInCell=\"1\" allowOverlap=\"1\">"
+                + "<wp:simplePos x=\"0\" y=\"0\"/><wp:positionH relativeFrom=\"page\"><wp:posOffset>" + x
+                + "</wp:posOffset></wp:positionH><wp:positionV relativeFrom=\"page\"><wp:posOffset>" + y
+                + "</wp:posOffset></wp:positionV><wp:extent cx=\"" + width + "\" cy=\"" + height + "\"/>"
+                + "<wp:effectExtent l=\"0\" t=\"0\" r=\"0\" b=\"0\"/><wp:wrapNone/>"
+                + "<wp:docPr id=\"" + id + "\" name=\"" + attr(image.id()) + "\"/>"
+                + "<wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect=\"1\"/></wp:cNvGraphicFramePr>"
+                + "<a:graphic><a:graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/picture\">"
+                + "<pic:pic><pic:nvPicPr><pic:cNvPr id=\"" + id + "\" name=\"" + attr(image.id())
+                + "\"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed=\"" + attr(relationId)
+                + "\"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm>"
+                + "<a:off x=\"0\" y=\"0\"/><a:ext cx=\"" + width + "\" cy=\"" + height
+                + "\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom></pic:spPr>"
+                + "</pic:pic></a:graphicData></a:graphic></wp:anchor>";
+        copyInto(anchor.createRun().getCTR().addNewDrawing(), XmlObject.Factory.parse(xml));
     }
 
     private boolean isOcrBackground(ImageBlock image) {

@@ -24,6 +24,81 @@ class LibreOfficePdfConverterTest {
     @TempDir Path temp;
 
     @Test
+    void preservesVisibleScanBackgroundAndUnrecognizedInkBehindEditableWords() throws Exception {
+        var discovered = LibreOfficeConverter.discover("");
+        assumeTrue(discovered.isPresent(), "LibreOffice is not installed");
+        var scan = new java.awt.image.BufferedImage(3749, 2500, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        var graphics = scan.createGraphics();
+        for (int x = 0; x < 3749; x++) {
+            int gray = 45 + 170 * x / 3748;
+            graphics.setColor(new java.awt.Color(gray, gray, gray));
+            graphics.drawLine(x, 0, x, 2499);
+        }
+        // Unrecognized colored content between word boxes must remain visible.
+        graphics.setColor(java.awt.Color.RED); graphics.fillRect(1687, 1312, 375, 375);
+        graphics.dispose();
+        var bytes = new java.io.ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(scan, "png", bytes); scan.flush();
+        byte[] original = bytes.toByteArray();
+        var pageBox = new com.fuyue.formatconverter.model.Rect(0, 0, 317.5, 211.6667);
+        var background = new com.fuyue.formatconverter.model.ImageBlock("scan", 1, pageBox,
+                "image/png", original, "OCR_SCAN_BACKGROUND", 0);
+        var words = new java.util.ArrayList<com.fuyue.formatconverter.model.TextBlock>();
+        for (int line = 0; line < 8; line++) {
+            var ocrWords = new java.util.ArrayList<com.fuyue.formatconverter.model.TextBlock.OcrWord>();
+            for (int column = 0; column < 6; column++) {
+                var box = new com.fuyue.formatconverter.model.Rect(25 + column * 25, 20 + line * 22, 23, 7);
+                ocrWords.add(new com.fuyue.formatconverter.model.TextBlock.OcrWord(box, "VISIBLE", .99));
+            }
+            words.add(new com.fuyue.formatconverter.model.TextBlock("ocr-" + line, 1,
+                    new com.fuyue.formatconverter.model.Rect(25, 20 + line * 22, 148, 7), "VISIBLE ".repeat(6).strip(),
+                    27 + line * 22, new com.fuyue.formatconverter.model.FontStyle("Arial", 14, false, false, null),
+                    line + 1, 0, 0, java.util.List.of(), com.fuyue.formatconverter.model.Transform2D.IDENTITY, ocrWords));
+        }
+        var page = new com.fuyue.formatconverter.model.PageModel(1, pageBox, words,
+                java.util.List.of(), java.util.List.of(background), java.util.List.of(), java.util.List.of(), java.util.List.of());
+        Path source = temp.resolve("scan-overlay.docx"), output = temp.resolve("scan-overlay.pdf");
+        new com.fuyue.formatconverter.docx.PoiDocxRenderer().render(
+                new com.fuyue.formatconverter.model.DocumentModel("scan", "test", 1,
+                        java.util.List.of(page), java.util.List.of()), source);
+        try (var docx = new XWPFDocument(Files.newInputStream(source))) {
+            assertArrayEquals(original, docx.getAllPictures().get(0).getData());
+        }
+        new LibreOfficeConverter(DocumentFormat.DOCX, DocumentFormat.PDF, discovered.orElseThrow(),
+                Duration.ofSeconds(45), "scan overlay regression").convert(
+                input(source, DocumentFormat.DOCX), temp.resolve("scan-work"), output,
+                ParseLimits.defaults(), (stage, percent) -> { });
+        String qa = System.getProperty("format.converter.office.qa-directory", "");
+        if (!qa.isBlank()) {
+            Path directory = Path.of(qa); Files.createDirectories(directory);
+            Files.copy(source, directory.resolve("scan-overlay.docx"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(output, directory.resolve("scan-overlay.pdf"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        }
+        try (var pdf = Loader.loadPDF(output.toFile())) {
+            assertEquals(1, pdf.getNumberOfPages());
+            assertTrue(new PDFTextStripper().getText(pdf).contains("VISIBLE"));
+            var rendered = new org.apache.pdfbox.rendering.PDFRenderer(pdf).renderImageWithDPI(0, 150);
+            try {
+                int paper = rendered.getRGB((int) (5 * 150 / 25.4), (int) (5 * 150 / 25.4));
+                assertTrue((paper & 255) < 90, "scan must be visible, not an invisible image on white paper");
+                int brightTextPixels = 0;
+                for (int y = (int) (20 * 150 / 25.4); y < (int) (27 * 150 / 25.4); y++) {
+                    for (int x = (int) (25 * 150 / 25.4); x < (int) (48 * 150 / 25.4); x++) {
+                        int pixel = rendered.getRGB(x, y);
+                        if (((pixel >> 16) & 255) > 220 && ((pixel >> 8) & 255) > 220 && (pixel & 255) > 220) {
+                            brightTextPixels++;
+                        }
+                    }
+                }
+                assertTrue(brightTextPixels > 20, "editable white letters must remain visibly readable on dark paper");
+                int stamp = rendered.getRGB((int) (158.75 * 150 / 25.4), (int) (127 * 150 / 25.4));
+                assertTrue(((stamp >> 16) & 255) > 180 && ((stamp >> 8) & 255) < 80 && (stamp & 255) < 80,
+                        "unrecognized red content must survive actual Office rendering");
+            } finally { rendered.flush(); }
+        }
+    }
+
+    @Test
     void convertsDocxXlsxAndPptxToPdfWithReadableCjkAndPageCounts() throws Exception {
         var discovered = LibreOfficeConverter.discover("");
         assumeTrue(discovered.isPresent(), "LibreOffice is not installed");
