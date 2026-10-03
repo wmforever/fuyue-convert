@@ -88,9 +88,11 @@ public final class TesseractOcrConverter implements FileConverter {
         progress.update(TaskStage.PACKAGING, 90);
         List<ConversionWarning> warnings = new ArrayList<>(warningsFor(recognized, 1, "图片"));
         if (ordered.adjusted()) warnings.add(ConversionWarning.of(WarningCode.OCR_READING_ORDER_ADJUSTED,
-                "根据稳定空白分栏调整为左栏后右栏的 TXT 阅读顺序；原词、数字和坐标未改变，歧义版面仍需人工复核。", 1));
+                "根据稳定空白分栏及受限同行片段调整 TXT 阅读顺序；原词、数字和坐标未改变，歧义版面仍需人工复核。", 1));
         if (ordered.multipleColumns()) warnings.add(ConversionWarning.of(WarningCode.OCR_READING_ORDER_UNCERTAIN,
-                "检测到多个显著空栏，可能是三栏以上或表格；未执行双栏重排，保留引擎顺序，仍可能混行，请按原图人工复核。", 1));
+                ordered.adjusted()
+                    ? "检测到多个显著空栏，仅重组满足严格对齐条件的三栏短片段；复杂阅读顺序及原识别遗漏仍需按原图人工复核。"
+                    : "检测到多个显著空栏，可能是三栏以上或表格；未执行双栏重排，保留引擎顺序，仍可能混行，请按原图人工复核。", 1));
         if (prepared.orientationApplied()) {
             warnings.add(ConversionWarning.of(WarningCode.EXIF_ORIENTATION_APPLIED,
                     "OCR 前已应用 EXIF Orientation=" + prepared.metadata().orientation() + "。", 1));

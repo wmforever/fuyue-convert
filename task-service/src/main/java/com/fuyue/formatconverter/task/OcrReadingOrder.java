@@ -30,7 +30,7 @@ final class OcrReadingOrder {
             // Only one gutter is validated. Two significant internal gaps mean
             // three or more columns; sorting one combined side would interleave them.
             if (space >= minimumGap && right > 0 && word.box().x() < pageWidth && ++gutters > 1)
-                return new Result(unchanged.lines(), false, true);
+                return OcrFragmentedColumns.arrange(blocks, pageWidth, deadline);
             if (space > gap && middle > pageWidth * .30 && middle < pageWidth * .70) { gap = space; gutter = middle; }
             right = Math.max(right, word.box().right());
         }

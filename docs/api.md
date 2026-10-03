@@ -138,6 +138,8 @@ GET /api/tasks/{taskId}
 
 OCR 的部分补行模式保持全部原识别行、分隔和词框，仅加入严格分离的候选新行；其 `OCR_IMAGE_ENHANCED` / `OCR_DESKEW_APPLIED` 文案明确说明混合输出，并同时返回 `OCR_RECOGNITION_CONFLICT` 和 `OCR_POSSIBLE_TEXT_OMISSION`。混合置信度包含原词，不保证满足整份输出五个百分点增益，不证明内容完整或数字正确；不能安全区分的重叠/跨行/多栏区域不替换。既有完整候选行为不变，路线仍为 experimental；详见 [部分恢复证据](cloud-ocr-iteration7.md)。
 
+多个显著空栏的保留引擎次序规则现有一个受限例外：仅 TXT 中，恰好三栏、每栏至少三行、每行三至六个重复严格对齐的短片段，可按左至右栏、上至下行重组；每个原片段全文恰好使用一次，只加入空白分隔，不改写数值/原分隔，不更改词框、Word 或 PDF/OFD。表格数值格、跨栏/已合并行、窄间隔、重叠/近邻行、超时及不满足边界的输入仍保留引擎次序。采用时返回 `OCR_READING_ORDER_ADJUSTED` 和准确描述此例外的 `OCR_READING_ORDER_UNCERTAIN`；未采用时仍说明保留引擎次序。此例外不能补回原 OCR 漏字；见 [三栏片段实测](cloud-ocr-iteration8.md)。
+
 ## 下载
 
 ```http

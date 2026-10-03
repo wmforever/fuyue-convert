@@ -30,6 +30,8 @@ def main():
     parser.add_argument('--evidence-doc',default='cloud-ocr-iteration4.md')
     parser.add_argument('--text-samples',type=Path)
     parser.add_argument('--text-report',type=Path)
+    parser.add_argument('--container-report',type=Path,help='Final production PDF/OFD acceptance of containerCases')
+    parser.add_argument('--regression-report',type=Path,help='Additional final TXT regression report and resources')
     args=parser.parse_args();revision=git('rev-parse','HEAD')
     assert not git('status','--porcelain'),'Commit validated work before packaging'
     provenance=json.loads(args.provenance.read_text())
@@ -87,7 +89,7 @@ def main():
         name=case['file'];assert Path(name).name==name
         source_path=args.samples/name;assert digest(source_path.read_bytes())==case['sha256']
         file('samples/'+name,source_path);r=by_name[name]
-        for suffix in ['.docx','.scan.docx','.pdf','.scan.pdf','.png','.scan.png','.edited.scan.docx','.edited.scan.pdf']:
+        for suffix in ['.docx','.scan.docx','.pdf','.scan.pdf','.png','.scan.png','.edited.scan.docx','.edited.scan.pdf','.edited.docx','.edited.pdf']:
             path=args.report/(name+suffix)
             if path.is_file():file('evidence/artifacts/'+path.name,path)
         if r.get('metrics'):
@@ -101,6 +103,36 @@ def main():
             picture='Expected no-text failure';score='No text';xml='No text';order=None;numbers=''
         warnings=', '.join(w['code'] for w in r.get('warnings',[]))
         rows.append('<tr><td>'+html.escape(name)+'</td><td><a href="../samples/'+html.escape(name)+'"><img loading="lazy" src="../samples/'+html.escape(name)+'" alt="Synthetic source"></a></td><td>'+picture+'</td><td>'+score+'</td><td>'+xml+'</td><td>'+('—' if order is None else f'{order:.2%}')+'</td><td>'+html.escape(warnings)+'<br>'+html.escape(numbers)+'</td></tr>')
+    if args.container_report:
+        container=json.loads((args.container_report/'report.json').read_text())
+        identity=json.loads((args.container_report/'artifact-provenance.json').read_text())
+        assert identity['jarSha256']==provenance['jarSha256'] and identity['verifiedCodeRevision']==revision
+        assert container['manifest']==manifest and len(container['cases'])==len(manifest['containerCases'])
+        assert all(c['success'] for c in container['cases'])
+        for name in ['report.json','resources.json','artifact-provenance.json']:file('evidence/containers/'+name,args.container_report/name)
+        by_container={c['file']:c for c in container['cases']}
+        for case in manifest['containerCases']:
+            name=case['file'];assert Path(name).name==name
+            assert digest((args.samples/name).read_bytes())==case['sha256']
+            file('samples/'+name,args.samples/name);r=by_container[name]
+            for suffix in ['.docx','.pdf','.png']:
+                path=args.container_report/(name+suffix)
+                if path.is_file():file('evidence/artifacts/'+path.name,path)
+            if r.get('metrics'):
+                assert r['originalScanPixelsPreserved']
+                put('evidence/artifacts/'+name+'.txt',r['text'].encode())
+                score=f'{r["metrics"]["cer"]:.2%} / {r["metrics"]["alignedCharacterRecall"]:.2%}'
+                picture='<a href="../evidence/artifacts/'+html.escape(name)+'.png"><img src="../evidence/artifacts/'+html.escape(name)+'.png" alt="Office container scan"></a>'
+                xml=f'{r["wordMetrics"]["cer"]:.2%}';order=f'{r["officeMetrics"]["cer"]:.2%}'
+            else:score=xml=order='No text';picture='Expected no-text failure'
+            source='<a href="../samples/'+html.escape(name)+'">'+html.escape(name)+'</a><img src="../samples/'+html.escape(case['rasterSource'])+'" alt="Original container raster">'
+            rows.append('<tr><td>'+html.escape(name)+'</td><td>'+source+'</td><td>'+picture+'</td><td>'+score+'</td><td>'+xml+'</td><td>'+order+'</td><td>'+html.escape(', '.join(w['code'] for w in r.get('warnings',[])))+'</td></tr>')
+    if args.regression_report:
+        extra=json.loads((args.regression_report/'report.json').read_text())
+        identity=json.loads((args.regression_report/'artifact-provenance.json').read_text())
+        assert identity['jarSha256']==provenance['jarSha256'] and identity['verifiedCodeRevision']==revision
+        assert all(c['success'] and (c.get('textOnly') or c.get('expectedFailureVerified')) for c in extra['cases'])
+        for name in ['report.json','resources.json','artifact-provenance.json']:file('evidence/txt-regressions/'+name,args.regression_report/name)
     page='''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fuyue cloud acceptance review</title><style>body{font:15px system-ui;margin:28px;color:#17242e}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccd7df;padding:10px;vertical-align:top}th{background:#edf3f7;position:sticky;top:0}img{width:210px;height:155px;object-fit:contain;background:#f4f6f8}code{overflow-wrap:anywhere}td:last-child{max-width:280px;overflow-wrap:anywhere}</style><h1>Cloud acceptance review</h1><p>Linux x86_64 cloud build; no desktop installer or native-platform acceptance. Word rotation is unresolved. The scan layer can preserve text pixels while OCR omits editable words. Text CER/recall and Office PDF extraction order are separate measurements.</p><p>Source revision: <code>'''+revision+'''</code><br>JAR SHA-256: <code>'''+provenance['jarSha256']+'''</code></p><p>Open source and scan images at full size; inspect the editable DOCX, PDF and text files in evidence/artifacts. Expected blank/noise errors are explicit. Missing warnings do not certify completeness.</p><table><thead><tr><th>Case</th><th>Source</th><th>Office scan view</th><th>TXT CER / recall</th><th>Scan DOCX XML CER</th><th>Office PDF extraction CER</th><th>Warnings / digit runs</th></tr></thead><tbody>'''+''.join(rows)+'''</tbody></table></html>'''
     put('review/index.html',page.encode())
     launcher=r'''#!/usr/bin/env bash
@@ -138,7 +170,8 @@ Source archive is the exact Git commit. Evidence build inputs and packaged appli
 '''
     put('README.md',readme.encode())
     put('bundle.json',json.dumps({'sourceRevision':revision,'jarSha256':provenance['jarSha256'],'platform':'Linux x86_64 cloud acceptance only',
-        'cases':len(manifest['cases']),'nativeInstallersAccepted':False,'wordRotationSolved':False},indent=2).encode()+b'\n')
+        'cases':len(manifest['cases']),'containerCases':len(manifest.get('containerCases',[])) if args.container_report else 0,
+        'nativeInstallersAccepted':False,'wordRotationSolved':False},indent=2).encode()+b'\n')
     sums=''.join(digest(data)+'  '+name+'\n' for name,data in sorted(entries.items()))
     put('SHA256SUMS.txt',sums.encode())
     args.out.parent.mkdir(parents=True,exist_ok=True)

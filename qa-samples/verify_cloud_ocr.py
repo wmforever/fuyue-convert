@@ -63,6 +63,7 @@ def main():
     parser.add_argument('--samples', type=Path, default=ROOT / 'qa-samples/generated/cloud-handoff')
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--text-only', action='store_true', help='TXT acceptance only; no Word/Office acceptance claim')
+    parser.add_argument('--containers', action='store_true', help='Verify frozen PDF/OFD wrappers and actual Office reopening')
     args = parser.parse_args()
     token = os.environ['FORMAT_CONVERTER_API_TOKEN']
     args.out.mkdir(parents=True, exist_ok=True)
@@ -94,7 +95,7 @@ def main():
     report = {'health': json.loads(request('/api/health')), 'manifest': manifest, 'cases': []}
     fonts = ROOT / 'task-service/src/main/resources/fonts'
     report['fontSha256'] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in fonts.glob('*.ttf')}
-    for case in manifest['cases']:
+    for case in manifest['containerCases'] if args.containers else manifest['cases']:
         name = case['file']
         data = (args.samples / name).read_bytes()
         assert hashlib.sha256(data).hexdigest() == case['sha256'], name
@@ -124,6 +125,43 @@ def main():
                 (args.out / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
                 print(name, True, record['metrics'], flush=True)
                 continue
+            if args.containers:
+                docx, docx_time, docx_task = convert(name, data, 'docx')
+                (args.out / (name + '.docx')).write_bytes(docx)
+                with zipfile.ZipFile(io.BytesIO(docx)) as archive:
+                    xml = ET.fromstring(archive.read('word/document.xml'))
+                    editable = ''.join(n.text or '' for n in xml.iter('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t'))
+                    pixel_hashes = []
+                    for member in archive.namelist():
+                        if member.startswith('word/media/'):
+                            with Image.open(io.BytesIO(archive.read(member))) as raster:
+                                pixel_hashes.append(hashlib.sha256(raster.convert('RGB').tobytes()).hexdigest())
+                with Image.open(args.samples / case['rasterSource']) as source_image:
+                    source = source_image.convert('RGB')
+                    assert hashlib.sha256(source.tobytes()).hexdigest() in pixel_hashes, 'Container scan RGB pixels changed'
+                assert editable, 'Container Word lacks editable OCR text'
+                pdf, office_time, _ = convert(name + '.docx', docx, 'pdf')
+                pdf_path = args.out / (name + '.pdf'); pdf_path.write_bytes(pdf)
+                reopened = subprocess.run(['pdftotext', str(pdf_path), '-'], check=True, capture_output=True, text=True).stdout
+                subprocess.run(['pdftoppm', '-f', '1', '-singlefile', '-scale-to', '1000', '-png', str(pdf_path),
+                                str(args.out / name)], check=True, capture_output=True)
+                with Image.open(args.out / (name + '.png')) as rendered:
+                    a = source.getpixel((int(source.width*.02), int(source.height*.02)))
+                    b = rendered.convert('RGB').getpixel((int(rendered.width*.02), int(rendered.height*.02)))
+                assert max(abs(x-y) for x,y in zip(a,b)) <= 12, 'Container Office scan margin changed'
+                info = subprocess.run(['pdfinfo', str(pdf_path)], check=True, capture_output=True, text=True).stdout
+                record.update(success=True, text=actual, editableText=editable, officeText=reopened,
+                    originalScanPixelsPreserved=True, sourceMarginRgb=a, renderedMarginRgb=b,
+                    metrics=metrics('\n'.join(case['expectedLines']), actual),
+                    wordMetrics=metrics('\n'.join(case['expectedLines']), editable),
+                    officeMetrics=metrics('\n'.join(case['expectedLines']), reopened),
+                    seconds={'txt':txt_time,'docx':docx_time,'office':office_time},
+                    warnings=txt_task.get('warnings',[]), wordWarnings=docx_task.get('warnings',[]),
+                    pages=int(re.search(r'^Pages:\s+(\d+)',info,re.M).group(1)))
+                report['cases'].append(record)
+                (args.out / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
+                print(name, True, record['metrics'], flush=True)
+                continue
             docx, docx_time, docx_task = convert(name, data, 'docx')
             (args.out / (name + '.docx')).write_bytes(docx)
             with zipfile.ZipFile(io.BytesIO(docx)) as archive:
@@ -132,20 +170,22 @@ def main():
                 editable = ''.join(n.text or '' for n in document.iter('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t'))
                 media = [archive.read(n) for n in archive.namelist() if n.startswith('word/media/')]
             edit_result = None
-            if name == 'english-tilt-+0.png':
+            if name in ('english-tilt-+0.png', 'bilingual-upright.png'):
+                original_word, edited_word = ('Invoice', 'Receipt') if name.startswith('english-') else ('Warehouse', 'Depot')
                 edited_bytes = io.BytesIO()
                 with zipfile.ZipFile(io.BytesIO(docx)) as source_zip, zipfile.ZipFile(edited_bytes, 'w') as edited_zip:
                     for member in source_zip.infolist():
                         contents = source_zip.read(member.filename)
                         if member.filename == 'word/document.xml':
-                            assert b'Invoice' in contents
-                            contents = contents.replace(b'Invoice', b'Receipt', 1)
+                            assert original_word.encode() in contents
+                            contents = contents.replace(original_word.encode(), edited_word.encode(), 1)
                         edited_zip.writestr(copy.copy(member), contents)
                 edited_pdf, _, _ = convert('edited.docx', edited_bytes.getvalue(), 'pdf')
-                edited_path = args.out / 'edited.pdf'
+                edited_path = args.out / (name + '.edited.pdf')
+                (args.out / (name + '.edited.docx')).write_bytes(edited_bytes.getvalue())
                 edited_path.write_bytes(edited_pdf)
                 edited_text = subprocess.run(['pdftotext', str(edited_path), '-'], check=True, capture_output=True, text=True).stdout
-                edit_result = 'Receipt' in edited_text
+                edit_result = edited_word in edited_text
                 assert edit_result, 'Editing a Word run must survive Office reopening'
             pdf, office_time, _ = convert(name + '.docx', docx, 'pdf')
             pdf_path = args.out / (name + '.pdf')
