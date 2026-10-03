@@ -3,6 +3,7 @@ import { constants as fsConstants, existsSync } from 'node:fs'
 import { access, mkdir } from 'node:fs/promises'
 import net from 'node:net'
 import path from 'node:path'
+import { engineEnvironment } from './engine-settings.mjs'
 
 const LOOPBACK = '127.0.0.1'
 const MAX_LOG_CHARS = 24_000
@@ -69,7 +70,7 @@ function assertStartupActive(signal) {
   if (signal?.aborted) throw new Error('桌面服务启动已取消')
 }
 
-export async function waitForBackend({ origin, child, timeoutMs = 60_000, intervalMs = 250, fetchImpl = fetch, getProcessError }) {
+export async function waitForBackend({ origin, child, timeoutMs = 120_000, intervalMs = 250, fetchImpl = fetch, getProcessError }) {
   const startedAt = Date.now()
   let lastError = null
   while (Date.now() - startedAt < timeoutMs) {
@@ -130,7 +131,7 @@ function observeOutput(child, logger) {
 }
 
 export async function startBackend({ resourcesPath, userDataPath, apiToken, logger, port: requestedPort,
-  onSpawn, signal, findPortImpl = findFreePort }) {
+  onSpawn, signal, engineSettings = {}, findPortImpl = findFreePort }) {
   if (typeof apiToken !== 'string' || apiToken.length < MINIMUM_TOKEN_LENGTH) {
     throw new Error(`桌面 API Token 长度不能少于 ${MINIMUM_TOKEN_LENGTH} 个字符`)
   }
@@ -166,9 +167,8 @@ export async function startBackend({ resourcesPath, userDataPath, apiToken, logg
   }
 
   const poppler = layout.popplerCandidates.find(candidate => existsSync(candidate))
-  const office = layout.officeCandidates.find(candidate => existsSync(candidate))
   const environment = {
-    ...process.env,
+    ...engineEnvironment(engineSettings, resourcesPath),
     FORMAT_CONVERTER_API_TOKEN: apiToken,
     FORMAT_CONVERTER_APP_HOME: layout.root,
     FORMAT_CONVERTER_DESKTOP_MODE: 'true',
@@ -176,7 +176,6 @@ export async function startBackend({ resourcesPath, userDataPath, apiToken, logg
     FORMAT_CONVERTER_AUTO_OPEN_BROWSER: 'false'
   }
   if (poppler) environment.PDFTOPPM_BIN = poppler
-  if (office) environment.FORMAT_CONVERTER_OFFICE_BINARY = office
 
   const child = spawn(layout.java, argumentsList, {
     cwd: layout.root,

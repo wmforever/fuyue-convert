@@ -29,14 +29,19 @@ public class TaskController {
                                                @RequestParam(required = false) String watermarkPages,
                                                @RequestParam(required = false) String watermarkColor,
                                                @RequestParam(required = false) String splitPages,
-                                               @RequestParam(required = false) Integer imageDpi) throws IOException {
+                                               @RequestParam(required = false) Integer imageDpi,
+                                               @RequestParam(required = false) String imagePages,
+                                               @RequestParam(required = false) String imagePdfPageSize,
+                                               @RequestParam(required = false) Double imagePdfMarginMm,
+                                               @RequestParam(required = false) String spreadsheetSheets,
+                                               @RequestParam(required = false) Boolean spreadsheetFitWidth) throws IOException {
         DocumentFormat target = DocumentFormat.from(targetFormat)
                 .orElseThrow(() -> new IllegalArgumentException("暂不支持的目标格式：" + targetFormat));
         List<UploadPayload> uploads = files.stream().map(file ->
                 new UploadPayload(file.getOriginalFilename(), file.getContentType(), file.getSize(), file::getInputStream)).toList();
         ConversionOptions options = ConversionOptions.fromRequest(compressionMode, watermarkText,
                 watermarkOpacity, watermarkAngle, watermarkPosition, watermarkTiled, watermarkPages, watermarkColor,
-                splitPages, imageDpi);
+                splitPages, imageDpi, imagePages, imagePdfPageSize, imagePdfMarginMm, spreadsheetSheets, spreadsheetFitWidth);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(tasks.createTask(uploads, target, options));
     }
 

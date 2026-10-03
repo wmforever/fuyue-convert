@@ -25,7 +25,7 @@ test('macOS release environment is fail-closed', () => {
     FORMAT_CONVERTER_PUBLIC_LITE_RELEASE: 'true',
     FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME: 'true',
     FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION: '17.0.20.1',
-    FORMAT_CONVERTER_BUNDLE_OCR: 'false'
+    FORMAT_CONVERTER_BUNDLE_OCR: 'true'
   }
   assert.doesNotThrow(() => assertPublicMacEnvironment(valid))
   assert.equal(assertPublicMacEnvironment({
@@ -43,8 +43,9 @@ test('macOS release environment is fail-closed', () => {
     FORMAT_CONVERTER_PUBLIC_LITE_RELEASE: 'false',
     FORMAT_CONVERTER_PUBLIC_FULL_RELEASE: 'true'
   }), /必须捆绑 LibreOffice/)
-  assert.throws(() => assertPublicMacEnvironment({ ...valid, FORMAT_CONVERTER_OCR_HOME: '/tmp/ocr' }),
-    /不得捆绑 OCR/)
+  assert.doesNotThrow(() => assertPublicMacEnvironment({ ...valid, FORMAT_CONVERTER_OCR_HOME: '/tmp/ocr' }))
+  assert.throws(() => assertPublicMacEnvironment({ ...valid, FORMAT_CONVERTER_BUNDLE_OCR: 'false' }), /必须内置中英文 OCR/)
+  assert.throws(() => assertPublicMacEnvironment({ ...valid, FORMAT_CONVERTER_POPPLER_HOME: '/tmp/poppler' }), /不得捆绑 Poppler/)
   assert.throws(() => assertPublicMacEnvironment({ ...valid, FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION: '17' }),
     /必须锁定 Eclipse Temurin/)
 })

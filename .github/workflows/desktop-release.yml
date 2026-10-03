@@ -78,7 +78,7 @@ jobs:
         working-directory: desktop
         shell: pwsh
         env:
-          FORMAT_CONVERTER_BUNDLE_OCR: "false"
+          FORMAT_CONVERTER_BUNDLE_OCR: "true"
           FORMAT_CONVERTER_PUBLIC_LITE_RELEASE: "true"
           FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME: "true"
           FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION: ${{ env.TEMURIN_RUNTIME_VERSION }}
@@ -299,7 +299,7 @@ jobs:
       - name: Package public Lite disk image
         working-directory: desktop
         env:
-          FORMAT_CONVERTER_BUNDLE_OCR: "false"
+          FORMAT_CONVERTER_BUNDLE_OCR: "true"
           FORMAT_CONVERTER_PUBLIC_LITE_RELEASE: "true"
           FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME: "true"
           FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION: ${{ env.TEMURIN_RUNTIME_VERSION }}

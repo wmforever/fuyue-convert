@@ -52,10 +52,15 @@ public final class ForkedFileConverter implements FileConverter {
         command.add(requestPath.toString());
         command.add(responsePath.toString());
         command.add(progressPath.toString());
-        Process process = new ProcessBuilder(command)
+        ProcessBuilder builder = new ProcessBuilder(command)
                 .directory(workDir.toFile())
-                .redirectErrorStream(true)
-                .start();
+                .redirectErrorStream(true);
+        // The worker changes cwd and does not inherit JVM system properties.
+        // Carry the parent's discovered bundle location without enabling OCR
+        // or overriding an explicitly selected engine.
+        TesseractOcrConverter.bundledRoot(builder.environment()).ifPresent(root ->
+                builder.environment().put("FORMAT_CONVERTER_APP_HOME", root.getParent().toString()));
+        Process process = builder.start();
         ProcessOutputCapture capture = ProcessOutputCapture.start(process, command, MAX_LOG_BYTES);
         Set<ProcessHandle> observedDescendants = new HashSet<>();
         WorkerProgress lastProgress = null;

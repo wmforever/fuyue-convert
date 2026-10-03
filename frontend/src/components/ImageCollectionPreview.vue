@@ -68,6 +68,6 @@ onBeforeUnmount(() => {
       </article>
     </div>
     <p v-if="hiddenCount" class="image-preview-more">另有 {{ hiddenCount }} 张图片未展开，仍会按文件列表顺序生成 PDF。</p>
-    <footer>这里展示源图片和顺序；PDF 物理页面尺寸仍按图片 DPI 与 EXIF 方向生成，最终以导出文件为准。</footer>
+    <footer>这里展示源图片和顺序；PDF 页面采用所选纸张与页边距，原始尺寸模式按图片 DPI 生成，最终以导出文件为准。</footer>
   </section>
 </template>

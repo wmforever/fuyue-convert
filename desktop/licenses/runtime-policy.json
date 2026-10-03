@@ -1,40 +1,40 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-08-31",
+  "reviewedAt": "2026-09-26",
   "profile": "windows-x64-lite",
   "profiles": {
     "windows-x64-lite": {
       "platform": "win32",
       "arch": "x64",
-      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "nsis"]
+      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "nsis", "tesseract-ocr"]
     },
     "macos-x64-lite": {
       "platform": "darwin",
       "arch": "x64",
-      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party"]
+      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "tesseract-ocr"]
     },
     "macos-arm64-lite": {
       "platform": "darwin",
       "arch": "arm64",
-      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party"]
+      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "tesseract-ocr"]
     },
     "windows-x64-full": {
       "platform": "win32",
       "arch": "x64",
-      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "nsis", "libreoffice"]
+      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "nsis", "libreoffice", "tesseract-ocr"]
     },
     "macos-x64-full": {
       "platform": "darwin",
       "arch": "x64",
-      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "libreoffice"]
+      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "libreoffice", "tesseract-ocr"]
     },
     "macos-arm64-full": {
       "platform": "darwin",
       "arch": "arm64",
-      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "libreoffice"]
+      "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "libreoffice", "tesseract-ocr"]
     }
   },
-  "description": "Fail-closed allow-list for public Lite and Full desktop runtimes. Full additionally requires the reviewed LibreOffice component; every dependency change requires explicit review.",
+  "description": "Fail-closed allow-list for public Lite and Full desktop runtimes, both with source-built static OCR and pinned Chinese/English models. Full additionally requires reviewed LibreOffice.",
   "licenseFileSha256": {
     "desktop/licenses/java/BOUNCY-CASTLE-LICENSE.html": "edbbb10380b1271998b867a2e36b1cbee226e03d438726e1a91f80c5dde11849",
     "desktop/licenses/java/CURVESAPI-LICENSE.txt": "126424394603617f06ed957255a1f6569ed54f58eec15891ade42405566cc4bc",
@@ -59,7 +59,9 @@
       "artifact": "LatencyUtils",
       "spdx": "CC0-1.0",
       "source": "https://github.com/LatencyUtils/LatencyUtils",
-      "licenseFiles": ["desktop/licenses/java/LATENCYUTILS-LICENSE.txt"]
+      "licenseFiles": [
+        "desktop/licenses/java/LATENCYUTILS-LICENSE.txt"
+      ]
     },
     {
       "pattern": "^SparseBitSet-(?<version>1\\.3)\\.jar$",
@@ -81,7 +83,9 @@
       "artifact": "{artifact}",
       "spdx": "MIT",
       "source": "https://github.com/bcgit/bc-java",
-      "licenseFiles": ["desktop/licenses/java/BOUNCY-CASTLE-LICENSE.html"]
+      "licenseFiles": [
+        "desktop/licenses/java/BOUNCY-CASTLE-LICENSE.html"
+      ]
     },
     {
       "pattern": "^classmate-(?<version>1\\.7\\.0)\\.jar$",
@@ -96,7 +100,9 @@
       "artifact": "{artifact}",
       "spdx": "BSD-3-Clause",
       "source": "https://github.com/haraldk/TwelveMonkeys",
-      "licenseFiles": ["desktop/licenses/java/TWELVEMONKEYS-LICENSE.txt"]
+      "licenseFiles": [
+        "desktop/licenses/java/TWELVEMONKEYS-LICENSE.txt"
+      ]
     },
     {
       "pattern": "^commons-codec-(?<version>1\\.18\\.0)\\.jar$",
@@ -146,7 +152,9 @@
       "artifact": "curvesapi",
       "spdx": "BSD-3-Clause",
       "source": "https://github.com/virtuald/curvesapi",
-      "licenseFiles": ["desktop/licenses/java/CURVESAPI-LICENSE.txt"]
+      "licenseFiles": [
+        "desktop/licenses/java/CURVESAPI-LICENSE.txt"
+      ]
     },
     {
       "pattern": "^(?<artifact>docx-renderer|layout-model|ofd-parser|table-recognizer|task-service)-(?<version>[^/]+)\\.jar$",
@@ -162,7 +170,9 @@
       "artifact": "dom4j",
       "spdx": "BSD-3-Clause",
       "source": "https://github.com/dom4j/dom4j",
-      "licenseFiles": ["desktop/licenses/java/DOM4J-LICENSE.txt"]
+      "licenseFiles": [
+        "desktop/licenses/java/DOM4J-LICENSE.txt"
+      ]
     },
     {
       "pattern": "^(?<artifact>fontbox|pdfbox|pdfbox-io)-(?<version>3\\.0\\.8)\\.jar$",
@@ -184,7 +194,9 @@
       "artifact": "{artifact}",
       "spdx": "BSD-3-Clause",
       "source": "https://github.com/haraldk/TwelveMonkeys",
-      "licenseFiles": ["desktop/licenses/java/TWELVEMONKEYS-LICENSE.txt"]
+      "licenseFiles": [
+        "desktop/licenses/java/TWELVEMONKEYS-LICENSE.txt"
+      ]
     },
     {
       "pattern": "^(?<artifact>jackson-(?:annotations|core|databind))-(?<version>2\\.19\\.2)\\.jar$",
@@ -227,7 +239,9 @@
       "artifact": "jaxen",
       "spdx": "BSD-3-Clause",
       "source": "https://github.com/jaxen-xpath/jaxen",
-      "licenseFiles": ["desktop/licenses/java/JAXEN-LICENSE.txt"]
+      "licenseFiles": [
+        "desktop/licenses/java/JAXEN-LICENSE.txt"
+      ]
     },
     {
       "pattern": "^jbig2-imageio-(?<version>3\\.0\\.3)\\.jar$",
@@ -397,7 +411,10 @@
       "spdx": "MPL-2.0 AND LicenseRef-LibreOffice-Third-Party",
       "source": "https://download.documentfoundation.org/libreoffice/src/26.2.5/libreoffice-26.2.5.2.tar.xz",
       "sourceSha256": "8ec785ee1fd1a1d9b9d8eba1c8ff7556695ca8f02e1f7a26bef8cd540f669fea",
-      "licensePath": ["backend/licenses/LIBREOFFICE-LICENSE.txt", "backend/licenses/LIBREOFFICE-SOURCE-OFFER.txt"]
+      "licensePath": [
+        "backend/licenses/LIBREOFFICE-LICENSE.txt",
+        "backend/licenses/LIBREOFFICE-SOURCE-OFFER.txt"
+      ]
     },
     "nsis-stdutils": {
       "version": "1.14+2018-10-27",
@@ -450,19 +467,22 @@
       "sourceSha256": "b1b3f070353a0eadee2cea3a575049d10df9763ff24e39313da4cec9455382e1",
       "licensePath": "backend/licenses/NSIS-TOOLCHAIN-NOTICES.txt",
       "optional": true
+    },
+    "tesseract-ocr": {
+      "version": "5.5.2",
+      "spdx": "Apache-2.0 AND BSD-2-Clause AND libpng-2.0 AND Zlib",
+      "source": "https://github.com/tesseract-ocr/tesseract/tree/5.5.2",
+      "licensePath": [
+        "backend/licenses/OCR-TESSERACT.txt",
+        "backend/licenses/OCR-LEPTONICA.txt",
+        "backend/licenses/OCR-LIBPNG.txt",
+        "backend/licenses/OCR-ZLIB.txt",
+        "backend/licenses/OCR-TESSDATA.txt",
+        "backend/licenses/OCR-SOURCE-POLICY.json"
+      ]
     }
   },
-  "requiredComponentIds": [
-    "fuyue-convert",
-    "vue",
-    "pdfjs-dist",
-    "droid-sans-fallback",
-    "liberation-sans",
-    "eclipse-temurin",
-    "electron",
-    "chromium-third-party",
-    "nsis"
-  ],
+  "requiredComponentIds": ["fuyue-convert", "vue", "pdfjs-dist", "droid-sans-fallback", "liberation-sans", "eclipse-temurin", "electron", "chromium-third-party", "nsis", "tesseract-ocr"],
   "forbiddenInstallerComponents": [
     "nsis-stdutils",
     "nsis-uac",

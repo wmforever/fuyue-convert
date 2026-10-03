@@ -108,12 +108,12 @@ public class ApplicationConfiguration {
         String heap = "-Xmx" + properties.getWorkerMaxMemoryMb() + "m";
         File source = new ApplicationHome(FormatConverterApplication.class).getSource();
         if (source != null && source.isFile() && source.getName().endsWith(".jar")) {
-            return List.of(java.toString(), heap,
+            return List.of(java.toString(), heap, "-Djava.awt.headless=true",
                     "-Dloader.main=" + ConversionWorkerMain.class.getName(),
                     "-cp", source.getAbsolutePath(),
                     "org.springframework.boot.loader.launch.PropertiesLauncher");
         }
-        return List.of(java.toString(), heap, "-cp", System.getProperty("java.class.path"),
+        return List.of(java.toString(), heap, "-Djava.awt.headless=true", "-cp", System.getProperty("java.class.path"),
                 ConversionWorkerMain.class.getName());
     }
 

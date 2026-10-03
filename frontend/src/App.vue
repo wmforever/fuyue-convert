@@ -1,8 +1,13 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ImageCollectionPreview from './components/ImageCollectionPreview.vue'
+import EngineSettings from './components/EngineSettings.vue'
+import { engineStatusLabel } from './engineSettingsClient.js'
 import PdfPreview from './components/PdfPreview.vue'
 import { imageDpiChoices, imageExportOptions, isImageExportRoute } from './imageExportOptions.js'
+import { imagePdfOptions, imagePdfPageChoices } from './imagePdfOptions.js'
+import { spreadsheetPdfOptions } from './spreadsheetPdfOptions.js'
+import { acceptsInputFile, imageFileLabel, inputExtensionsForRoute, isImageToPdfRoute as acceptsMixedImages } from './fileSelection.js'
 import { normalizeNativeSaveResult, shouldUseNativeSave } from './downloadTransport.js'
 import { blocksPdfSubmission, loadPdfJs, pdfPreviewError } from './pdfPreviewRuntime.js'
 import {
@@ -56,6 +61,11 @@ const downloadingTaskId = ref('')
 const compressionMode = ref('balanced')
 const splitPages = ref('all')
 const imageDpi = ref('')
+const imagePages = ref('all')
+const imagePdfPageSize = ref('original')
+const imagePdfMarginMm = ref(10)
+const spreadsheetSheets = ref('all')
+const spreadsheetFitWidth = ref(false)
 const watermarkText = ref('机密资料')
 const watermarkOpacity = ref(0.18)
 const watermarkAngle = ref(35)
@@ -127,10 +137,23 @@ const isPdfCompressRoute = computed(() => selectedRoute.value?.targetFormat === 
 const isPdfWatermarkRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-watermark')
 const isPdfSplitRoute = computed(() => selectedRoute.value?.targetFormat === 'pdf-split')
 const isPdfInputRoute = computed(() => selectedRoute.value?.sourceFormat === 'pdf')
-const isImageToPdfRoute = computed(() => ['png', 'jpg'].includes(selectedRoute.value?.sourceFormat)
-  && selectedRoute.value?.targetFormat === 'pdf')
+const isImageToPdfRoute = computed(() => acceptsMixedImages(selectedRoute.value))
+const uploadSourceLabel = computed(() => isImageToPdfRoute.value ? 'PNG / JPG 图片' : selectedRoute.value?.sourceLabel)
 const isImageExport = computed(() => isImageExportRoute(selectedRoute.value))
-const hasToolOptions = computed(() => isPdfCompressRoute.value || isPdfWatermarkRoute.value || isPdfSplitRoute.value || isImageExport.value)
+const isPdfImageExport = computed(() => isImageExport.value && isPdfInputRoute.value)
+const imagePdfSettingsError = computed(() => {
+  try { imagePdfOptions(imagePdfPageSize.value, imagePdfMarginMm.value); return '' }
+  catch (error) { return error.message }
+})
+const isSpreadsheetPdfRoute = computed(() => selectedRoute.value?.sourceFormat === 'xlsx' && selectedRoute.value?.targetFormat === 'pdf')
+const spreadsheetSettingsError = computed(() => {
+  try {
+    if (spreadsheetFitWidth.value && selectedRoute.value?.strategy === 'content') return '所有列放在一页宽度需要 LibreOffice，请选择保留原打印设置'
+    spreadsheetPdfOptions(spreadsheetSheets.value, spreadsheetFitWidth.value); return ''
+  }
+  catch (error) { return error.message }
+})
+const hasToolOptions = computed(() => isSpreadsheetPdfRoute.value || isPdfCompressRoute.value || isPdfWatermarkRoute.value || isPdfSplitRoute.value || isImageExport.value || isImageToPdfRoute.value)
 const watermarkPagesValid = computed(() => validWatermarkPages(watermarkPages.value))
 const watermarkPreviewFile = computed(() => isPdfWatermarkRoute.value ? files.value[0] || null : null)
 const watermarkPreviewPending = computed(() => Boolean(watermarkPreviewFile.value)
@@ -220,13 +243,19 @@ const watermarkRangeState = computed(() => {
   }
 })
 const splitPagesValid = computed(() => validWatermarkPages(splitPages.value))
+const imagePagesValid = computed(() => validWatermarkPages(imagePages.value))
+const imageRangeState = computed(() => pageRangeState(imagePages.value, pdfSourcePreviewPageCount.value))
 const splitRangeState = computed(() => pageRangeState(splitPages.value, pdfSourcePreviewPageCount.value))
 const splitSelectedPages = computed(() => {
   if (!splitPagesValid.value || !pdfSourcePreviewPageCount.value || splitRangeState.value.overflow) return []
   return Array.from({ length: pdfSourcePreviewPageCount.value }, (_, index) => index + 1)
     .filter(page => pageMatchesRange(page, splitPages.value))
 })
-const toolOptionsValid = computed(() => (!isPdfWatermarkRoute.value
+const toolOptionsValid = computed(() => (!isSpreadsheetPdfRoute.value || !spreadsheetSettingsError.value)
+  && (!isImageToPdfRoute.value || !imagePdfSettingsError.value)
+  && (!isPdfImageExport.value || (imagePagesValid.value
+    && imageRangeState.value.matches !== false && !imageRangeState.value.overflow))
+  && (!isPdfWatermarkRoute.value
   || (watermarkText.value.trim().length > 0
     && watermarkPagesValid.value
     && watermarkRangeState.value.matches !== false
@@ -235,7 +264,7 @@ const toolOptionsValid = computed(() => (!isPdfWatermarkRoute.value
   && (!isPdfSplitRoute.value || (splitPagesValid.value
     && splitRangeState.value.matches !== false
     && !splitRangeState.value.overflow))
-  && (!(isSinglePdfTool.value && !isPdfWatermarkRoute.value && pdfSourcePreviewFile.value)
+  && (!(((isSinglePdfTool.value && !isPdfWatermarkRoute.value) || isPdfImageExport.value) && pdfSourcePreviewFile.value)
     || (!pdfSourcePreviewPending.value && !pdfSourcePreviewBlocksSubmit.value)))
 const routeFileLimit = computed(() => isSinglePdfTool.value ? 1 : limits.value.maxFilesPerTask)
 const canSubmit = computed(() => files.value.length >= (isPdfMergeRoute.value ? 2 : 1)
@@ -250,18 +279,14 @@ const quickRoutes = computed(() => popularRouteIds.map(id => conversions.value.f
 const successfulTasks = computed(() => recentTasks.value.filter(item => item.status === 'SUCCESS').length)
 const serviceHealthy = computed(() => Boolean(diagnostics.value))
 const selectedBytes = computed(() => files.value.reduce((total, file) => total + file.size, 0))
-const acceptExtension = computed(() => selectedRoute.value?.inputExtension || '.ofd')
-const acceptExtensions = computed(() => {
-  if (selectedRoute.value?.sourceFormat === 'jpg') return ['.jpg', '.jpeg']
-  if (selectedRoute.value?.sourceFormat === 'uof') return ['.uof', '.uot']
-  return [acceptExtension.value]
-})
-const acceptType = computed(() => `${acceptExtensions.value.join(',')},application/${selectedRoute.value?.sourceFormat || 'ofd'}`)
+const acceptExtensions = computed(() => inputExtensionsForRoute(selectedRoute.value))
+const acceptType = computed(() => acceptExtensions.value.join(','))
 const statusLabel = computed(() => ({ WAITING: '等待转换', CONVERTING: '正在转换', SUCCESS: '转换完成', FAILED: '转换失败', CANCELLED: '转换已取消' })[task.value?.status] || '')
 const progress = computed(() => task.value?.progress ?? uploadProgress.value)
 const uploadHint = computed(() => {
   if (isPdfMergeRoute.value) return `至少 2 个 PDF，按上传顺序合并；单文件最大 ${formatBytes(limits.value.maxFileSize)}`
   if (isSinglePdfTool.value) return `一次处理 1 个 PDF，单文件最大 ${formatBytes(limits.value.maxFileSize)}`
+  if (isImageToPdfRoute.value) return `支持 PNG、JPG、JPEG 混合上传，按列表顺序合并为一个 PDF；最多 ${limits.value.maxFilesPerTask} 张，单张最大 ${formatBytes(limits.value.maxFileSize)}，总计最大 ${formatBytes(limits.value.maxTaskUploadBytes)}`
   return `最多 ${limits.value.maxFilesPerTask} 个文件，单文件最大 ${formatBytes(limits.value.maxFileSize)}，总计最大 ${formatBytes(limits.value.maxTaskUploadBytes)}`
 })
 const popularRouteIds = ['pdf-to-docx', 'docx-to-pdf', 'pdf-to-pdf-merge', 'ofd-to-docx', 'pdf-to-pdf-compress', 'png-to-pdf']
@@ -438,7 +463,14 @@ function fileIdentity(file) {
 }
 
 function currentRouteOptions() {
-  if (isImageExport.value) return imageExportOptions(imageDpi.value)
+  if (isSpreadsheetPdfRoute.value) return spreadsheetSettingsError.value
+    ? { spreadsheetSheets: spreadsheetSheets.value, spreadsheetFitWidth: spreadsheetFitWidth.value }
+    : spreadsheetPdfOptions(spreadsheetSheets.value, spreadsheetFitWidth.value)
+  if (isImageExport.value) return { ...imageExportOptions(imageDpi.value),
+    ...(isPdfImageExport.value ? { imagePages: imagePages.value.replace(/\s+/g, '').toLowerCase() } : {}) }
+  if (isImageToPdfRoute.value) return imagePdfSettingsError.value
+    ? { imagePdfPageSize: imagePdfPageSize.value, imagePdfMarginMm: imagePdfMarginMm.value }
+    : imagePdfOptions(imagePdfPageSize.value, imagePdfMarginMm.value)
   if (isPdfWatermarkRoute.value) return currentWatermarkSettings()
   if (isPdfCompressRoute.value) return { compressionMode: compressionMode.value }
   if (isPdfSplitRoute.value) return { splitPages: splitPages.value.replace(/\s+/g, '').toLowerCase() }
@@ -457,7 +489,9 @@ const batchSettingsDirty = computed(() => ['SUCCESS', 'FAILED', 'CANCELLED'].inc
   && submittedBatchFingerprint.value
   && currentBatchFingerprint() !== submittedBatchFingerprint.value)
 const dirtySettingsLabel = computed(() => {
-  if (isImageExport.value) return '图片清晰度'
+  if (isSpreadsheetPdfRoute.value) return '工作表与分页设置'
+  if (isImageExport.value) return '图片导出设置'
+  if (isImageToPdfRoute.value) return '纸张与页边距'
   if (isPdfWatermarkRoute.value) return '水印设置'
   if (isPdfCompressRoute.value) return '压缩设置'
   if (isPdfSplitRoute.value) return '拆分页码'
@@ -502,6 +536,9 @@ function pdfSourceStatus(state, page, pageCount, error) {
   if (isPdfSplitRoute.value) return pageMatchesRange(page, splitPages.value)
     ? `第 ${page} 页会包含在拆分结果中`
     : `第 ${page} 页不会包含在拆分结果中`
+  if (isPdfImageExport.value) return pageMatchesRange(page, imagePages.value)
+    ? `第 ${page} 页会导出为图片`
+    : `第 ${page} 页不在图片导出范围内`
   if (isPdfCompressRoute.value) return `源文件第 ${page} / ${pageCount} 页；完成后将展示真实压缩结果`
   return `源文件第 ${page} / ${pageCount} 页`
 }
@@ -804,7 +841,7 @@ function historyEntry(snapshot, existing = null) {
     progress: Number.isFinite(snapshot.progress) ? snapshot.progress : 0,
     sourceFormat: snapshot.sourceFormat || existing?.sourceFormat || route?.sourceFormat || '',
     targetFormat: snapshot.targetFormat || existing?.targetFormat || route?.targetFormat || '',
-    sourceLabel: route?.sourceLabel || existing?.sourceLabel || snapshot.sourceFormat?.toUpperCase() || '文件',
+    sourceLabel: acceptsMixedImages(snapshot) ? '图片' : (route?.sourceLabel || existing?.sourceLabel || snapshot.sourceFormat?.toUpperCase() || '文件'),
     targetLabel: route?.targetLabel || existing?.targetLabel || snapshot.targetFormat?.toUpperCase() || '输出文件',
     fileCount: resultCount || existing?.fileCount || (snapshot.taskId === task.value?.taskId ? files.value.length : 0),
     updatedAt: snapshot.updatedAt || existing?.updatedAt || new Date().toISOString(),
@@ -1090,10 +1127,10 @@ function startNewBatch() {
 }
 
 function accept(selected) {
+  if (busy.value || selectedRoute.value?.status !== 'available') return
   const wasEmpty = files.value.length === 0
-  const extensions = acceptExtensions.value.map(extension => extension.toLowerCase())
   const selectedFiles = Array.from(selected || [])
-  const matching = selectedFiles.filter(file => extensions.some(extension => file.name.toLowerCase().endsWith(extension)))
+  const matching = selectedFiles.filter(file => acceptsInputFile(selectedRoute.value, file.name))
   const incoming = matching.filter(file => file.size <= limits.value.maxFileSize)
   if (incoming.length && task.value && !busy.value) startNewBatch()
   let capacityRejected = 0
@@ -1194,8 +1231,8 @@ async function submit() {
   const data = new FormData()
   files.value.forEach(file => data.append('files', file))
   data.append('targetFormat', selectedRoute.value.targetFormat)
-  if (isImageExport.value) {
-    for (const [key, value] of Object.entries(imageExportOptions(imageDpi.value))) data.append(key, value)
+  if (isImageExport.value || isImageToPdfRoute.value) {
+    for (const [key, value] of Object.entries(currentRouteOptions())) data.append(key, value)
   }
   if (isPdfCompressRoute.value) data.append('compressionMode', compressionMode.value)
   if (isPdfSplitRoute.value) data.append('splitPages', splitPages.value)
@@ -1603,7 +1640,7 @@ onBeforeUnmount(() => {
               <div class="engine-list">
                 <div><span class="engine-dot" :class="{ online: serviceHealthy }"></span><p><strong>转换服务</strong><small>Java {{ diagnostics?.runtime?.javaVersion || '17' }}</small></p><b>{{ serviceHealthy ? '在线' : '检测中' }}</b></div>
                 <div><span class="engine-dot" :class="{ online: diagnostics?.office?.available }"></span><p><strong>Office 引擎</strong><small>{{ diagnostics?.office?.binaryName || 'LibreOffice' }}</small></p><b>{{ diagnostics ? (diagnostics.office?.available ? '可用' : '不可用') : (diagnosticsFailed ? '检测失败' : '检测中') }}</b></div>
-                <div><span class="engine-dot" :class="{ online: diagnostics?.ocr?.available }"></span><p><strong>OCR 识别</strong><small>本地文字识别</small></p><b>{{ diagnostics ? (diagnostics.ocr?.available ? '可用' : '未启用') : (diagnosticsFailed ? '检测失败' : '检测中') }}</b></div>
+                <div><span class="engine-dot" :class="{ online: diagnostics?.ocr?.available }"></span><p><strong>OCR 识别</strong><small>本地文字识别</small></p><b>{{ diagnostics ? (engineStatusLabel(diagnostics.ocr)) : (diagnosticsFailed ? '检测失败' : '检测中') }}</b></div>
               </div>
               <button type="button" class="engine-action" @click="navigate('settings')">查看系统详情 <span>→</span></button>
             </aside>
@@ -1662,6 +1699,7 @@ onBeforeUnmount(() => {
             <section class="settings-card"><div class="settings-head"><span>02</span><div><strong>转换引擎</strong><small>本机依赖可用状态</small></div></div><dl><div><dt>Office</dt><dd :class="{ good: diagnostics?.office?.available }">{{ diagnostics?.office?.message || '检测中' }}</dd></div><div><dt>OCR</dt><dd :class="{ good: diagnostics?.ocr?.available }">{{ diagnostics?.ocr?.message || '检测中' }}</dd></div><div><dt>Worker</dt><dd :class="{ good: diagnostics?.limits?.workerEnabled }">{{ diagnostics?.limits?.workerEnabled ? '独立进程已启用' : '未启用' }}</dd></div></dl></section>
             <section class="settings-card"><div class="settings-head"><span>03</span><div><strong>资源限制</strong><small>保护本机运行稳定</small></div></div><dl><div><dt>单文件</dt><dd>{{ formatBytes(limits.maxFileSize) }}</dd></div><div><dt>单任务</dt><dd>{{ limits.maxFilesPerTask }} 个文件</dd></div><div><dt>并发任务</dt><dd>{{ diagnostics?.limits?.concurrency || '—' }}</dd></div></dl></section>
             <section class="settings-card preference-card"><div class="settings-head"><span>04</span><div><strong>使用偏好</strong><small>保存在当前设备</small></div></div><label class="setting-toggle"><span><strong>完成后自动下载</strong><small>转换成功后立即保存结果</small></span><input v-model="autoDownload" type="checkbox" @change="savePreferences" /><i></i></label><label class="setting-select"><span>默认 PDF 压缩等级</span><select v-model="compressionMode" @change="savePreferences"><option value="lossless">无损优化</option><option value="balanced">均衡压缩</option><option value="strong">强力压缩</option></select></label><small v-if="preferenceMessage" class="setting-message">{{ preferenceMessage }}</small></section>
+            <EngineSettings :diagnostics="diagnostics" :busy="busy || !!downloadingTaskId" />
             <section class="settings-card action-card"><div class="settings-head"><span>05</span><div><strong>诊断信息</strong><small>刷新或复制脱敏运行状态</small></div></div><p>遇到转换问题时，可刷新引擎状态，或复制诊断信息随问题反馈提交。</p><div class="settings-actions"><button type="button" @click="refreshRuntime">刷新状态</button><button type="button" @click="copyDiagnostics">复制诊断</button></div><small v-if="diagnosticMessage">{{ diagnosticMessage }}</small></section>
           </div>
         </section>
@@ -1793,17 +1831,57 @@ onBeforeUnmount(() => {
       <div v-if="hasToolOptions" class="tool-options-section">
         <div class="field-heading">
           <span class="field-number">02</span>
-          <div><label>{{ isImageExport ? '图片清晰度' : (isPdfCompressRoute ? '压缩设置' : (isPdfSplitRoute ? '拆分范围' : '水印设置')) }}</label><small>根据使用场景调整处理参数</small></div>
+          <div><label>{{ isSpreadsheetPdfRoute ? '工作表与分页设置' : isImageExport ? '图片导出设置' : (isImageToPdfRoute ? '纸张与页边距' : (isPdfCompressRoute ? '压缩设置' : (isPdfSplitRoute ? '拆分范围' : '水印设置'))) }}</label><small>根据使用场景调整处理参数</small></div>
         </div>
 
-        <div v-if="isImageExport" class="compression-options" role="radiogroup" aria-label="图片清晰度">
+        <div v-if="isSpreadsheetPdfRoute">
+          <div class="split-options">
+            <label><span>工作表范围</span><input v-model="spreadsheetSheets" type="text" placeholder="all 或 1,3-5" :disabled="busy" :class="{ invalid: spreadsheetSettingsError }" />
+              <small v-if="spreadsheetSettingsError" class="field-error">{{ spreadsheetSettingsError }}</small>
+              <small v-else>按源工作簿从左到右的序号填写，隐藏表也占序号。all 导出全部可见工作表；批量时分别应用于每份文件。</small>
+            </label>
+            <div class="split-examples"><span>示例</span><button type="button" :disabled="busy" @click="spreadsheetSheets = 'all'">全部可见表</button><button type="button" :disabled="busy" @click="spreadsheetSheets = '1'">第 1 张表</button><button type="button" :disabled="busy" @click="spreadsheetSheets = '1-3'">第 1–3 张表</button></div>
+          </div>
+          <div class="compression-options image-page-range" role="radiogroup" aria-label="Excel PDF 分页">
+            <label :class="{ selected: !spreadsheetFitWidth }"><input v-model="spreadsheetFitWidth" type="radio" :value="false" :disabled="busy" /><span class="option-check"></span><strong>保留原打印设置</strong><small>沿用工作簿纸张、缩放与打印区域</small></label>
+            <label :class="{ selected: spreadsheetFitWidth }"><input v-model="spreadsheetFitWidth" type="radio" :value="true" :disabled="busy || selectedRoute.strategy === 'content'" /><span class="option-check"></span><strong>所有列放在一页宽度</strong><small>减少宽表横向分页，长表仍可纵向分页</small></label>
+          </div>
+          <p class="option-notice"><span>i</span>{{ selectedRoute.strategy === 'content' ? '当前使用基础文本导出；不保留表格版式，一页宽度选项需要 LibreOffice。' : '保留源打印区域与纸张方向；列很多时文字会变小，可先在表格软件中设置横向纸张。' }}</p>
+        </div>
+
+        <div v-else-if="isImageExport">
+        <div class="compression-options" role="radiogroup" aria-label="图片清晰度">
           <label v-for="choice in imageDpiChoices" :key="choice.value" :class="{ selected: imageDpi === choice.value }">
             <input v-model="imageDpi" type="radio" :value="choice.value" :disabled="busy" />
             <span class="option-check"></span>
             <strong>{{ choice.label }}</strong>
             <small>{{ choice.detail }}</small>
           </label>
-          <p class="option-notice"><span>i</span> DPI 越高，输出像素和文件体积越大；多页文档按页导出 ZIP。提高 DPI 无法恢复源扫描图中缺失的细节。</p>
+          <p class="option-notice"><span>i</span> DPI 越高，输出像素和文件体积越大；选中一页直接输出图片，多页输出 ZIP。提高 DPI 无法恢复源扫描图中缺失的细节。</p>
+        </div>
+        <div v-if="isPdfImageExport" class="split-options image-page-range">
+          <label>
+            <span>要导出的页面</span>
+            <input v-model="imagePages" type="text" placeholder="all 或 1,3-5" :class="{ invalid: !imagePagesValid || imageRangeState.overflow || imageRangeState.matches === false }" :disabled="busy" />
+            <small v-if="!imagePagesValid" class="field-error">请输入 all、1 或 1,3-5</small>
+            <small v-else-if="imageRangeState.overflow || imageRangeState.matches === false" class="field-error">范围超出当前 PDF 的 {{ pdfSourcePreviewPageCount }} 页，请调整</small>
+            <small v-else>按原页码升序导出并去重，文件名保留原页码。批量时范围分别应用于每份 PDF，越界文件会失败。</small>
+          </label>
+          <div class="split-examples"><span>示例</span><button type="button" :disabled="busy" @click="imagePages = 'all'">全部页面</button><button type="button" :disabled="busy" @click="imagePages = '1'">仅第 1 页</button><button type="button" :disabled="busy" @click="imagePages = '1,3-5'">第 1、3–5 页</button></div>
+        </div>
+        </div>
+
+        <div v-else-if="isImageToPdfRoute">
+          <div class="compression-options" role="radiogroup" aria-label="图片 PDF 纸张">
+            <label v-for="choice in imagePdfPageChoices" :key="choice.value" :class="{ selected: imagePdfPageSize === choice.value }">
+              <input v-model="imagePdfPageSize" type="radio" :value="choice.value" :disabled="busy" />
+              <span class="option-check"></span><strong>{{ choice.label }}</strong><small>{{ choice.detail }}</small>
+            </label>
+          </div>
+          <div v-if="imagePdfPageSize !== 'original'" class="split-options image-page-range">
+            <label><span>页边距（mm）</span><input v-model="imagePdfMarginMm" type="number" min="0" max="50" step="0.5" :disabled="busy" :class="{ invalid: imagePdfSettingsError }" /><small v-if="imagePdfSettingsError" class="field-error">{{ imagePdfSettingsError }}</small><small v-else>图片等比缩放、居中放入纸张，不拉伸或裁切；四边页边距至少为此值。</small></label>
+          </div>
+          <p class="option-notice"><span>i</span>每张图片生成一页，按列表顺序合并。A4 自动方向在应用照片 EXIF 方向后选择横向或纵向。</p>
         </div>
 
         <div v-else-if="isPdfCompressRoute" class="compression-options" role="radiogroup" aria-label="PDF 压缩等级">
@@ -1957,10 +2035,10 @@ onBeforeUnmount(() => {
         >
           <div class="file-symbol" aria-hidden="true">
             <svg viewBox="0 0 42 48" fill="none"><path d="M7 2h19l9 9v35H7z"/><path d="M26 2v10h9"/><path d="M15 25h12M15 31h12"/></svg>
-            <span>{{ selectedRoute.sourceLabel }}</span>
+            <span>{{ isImageToPdfRoute ? '图片' : selectedRoute.sourceLabel }}</span>
           </div>
           <div class="drop-content">
-            <h3>{{ files.length ? `已添加 ${files.length} 个文件` : `拖放 ${selectedRoute.sourceLabel} 文件到这里` }}</h3>
+            <h3>{{ files.length ? `已添加 ${files.length} 个文件` : `拖放 ${uploadSourceLabel} 文件到这里` }}</h3>
             <p>{{ files.length ? `总计 ${formatBytes(selectedBytes)}，可以继续添加或开始转换` : uploadHint }}</p>
           </div>
           <label class="select-button">
@@ -1978,7 +2056,7 @@ onBeforeUnmount(() => {
         </div>
         <ul>
           <li v-for="(file, index) in files" :key="`${file.name}:${file.size}:${file.lastModified}:${index}`">
-            <span class="mini-icon">{{ selectedRoute.sourceFormat.slice(0, 3).toUpperCase() }}</span>
+            <span class="mini-icon">{{ isImageToPdfRoute ? imageFileLabel(file.name) : selectedRoute.sourceFormat.slice(0, 3).toUpperCase() }}</span>
             <span class="file-name">{{ file.name }}</span>
             <span class="file-size">{{ formatBytes(file.size) }}</span>
             <span v-if="files.length > 1" class="file-order-actions"><button type="button" :disabled="busy || index === 0" :aria-label="`上移 ${file.name}`" title="上移" @click="moveFile(index, -1)">↑</button><button type="button" :disabled="busy || index === files.length - 1" :aria-label="`下移 ${file.name}`" title="下移" @click="moveFile(index, 1)">↓</button></span>
@@ -1988,7 +2066,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div v-if="showPdfSourcePreview" ref="pdfSourcePreviewRef" class="source-preview-panel">
-        <div v-if="isPdfMergeRoute && files.length > 1" class="pdf-preview-file-tabs" aria-label="选择要预览的合并文件">
+        <div v-if="(isPdfMergeRoute || isPdfImageExport) && files.length > 1" class="pdf-preview-file-tabs" aria-label="选择要预览的 PDF 文件">
           <button
             v-for="(file, index) in files"
             :key="fileIdentity(file)"
@@ -2006,12 +2084,12 @@ onBeforeUnmount(() => {
           :title="isPdfMergeRoute ? '合并源文件预览' : (isPdfSplitRoute ? '拆分页预览' : '源文件预览')"
           :subtitle="pdfSourcePreviewFile?.name || '仅在浏览器本地读取，不会提前上传'"
           :badge="isPdfMergeRoute ? `第 ${pdfSourcePreviewFileIndex + 1} / ${files.length} 个` : '本地预览'"
-          :note="(isPdfMergeRoute || isPdfSplitRoute) ? '预览用于确认页面、范围与顺序；重写 PDF 后不会保留数字签名的有效性。' : '这里展示源文件；转换完成后如结果为 PDF，会继续展示真实结果预览。'"
+          :note="(isPdfMergeRoute || isPdfSplitRoute) ? '预览用于确认页面、范围与顺序；重写 PDF 后不会保留数字签名的有效性。' : '这里展示源文件；转换完成后如结果为 PDF 或单张图片，会继续展示真实结果预览。'"
           @state-change="handlePdfSourcePreviewState"
         >
           <template #status="{ state, page, pageCount, error }">
-            <p :class="{ matched: state === 'ready' && (!isPdfSplitRoute || pageMatchesRange(page, splitPages)) }" aria-live="polite">
-              <span aria-hidden="true">{{ state === 'ready' ? (isPdfSplitRoute && !pageMatchesRange(page, splitPages) ? '○' : '✓') : '○' }}</span>{{ pdfSourceStatus(state, page, pageCount, error) }}
+            <p :class="{ matched: state === 'ready' && (!isPdfSplitRoute || pageMatchesRange(page, splitPages)) && (!isPdfImageExport || pageMatchesRange(page, imagePages)) }" aria-live="polite">
+              <span aria-hidden="true">{{ state === 'ready' && (!isPdfSplitRoute || pageMatchesRange(page, splitPages)) && (!isPdfImageExport || pageMatchesRange(page, imagePages)) ? '✓' : '○' }}</span>{{ pdfSourceStatus(state, page, pageCount, error) }}
             </p>
           </template>
         </PdfPreview>

@@ -309,6 +309,7 @@ body::before { display: none; }
 .field-error { color: #d6757c !important; }
 .field-warning { color: #c49a63 !important; }
 .split-options { display: grid; grid-template-columns: minmax(240px, .9fr) minmax(280px, 1.1fr); gap: 16px; align-items: end; }
+.image-page-range { margin-top: 16px; }
 .split-options > label { display: grid; gap: 7px; color: #77869c; font-size: 10px; font-weight: 800; }
 .split-options input { width: 100%; height: 42px; padding: 0 12px; border: 1px solid #27364d; border-radius: 10px; outline: 0; color: #d6dfec; background: #101925; font-size: 11px; }
 .split-options input:focus { border-color: #477fd8; box-shadow: 0 0 0 3px rgba(67,137,255,.06); }

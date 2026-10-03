@@ -14,8 +14,8 @@ import java.util.Locale;
 
 public final class XlsxToPdfConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.XLSX, DocumentFormat.PDF,
-            "将 Excel 第一个工作表导出为基础表格 PDF。",
-            QualityLevel.BETA, ConversionStrategy.CONTENT, List.of(), List.of("Java 兜底路线仅导出第一个工作表文本"));
+            "将 Excel 所选可见工作表逐表分页导出为基础文本 PDF。",
+            QualityLevel.BETA, ConversionStrategy.CONTENT, List.of(), List.of("Java 兜底路线导出可见工作表文本，不保留表格版式；一页宽度需 LibreOffice"));
 
     @Override public ConversionRoute route() { return route; }
 
@@ -24,13 +24,22 @@ public final class XlsxToPdfConverter implements FileConverter {
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
         progress.update(TaskStage.PARSING, 35);
         DataFormatter formatter = new DataFormatter(Locale.ROOT);
-        List<String> lines = new ArrayList<>();
+        List<List<String>> pages = new ArrayList<>();
+        if (input.options().spreadsheetFitWidth()) throw new ConversionFailureException("OFFICE_REQUIRED_FOR_FIT_WIDTH",
+                "所有列放在一页宽度需要 LibreOffice；请启用 Office 引擎或选择保留原打印设置。");
         boolean[] formulas = {false};
         long cells = 0;
         try (XSSFWorkbook workbook = new XSSFWorkbook(Files.newInputStream(input.path()))) {
             boolean use1904Windowing = uses1904Windowing(workbook);
-            if (workbook.getNumberOfSheets() > 0) {
-                Sheet sheet = workbook.getSheetAt(0);
+            List<Boolean> visible = new ArrayList<>();
+            for (int index = 0; index < workbook.getNumberOfSheets(); index++) {
+                visible.add(!workbook.isSheetHidden(index) && !workbook.isSheetVeryHidden(index));
+            }
+            List<Integer> selected = SpreadsheetPdfPreparation.select(visible, input.options());
+            for (int index : selected) {
+                Sheet sheet = workbook.getSheetAt(index);
+                List<String> lines = new ArrayList<>();
+                if (selected.size() > 1) lines.add("工作表：" + sheet.getSheetName());
                 for (int r = 0; r <= sheet.getLastRowNum(); r++) {
                     ConversionGuards.requireSpreadsheetRow(r, limits);
                     Row row = sheet.getRow(r);
@@ -50,10 +59,11 @@ public final class XlsxToPdfConverter implements FileConverter {
                     }
                     lines.add(String.join("    ", values));
                 }
+                pages.add(lines);
             }
         }
         progress.update(TaskStage.RENDERING, 80);
-        int pageCount = PdfSupport.writeTextPdfPages(List.of(lines), outputPath, limits.maxPages());
+        int pageCount = PdfSupport.writeTextPdfPages(pages, outputPath, limits.maxPages());
         ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "XLSX 转 PDF");
         List<ConversionWarning> warnings = formulas[0]
                 ? List.of(ConversionWarning.of(WarningCode.FORMULA_RESULT_EXPORTED,

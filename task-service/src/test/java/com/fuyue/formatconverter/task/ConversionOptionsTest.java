@@ -3,6 +3,7 @@ package com.fuyue.formatconverter.task;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -56,5 +57,51 @@ class ConversionOptionsTest {
                 null, null, null, null, null, null, null, null, "8").splitPageNumbers(3));
         assertThrows(IllegalArgumentException.class, () -> ConversionOptions.fromRequest(
                 null, null, null, null, null, null, null, null, null, 601));
+    }
+
+    @Test
+    void normalizesImageRangesAndRoundTripsWorkerAndLegacyOptions() throws Exception {
+        ConversionOptions options = imageOptions(" 4,2-3,2 ", "A4-AUTO", 0d);
+        assertEquals(List.of(2, 3, 4), options.imagePageNumbers(5));
+        assertEquals(ImagePdfPageSize.A4_AUTO, options.imagePdfPageSize());
+        assertEquals(0d, options.imagePdfMarginMm());
+        ObjectMapper mapper = new ObjectMapper();
+        assertEquals(options, mapper.readValue(mapper.writeValueAsBytes(options), ConversionOptions.class));
+        ConversionOptions legacy = mapper.readValue("{\"imageDpi\":300,\"splitPages\":\"all\"}", ConversionOptions.class);
+        assertEquals("all", legacy.imagePages());
+        assertEquals(ImagePdfPageSize.ORIGINAL, legacy.imagePdfPageSize());
+        assertEquals(10d, legacy.imagePdfMarginMm());
+    }
+
+    @Test
+    void rejectsInvalidImageRangesPaperAndMargins() {
+        for (String range : List.of("0", "3-1", "1,", "1000001", "99999999999")) {
+            assertThrows(IllegalArgumentException.class, () -> imageOptions(range, null, null));
+        }
+        assertThrows(ConversionFailureException.class, () -> imageOptions("1,4", null, null).imagePageNumbers(3));
+        assertThrows(IllegalArgumentException.class, () -> imageOptions(null, "a3", null));
+        for (double margin : new double[]{-1, 50.1, Double.NaN, Double.POSITIVE_INFINITY}) {
+            assertThrows(IllegalArgumentException.class, () -> imageOptions(null, "a4-auto", margin));
+        }
+    }
+
+    @Test
+    void validatesAndRoundTripsSpreadsheetOptionsWithLegacyDefaults() throws Exception {
+        ConversionOptions options = SpreadsheetPdfPreparationTest.options(" 3,1-2,2 ", true);
+        assertEquals(List.of(1, 2, 3), options.spreadsheetSheetNumbers(4));
+        assertEquals(true, options.spreadsheetFitWidth());
+        ObjectMapper mapper = new ObjectMapper();
+        assertEquals(options, mapper.readValue(mapper.writeValueAsBytes(options), ConversionOptions.class));
+        ConversionOptions legacy = mapper.readValue("{}", ConversionOptions.class);
+        assertEquals("all", legacy.spreadsheetSheets());
+        assertFalse(legacy.spreadsheetFitWidth());
+        for (String range : List.of("0", "3-1", "1,", "1000001", "999999999999")) {
+            assertThrows(IllegalArgumentException.class, () -> SpreadsheetPdfPreparationTest.options(range, false));
+        }
+    }
+
+    private ConversionOptions imageOptions(String pages, String paper, Double margin) {
+        return ConversionOptions.fromRequest(null, null, null, null, null, null,
+                null, null, null, null, pages, paper, margin);
     }
 }

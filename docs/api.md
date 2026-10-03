@@ -39,7 +39,9 @@ Content-Type: multipart/form-data
 - `files`：可重复上传一个或多个源文件；
 - `targetFormat`：目标格式，当前开放 `docx`、`txt`、`pdf`、`xlsx`、`csv`、`png`、`jpg`、`pdf-compress`、`pdf-watermark`、`pdf-merge`、`pdf-split`，其中 `jpeg` 会按 `jpg` 处理；未传时默认 `docx`。
 
-PDF 工具可选参数：
+当 `targetFormat=pdf` 且所有输入均为 PNG、JPG 或 JPEG 时，允许混合图片格式，按上传顺序合并为一个 PDF，并逐个验证扩展名、MIME 和文件头。任务顶层 `sourceFormat` 保留首文件类型以兼容既有客户端，各 `files[]` 结果的 `sourceFormat` 则记录对应输入的实际格式。其他路线仍要求同一批次使用相同的源格式。
+
+PDF 工具、Excel 和图片转换可选参数：
 
 - `compressionMode`：`lossless`、`balanced` 或 `strong`；仅用于 `pdf-compress`，默认 `lossless`；
 - `watermarkText`：1-80 个字符的中英文文字，默认 `CONFIDENTIAL`；
@@ -50,10 +52,26 @@ PDF 工具可选参数：
 - `watermarkPages`：`all`、`1`、`1-3` 或 `1,3-5` 形式的页码范围；
 - `watermarkColor`：`#RRGGBB` 形式的颜色。
 - `imageDpi`：PDF/OFD 导出 PNG/JPEG 时的任务级清晰度，整数 `36-600`；省略时使用服务默认值。DPI 越高，像素、内存和输出体积越大。
+- `spreadsheetSheets`：仅用于 XLSX 转 PDF，默认 `all` 导出全部可见工作表；支持 `1`、`1-3`、`1,3-5`，按源工作簿从左到右的序号升序去重（隐藏表也占序号）。显式选中隐藏表返回 `SPREADSHEET_SHEET_HIDDEN`，越界返回 `SPREADSHEET_SHEET_RANGE_INVALID`，不静默截断。批量时分别校验每份工作簿。未选中表保留在临时副本中供跨表公式引用，不修改上传原件。
+- `spreadsheetFitWidth`：仅用于 XLSX 转 PDF，默认 `false` 保留原打印设置；`true` 将所选普通工作表的所有列缩放到一页宽度，纵向页数不限，保留纸张方向、边距、打印区域与重复标题。列很多时字体会变小；图表工作表沿用原打印设置。没有 LibreOffice 时该选项返回 `OFFICE_REQUIRED_FOR_FIT_WIDTH`，基础路线支持全部可见表或指定表的文本逐表分页。
+- `imagePages`：仅用于 PDF 导出 PNG/JPEG，默认 `all`；支持 `1`、`1-3`、`1,3-5`。按原页码升序去重，只渲染所选页面；越界以 `PDF_PAGE_RANGE_INVALID` 失败，不截断为部分页面。选择一页返回图片（多页源文件保留 `-page-0003` 后缀），多页返回 ZIP，条目如 `page-0003.png` 保留原页码。批量时范围分别应用于各输入 PDF。
+- `imagePdfPageSize`：仅用于 PNG/JPEG 转 PDF，默认 `original` 保留 DPI 对应的原始物理尺寸；`a4-auto` 按 EXIF 修正后的物理长宽选择方向，`a4-portrait` 为 A4 纵向，`a4-landscape` 为 A4 横向。图片等比缩放、居中，不裁切或拉伸。
+- `imagePdfMarginMm`：A4 图片 PDF 四边的最小留白，`0-50` mm，支持小数，默认 `10`；原始尺寸模式不应用页边距。批量图片的纸张设置一致，自动方向可逐页不同。
+
+例如将 Excel 的第 1、3 张表导出为一页宽度 PDF，将图片整理为 A4 PDF，或只导出 PDF 第 2、4–5 页：
+
+```bash
+curl -F 'files=@workbook.xlsx' -F 'targetFormat=pdf' \
+  -F 'spreadsheetSheets=1,3' -F 'spreadsheetFitWidth=true' http://127.0.0.1:8080/api/tasks
+curl -F 'files=@photo.jpg' -F 'targetFormat=pdf' \
+  -F 'imagePdfPageSize=a4-auto' -F 'imagePdfMarginMm=10' http://127.0.0.1:8080/api/tasks
+curl -F 'files=@document.pdf' -F 'targetFormat=png' \
+  -F 'imageDpi=300' -F 'imagePages=2,4-5' http://127.0.0.1:8080/api/tasks
+```
 
 成功返回 HTTP 202 和任务快照。快照中包含 `sourceFormat`、`targetFormat`、任务状态、进度、警告和文件级结果。
 
-除 PDF 工具的受控参数外，API 仍由 `targetFormat` 选择路线，保真优先和可编辑优先策略由注册的转换器决定。
+除上述受控参数外，API 仍由 `targetFormat` 选择路线，保真优先和可编辑优先策略由注册的转换器决定。
 
 ## 转换能力
 
@@ -116,7 +134,7 @@ GET /api/tasks/{taskId}
 - `FAILED`
 - `CANCELLED`
 
-`stage` 提供内部阶段，`progress` 为 0 到 100。`warnings` 是非致命限制，例如字体替代、OCR 低置信度或图像层保真兜底。OCR 警告的 `confidence` 为 0-1 的页面平均置信度，非 OCR 警告为 `null`。`files` 给出每个文件的成功或失败结果；成功结果中的 `pageCount` 是目标文档实际写入页数。OCR 常见稳定失败码包括 `OCR_REQUIRED`、`OCR_ENGINE_UNAVAILABLE`、`OCR_LANGUAGE_MISSING`、`OCR_PAGE_MISSING`、`OCR_NO_TEXT`、`OCR_NO_NEW_TEXT`、`OCR_IMAGE_INVALID`、`OCR_IMAGE_FAILED`、`OCR_IMAGE_LIMIT_EXCEEDED`、`OCR_LOW_CONFIDENCE`、`OCR_TIMEOUT`、`OCR_CAPACITY_EXCEEDED`、`OCR_RESOURCE_EXHAUSTED` 和 `OCR_ENGINE_FAILED`。PDF/OFD 图像对象无法安全提取时分别返回 `PDF_IMAGE_EXTRACTION_FAILED`、`OFD_IMAGE_EXTRACTION_FAILED`；签名 PDF 被压缩、水印、合并或拆分路线拒绝时返回 `PDF_SIGNATURE_PRESENT`。服务重启恢复历史任务时若发现下载结果文件缺失，会将任务标记为 `FAILED` 并返回 `RESULT_MISSING`，避免继续展示不可用的下载状态。
+`stage` 提供内部阶段，`progress` 为 0 到 100。`warnings` 是非致命限制，例如字体替代、OCR 低置信度或图像层保真兜底。`OCR_APPLIED` 与 `OCR_LOW_CONFIDENCE` 警告的 `confidence` 为 0-1 的页面平均置信度，其他警告可以为 `null`。采用低置信度图片增强重试结果时另外返回 `OCR_IMAGE_ENHANCED` 警告，表示临时处理了灰底/缓变阴影与对比度，原图和像素坐标系未变；置信度并非逐字准确率。`files` 给出每个文件的成功或失败结果；成功结果中的 `pageCount` 是目标文档实际写入页数。OCR 常见稳定失败码包括 `OCR_REQUIRED`、`OCR_ENGINE_UNAVAILABLE`、`OCR_LANGUAGE_MISSING`、`OCR_PAGE_MISSING`、`OCR_NO_TEXT`、`OCR_NO_NEW_TEXT`、`OCR_IMAGE_INVALID`、`OCR_IMAGE_FAILED`、`OCR_IMAGE_LIMIT_EXCEEDED`、`OCR_LOW_CONFIDENCE`、`OCR_TIMEOUT`、`OCR_CAPACITY_EXCEEDED`、`OCR_RESOURCE_EXHAUSTED` 和 `OCR_ENGINE_FAILED`。PDF/OFD 图像对象无法安全提取时分别返回 `PDF_IMAGE_EXTRACTION_FAILED`、`OFD_IMAGE_EXTRACTION_FAILED`；签名 PDF 被压缩、水印、合并或拆分路线拒绝时返回 `PDF_SIGNATURE_PRESENT`。服务重启恢复历史任务时若发现下载结果文件缺失，会将任务标记为 `FAILED` 并返回 `RESULT_MISSING`，避免继续展示不可用的下载状态。
 
 ## 下载
 
@@ -124,7 +142,7 @@ GET /api/tasks/{taskId}
 GET /api/tasks/{taskId}/download
 ```
 
-单文件任务返回目标格式文件；批量任务返回 ZIP。任务未完成时返回 HTTP 400。响应包含精确的 `Content-Type`、`Content-Length` 和附件文件名，并设置 `Cache-Control: private, no-store, max-age=0`、`Pragma: no-cache`、`X-Content-Type-Options: nosniff`，避免敏感转换结果进入浏览器缓存或被 MIME 猜测。
+单文件任务返回目标格式文件；图片转 PDF 和 PDF 合并批次返回合并后的单个 PDF，其他批量任务通常返回 ZIP。多页图片导出和 PDF 拆分即使只有一个输入，也返回 ZIP。任务未完成时返回 HTTP 400。响应包含精确的 `Content-Type`、`Content-Length` 和附件文件名，并设置 `Cache-Control: private, no-store, max-age=0`、`Pragma: no-cache`、`X-Content-Type-Options: nosniff`，避免敏感转换结果进入浏览器缓存或被 MIME 猜测。
 
 网页端仅自动加载不超过 32 MiB 的单个 PDF、24 MiB 的单张 PNG/JPEG，以及 2 MiB 的 TXT/CSV 结果。PDF 使用本地 PDF.js 逐页渲染，图片使用受控 Blob URL，文本只作为纯文本节点展示且最长显示 200,000 个字符；ZIP 和超限结果不会自动读入页面内存，仍可直接流式下载。
 
@@ -160,6 +178,10 @@ GET /api/health
 
 `ocr` 节点返回 `enabled`、`available`、`bundled`、`binaryName`、`version`、`requestedLanguages`、`availableLanguages`、`timeoutSeconds`、`maxConcurrency`、`maxImagePixels`、`minimumConfidence`、`errorCode` 和脱敏后的 `message`。`bundled=true` 表示应用正在使用发布包内置运行时；健康接口只报告能力，不会因为 OCR 被强制关闭而把整个服务标记为 DOWN。
 
+后续 Lite/Full 和通用运行包默认内置中英文 OCR，完整运行时存在时自动启用；`FORMAT_CONVERTER_OCR_ENABLED=false` 可强制关闭。JPEG 等非 PNG 图片会在像素上限检查后转成临时 PNG 供引擎识别，转换失败返回 `OCR_IMAGE_NORMALIZATION_FAILED`，不修改上传原件或识别坐标。
+
 返回服务版本、解析器、Java、操作系统、CPU 架构和 Office 引擎状态，不包含文件正文或敏感内容。
+
+新版桌面应用通过受可信主页面限制的 IPC 配置本机 OCR/Office，不开放 HTTP 的可执行文件绑定接口。独立 JAR 可设置 `FORMAT_CONVERTER_TESSDATA_DIR` 选择独立语言包目录。
 
 `office.available=true` 时，DOCX/XLSX/PPTX 到 PDF 以及部分 WPS/UOF 兼容路线会由本机 LibreOffice headless 执行；否则服务回退到 Java 内置基础转换或将对应路线标为规划中。

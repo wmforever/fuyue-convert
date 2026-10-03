@@ -8,6 +8,25 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PageLayoutAnalyzerTest {
+    @Test void separatesColumnsOnMatchingBaselinesWithoutSplittingNearbyRuns() {
+        List<TextBlock> blocks = List.of(
+                text("left-first", 15, 20, 18, "LEFT-", 24),
+                text("left-suffix", 34, 20, 4, "1", 24),
+                text("right-first", 125, 20, 25, "RIGHT-1", 24),
+                text("left-second", 15, 35, 25, "LEFT-2", 39),
+                text("right-second", 125, 35, 25, "RIGHT-2", 39));
+        PageModel source = new PageModel(1, new Rect(0, 0, 210, 297), blocks,
+                List.of(), List.of(), List.of(), List.of(), List.of());
+
+        PageModel analyzed = new PageLayoutAnalyzer().analyze(source);
+
+        assertEquals(4, analyzed.paragraphs().size());
+        assertEquals(List.of("LEFT-", "1"), analyzed.paragraphs().get(0).runs().stream().map(TextBlock::text).toList());
+        assertEquals(List.of(15d, 125d, 15d, 125d),
+                analyzed.paragraphs().stream().map(paragraph -> paragraph.box().x()).toList());
+        assertEquals(blocks.size(), analyzed.paragraphs().stream().mapToInt(paragraph -> paragraph.runs().size()).sum());
+    }
+
     @Test void mergesTextObjectsOnTheSameBaselineIntoOneWordParagraph() {
         List<TextBlock> blocks = List.of(
                 text("title-1", 69.55, 29.33, 34.57, "测试询价单（", 34.16),

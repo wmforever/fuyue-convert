@@ -19,49 +19,50 @@ public final class PoiDocxRenderer implements DocxRenderer {
             Files.createDirectories(output.toAbsolutePath().getParent());
             try (XWPFDocument docx = new XWPFDocument()) {
                 if (document.pages().isEmpty()) throw new IOException("文档没有可渲染页面");
-                List<PageModel> pages = document.pages();
-                FixedLayoutDocxRenderer overlays = new FixedLayoutDocxRenderer();
-                for (int i = 0; i < pages.size(); i++) {
-                    PageModel page = pages.get(i);
-                    XWPFParagraph anchor = docx.createParagraph();
-                    configureMarker(anchor);
-                    if (i > 0 && samePageGeometry(pages.get(i - 1).physicalBox(), page.physicalBox())) {
-                        CTPPr anchorProperties = anchor.getCTP().isSetPPr()
-                                ? anchor.getCTP().getPPr() : anchor.getCTP().addNewPPr();
-                        CTOnOff pageBreakBefore = anchorProperties.isSetPageBreakBefore()
-                                ? anchorProperties.getPageBreakBefore() : anchorProperties.addNewPageBreakBefore();
-                        pageBreakBefore.setVal(true);
-                    }
-                    List<ParagraphModel> semanticParagraphs = page.paragraphs().isEmpty()
-                            ? page.textBlocks().stream().map(block -> new ParagraphModel(
-                                    block.box(), List.of(block), ParagraphModel.Alignment.LEFT, 0)).toList()
-                            : page.paragraphs();
-                    List<ParagraphModel> fixedParagraphs = semanticParagraphs.stream()
-                            .filter(paragraph -> requiresFixedPosition(paragraph)
-                                    || overlapsComplexLayout(paragraph, semanticParagraphs))
-                            .toList();
-                    List<TextBlock> fallbackTexts = fixedParagraphs.stream()
-                            .flatMap(paragraph -> paragraph.runs().stream()).toList();
-                    overlays.renderOverlays(docx, anchor, page, fallbackTexts);
-                    boolean geometryChanges = i < pages.size() - 1
-                            && !samePageGeometry(page.physicalBox(), pages.get(i + 1).physicalBox());
-                    XWPFParagraph sectionCarrier = renderPage(docx, page, semanticParagraphs,
-                            fixedParagraphs, anchor, geometryChanges);
-                    CTPPr boundaryProperties = null;
-                    if (i < pages.size() - 1) {
-                        boundaryProperties = sectionCarrier.getCTP().isSetPPr()
-                                ? sectionCarrier.getCTP().getPPr() : sectionCarrier.getCTP().addNewPPr();
-                        if (needsSectionBreakReserve(page, semanticParagraphs, fixedParagraphs)) {
-                            reserveSectionBreakSpace(boundaryProperties);
+                if (document.continuousFlow() != null) {
+                    renderContinuousProse(docx, document);
+                } else {
+                    List<PageModel> pages = document.pages();
+                    FixedLayoutDocxRenderer overlays = new FixedLayoutDocxRenderer();
+                    for (int i = 0; i < pages.size(); i++) {
+                        PositionedPage positioned = preserveTransformedTableText(pages.get(i));
+                        PageModel page = positioned.page();
+                        XWPFParagraph anchor = docx.createParagraph();
+                        configureMarker(anchor);
+                        if (i > 0 && samePageGeometry(pages.get(i - 1).physicalBox(), page.physicalBox())) {
+                            CTPPr anchorProperties = anchor.getCTP().isSetPPr()
+                                    ? anchor.getCTP().getPPr() : anchor.getCTP().addNewPPr();
+                            CTOnOff pageBreakBefore = anchorProperties.isSetPageBreakBefore()
+                                    ? anchorProperties.getPageBreakBefore() : anchorProperties.addNewPageBreakBefore();
+                            pageBreakBefore.setVal(true);
                         }
-                    }
-                    if (geometryChanges) {
-                        configureSection(boundaryProperties.addNewSectPr(), page.physicalBox(), true);
-                    } else if (i == pages.size() - 1) {
-                        CTSectPr finalSection = docx.getDocument().getBody().isSetSectPr()
-                                ? docx.getDocument().getBody().getSectPr()
-                                : docx.getDocument().getBody().addNewSectPr();
-                        configureSection(finalSection, page.physicalBox(), false);
+                        List<ParagraphModel> semanticParagraphs = semanticParagraphs(page);
+                        Set<ParagraphModel> fixed = new HashSet<>(fixedParagraphs(page, semanticParagraphs));
+                        fixed.addAll(positioned.cellParagraphs());
+                        List<ParagraphModel> fixedParagraphs = semanticParagraphs.stream().filter(fixed::contains).toList();
+                        List<TextBlock> fallbackTexts = fixedParagraphs.stream()
+                                .flatMap(paragraph -> paragraph.runs().stream()).toList();
+                        overlays.renderOverlays(docx, anchor, page, fallbackTexts);
+                        boolean geometryChanges = i < pages.size() - 1
+                                && !samePageGeometry(page.physicalBox(), pages.get(i + 1).physicalBox());
+                        XWPFParagraph sectionCarrier = renderPage(docx, page, semanticParagraphs,
+                                fixedParagraphs, anchor, geometryChanges);
+                        CTPPr boundaryProperties = null;
+                        if (i < pages.size() - 1) {
+                            boundaryProperties = sectionCarrier.getCTP().isSetPPr()
+                                    ? sectionCarrier.getCTP().getPPr() : sectionCarrier.getCTP().addNewPPr();
+                            if (needsSectionBreakReserve(page, semanticParagraphs, fixedParagraphs)) {
+                                reserveSectionBreakSpace(boundaryProperties);
+                            }
+                        }
+                        if (geometryChanges) {
+                            configureSection(boundaryProperties.addNewSectPr(), page.physicalBox(), true);
+                        } else if (i == pages.size() - 1) {
+                            CTSectPr finalSection = docx.getDocument().getBody().isSetSectPr()
+                                    ? docx.getDocument().getBody().getSectPr()
+                                    : docx.getDocument().getBody().addNewSectPr();
+                            configureSection(finalSection, page.physicalBox(), false);
+                        }
                     }
                 }
                 DocxFontSupport.embedBundledCjkFont(docx, document);
@@ -70,6 +71,65 @@ public final class PoiDocxRenderer implements DocxRenderer {
         } catch (Exception e) {
             throw new DocxRenderException("DOCX 生成失败", e);
         }
+    }
+
+    private void renderContinuousProse(XWPFDocument docx, DocumentModel document) {
+        var layout = document.continuousFlow();
+        Rect size = document.pages().get(0).physicalBox();
+        if (layout.topMarginMm() + layout.bottomMarginMm() >= size.height()) {
+            throw new IllegalArgumentException("Continuous prose margins exceed page height");
+        }
+        XWPFParagraph target = null;
+        TextBlock previous = null;
+        for (int pageIndex = 0; pageIndex < document.pages().size(); pageIndex++) {
+            PageModel page = document.pages().get(pageIndex);
+            double previousBottom = page.physicalBox().y() + layout.topMarginMm();
+            for (int index = 0; index < page.paragraphs().size(); index++) {
+                ParagraphModel paragraph = page.paragraphs().get(index);
+                if (pageIndex > 0 && index == 0) {
+                    appendFlowRuns(target, paragraph, previous);
+                } else {
+                    target = docx.createParagraph();
+                    renderParagraph(target, paragraph, page.physicalBox(), previousBottom);
+                }
+                previous = paragraph.runs().get(paragraph.runs().size() - 1);
+                previousBottom = paragraph.box().y() + paragraphHeightMm(paragraph);
+            }
+        }
+        CTSectPr section = docx.getDocument().getBody().addNewSectPr();
+        configureSection(section, size, false);
+        section.getPgMar().setTop(BigInteger.valueOf(twips(layout.topMarginMm())));
+        section.getPgMar().setBottom(BigInteger.valueOf(twips(layout.bottomMarginMm())));
+    }
+
+    private record PositionedPage(PageModel page, List<ParagraphModel> cellParagraphs) { }
+
+    private PositionedPage preserveTransformedTableText(PageModel page) {
+        List<TableModel> positionedTables = page.tables().stream()
+                .filter(table -> table.cells().stream().flatMap(cell -> cell.paragraphs().stream())
+                        .anyMatch(this::requiresFixedPosition)).toList();
+        if (positionedTables.isEmpty()) return new PositionedPage(page, List.of());
+        // Word table runs cannot represent arbitrary source rotation or skew.
+        // Retain these tables' grid lines and editable, positioned cell text.
+        List<ParagraphModel> paragraphs = new ArrayList<>(semanticParagraphs(page));
+        List<ParagraphModel> cellParagraphs = positionedTables.stream().flatMap(table -> table.cells().stream())
+                .flatMap(cell -> cell.paragraphs().stream()).toList();
+        paragraphs.addAll(cellParagraphs);
+        List<TableModel> semanticTables = page.tables().stream()
+                .filter(table -> !positionedTables.contains(table)).toList();
+        return new PositionedPage(page.withLayout(paragraphs, semanticTables, List.of()), cellParagraphs);
+    }
+
+    private List<ParagraphModel> semanticParagraphs(PageModel page) {
+        if (!page.paragraphs().isEmpty()) return page.paragraphs();
+        // An analyzed table-only page legitimately has no body paragraphs.
+        // Only fall back to text that is not already represented by a table cell.
+        Set<TextBlock> cellText = new HashSet<>();
+        page.tables().forEach(table -> table.cells().forEach(cell -> cell.paragraphs()
+                .forEach(paragraph -> cellText.addAll(paragraph.runs()))));
+        return page.textBlocks().stream().filter(block -> !cellText.contains(block))
+                .map(block -> new ParagraphModel(block.box(), List.of(block),
+                        ParagraphModel.Alignment.LEFT, 0)).toList();
     }
 
     private void configureSection(CTSectPr section, Rect page, boolean nextPage) {
@@ -107,7 +167,7 @@ public final class PoiDocxRenderer implements DocxRenderer {
             if (item.paragraph() != null) {
                 lastParagraph = docx.createParagraph();
                 renderParagraph(lastParagraph, item.paragraph(), page.physicalBox(), previousBottom);
-                previousBottom = item.paragraph().box().y() + paragraphLineHeightMm(item.paragraph());
+                previousBottom = item.paragraph().box().y() + paragraphHeightMm(item.paragraph());
                 tableLast = false;
             } else if (item.table() != null) {
                 addVerticalSpacer(docx, Math.max(0, item.table().box().y() - previousBottom));
@@ -130,13 +190,61 @@ public final class PoiDocxRenderer implements DocxRenderer {
         setExactLineHeight(target, paragraphLineHeightMm(paragraph));
         int leftIndent = Math.max(0, twips(paragraph.box().x() - page.x() - PAGE_EDGE_MM));
         int rightIndent = Math.max(0, twips(page.right() - PAGE_EDGE_MM - paragraph.box().right()));
+        if (paragraph.flow() != null) {
+            target.setIndentationLeft(leftIndent);
+            target.setIndentationRight(rightIndent);
+            target.setIndentationFirstLine(twips(paragraph.flow().firstLineIndentMm()));
+            appendFlowRuns(target, paragraph);
+            return;
+        }
         switch (paragraph.alignment()) {
             case CENTER -> { target.setIndentationLeft(0); target.setIndentationRight(0); }
             case RIGHT -> { target.setIndentationLeft(0); target.setIndentationRight(rightIndent); }
             case JUSTIFY -> { target.setIndentationLeft(leftIndent); target.setIndentationRight(rightIndent); }
             default -> { target.setIndentationLeft(leftIndent); target.setIndentationRight(0); }
         }
-        List<TextBlock> runs = paragraph.runs().stream()
+        appendRuns(target, paragraph.runs());
+    }
+
+    private void appendFlowRuns(XWPFParagraph target, ParagraphModel paragraph) {
+        appendFlowRuns(target, paragraph, null);
+    }
+
+    private void appendFlowRuns(XWPFParagraph target, ParagraphModel paragraph, TextBlock previous) {
+        for (TextBlock block : paragraph.runs()) {
+            if (previous != null) {
+                boolean newLine = block.pageNumber() != previous.pageNumber()
+                        || block.baselineY() - previous.baselineY() > paragraph.lineSpacingMm() * 0.5d;
+                if (!newLine) appendVisualGap(target, previous, block);
+                else if (needsWordSeparator(previous.text(), block.text())) {
+                    XWPFRun separator = target.createRun();
+                    separator.setText(" ");
+                    separator.setFontFamily(block.style().family());
+                    separator.setFontSize(block.style().sizePt());
+                }
+            }
+            appendRun(target, block);
+            previous = block;
+        }
+    }
+
+    private boolean needsWordSeparator(String previous, String current) {
+        if (previous.isEmpty() || current.isEmpty()) return false;
+        int last = previous.codePointBefore(previous.length()), first = current.codePointAt(0);
+        if (Character.isWhitespace(last) || Character.isWhitespace(first) || last == '-' || last == '\u00ad') return false;
+        return !isEastAsian(last) && !isEastAsian(first);
+    }
+
+    private boolean isEastAsian(int codePoint) {
+        Character.UnicodeScript script = Character.UnicodeScript.of(codePoint);
+        return script == Character.UnicodeScript.HAN || script == Character.UnicodeScript.HIRAGANA
+                || script == Character.UnicodeScript.KATAKANA || script == Character.UnicodeScript.HANGUL
+                || script == Character.UnicodeScript.BOPOMOFO || codePoint >= 0x3000 && codePoint <= 0x303f
+                || codePoint >= 0xff00 && codePoint <= 0xffef;
+    }
+
+    private void appendRuns(XWPFParagraph target, List<TextBlock> sourceRuns) {
+        List<TextBlock> runs = sourceRuns.stream()
                 .sorted(Comparator.comparingDouble(block -> block.box().x())).toList();
         TextBlock previous = null;
         for (TextBlock block : runs) {
@@ -151,14 +259,14 @@ public final class PoiDocxRenderer implements DocxRenderer {
         FontStyle style = block.style();
         String family = DocxFontSupport.familyFor(block);
         run.setText(block.text());
-        run.setFontFamily(family);
+        run.setFontFamily(style.family());
         run.setFontSize(Math.max(1d, style.sizePt()));
         run.setBold(style.bold());
         run.setItalic(style.italic());
         run.setColor(style.color().rgbHex());
         CTRPr properties = run.getCTR().isSetRPr() ? run.getCTR().getRPr() : run.getCTR().addNewRPr();
         CTFonts fonts = properties.sizeOfRFontsArray() > 0 ? properties.getRFontsArray(0) : properties.addNewRFonts();
-        fonts.setAscii(family); fonts.setHAnsi(family); fonts.setEastAsia(family);
+        fonts.setAscii(style.family()); fonts.setHAnsi(style.family()); fonts.setEastAsia(family);
         int horizontalScale = horizontalScalePercent(block);
         if (horizontalScale != 100) properties.addNewW().setVal(BigInteger.valueOf(horizontalScale));
         int characterSpacing = characterSpacingTwips(block);
@@ -229,7 +337,7 @@ public final class PoiDocxRenderer implements DocxRenderer {
             XWPFParagraph paragraph = i == 0 ? target.getParagraphs().get(0) : target.addParagraph();
             paragraph.setAlignment(alignment(model.horizontalAlignment()));
             paragraph.setSpacingBefore(0); paragraph.setSpacingAfter(0);
-            for (TextBlock block : model.paragraphs().get(i).runs()) appendRun(paragraph, block);
+            appendRuns(paragraph, model.paragraphs().get(i).runs());
         }
     }
 
@@ -319,6 +427,7 @@ public final class PoiDocxRenderer implements DocxRenderer {
     }
 
     private double paragraphLineHeightMm(ParagraphModel paragraph) {
+        if (paragraph.flow() != null) return paragraph.lineSpacingMm();
         // The OFD boundary already describes the source line box. Replacing it
         // with Word's nominal font height adds a small amount on every visual
         // line; over a dense page those fractions accumulate and push the
@@ -328,10 +437,14 @@ public final class PoiDocxRenderer implements DocxRenderer {
         return Math.max(0.5d, Math.max(paragraph.box().height(), fontHeight));
     }
 
+    private double paragraphHeightMm(ParagraphModel paragraph) {
+        return paragraphLineHeightMm(paragraph) * (paragraph.flow() == null ? 1 : paragraph.flow().sourceLineCount());
+    }
+
     private boolean needsSectionBreakReserve(PageModel page, List<ParagraphModel> paragraphs,
                                              List<ParagraphModel> fixedParagraphs) {
         double flowBottom = paragraphs.stream().filter(paragraph -> !fixedParagraphs.contains(paragraph))
-                .mapToDouble(paragraph -> paragraph.box().y() + paragraphLineHeightMm(paragraph))
+                .mapToDouble(paragraph -> paragraph.box().y() + paragraphHeightMm(paragraph))
                 .max().orElse(page.physicalBox().y());
         flowBottom = Math.max(flowBottom, page.tables().stream().mapToDouble(table -> table.box().bottom())
                 .max().orElse(page.physicalBox().y()));
@@ -351,8 +464,76 @@ public final class PoiDocxRenderer implements DocxRenderer {
 
     private boolean requiresFixedPosition(ParagraphModel paragraph) {
         return paragraph.runs().stream().anyMatch(block ->
-                Math.abs(block.transform().rotationDegrees()) > 0.5d
+                !block.ocrWords().isEmpty() || Math.abs(block.transform().rotationDegrees()) > 0.5d
                         || block.transform().hasSkew(0.02d));
+    }
+
+    private List<ParagraphModel> fixedParagraphs(PageModel page, List<ParagraphModel> paragraphs) {
+        Set<ParagraphModel> fixed = new HashSet<>();
+        paragraphs.stream().filter(paragraph -> requiresFixedPosition(paragraph)
+                || overlapsComplexLayout(paragraph, paragraphs)).forEach(fixed::add);
+
+        List<List<ParagraphModel>> rows = new ArrayList<>();
+        for (ParagraphModel paragraph : paragraphs.stream()
+                .sorted(Comparator.comparingDouble(p -> p.box().y())).toList()) {
+            if (rows.isEmpty() || !sharesVisualRow(rows.get(rows.size() - 1).get(0), paragraph)) {
+                rows.add(new ArrayList<>());
+            }
+            rows.get(rows.size() - 1).add(paragraph);
+        }
+        double minimumGap = Math.max(12d, page.physicalBox().width() * 0.06d);
+        List<Rect> columns = List.of();
+        double previousBottom = Double.NEGATIVE_INFINITY;
+        for (List<ParagraphModel> row : rows) {
+            row.sort(Comparator.comparingDouble(p -> p.box().x()));
+            double top = row.stream().mapToDouble(p -> p.box().y()).min().orElseThrow();
+            double height = row.stream().mapToDouble(p -> p.box().height()).max().orElseThrow();
+            double bottom = row.stream().mapToDouble(p -> p.box().bottom()).max().orElseThrow();
+            boolean clearColumns = row.size() > 1;
+            for (int index = 1; index < row.size(); index++) {
+                clearColumns &= row.get(index).box().x() - row.get(index - 1).box().right() > minimumGap;
+            }
+            if (clearColumns && row.stream().noneMatch(this::requiresFixedPosition)) {
+                columns = new ArrayList<>(row.stream().map(ParagraphModel::box).toList());
+                fixed.addAll(row);
+            } else {
+                // A column can continue after the shorter column ends. Keep its
+                // nearby tail in the same floating text sequence, but stop at a
+                // spanning heading, table, or a break between layout regions.
+                boolean separated = top - previousBottom > Math.max(12d, height * 4d);
+                for (TableModel table : page.tables()) {
+                    separated |= table.box().bottom() > previousBottom && table.box().y() < top;
+                }
+                int column = !separated && row.size() == 1
+                        ? continuationColumn(row.get(0).box(), columns, minimumGap) : -1;
+                if (column >= 0 && !requiresFixedPosition(row.get(0))) {
+                    fixed.add(row.get(0));
+                    columns.set(column, columns.get(column).union(row.get(0).box()));
+                } else {
+                    columns = List.of();
+                }
+            }
+            previousBottom = bottom;
+        }
+        return paragraphs.stream().filter(fixed::contains).toList();
+    }
+
+    private int continuationColumn(Rect box, List<Rect> columns, double minimumGap) {
+        for (int index = 0; index < columns.size(); index++) {
+            Rect column = columns.get(index);
+            double overlap = Math.min(box.right(), column.right()) - Math.max(box.x(), column.x());
+            if (overlap < Math.min(box.width(), column.width()) * 0.5d) continue;
+            if (index > 0 && box.x() - columns.get(index - 1).right() <= minimumGap) continue;
+            if (index < columns.size() - 1 && columns.get(index + 1).x() - box.right() <= minimumGap) continue;
+            return index;
+        }
+        return -1;
+    }
+
+    private boolean sharesVisualRow(ParagraphModel first, ParagraphModel second) {
+        double overlap = Math.min(first.box().bottom(), second.box().bottom())
+                - Math.max(first.box().y(), second.box().y());
+        return overlap > Math.min(first.box().height(), second.box().height()) * 0.2d;
     }
 
     private boolean overlapsComplexLayout(ParagraphModel paragraph,

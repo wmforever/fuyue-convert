@@ -12,10 +12,10 @@ Electron 只负责桌面窗口、安全边界和后端生命周期；所有转�
 
 Full 文件名在扩展名前增加 `-Full`，例如 `Fuyue-Convert-0.1.5-win-x64-Full.exe`。
 
-v0.1.5 同时提供跨平台 Lite 与 Full：
+当前源码支持跨平台 Lite 与 Full；OCR 改动需要重新构建发布后进入安装包：
 
 - 内置经 `jlink` 精简的 Eclipse Temurin 17.0.20.1+1。
-- 不捆绑 OCR/Tesseract 和 Poppler，避免未审核的本地原生库被意外带入公开安装包。
+- 两版均内置固定源码构建的静态 Tesseract 与中英文模型，不依赖用户电脑安装 OCR；不捆绑 Poppler。
 - 应用内包含项目、前端、字体、Electron/Chromium、Temurin，以及 Windows 所用 NSIS 的许可/来源文件。
 - Lite 不捆绑 LibreOffice；Office 高保真路线使用用户电脑上已安装的 LibreOffice。
 - Full 内置官方 LibreOffice 26.2.5.2，并锁定来源、架构、版本和文件哈希。
@@ -51,16 +51,16 @@ npm run stage:backend
 npm run dev:managed
 ```
 
-暂存结构固定为 `.runtime/backend/{runtime,app,licenses,application.yml}`。开发者可通过 `FORMAT_CONVERTER_OCR_HOME` 或 `FORMAT_CONVERTER_POPPLER_HOME` 生成仅用于本地验收的扩展包；这些目录会被公开 Lite 发布门禁明确拒绝。
+暂存结构固定为 `.runtime/backend/{runtime,app,licenses,application.yml}`，OCR 默认包含。`FORMAT_CONVERTER_OCR_HOME` 可复用通过固定来源、模型、许可证和真实识别校验的运行时；公开发布仍拒绝 `FORMAT_CONVERTER_POPPLER_HOME`。仅本地开发可明确设置 `FORMAT_CONVERTER_BUNDLE_OCR=false`。详见 [OCR 打包与运行说明](../docs/ocr-deployment.md)。
 
 ## Windows x64 正式打包
 
-在 Windows x64 构建机安装 Maven 3.9+、Node.js 22 和精确版本的 Eclipse Temurin 17.0.20.1+1，然后执行：
+在 Windows x64 构建机安装 Maven 3.9+、Node.js 22、CMake、Visual Studio C++ Build Tools 和精确版本的 Eclipse Temurin 17.0.20.1+1，然后执行：
 
 ```powershell
 cd desktop
 npm ci --no-audit --no-fund
-$env:FORMAT_CONVERTER_BUNDLE_OCR = "false"
+$env:FORMAT_CONVERTER_BUNDLE_OCR = "true"
 $env:FORMAT_CONVERTER_PUBLIC_LITE_RELEASE = "true"
 $env:FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME = "true"
 $env:FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION = "17.0.20.1"
@@ -70,18 +70,24 @@ npm run verify:package -- --public-lite --require-installer
 
 产物为 `release/Fuyue-Convert-0.1.5-win-x64.exe`。Electron-builder 只生成 `win-unpacked`，仓库自有的最小安装脚本再使用 `nsis@1.2.1` 工具集中的 NSIS 3.12 编译安装器。该脚本只使用 NSIS 内建的 `File`、`CreateShortCut`、`WriteUninstaller` 等指令，采用 zlib 压缩并以当前用户权限安装；不使用 StdUtils、UAC、WinShell、nsProcess、nsis7z 或 `elevate.exe`，也不得回退到旧 NSIS 3.0.4.1。
 
-官方 Actions 会额外将 NSIS 安装器静默安装到临时目录，对真实安装后资源再执行一次许可、Runtime、禁止依赖和 OCR/Poppler 缺席检查，而不只检查 `win-unpacked`。
+官方 Actions 会额外将 NSIS 安装器静默安装到临时目录，对真实安装后资源再执行一次许可、Runtime、禁止依赖、OCR 中英文真实识别和 Poppler 缺席检查，而不只检查 `win-unpacked`。
 
 Full 版执行 `npm run dist:win:full`，产物为 `release/Fuyue-Convert-0.1.5-win-x64-Full.exe`，并额外完成包内 LibreOffice 的真实 DOCX → PDF 转换。
 
+## 用户引擎配置
+
+新版“设置 → OCR 与 Office 配置”可选择本机 Tesseract、tessdata 目录和 LibreOffice，并实际检测、保存与重启生效；存在未完成任务或原生保存时阻止重启。默认使用内置引擎，不继承系统遗留的 OCR 停用/路径设置，不需要用户绑定账号。Lite/Full 均必须包含 OCR；Office 仍由 Full 提供，Lite 可指定用户已有的本机引擎。旧发布包不会自动增加这些功能。
+
+`npm run verify:package` 默认要求随包 OCR，包括执行文件、中英模型和 TSV 配置。
+
 ## macOS 原生 Lite 打包
 
-Intel 与 Apple Silicon 必须分别在同架构 Mac 上构建，使用 Maven 3.9+、Node.js 22 和精确版本 Eclipse Temurin 17.0.20.1+1：
+Intel 与 Apple Silicon 必须分别在同架构 Mac 上构建，使用 Maven 3.9+、Node.js 22、CMake、Xcode Command Line Tools 和精确版本 Eclipse Temurin 17.0.20.1+1：
 
 ```bash
 cd desktop
 npm ci --no-audit --no-fund
-export FORMAT_CONVERTER_BUNDLE_OCR=false
+export FORMAT_CONVERTER_BUNDLE_OCR=true
 export FORMAT_CONVERTER_PUBLIC_LITE_RELEASE=true
 export FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME=true
 export FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION=17.0.20.1

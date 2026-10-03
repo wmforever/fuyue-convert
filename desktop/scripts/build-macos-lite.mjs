@@ -2,6 +2,7 @@ import { access, readFile, rename, unlink } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import crossSpawn from 'cross-spawn'
+import { ocrBundlingEnabled } from './lib/ocr-runtime.mjs'
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const desktopDirectory = path.resolve(scriptDirectory, '..')
@@ -32,10 +33,8 @@ export function assertPublicMacEnvironment(environment = process.env) {
       environment.FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION !== '17.0.20.1') {
     throw new Error('macOS 正式打包必须锁定 Eclipse Temurin 17.0.20.1+1')
   }
-  if (enabled('FORMAT_CONVERTER_BUNDLE_OCR') ||
-      environment.FORMAT_CONVERTER_OCR_HOME || environment.FORMAT_CONVERTER_POPPLER_HOME) {
-    throw new Error('macOS DMG 不得捆绑 OCR 或 Poppler Runtime')
-  }
+  if (!ocrBundlingEnabled(environment)) throw new Error('macOS DMG 必须内置中英文 OCR Runtime')
+  if (environment.FORMAT_CONVERTER_POPPLER_HOME) throw new Error('macOS DMG 不得捆绑 Poppler Runtime')
   if (lite && environment.FORMAT_CONVERTER_LIBREOFFICE_HOME) throw new Error('macOS Lite DMG 不得捆绑 LibreOffice')
   if (full && !environment.FORMAT_CONVERTER_LIBREOFFICE_HOME) throw new Error('macOS Full DMG 必须捆绑 LibreOffice')
   return full ? 'full' : 'lite'

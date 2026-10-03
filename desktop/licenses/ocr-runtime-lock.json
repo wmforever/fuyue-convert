@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "description": "Static PNG-only OCR runtime; all third-party sources and language models are pinned and verified before native compilation.",
+  "sources": [
+    {
+      "id": "zlib",
+      "version": "1.3.1",
+      "url": "https://codeload.github.com/madler/zlib/tar.gz/v1.3.1",
+      "directory": "zlib-1.3.1",
+      "licenseFile": "LICENSE",
+      "spdx": "Zlib",
+      "cmake": [
+        "-DZLIB_BUILD_EXAMPLES=OFF"
+      ],
+      "sha256": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c",
+      "licenseSha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+    },
+    {
+      "id": "libpng",
+      "version": "1.6.57",
+      "url": "https://codeload.github.com/pnggroup/libpng/tar.gz/v1.6.57",
+      "directory": "libpng-1.6.57",
+      "licenseFile": "LICENSE",
+      "spdx": "libpng-2.0",
+      "cmake": [
+        "-DPNG_SHARED=OFF",
+        "-DPNG_STATIC=ON",
+        "-DPNG_TESTS=OFF",
+        "-DPNG_TOOLS=OFF",
+        "-DPNG_FRAMEWORK=OFF"
+      ],
+      "sha256": "4cbb7b0746edc1683c9581b373365e955133b7f1243f171b7d1535b4415dfedb",
+      "licenseSha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+    },
+    {
+      "id": "leptonica",
+      "version": "1.87.0",
+      "url": "https://codeload.github.com/DanBloomberg/leptonica/tar.gz/1.87.0",
+      "directory": "leptonica-1.87.0",
+      "licenseFile": "leptonica-license.txt",
+      "spdx": "BSD-2-Clause",
+      "cmake": [
+        "-DSW_BUILD=OFF",
+        "-DBUILD_PROG=OFF",
+        "-DSTRICT_CONF=ON",
+        "-DENABLE_ZLIB=ON",
+        "-DENABLE_PNG=ON",
+        "-DENABLE_GIF=OFF",
+        "-DENABLE_JPEG=OFF",
+        "-DENABLE_TIFF=OFF",
+        "-DENABLE_WEBP=OFF",
+        "-DENABLE_OPENJPEG=OFF"
+      ],
+      "sha256": "fa2b40c5caea96d1bb93a97486262aed8731b69ce25a84a6bf5d25323e33f631",
+      "licenseSha256": "87829abb5bbb00b55a107365da89e9a33f86c4250169e5a1e5588505be7d5806"
+    },
+    {
+      "id": "tesseract",
+      "version": "5.5.2",
+      "url": "https://codeload.github.com/tesseract-ocr/tesseract/tar.gz/5.5.2",
+      "directory": "tesseract-5.5.2",
+      "licenseFile": "LICENSE",
+      "spdx": "Apache-2.0",
+      "cmake": [
+        "-DSW_BUILD=OFF",
+        "-DBUILD_TRAINING_TOOLS=OFF",
+        "-DBUILD_TESTS=OFF",
+        "-DOPENMP_BUILD=OFF",
+        "-DDISABLE_TIFF=ON",
+        "-DDISABLE_ARCHIVE=ON",
+        "-DDISABLE_CURL=ON",
+        "-DGRAPHICS_DISABLED=ON",
+        "-DENABLE_NATIVE=OFF",
+        "-DENABLE_LTO=OFF",
+        "-DINSTALL_CONFIGS=ON",
+        "-DENABLE_PRECOMPILED_HEADERS=OFF",
+        "-DCMAKE_CXX_FLAGS=-DTESSERACT_DISABLE_DEBUG_FONTS"
+      ],
+      "sha256": "6235ea0dae45ea137f59c09320406f5888383741924d98855bd2ce0d16b54f21",
+      "licenseSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    }
+  ],
+  "modelCommit": "87416418657359cb625c412a48b6e1d6d41c29bd",
+  "models": [
+    {
+      "name": "eng",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/eng.traineddata",
+      "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+    },
+    {
+      "name": "chi_sim",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim.traineddata",
+      "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+    },
+    {
+      "name": "chi_sim_vert",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim_vert.traineddata",
+      "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+    },
+    {
+      "name": "osd",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/osd.traineddata",
+      "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+    }
+  ],
+  "modelLicense": {
+    "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/LICENSE",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+  }
+}

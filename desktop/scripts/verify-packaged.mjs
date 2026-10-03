@@ -1,3 +1,4 @@
+import { verifyOcrRuntime } from './lib/ocr-runtime.mjs'
 import { existsSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { access, readFile, readdir, stat } from 'node:fs/promises'
@@ -173,8 +174,7 @@ async function main() {
         (targetPlatform === 'win32' && requestedArch !== 'x64')) {
       throw new Error(`不支持的公开桌面校验目标：${targetPlatform} ${requestedArch}`)
     }
-    if (requireOcr) throw new Error('Lite 发布不得要求内置 OCR')
-    assertMissing(resources, 'backend/app/ocr')
+    await verifyOcrRuntime(path.join(resources, 'backend/app/ocr'), targetPlatform, requestedArch)
     assertMissing(resources, 'backend/app/poppler')
     if (publicLiteRelease) assertMissing(resources, 'backend/app/libreoffice')
     if (publicFullRelease) {
@@ -224,7 +224,8 @@ async function main() {
     }
   }
 
-  if (requireOcr) {
+  if (requireOcr && !publicRelease) {
+    await verifyOcrRuntime(path.join(resources, 'backend/app/ocr'))
     const ocrBinary = process.platform === 'win32' ? 'tesseract.exe' : 'tesseract'
     await requireFile(resources, `backend/app/ocr/bin/${ocrBinary}`, 10_000)
     await requireFile(resources, 'backend/app/ocr/tessdata/eng.traineddata', 100_000)

@@ -15,7 +15,28 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
                                 String watermarkPages,
                                 String watermarkColor,
                                 String splitPages,
-                                Integer imageDpi) {
+                                Integer imageDpi,
+                                String imagePages,
+                                ImagePdfPageSize imagePdfPageSize,
+                                Double imagePdfMarginMm,
+                                String spreadsheetSheets,
+                                Boolean spreadsheetFitWidth) {
+    public ConversionOptions(PdfCompressionMode compressionMode, String watermarkText,
+                             Double watermarkOpacity, Double watermarkAngle, WatermarkPosition watermarkPosition,
+                             Boolean watermarkTiled, String watermarkPages, String watermarkColor, String splitPages,
+                             Integer imageDpi, String imagePages, ImagePdfPageSize imagePdfPageSize, Double imagePdfMarginMm) {
+        this(compressionMode, watermarkText, watermarkOpacity, watermarkAngle, watermarkPosition,
+                watermarkTiled, watermarkPages, watermarkColor, splitPages, imageDpi, imagePages,
+                imagePdfPageSize, imagePdfMarginMm, null, null);
+    }
+
+    public ConversionOptions(PdfCompressionMode compressionMode, String watermarkText,
+                             Double watermarkOpacity, Double watermarkAngle, WatermarkPosition watermarkPosition,
+                             Boolean watermarkTiled, String watermarkPages, String watermarkColor, String splitPages,
+                             Integer imageDpi) {
+        this(compressionMode, watermarkText, watermarkOpacity, watermarkAngle, watermarkPosition,
+                watermarkTiled, watermarkPages, watermarkColor, splitPages, imageDpi, null, null, null);
+    }
     public ConversionOptions(PdfCompressionMode compressionMode, String watermarkText,
                              Double watermarkOpacity, Double watermarkAngle, WatermarkPosition watermarkPosition,
                              Boolean watermarkTiled, String watermarkPages, String watermarkColor, String splitPages) {
@@ -27,6 +48,24 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
     private static final Pattern HEX_COLOR = Pattern.compile("#[0-9a-fA-F]{6}");
 
     public ConversionOptions {
+        spreadsheetSheets = spreadsheetSheets == null || spreadsheetSheets.isBlank()
+                ? "all" : spreadsheetSheets.replaceAll("\\s+", "").toLowerCase(Locale.ROOT);
+        if (!PAGE_RANGE.matcher(spreadsheetSheets).matches()) {
+            throw new IllegalArgumentException("工作表范围格式无效，例如 all、1、1-3、1,3-5");
+        }
+        validatePageRanges(spreadsheetSheets, "工作表");
+        spreadsheetFitWidth = Boolean.TRUE.equals(spreadsheetFitWidth);
+        imagePages = imagePages == null || imagePages.isBlank()
+                ? "all" : imagePages.replaceAll("\\s+", "").toLowerCase(Locale.ROOT);
+        if (!PAGE_RANGE.matcher(imagePages).matches()) {
+            throw new IllegalArgumentException("图片导出页码范围格式无效，例如 all、1、1-3、1,3-5");
+        }
+        validatePageRanges(imagePages, "图片导出");
+        imagePdfPageSize = imagePdfPageSize == null ? ImagePdfPageSize.ORIGINAL : imagePdfPageSize;
+        imagePdfMarginMm = imagePdfMarginMm == null ? 10d : imagePdfMarginMm;
+        if (!Double.isFinite(imagePdfMarginMm) || imagePdfMarginMm < 0 || imagePdfMarginMm > 50) {
+            throw new IllegalArgumentException("图片 PDF 页边距必须在 0 到 50 mm 之间");
+        }
         if (imageDpi != null && (imageDpi < 36 || imageDpi > 600)) {
             throw new IllegalArgumentException("图片清晰度必须为 36-600 DPI");
         }
@@ -93,9 +132,33 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
                                                 String watermarkPosition, Boolean watermarkTiled,
                                                 String watermarkPages, String watermarkColor,
                                                 String splitPages, Integer imageDpi) {
+        return fromRequest(compressionMode, watermarkText, watermarkOpacity, watermarkAngle,
+                watermarkPosition, watermarkTiled, watermarkPages, watermarkColor, splitPages,
+                imageDpi, null, null, null);
+    }
+
+    public static ConversionOptions fromRequest(String compressionMode, String watermarkText,
+                                                Double watermarkOpacity, Double watermarkAngle,
+                                                String watermarkPosition, Boolean watermarkTiled,
+                                                String watermarkPages, String watermarkColor,
+                                                String splitPages, Integer imageDpi, String imagePages,
+                                                String imagePdfPageSize, Double imagePdfMarginMm) {
+        return fromRequest(compressionMode, watermarkText, watermarkOpacity, watermarkAngle,
+                watermarkPosition, watermarkTiled, watermarkPages, watermarkColor, splitPages,
+                imageDpi, imagePages, imagePdfPageSize, imagePdfMarginMm, null, null);
+    }
+
+    public static ConversionOptions fromRequest(String compressionMode, String watermarkText,
+                                                Double watermarkOpacity, Double watermarkAngle,
+                                                String watermarkPosition, Boolean watermarkTiled,
+                                                String watermarkPages, String watermarkColor,
+                                                String splitPages, Integer imageDpi, String imagePages,
+                                                String imagePdfPageSize, Double imagePdfMarginMm,
+                                                String spreadsheetSheets, Boolean spreadsheetFitWidth) {
         return new ConversionOptions(PdfCompressionMode.from(compressionMode), watermarkText,
                 watermarkOpacity, watermarkAngle, WatermarkPosition.from(watermarkPosition),
-                watermarkTiled, watermarkPages, watermarkColor, splitPages, imageDpi);
+                watermarkTiled, watermarkPages, watermarkColor, splitPages, imageDpi, imagePages,
+                ImagePdfPageSize.from(imagePdfPageSize), imagePdfMarginMm, spreadsheetSheets, spreadsheetFitWidth);
     }
 
     public boolean appliesWatermarkToPage(int pageNumber) {
@@ -116,16 +179,34 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
     }
 
     public List<Integer> splitPageNumbers(int totalPages) throws ConversionFailureException {
-        if (totalPages < 1) throw new ConversionFailureException("PDF_PAGE_RANGE_INVALID", "PDF 没有可拆分页面");
-        if ("all".equals(splitPages)) return IntStream.rangeClosed(1, totalPages).boxed().toList();
+        return pageNumbers(splitPages, totalPages, "拆分");
+    }
+
+    public List<Integer> imagePageNumbers(int totalPages) throws ConversionFailureException {
+        return pageNumbers(imagePages, totalPages, "图片导出");
+    }
+
+    public List<Integer> spreadsheetSheetNumbers(int totalSheets) throws ConversionFailureException {
+        try {
+            return pageNumbers(spreadsheetSheets, totalSheets, "工作表");
+        } catch (ConversionFailureException error) {
+            throw new ConversionFailureException("SPREADSHEET_SHEET_RANGE_INVALID",
+                    "工作表范围超出文档：工作簿共 " + totalSheets + " 张工作表，请检查所选序号。");
+        }
+    }
+
+    private static List<Integer> pageNumbers(String ranges, int totalPages, String label)
+            throws ConversionFailureException {
+        if (totalPages < 1) throw new ConversionFailureException("PDF_PAGE_RANGE_INVALID", "PDF 没有可" + label + "页面");
+        if ("all".equals(ranges)) return IntStream.rangeClosed(1, totalPages).boxed().toList();
         TreeSet<Integer> selected = new TreeSet<>();
-        for (String part : splitPages.split(",")) {
+        for (String part : ranges.split(",")) {
             int dash = part.indexOf('-');
             int start = Integer.parseInt(dash < 0 ? part : part.substring(0, dash));
             int end = Integer.parseInt(dash < 0 ? part : part.substring(dash + 1));
             if (end > totalPages) {
                 throw new ConversionFailureException("PDF_PAGE_RANGE_INVALID",
-                        "拆分页码超出文档范围：第 " + end + " 页，文档共 " + totalPages + " 页");
+                        label + "页码超出文档范围：第 " + end + " 页，文档共 " + totalPages + " 页");
             }
             for (int page = start; page <= end; page++) selected.add(page);
         }
@@ -143,7 +224,8 @@ public record ConversionOptions(PdfCompressionMode compressionMode,
                 int dash = part.indexOf('-');
                 int start = Integer.parseInt(dash < 0 ? part : part.substring(0, dash));
                 int end = Integer.parseInt(dash < 0 ? part : part.substring(dash + 1));
-                if (end < start) throw new IllegalArgumentException(label + "页码范围起始页不能大于结束页");
+                if (end < start) throw new IllegalArgumentException("工作表".equals(label)
+                        ? "工作表范围起始序号不能大于结束序号" : label + "页码范围起始页不能大于结束页");
                 if (end > 1_000_000) throw new IllegalArgumentException(label + "页码范围超过允许上限");
             }
         } catch (NumberFormatException e) {

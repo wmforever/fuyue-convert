@@ -24,9 +24,10 @@ public final class ImageToPdfConverter implements FileConverter {
             throw new IllegalArgumentException("图片转 PDF 仅支持 PNG/JPG");
         }
         this.route = ConversionRoute.of(sourceFormat, DocumentFormat.PDF,
-                "按图片像素、内嵌 DPI 和 EXIF 方向生成固定版式 PDF 页面。",
+                "按图片原始尺寸或 A4 纸张生成 PDF，保留 EXIF 方向并等比适配页边距。",
                 QualityLevel.STABLE, ConversionStrategy.FIDELITY, List.of(),
-                List.of("缺少或异常 DPI 时按 96 DPI 并返回警告", "同格式批量图片按上传顺序合并为多页 PDF"));
+                List.of("缺少或异常 DPI 时按 96 DPI 并返回警告", "PNG/JPEG 可混合上传，按上传顺序合并为多页 PDF",
+                        "可选择原始尺寸或 A4 横向、纵向、自动方向；A4 页边距支持 0-50 mm"));
     }
 
     @Override public ConversionRoute route() { return route; }
@@ -53,14 +54,31 @@ public final class ImageToPdfConverter implements FileConverter {
             double destinationDpiY = metadata.swapsAxes() ? metadata.dpiX() : metadata.dpiY();
             int orientedWidth = metadata.swapsAxes() ? image.getHeight() : image.getWidth();
             int orientedHeight = metadata.swapsAxes() ? image.getWidth() : image.getHeight();
-            float pageWidth = (float) (orientedWidth * 72d / destinationDpiX);
-            float pageHeight = (float) (orientedHeight * 72d / destinationDpiY);
+            float imageWidth = (float) (orientedWidth * 72d / destinationDpiX);
+            float imageHeight = (float) (orientedHeight * 72d / destinationDpiY);
+            float pageWidth = imageWidth;
+            float pageHeight = imageHeight;
+            float fit = 1f;
+            float left = 0f;
+            float bottom = 0f;
+            ImagePdfPageSize paper = input.options().imagePdfPageSize();
+            if (paper != ImagePdfPageSize.ORIGINAL) {
+                boolean landscape = paper == ImagePdfPageSize.A4_LANDSCAPE
+                        || (paper == ImagePdfPageSize.A4_AUTO && imageWidth > imageHeight);
+                pageWidth = landscape ? PDRectangle.A4.getHeight() : PDRectangle.A4.getWidth();
+                pageHeight = landscape ? PDRectangle.A4.getWidth() : PDRectangle.A4.getHeight();
+                float margin = (float) (input.options().imagePdfMarginMm() * 72d / 25.4d);
+                fit = Math.min((pageWidth - 2 * margin) / imageWidth,
+                        (pageHeight - 2 * margin) / imageHeight);
+                left = (pageWidth - imageWidth * fit) / 2;
+                bottom = (pageHeight - imageHeight * fit) / 2;
+            }
             requirePageSize(pageWidth, pageHeight);
             PDPage page = new PDPage(new PDRectangle(pageWidth, pageHeight));
             document.addPage(page);
             progress.update(TaskStage.RENDERING, 75);
             try (PDPageContentStream content = new PDPageContentStream(document, page)) {
-                content.drawImage(image, imageMatrix(metadata, image.getWidth(), image.getHeight()));
+                content.drawImage(image, imageMatrix(metadata, image.getWidth(), image.getHeight(), fit, left, bottom));
             }
             document.save(outputPath.toFile());
         }
@@ -69,7 +87,8 @@ public final class ImageToPdfConverter implements FileConverter {
                 input.displayName().replaceFirst("(?i)\\.(png|jpe?g)$", ".pdf"), 1, warnings);
     }
 
-    private Matrix imageMatrix(ImageMetadataReader.ImageMetadata metadata, int width, int height) {
+    private Matrix imageMatrix(ImageMetadataReader.ImageMetadata metadata, int width, int height,
+                               float fit, float left, float bottom) {
         float[] orientation = switch (metadata.orientation()) {
             case 2 -> new float[]{-1, 0, 0, 1, width, 0};
             case 3 -> new float[]{-1, 0, 0, -1, width, height};
@@ -82,14 +101,14 @@ public final class ImageToPdfConverter implements FileConverter {
         };
         float destinationDpiX = (float) (metadata.swapsAxes() ? metadata.dpiY() : metadata.dpiX());
         float destinationDpiY = (float) (metadata.swapsAxes() ? metadata.dpiX() : metadata.dpiY());
-        float scaleX = 72f / destinationDpiX;
-        float scaleY = 72f / destinationDpiY;
+        float scaleX = 72f / destinationDpiX * fit;
+        float scaleY = 72f / destinationDpiY * fit;
         return new Matrix(orientation[0] * width * scaleX,
                 orientation[1] * width * scaleY,
                 orientation[2] * height * scaleX,
                 orientation[3] * height * scaleY,
-                orientation[4] * scaleX,
-                orientation[5] * scaleY);
+                orientation[4] * scaleX + left,
+                orientation[5] * scaleY + bottom);
     }
 
     private void requirePageSize(float width, float height) throws ConversionFailureException {

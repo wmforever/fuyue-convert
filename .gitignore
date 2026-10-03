@@ -6,6 +6,7 @@ frontend/node_modules/
 frontend/dist/
 desktop/node_modules/
 desktop/.runtime/
+desktop/.cache/
 desktop/release/
 data/
 logs/

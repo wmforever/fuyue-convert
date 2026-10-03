@@ -19,7 +19,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImage;
 import org.apache.pdfbox.contentstream.PDFGraphicsStreamEngine;
 import org.apache.pdfbox.util.Matrix;
@@ -228,6 +227,7 @@ public final class PdfLayoutParser {
         private final List<PageState> pages;
         private final int maxTextObjects;
         private final Map<TextPosition, ColorValue> colors = new IdentityHashMap<>();
+        private final Map<PDFont, PdfFontNames.Face> fontFaces = new IdentityHashMap<>();
         private PageState current;
         private int textObjects;
 
@@ -264,7 +264,8 @@ public final class PdfLayoutParser {
                 if (position == null) continue;
                 ColorValue color = colors.remove(position);
                 if (position.getUnicode() == null || position.getUnicode().isEmpty()) continue;
-                RunKey next = RunKey.from(position, color == null ? ColorValue.BLACK : color);
+                PdfFontNames.Face face = fontFaces.computeIfAbsent(position.getFont(), PdfFontNames::from);
+                RunKey next = RunKey.from(position, color == null ? ColorValue.BLACK : color, face);
                 if (key != null && !key.compatible(next)) {
                     addRun(run, key);
                     run.clear();
@@ -345,18 +346,8 @@ public final class PdfLayoutParser {
 
     private record RunKey(String family, double fontSizePt, boolean bold, boolean italic,
                           double direction, ColorValue color) {
-        private static RunKey from(TextPosition position, ColorValue color) {
-            PDFont font = position.getFont();
-            PDFontDescriptor descriptor = font == null ? null : font.getFontDescriptor();
-            String rawName = descriptor == null ? null : descriptor.getFontFamily();
-            if (rawName == null || rawName.isBlank()) rawName = font == null ? null : font.getName();
-            String family = normalizeFontName(rawName);
-            String lower = family.toLowerCase(Locale.ROOT);
-            boolean bold = lower.contains("bold") || lower.contains("black") || lower.contains("heavy")
-                    || descriptor != null && (descriptor.isForceBold() || descriptor.getFontWeight() >= 600);
-            boolean italic = lower.contains("italic") || lower.contains("oblique")
-                    || descriptor != null && (descriptor.isItalic() || Math.abs(descriptor.getItalicAngle()) > 0.1f);
-            return new RunKey(family, positive(position.getFontSizeInPt(), 10.5d), bold, italic,
+        private static RunKey from(TextPosition position, ColorValue color, PdfFontNames.Face face) {
+            return new RunKey(face.family(), positive(position.getFontSizeInPt(), 10.5d), face.bold(), face.italic(),
                     position.getDir(), color);
         }
 
@@ -368,11 +359,6 @@ public final class PdfLayoutParser {
                     && color.equals(other.color);
         }
 
-        private static String normalizeFontName(String value) {
-            if (value == null || value.isBlank()) return "SimSun";
-            String name = value.replaceFirst("^[A-Z]{6}\\+", "").replace(',', ' ').trim();
-            return name.isBlank() ? "SimSun" : name;
-        }
     }
 
     private record PageState(int pageNumber, Rect pageBox, double userUnit, int rotation,
@@ -394,6 +380,7 @@ public final class PdfLayoutParser {
     /** Extracts simple vector rules and image placements used by editable Word tables and pictures. */
     private static final class PdfGraphicsCollector extends PDFGraphicsStreamEngine {
         private final PageState page;
+        private final PDRectangle cropBox;
         private final int maxEntries;
         private final Path2D.Float path = new Path2D.Float();
         private final List<LineElement> lines = new ArrayList<>();
@@ -404,6 +391,7 @@ public final class PdfLayoutParser {
         private PdfGraphicsCollector(PDPage source, PageState page, int maxEntries) {
             super(source);
             this.page = page;
+            this.cropBox = source.getCropBox();
             this.maxEntries = Math.max(1, maxEntries);
         }
 
@@ -448,7 +436,7 @@ public final class PdfLayoutParser {
         @Override public void closePath() { path.closePath(); }
         @Override public void endPath() { path.reset(); }
         @Override public void strokePath() throws IOException { addPathLines(); path.reset(); }
-        @Override public void fillPath(int windingRule) { path.reset(); }
+        @Override public void fillPath(int windingRule) throws IOException { addFilledRules(); path.reset(); }
         @Override public void fillAndStrokePath(int windingRule) throws IOException { addPathLines(); path.reset(); }
         @Override public void shadingFill(org.apache.pdfbox.cos.COSName shadingName) { }
 
@@ -456,29 +444,100 @@ public final class PdfLayoutParser {
             PathIterator iterator = path.getPathIterator(null);
             double[] coords = new double[6];
             Point2D.Double previous = null;
+            Point2D.Double first = null;
             while (!iterator.isDone()) {
                 int type = iterator.currentSegment(coords);
-                if (type == PathIterator.SEG_MOVETO) previous = new Point2D.Double(coords[0], coords[1]);
+                if (type == PathIterator.SEG_MOVETO) {
+                    first = new Point2D.Double(coords[0], coords[1]);
+                    previous = first;
+                }
                 else if (type == PathIterator.SEG_LINETO && previous != null) {
                     addLine(previous, new Point2D.Double(coords[0], coords[1]));
                     previous = new Point2D.Double(coords[0], coords[1]);
+                } else if (type == PathIterator.SEG_CLOSE && previous != null && first != null) {
+                    addLine(previous, first);
+                    previous = first;
+                } else if (type == PathIterator.SEG_QUADTO) {
+                    previous = new Point2D.Double(coords[2], coords[3]);
+                } else if (type == PathIterator.SEG_CUBICTO) {
+                    previous = new Point2D.Double(coords[4], coords[5]);
                 }
                 iterator.next();
             }
         }
 
+        /** Filled hairline rectangles are common table borders in Office/browser PDFs. */
+        private void addFilledRules() throws IOException {
+            PathIterator iterator = path.getPathIterator(null);
+            double[] coords = new double[6];
+            List<Point> corners = new ArrayList<>();
+            boolean curved = false;
+            while (!iterator.isDone()) {
+                int type = iterator.currentSegment(coords);
+                if (type == PathIterator.SEG_MOVETO) {
+                    if (!curved) addFilledRule(corners);
+                    corners.clear();
+                    curved = false;
+                    corners.add(point(coords[0], coords[1]));
+                } else if (type == PathIterator.SEG_LINETO) {
+                    corners.add(point(coords[0], coords[1]));
+                } else if (type == PathIterator.SEG_CLOSE) {
+                    if (!curved) addFilledRule(corners);
+                    corners.clear();
+                } else {
+                    curved = true;
+                }
+                iterator.next();
+            }
+            // PDF filling implicitly closes open subpaths too.
+            if (!curved) addFilledRule(corners);
+        }
+
+        private void addFilledRule(List<Point> corners) throws IOException {
+            if (corners.size() == 5 && distance(corners.get(0), corners.get(4)) < 0.001d) {
+                corners = corners.subList(0, 4);
+            }
+            if (corners.size() != 4) return;
+            for (int i = 0; i < 4; i++) {
+                Point from = corners.get(i), to = corners.get((i + 1) % 4);
+                // Preserve only axis-aligned rectangles, never arbitrary filled artwork.
+                if (Math.abs(from.x() - to.x()) > 0.001d && Math.abs(from.y() - to.y()) > 0.001d) return;
+            }
+            double minX = corners.stream().mapToDouble(Point::x).min().orElseThrow();
+            double maxX = corners.stream().mapToDouble(Point::x).max().orElseThrow();
+            double minY = corners.stream().mapToDouble(Point::y).min().orElseThrow();
+            double maxY = corners.stream().mapToDouble(Point::y).max().orElseThrow();
+            double width = maxX - minX, height = maxY - minY;
+            double thickness = Math.min(width, height), length = Math.max(width, height);
+            if (thickness <= 0 || thickness > 1d || length < 2d || length < thickness * 8d) return;
+            Point from = width >= height ? new Point(minX, (minY + maxY) / 2d)
+                    : new Point((minX + maxX) / 2d, minY);
+            Point to = width >= height ? new Point(maxX, (minY + maxY) / 2d)
+                    : new Point((minX + maxX) / 2d, maxY);
+            int rgb;
+            try { rgb = getGraphicsState().getNonStrokingColor().toRGB(); } catch (Exception ignored) { rgb = 0; }
+            addLine(from, to, thickness, rgb);
+        }
+
+        private static double distance(Point from, Point to) {
+            return Math.hypot(from.x() - to.x(), from.y() - to.y());
+        }
+
         private void addLine(Point2D from, Point2D to) throws IOException {
-            if (++entries > maxEntries) throw new IOException("PDF 图形对象数量超过限制");
-            Matrix matrix = getGraphicsState().getCurrentTransformationMatrix();
-            Point2D start = matrix.transformPoint((float) from.getX(), (float) from.getY());
-            Point2D end = matrix.transformPoint((float) to.getX(), (float) to.getY());
-            Point a = point(start.getX(), start.getY());
-            Point b = point(end.getX(), end.getY());
-            if (Math.hypot(a.x() - b.x(), a.y() - b.y()) < 0.5d) return;
+            // PDFBox transforms path coordinates before invoking the graphics callbacks.
+            // Applying the CTM here again moves/scales table borders away from their text.
+            Point a = point(from.getX(), from.getY());
+            Point b = point(to.getX(), to.getY());
             int rgb;
             try { rgb = getGraphicsState().getStrokingColor().toRGB(); } catch (Exception ignored) { rgb = 0; }
+            addLine(a, b, Math.max(0.1d, getGraphicsState().getLineWidth() * page.userUnit() * MM_PER_POINT), rgb);
+        }
+
+        private void addLine(Point a, Point b, double width, int rgb) throws IOException {
+            if (++entries > maxEntries) throw new IOException("PDF 图形对象数量超过限制");
+            if (distance(a, b) < 0.5d) return;
             lines.add(new LineElement("pdf-p%d-line-%d".formatted(page.pageNumber(), entries), page.pageNumber(), a, b,
-                    Math.max(0.1d, getGraphicsState().getLineWidth() * page.userUnit() * MM_PER_POINT),
+                    width,
                     new ColorValue((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, 255), entries));
         }
 
@@ -490,7 +549,17 @@ public final class PdfLayoutParser {
 
         private Point point(double x, double y) {
             double unit = page.userUnit();
-            return new Point(pointsToMm(x * unit), page.pageBox().height() - pointsToMm(y * unit));
+            double localX = x - cropBox.getLowerLeftX();
+            double localY = y - cropBox.getLowerLeftY();
+            double displayedX;
+            double displayedY;
+            switch (page.rotation()) {
+                case 90 -> { displayedX = localY; displayedY = localX; }
+                case 180 -> { displayedX = cropBox.getWidth() - localX; displayedY = localY; }
+                case 270 -> { displayedX = cropBox.getHeight() - localY; displayedY = cropBox.getWidth() - localX; }
+                default -> { displayedX = localX; displayedY = cropBox.getHeight() - localY; }
+            }
+            return new Point(pointsToMm(displayedX * unit), pointsToMm(displayedY * unit));
         }
     }
 }

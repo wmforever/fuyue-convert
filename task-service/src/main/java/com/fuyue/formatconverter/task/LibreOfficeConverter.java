@@ -55,11 +55,13 @@ public final class LibreOfficeConverter implements FileConverter {
         Files.createDirectories(workDir);
         Path outDir = Files.createTempDirectory(workDir, "office-output-");
         Path profileDir = Files.createTempDirectory(workDir, "office-profile-");
+        Path officeInput = route.sourceFormat() == DocumentFormat.XLSX && route.targetFormat() == DocumentFormat.PDF
+                ? SpreadsheetPdfPreparation.prepare(input.path(), workDir, input.options(), limits) : input.path();
         progress.update(TaskStage.RENDERING, 25);
         List<String> command = List.of(binary.toString(), "--headless", "--nologo", "--nodefault",
                 "--nofirststartwizard", "--nolockcheck",
                 "-env:UserInstallation=" + profileDir.toUri(),
-                "--convert-to", convertTo, "--outdir", outDir.toString(), input.path().toString());
+                "--convert-to", convertTo, "--outdir", outDir.toString(), officeInput.toString());
         long deadline = System.nanoTime() + timeout.toNanos();
         String processOutput;
         try {
@@ -317,10 +319,10 @@ public final class LibreOfficeConverter implements FileConverter {
     public static Optional<String> version(Path binary) {
         if (binary == null || !Files.isRegularFile(binary) || !Files.isExecutable(binary)) return Optional.empty();
         try {
-            Process process = new ProcessBuilder(binary.toString(), "--version")
+            Process process = new ProcessBuilder(versionProbeBinary(binary, System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win")).toString(), "--version")
                     .redirectErrorStream(true)
                     .start();
-            boolean finished = process.waitFor(10, TimeUnit.SECONDS);
+            boolean finished = process.waitFor(60, TimeUnit.SECONDS);
             if (!finished) {
                 process.destroyForcibly();
                 process.waitFor(2, TimeUnit.SECONDS);
@@ -334,6 +336,14 @@ public final class LibreOfficeConverter implements FileConverter {
         } catch (Exception e) {
             return Optional.empty();
         }
+    }
+
+    static Path versionProbeBinary(Path binary, boolean windows) {
+        if (windows && binary.getFileName().toString().equalsIgnoreCase("soffice.exe")) {
+            Path console = binary.resolveSibling("soffice.com");
+            if (Files.isRegularFile(console)) return console;
+        }
+        return binary;
     }
 
     private static boolean probe(Path binary) {

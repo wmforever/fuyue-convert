@@ -35,11 +35,30 @@ public final class PageLayoutAnalyzer {
             }
             line.add(block);
         }
-        return lines.stream().map(line -> {
+        List<List<TextBlock>> segments = new ArrayList<>();
+        double minimumColumnGap = Math.max(12d, page.width() * 0.06d);
+        for (List<TextBlock> line : lines) {
             line.sort(Comparator.comparingDouble(text -> text.box().x()));
+            List<TextBlock> segment = new ArrayList<>();
+            double previousRight = Double.NEGATIVE_INFINITY;
+            for (TextBlock block : line) {
+                // Equal baselines do not imply one paragraph: two columns often
+                // share every baseline. Keep a clear gutter outside the paragraph
+                // so the Word renderer can retain each column's source position.
+                if (!segment.isEmpty() && block.box().x() - previousRight > minimumColumnGap) {
+                    segments.add(segment);
+                    segment = new ArrayList<>();
+                }
+                segment.add(block);
+                previousRight = Math.max(previousRight, block.box().right());
+            }
+            if (!segment.isEmpty()) segments.add(segment);
+        }
+        return segments.stream().map(line -> {
             Rect lineBox = line.stream().map(TextBlock::box).reduce(Rect::union).orElseThrow();
             return new ParagraphModel(lineBox, line, inferAlignment(lineBox, page), 0);
-        }).sorted(Comparator.comparingDouble(paragraph -> paragraph.box().y())).toList();
+        }).sorted(Comparator.comparingDouble((ParagraphModel paragraph) -> paragraph.box().y())
+                .thenComparingDouble(paragraph -> paragraph.box().x())).toList();
     }
 
     private boolean sameVisualLine(TextBlock first, TextBlock second) {

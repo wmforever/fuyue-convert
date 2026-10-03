@@ -9,7 +9,7 @@ claim that every assembled binary is distributed solely under Apache-2.0.
 
 The official public binary path is restricted to the reviewed Windows x64,
 macOS Intel, and macOS Apple Silicon Lite and Full desktop packages. Both
-editions exclude bundled OCR and Poppler. Lite excludes LibreOffice; Full pins
+editions include source-built OCR with pinned English/Chinese language models and exclude Poppler. Lite excludes LibreOffice; Full pins
 and embeds the official LibreOffice 26.2.5.2 runtime. The release
 workflow remains fail-closed unless the repository variable
 `FORMAT_CONVERTER_BINARY_RELEASE_APPROVED` is deliberately enabled for an
@@ -47,13 +47,26 @@ unreviewed renderer.
 - Runtime location in platform packages: `app/ocr/`
 - License: Apache License 2.0
 
-When explicitly enabled for local verification, packaging scripts obtain the engine from the operating-system package manager, copy its required native runtime, and include only the selected `eng`, `chi_sim`, `chi_sim_vert`, and supporting `osd` data. Windows model downloads are pinned to a source commit and verified by SHA-256 before packaging. The official Lite packages do not include this directory.
+New packages build Tesseract 5.5.2 from pinned source and statically link
+Leptonica 1.87.0 (BSD-2-Clause), libpng 1.6.57 (PNG Reference Library License
+version 2), and zlib 1.3.1 (Zlib). Only PNG input and the application's required
+OCR outputs are enabled; no Homebrew/Chocolatey native-library collection is
+copied from the build machine. The application normalizes source images to PNG
+before OCR. Windows uses the static C runtime; macOS permits only operating
+system dynamic-library references.
 
-Tesseract packages also depend on native libraries such as Leptonica and image
-codec/archive libraries. Those libraries vary by operating system package
-manager and are not yet covered by a fixed, reviewed redistribution manifest.
-Consequently, detecting Tesseract on a build machine is not sufficient approval
-to publish the copied OCR runtime.
+`desktop/licenses/ocr-runtime-lock.json` records the exact official source URLs,
+SHA-256 digests, license digests, and tessdata_fast commit/model digests.
+`app/ocr/licenses/` preserves each component's complete license, and
+`app/ocr/OCR-RUNTIME.json` records the built platform, architecture, source
+components, and hashes of every runtime file. Public Lite and Full installers
+require this runtime and include it in the final component/license manifest.
+No model or engine is downloaded on the user's computer at conversion time.
+
+The source and binary hashes are checked before use; missing files or failed
+real PNG/TSV recognition abort packaging. A local development package may
+explicitly omit OCR, but official release workflows cannot. Older released
+installers remain unchanged until rebuilt.
 
 ## Poppler
 

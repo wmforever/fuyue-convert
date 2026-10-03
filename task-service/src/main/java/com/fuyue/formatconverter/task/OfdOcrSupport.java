@@ -106,7 +106,8 @@ final class OfdOcrSupport {
                         TextBlock addition = new TextBlock(
                                 block.id() + "-i" + currentImage, block.pageNumber(), block.box(),
                                 block.text(), block.baselineY(), block.style(), recognized.size() + 1,
-                                block.textOffsetXmm(), block.textOffsetYmm(), block.advancesMm(), block.transform());
+                                block.textOffsetXmm(), block.textOffsetYmm(), block.advancesMm(), block.transform(),
+                                block.ocrWords());
                         recognized.add(addition);
                         allTexts.add(addition);
                     }

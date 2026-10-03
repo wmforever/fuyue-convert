@@ -125,15 +125,16 @@ public final class ConversionTaskService implements AutoCloseable {
         try {
             for (int i = 0; i < uploads.size(); i++) {
                 UploadPayload upload = uploads.get(i);
-                validateUploadMetadata(upload, plan.route().sourceFormat());
-                Path stored = inputDir.resolve("input-%04d.%s".formatted(i + 1, plan.route().sourceFormat().extension()));
+                DocumentFormat sourceFormat = DocumentFormat.fromFileName(upload.originalName()).orElseThrow();
+                validateUploadMetadata(upload, sourceFormat);
+                Path stored = inputDir.resolve("input-%04d.%s".formatted(i + 1, sourceFormat.extension()));
                 try (var in = new BufferedInputStream(upload.source().open());
                      var out = new BufferedOutputStream(Files.newOutputStream(stored, StandardOpenOption.CREATE_NEW))) {
                     ConversionGuards.copyLimited(in, out, upload.size(), config.parseLimits().maxArchiveBytes());
                 }
-                validateStoredFile(stored, plan.route().sourceFormat());
-                inputs.add(new InputFile(safeDisplayName(upload.originalName(), i, plan.route().sourceFormat()),
-                        upload.contentType(), upload.size(), stored));
+                validateStoredFile(stored, sourceFormat);
+                inputs.add(new InputFile(safeDisplayName(upload.originalName(), i, sourceFormat),
+                        upload.contentType(), upload.size(), stored, sourceFormat));
             }
         } catch (Exception e) {
             deleteTree(taskDir);
@@ -265,8 +266,10 @@ public final class ConversionTaskService implements AutoCloseable {
                 try {
                     ConversionInput conversionInput = new ConversionInput(input.displayName, input.contentType,
                             input.size, input.path, record.options);
+                    FileConverter fileConverter = input.sourceFormat == record.route.sourceFormat()
+                            ? record.converter : converter(input.sourceFormat, record.route.targetFormat());
                     ensureStorageCapacity(0);
-                    ConversionOutput converted = convertWithTimeout(record, conversionInput, work, output, deadline, (stage, withinFile) -> {
+                    ConversionOutput converted = convertWithTimeout(record, fileConverter, conversionInput, work, output, deadline, (stage, withinFile) -> {
                         if (fileActive.get()) {
                             update(record, TaskStatus.CONVERTING, stage, progress(fileIndex, record.inputs.size(), withinFile), null, null, warnings, results, false, null);
                         }
@@ -280,7 +283,7 @@ public final class ConversionTaskService implements AutoCloseable {
                     outputs.add(produced);
                     String outputName = safeOutputName(converted.outputName(), input.displayName, record.route.targetFormat());
                     results.add(new TaskFileResult(input.displayName, true, outputName, parsedPageCount, null, null,
-                            record.route.sourceFormat(), record.route.targetFormat()));
+                            input.sourceFormat, record.route.targetFormat()));
                 } catch (CancellationException e) {
                     throw e;
                 } catch (InterruptedException e) {
@@ -289,7 +292,7 @@ public final class ConversionTaskService implements AutoCloseable {
                 } catch (Exception e) {
                     String code = failureCode(e);
                     results.add(new TaskFileResult(input.displayName, false, null, parsedPageCount, code, safeError(e),
-                            record.route.sourceFormat(), record.route.targetFormat()));
+                            input.sourceFormat, record.route.targetFormat()));
                     log.warn("taskId={} fileIndex={} conversion failed code={}", record.id, i, code);
                     if (!isFileCleanupDeferred(record, work)) {
                         if (produced != null) try { Files.deleteIfExists(produced); } catch (IOException ignored) { }
@@ -428,13 +431,14 @@ public final class ConversionTaskService implements AutoCloseable {
         }
     }
 
-    private ConversionOutput convertWithTimeout(TaskRecord record, ConversionInput input, Path work, Path output,
+    private ConversionOutput convertWithTimeout(TaskRecord record, FileConverter converter,
+                                                ConversionInput input, Path work, Path output,
                                                 Instant deadline, ConversionProgress progress) throws Exception {
         long remainingMillis = Duration.between(Instant.now(), deadline).toMillis();
         if (remainingMillis <= 0) throw new TimeoutException("转换超时");
         ExecutorService single = Executors.newSingleThreadExecutor(namedFactory("format-file-"));
         Future<ConversionOutput> future = single.submit(() ->
-                record.converter.convert(input, work, output, config.parseLimits(), progress));
+                converter.convert(input, work, output, config.parseLimits(), progress));
         boolean stopRequested = false;
         try {
             return future.get(remainingMillis, TimeUnit.MILLISECONDS);
@@ -705,10 +709,12 @@ public final class ConversionTaskService implements AutoCloseable {
             List<InputFile> recovered = new ArrayList<>();
             for (int index = 0; index < paths.size(); index++) {
                 Path path = paths.get(index);
+                DocumentFormat sourceFormat = DocumentFormat.fromFileName(path.getFileName().toString())
+                        .orElse(snapshot.sourceFormat());
                 String displayName = index < snapshot.files().size()
                         ? snapshot.files().get(index).fileName()
-                        : "document-%d.%s".formatted(index + 1, snapshot.sourceFormat().extension());
-                recovered.add(new InputFile(displayName, snapshot.sourceFormat().contentType(), Files.size(path), path));
+                        : "document-%d.%s".formatted(index + 1, sourceFormat.extension());
+                recovered.add(new InputFile(displayName, sourceFormat.contentType(), Files.size(path), path, sourceFormat));
             }
             return List.copyOf(recovered);
         }
@@ -825,8 +831,9 @@ public final class ConversionTaskService implements AutoCloseable {
             FileConverter converter = converter(source, targetFormat);
             if (plan == null) {
                 plan = new TaskPlan(converter, converter.route());
-            } else if (!plan.route().id().equals(converter.route().id())) {
-                throw new IllegalArgumentException("同一任务目前只支持相同的源格式和目标格式");
+            } else if (!plan.route().id().equals(converter.route().id())
+                    && !(isImageToPdf(plan.route()) && isImageToPdf(converter.route()))) {
+                throw new IllegalArgumentException("同一任务仅图片转 PDF 支持混合 PNG/JPEG，其他转换要求相同源格式");
             }
         }
         return Objects.requireNonNull(plan);
@@ -1063,7 +1070,8 @@ public final class ConversionTaskService implements AutoCloseable {
         }
     }
 
-    private record InputFile(String displayName, String contentType, long size, Path path) {}
+    private record InputFile(String displayName, String contentType, long size, Path path,
+                             DocumentFormat sourceFormat) {}
     private record TaskPlan(FileConverter converter, ConversionRoute route) {}
     private static final class TaskRecord {
         private final String id;

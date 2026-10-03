@@ -127,4 +127,25 @@ class FormatConverterApplicationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("拆分页码范围起始页不能大于结束页"));
     }
+
+    @Test void rejectsInvalidImageOptionsBeforeStartingTask() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("files", "input.pdf", "application/pdf",
+                "%PDF-1.4\n%%EOF".getBytes(java.nio.charset.StandardCharsets.US_ASCII));
+        mvc.perform(multipart("/api/tasks").file(file).param("targetFormat", "png")
+                        .param("imagePages", "5-3"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("图片导出页码范围起始页不能大于结束页"));
+        mvc.perform(multipart("/api/tasks").file(file).param("targetFormat", "pdf")
+                        .param("imagePdfPageSize", "a4-auto").param("imagePdfMarginMm", "51"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("图片 PDF 页边距必须在 0 到 50 mm 之间"));
+    }
+    @Test void rejectsInvalidSpreadsheetOptionsBeforeStartingTask() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("files", "input.xlsx", "application/octet-stream", new byte[]{1});
+        mvc.perform(multipart("/api/tasks").file(file).param("targetFormat", "pdf")
+                        .param("spreadsheetSheets", "3-1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("工作表范围起始序号不能大于结束序号"));
+    }
+
 }

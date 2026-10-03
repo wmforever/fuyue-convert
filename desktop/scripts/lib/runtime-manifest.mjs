@@ -3,6 +3,7 @@ import { mkdir, readlink, readdir, readFile, realpath, stat, writeFile } from 'n
 import path from 'node:path'
 import { openZip } from './zip-reader.mjs'
 import { libreOfficeDescriptor } from './libreoffice-runtime.mjs'
+import { verifyOcrRuntime, finalizeSignedOcrRuntime } from './ocr-runtime.mjs'
 
 const LICENSE_ENTRY = /(^|\/)(?:LICENSE|LICENCE|NOTICE|COPYING|DEPENDENCIES)(?:[._-][^/]*)?$/i
 const FULL_LICENSE_ENTRY = /(^|\/)(?:LICENSE|LICENCE|COPYING)(?:[._-][^/]*)?$/i
@@ -577,7 +578,20 @@ export async function generateRuntimeManifest({
       artifact: { path: 'backend/app/libreoffice', hashKind: 'directory-tree', ...libreOfficeTree }
     }))
   }
-  const requiredComponents = releaseProfileConfiguration?.requiredComponentIds || policy.requiredComponentIds
+  const ocrRoot = path.join(backendRoot, 'app', 'ocr')
+  const ocrPresent = await stat(ocrRoot).then(info => info.isDirectory()).catch(error => {
+    if (error.code === 'ENOENT') return false
+    throw error
+  })
+  if (releaseProfile || ocrPresent) {
+    const provenance = await verifyOcrRuntime(ocrRoot, releaseTarget?.platform || process.platform, releaseTarget?.arch || process.arch)
+    components.push(component(policy, 'tesseract-ocr', {
+      type: 'ocr-runtime', provenance,
+      artifact: { path: 'backend/app/ocr', hashKind: 'directory-tree', ...await hashDirectory(ocrRoot) }
+    }))
+  }
+  const requiredComponents = releaseProfileConfiguration?.requiredComponentIds ||
+    policy.requiredComponentIds.filter(id => id !== 'tesseract-ocr' || ocrPresent)
   const missingRequired = requiredComponents.filter(id => !components.some(item => item.id === id))
   if (missingRequired.length > 0) throw new Error(`manifest 缺少必需组件：${missingRequired.join(', ')}`)
 
@@ -616,6 +630,12 @@ export async function finalizeRuntimeManifest(resourcesRoot) {
   }
   const targetApplicationRoot = applicationRoot(resourcesRoot, manifest.profile)
   if (manifest.profile.startsWith('macos-')) {
+    const ocr = manifest.components.find(item => item.id === 'tesseract-ocr')
+    if (ocr) {
+      const ocrRoot = path.join(resourcesRoot, 'backend/app/ocr')
+      ocr.provenance = await finalizeSignedOcrRuntime(ocrRoot)
+      ocr.artifact = { path: 'backend/app/ocr', hashKind: 'directory-tree', ...await hashDirectory(ocrRoot) }
+    }
     const stagedRuntimeTree = manifest.artifacts?.javaRuntimeTree
     const finalRuntimeTree = await hashDirectory(path.join(resourcesRoot, 'backend', 'runtime'), {
       allowSafeSymlinks: true
@@ -875,6 +895,9 @@ export async function verifyRuntimeManifest(resourcesRoot) {
     if (!policy.components[forbidden]) throw new Error(`审核策略缺少禁止组件定义：${forbidden}`)
     if ((selectedProfile.requiredComponentIds || []).includes(forbidden)) throw new Error(`审核策略同时要求并禁止组件：${forbidden}`)
     if (ids.has(forbidden)) throw new Error(`core-only 安装器 manifest 禁止组件：${forbidden}`)
+  }
+  if (selectedProfile.requiredComponentIds?.includes('tesseract-ocr')) {
+    await verifyOcrRuntime(path.join(resourcesRoot, 'backend/app/ocr'), selectedProfile.platform, selectedProfile.arch, { execute: false })
   }
   const temurin = manifest.components.find(item => item.id === 'eclipse-temurin')
   const actualRuntimeRelease = parseRuntimeRelease(await readFile(path.join(resourcesRoot, 'backend', 'runtime', 'release'), 'utf8'))

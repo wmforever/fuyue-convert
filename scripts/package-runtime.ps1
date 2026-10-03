@@ -65,19 +65,13 @@ New-Item -ItemType Directory -Force (Join-Path $PackageDir "docs") | Out-Null
 Copy-Item (Join-Path $RootDir "docs\known-limitations.md") (Join-Path $PackageDir "docs")
 Copy-Item (Join-Path $RootDir "docs\test-report.md") (Join-Path $PackageDir "docs")
 
-$BundleOcr = if ($env:FORMAT_CONVERTER_BUNDLE_OCR) { $env:FORMAT_CONVERTER_BUNDLE_OCR } else { "auto" }
-if ($BundleOcr -notin @("false", "0")) {
-  $Tesseract = Get-Command tesseract.exe -ErrorAction SilentlyContinue
-  if (-not $Tesseract) {
-    $Tesseract = Get-ChildItem "$env:ProgramFiles", "${env:ProgramFiles(x86)}" -Recurse -File -Filter tesseract.exe -ErrorAction SilentlyContinue | Select-Object -First 1
-  }
-  if ($Tesseract) {
-    & (Join-Path $RootDir "scripts\prepare-ocr-runtime.ps1") -Destination (Join-Path $PackageDir "app\ocr")
-  } elseif ($BundleOcr -in @("true", "1")) {
-    throw "要求内置 OCR，但构建机未安装 Tesseract"
-  } else {
-    Write-Host "构建机未安装 Tesseract，本次运行包不含内置 OCR"
-  }
+$BundleOcr = if ($env:FORMAT_CONVERTER_BUNDLE_OCR) { $env:FORMAT_CONVERTER_BUNDLE_OCR.ToLowerInvariant() } else { "true" }
+if ($BundleOcr -in @("true", "1")) {
+  & (Join-Path $RootDir "scripts\prepare-ocr-runtime.ps1") -Destination (Join-Path $PackageDir "app\ocr")
+} elseif ($BundleOcr -in @("false", "0")) {
+  Write-Host "已明确关闭内置 OCR，本包不支持开箱即用的扫描件识别"
+} else {
+  throw "FORMAT_CONVERTER_BUNDLE_OCR 必须为 true 或 false"
 }
 New-Item -ItemType Directory -Force (Join-Path $PackageDir "app\docs") | Out-Null
 Copy-Item (Join-Path $RootDir "THIRD_PARTY_NOTICES.md") (Join-Path $PackageDir "app")

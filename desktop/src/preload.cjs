@@ -9,5 +9,10 @@ contextBridge.exposeInMainWorld('formatConverterDesktop', Object.freeze({
   copyText: text => ipcRenderer.invoke('format-converter:copy-text', text),
   saveTaskResult: taskId => ipcRenderer.invoke('format-converter:save-task-result', { taskId }),
   getPreferences: () => ipcRenderer.invoke('format-converter:get-preferences'),
-  updatePreferences: patch => ipcRenderer.invoke('format-converter:update-preferences', patch)
+  updatePreferences: patch => ipcRenderer.invoke('format-converter:update-preferences', patch),
+  getEngineSettings: () => ipcRenderer.invoke('format-converter:get-engine-settings'),
+  chooseEnginePath: kind => ipcRenderer.invoke('format-converter:choose-engine-path', kind),
+  probeEngineSettings: settings => ipcRenderer.invoke('format-converter:probe-engine-settings', settings),
+  saveEngineSettings: settings => ipcRenderer.invoke('format-converter:save-engine-settings', settings),
+  restartForEngines: () => ipcRenderer.invoke('format-converter:restart-for-engines')
 }))

@@ -3,6 +3,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { app, BrowserWindow, clipboard, dialog, ipcMain, session, shell } from 'electron'
 import { startBackend, stopBackend } from './backend-manager.mjs'
+import { EngineSettingsService, bundledEnginePaths, assertEngineRestartIdle } from './engine-settings.mjs'
+import { existsSync } from 'node:fs'
 import { DesktopPreferencesStore, publicDesktopPreferencesError } from './desktop-preferences.mjs'
 import { NativeSaveService, publicNativeSaveError } from './native-save.mjs'
 import { isSafeExternalUrl, isTrustedRendererFrame, isTrustedTaskRequest, isTrustedUrl } from './security.mjs'
@@ -21,6 +23,9 @@ let trustedRendererOrigin = null
 let nativeSaveService = null
 let desktopPreferencesStore = null
 let activeNativeSavePromise = null
+let engineSettingsService = null
+let effectiveEngineSettings = null
+let engineOperation = false
 
 if (!singleInstance) app.quit()
 
@@ -77,6 +82,50 @@ ipcMain.handle('format-converter:update-preferences', async (event, patch) => {
     console.error(`[desktop-preferences] ${error?.code || error?.name || 'PREFERENCES_FAILED'}`)
     throw new Error(publicDesktopPreferencesError(error))
   }
+})
+
+async function engineSettingsSnapshot() {
+  const loaded = await engineSettingsService.load()
+  const paths = bundledEnginePaths(engineSettingsService.resourcesPath)
+  return { ...loaded, managed: Boolean(effectiveEngineSettings),
+    pendingRestart: Boolean(effectiveEngineSettings) && JSON.stringify(loaded.settings) !== JSON.stringify(effectiveEngineSettings),
+    bundledOcr: existsSync(paths.ocrBinary) && existsSync(paths.tessdataDirectory), bundledOffice: existsSync(paths.officeBinary) }
+}
+
+ipcMain.handle('format-converter:get-engine-settings', async event => {
+  assertTrustedMainFrame(event, '引擎设置读取')
+  if (!engineSettingsService) throw new Error('引擎设置尚未就绪')
+  return engineSettingsSnapshot()
+})
+
+ipcMain.handle('format-converter:choose-engine-path', async (event, kind) => {
+  assertTrustedMainFrame(event, '引擎文件选择')
+  if (!engineSettingsService || engineOperation || engineSettingsService.choosing) throw new Error('引擎设置正在处理，请稍后再试')
+  return engineSettingsService.choose(kind)
+})
+
+for (const action of ['probe', 'save']) ipcMain.handle(`format-converter:${action}-engine-settings`, async (event, settings) => {
+  assertTrustedMainFrame(event, '引擎配置检测或保存')
+  if (!engineSettingsService || engineOperation || engineSettingsService.choosing) throw new Error('引擎设置正在处理，请稍后再试')
+  engineOperation = true
+  try {
+    if (action === 'probe') return await engineSettingsService.probe(settings)
+    if (!effectiveEngineSettings) throw new Error('当前由外部服务提供转换，请在服务所在设备配置引擎')
+    const saved = await engineSettingsService.save(settings)
+    return { ...await engineSettingsSnapshot(), checks: saved.checks }
+  } finally { engineOperation = false }
+})
+
+ipcMain.handle('format-converter:restart-for-engines', async event => {
+  assertTrustedMainFrame(event, '引擎配置重启')
+  if (!backend || !backendReady || engineOperation || engineSettingsService?.choosing || quitting || activeNativeSavePromise) throw new Error('当前不能重启，请稍后再试')
+  engineOperation = true
+  try {
+    await assertEngineRestartIdle({ origin: backend.origin, apiToken: backend.apiToken })
+    app.relaunch()
+    setImmediate(() => void shutdownApplication())
+    return true
+  } finally { engineOperation = false }
 })
 
 function rendererSecurity(targetSession, backendOrigin, rendererOrigin, apiToken, trustedWebContents) {
@@ -168,17 +217,22 @@ async function startApplication() {
   let backendOrigin = process.env.FORMAT_CONVERTER_BACKEND_URL || null
   let apiToken = process.env.FORMAT_CONVERTER_API_TOKEN || ''
 
+  const resourcesPath = app.isPackaged ? process.resourcesPath : path.resolve(app.getAppPath(), '.runtime')
+  engineSettingsService = new EngineSettingsService({ resourcesPath, userDataPath: app.getPath('userData'),
+    dialog, getParentWindow: () => mainWindow })
+  const loadedEngines = await engineSettingsService.load()
   if (useManagedBackend) {
+    effectiveEngineSettings = loadedEngines.settings
     backendStarting = true
     startupAbortController = new AbortController()
     apiToken = randomBytes(32).toString('base64url')
-    const resourcesPath = app.isPackaged ? process.resourcesPath : path.resolve(app.getAppPath(), '.runtime')
     let startedBackend
     try {
       startedBackend = await startBackend({
         resourcesPath,
         userDataPath: app.getPath('userData'),
         apiToken,
+        engineSettings: effectiveEngineSettings,
         signal: startupAbortController.signal,
         onSpawn: handle => {
           backend = handle

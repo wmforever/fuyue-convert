@@ -72,8 +72,14 @@ class OfdOcrConverterTest {
                 new PoiDocxRenderer(), new OfdOcrSupport(settings)).convert(input(source),
                 temp.resolve("docx-work"), docx, ParseLimits.defaults(), (stage, percent) -> { });
         try (XWPFDocument word = new XWPFDocument(Files.newInputStream(docx))) {
-            String text = word.getParagraphs().stream().map(paragraph -> paragraph.getText())
-                    .reduce("", (left, right) -> left + "\n" + right);
+            // Read actual text nodes; POI's paragraph accessor adds parentheses around VML boxes.
+            var xml = org.apache.poi.util.XMLHelper.newDocumentBuilder().parse(new java.io.ByteArrayInputStream(
+                    word.getDocument().xmlText().getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+            var nodes = xml.getElementsByTagNameNS(
+                    "http://schemas.openxmlformats.org/wordprocessingml/2006/main", "t");
+            StringBuilder contents = new StringBuilder();
+            for (int index = 0; index < nodes.getLength(); index++) contents.append(nodes.item(index).getTextContent());
+            String text = contents.toString();
             assertTrue(text.contains("REAL OFD PAGE"), text);
             assertTrue(text.contains("OFD SCANNED 2026"), text);
             assertFalse(word.getAllPictures().isEmpty(), "OFD scan image should remain as a fidelity layer");
@@ -139,6 +145,9 @@ class OfdOcrConverterTest {
 
         var page = recognized.pages().get(0);
         assertEquals(1, page.textBlocks().stream().filter(block -> block.text().equals("ONEWORD")).count());
+        assertEquals(1, page.textBlocks().stream().filter(block -> block.text().equals("ONEWORD"))
+                .findFirst().orElseThrow().ocrWords().size(),
+                "OFD 追加图像标识时须保留词框，供 Word 精确定位和局部遮盖");
         assertEquals(2, page.images().size());
         assertTrue(page.images().stream()
                 .allMatch(image -> image.role().equals("OCR_SCAN_BACKGROUND")));

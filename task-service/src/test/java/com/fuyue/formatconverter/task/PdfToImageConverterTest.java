@@ -15,6 +15,10 @@ import java.awt.Color;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.List;
+import java.util.zip.ZipFile;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -173,5 +177,93 @@ class PdfToImageConverterTest {
 
     private ConversionInput input(Path source) throws Exception {
         return new ConversionInput(source.getFileName().toString(), "application/pdf", Files.size(source), source);
+    }
+
+    @Test
+    void selectedPngPagesKeepSourceNumbersOrderAndPixelsWithoutRenderingOtherPages() throws Exception {
+        verifySelectedPages(new PdfToPngConverter(null, 72), "png");
+    }
+
+    @Test
+    void selectedJpegPagesWorkWithJavaFallback() throws Exception {
+        verifySelectedPages(new PdfToJpgConverter(null, 72), "jpg");
+    }
+
+    @Test
+    void selectedJpegPagesWorkWithRealPoppler() throws Exception {
+        Optional<Path> binary = PdfToImageConverter.discoverPoppler();
+        assumeTrue(binary.isPresent(), "需要实际 Poppler 验证选中页渲染");
+        verifySelectedPages(new PdfToJpgConverter(binary.orElseThrow(), 72), "jpg");
+    }
+
+    private void verifySelectedPages(FileConverter converter, String extension) throws Exception {
+        Path source = coloredPages();
+        ConversionInput input = selectedInput(source, "10,2-3,2");
+        ConversionOutput output = converter.convert(input, temp.resolve("selected-" + extension),
+                temp.resolve("selected." + extension), ParseLimits.defaults(), (stage, percent) -> { });
+        assertEquals(3, output.pageCount());
+        try (ZipFile zip = new ZipFile(output.path().toFile())) {
+            assertEquals(List.of("page-0002." + extension, "page-0003." + extension, "page-0010." + extension),
+                    zip.stream().map(entry -> entry.getName()).toList());
+            for (int page : List.of(2, 3, 10)) {
+                try (var stream = zip.getInputStream(zip.getEntry("page-%04d.%s".formatted(page, extension)))) {
+                    var image = ImageIO.read(stream);
+                    assertEquals(72, image.getWidth());
+                    Color actual = new Color(image.getRGB(36, 36));
+                    Color expected = pageColor(page);
+                    assertTrue(Math.abs(actual.getRed() - expected.getRed()) < 20);
+                    assertTrue(Math.abs(actual.getGreen() - expected.getGreen()) < 20);
+                    assertTrue(Math.abs(actual.getBlue() - expected.getBlue()) < 20);
+                }
+            }
+        }
+    }
+
+    @Test
+    void selectingOnePageReturnsImageNamedForOriginalPageAndRejectsOverflow() throws Exception {
+        Path source = coloredPages();
+        ConversionOutput result = new PdfToPngConverter(null, 72).convert(selectedInput(source, "10"),
+                temp.resolve("single"), temp.resolve("single.png"), ParseLimits.defaults(), (stage, percent) -> { });
+        assertEquals("colored-page-0010.png", result.outputName());
+        assertEquals(1, result.pageCount());
+        assertEquals(72, ImageIO.read(result.path().toFile()).getWidth());
+        Path badOutput = temp.resolve("overflow.png");
+        ConversionFailureException error = assertThrows(ConversionFailureException.class,
+                () -> new PdfToPngConverter(null, 72).convert(selectedInput(source, "1,13"),
+                        temp.resolve("overflow"), badOutput, ParseLimits.defaults(), (stage, percent) -> { }));
+        assertEquals("PDF_PAGE_RANGE_INVALID", error.code());
+        assertFalse(Files.exists(badOutput));
+        Exception huge = assertThrows(Exception.class, () -> new PdfToPngConverter(null, 72).convert(
+                selectedInput(source, "1"), temp.resolve("huge-selected"), temp.resolve("huge-selected.png"),
+                ParseLimits.defaults(), (stage, percent) -> { }));
+        assertTrue(huge.getMessage().contains("渲染像素超过限制"));
+    }
+
+    private Path coloredPages() throws Exception {
+        Path source = temp.resolve("colored.pdf");
+        try (PDDocument pdf = new PDDocument()) {
+            for (int i = 1; i <= 12; i++) {
+                // Page 1 would exceed the bitmap limit and must never be rendered for a 2,3,10 selection.
+                PDPage page = new PDPage(i == 1 ? new PDRectangle(14_400, 14_400) : new PDRectangle(72, 72));
+                pdf.addPage(page);
+                try (PDPageContentStream content = new PDPageContentStream(pdf, page)) {
+                    content.setNonStrokingColor(pageColor(i));
+                    content.addRect(0, 0, 72, 72);
+                    content.fill();
+                }
+            }
+            pdf.save(source.toFile());
+        }
+        return source;
+    }
+
+    private Color pageColor(int page) {
+        return new Color[]{Color.RED, Color.GREEN, Color.BLUE, Color.ORANGE}[(page - 1) % 4];
+    }
+
+    private ConversionInput selectedInput(Path source, String pages) throws Exception {
+        ConversionOptions options = ConversionOptions.fromRequest(null, null, null, null, null,
+                null, null, null, null, null, pages, null, null);
+        return new ConversionInput("colored.pdf", "application/pdf", Files.size(source), source, options);
     }
 }

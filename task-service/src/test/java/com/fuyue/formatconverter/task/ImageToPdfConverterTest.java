@@ -1,5 +1,7 @@
 package com.fuyue.formatconverter.task;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fuyue.formatconverter.docx.PoiDocxRenderer;
 import com.fuyue.formatconverter.model.WarningCode;
 import com.fuyue.formatconverter.parser.OfdrwParser;
@@ -27,6 +29,7 @@ import java.util.zip.CRC32;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -113,6 +116,206 @@ class ImageToPdfConverterTest {
                 assertEquals(72d, pdf.getPage(1).getMediaBox().getHeight(), 0.1d);
             }
         }
+    }
+
+    @Test
+    void fitsRotatedJpegIntoPortraitA4WithoutCroppingOrStretching() throws Exception {
+        BufferedImage image = solidImage(200, 100, Color.BLUE);
+        Graphics2D graphics = image.createGraphics();
+        graphics.setColor(Color.RED);
+        graphics.fillRect(0, 0, 100, 100);
+        graphics.dispose();
+        Path source = temp.resolve("a4-rotated.jpg");
+        Files.write(source, jpegWithExif(image, 6, 100));
+        ConversionOptions options = ConversionOptions.fromRequest(null, null, null, null, null,
+                null, null, null, null, null, null, "a4-portrait", 20d);
+        Path output = temp.resolve("a4-rotated.pdf");
+        new ImageToPdfConverter(DocumentFormat.JPG).convert(new ConversionInput("photo.jpg", "image/jpeg",
+                Files.size(source), source, options), temp.resolve("a4-work"), output,
+                ParseLimits.defaults(), (stage, percent) -> { });
+        try (var pdf = Loader.loadPDF(output.toFile())) {
+            var page = pdf.getPage(0).getMediaBox();
+            assertEquals(210d, page.getWidth() * 25.4 / 72, 0.1d);
+            assertEquals(297d, page.getHeight() * 25.4 / 72, 0.1d);
+            BufferedImage rendered = new PDFRenderer(pdf).renderImageWithDPI(0, 72);
+            // A rotated 1:2 image fills available height, retains all four edges and is centered.
+            int cx = rendered.getWidth() / 2;
+            int top = Math.round(20f * 72f / 25.4f);
+            int imageHeight = rendered.getHeight() - 2 * top;
+            int left = (rendered.getWidth() - imageHeight / 2) / 2;
+            assertColorNear(Color.WHITE, new Color(rendered.getRGB(cx, top - 5)), 8);
+            assertColorNear(Color.WHITE, new Color(rendered.getRGB(left - 5, rendered.getHeight() / 2)), 8);
+            assertColorNear(Color.RED, new Color(rendered.getRGB(left + 5, top + 5)), 45);
+            assertColorNear(Color.BLUE, new Color(rendered.getRGB(rendered.getWidth() - left - 6,
+                    rendered.getHeight() - top - 6)), 45);
+        }
+    }
+
+    @Test
+    void mixedImageBatchUsesA4AutoAfterExifAndKeepsOrder() throws Exception {
+        byte[] png = pngWithDpi(solidImage(100, 50, Color.RED), 100);
+        byte[] jpeg = jpegWithExif(solidImage(40, 20, Color.BLUE), 6, 100);
+        ConversionOptions options = ConversionOptions.fromRequest(null, null, null, null, null,
+                null, null, null, null, null, null, "a4-auto", 10d);
+        try (ConversionTaskService service = new ConversionTaskService(batchConfig("a4-mixed"), imageConverters())) {
+            TaskSnapshot task = service.createTask(List.of(upload("wide.png", "image/png", png),
+                    upload("rotated.jpg", "image/jpeg", jpeg)), DocumentFormat.PDF, options);
+            assertEquals(TaskStatus.SUCCESS, await(service, task.taskId()).status());
+            try (var pdf = Loader.loadPDF(service.download(task.taskId()).path().toFile())) {
+                assertEquals(2, pdf.getNumberOfPages());
+                assertEquals(297d, pdf.getPage(0).getMediaBox().getWidth() * 25.4 / 72, 0.1d);
+                assertEquals(210d, pdf.getPage(1).getMediaBox().getWidth() * 25.4 / 72, 0.1d);
+                PDFRenderer renderer = new PDFRenderer(pdf);
+                for (int i = 0; i < 2; i++) {
+                    BufferedImage rendered = renderer.renderImage(i);
+                    assertColorNear(i == 0 ? Color.RED : Color.BLUE,
+                            new Color(rendered.getRGB(rendered.getWidth() / 2, rendered.getHeight() / 2)), 20);
+                }
+            }
+        }
+    }
+
+    @Test
+    void mergesMixedPngAndJpegInEitherOrderUsingEachImagesDpiAndOrientation() throws Exception {
+        byte[] png = pngWithDpi(solidImage(100, 50, Color.RED), 100);
+        byte[] jpeg = jpegWithExif(solidImage(40, 20, Color.BLUE), 6, 100);
+        UploadPayload pngUpload = upload("first.png", "image/png", png);
+        UploadPayload jpegUpload = upload("second.JPEG", "image/jpeg", jpeg);
+        for (boolean jpegFirst : List.of(false, true)) {
+            TaskServiceConfig config = batchConfig("mixed-" + jpegFirst);
+            try (ConversionTaskService service = new ConversionTaskService(config, imageConverters())) {
+                TaskSnapshot created = service.createTask(jpegFirst
+                        ? List.of(jpegUpload, pngUpload) : List.of(pngUpload, jpegUpload), DocumentFormat.PDF);
+                TaskSnapshot finished = await(service, created.taskId());
+                assertEquals(TaskStatus.SUCCESS, finished.status(), finished.errorMessage());
+                assertEquals(jpegFirst ? DocumentFormat.JPG : DocumentFormat.PNG, finished.sourceFormat());
+                assertEquals(jpegFirst ? List.of(DocumentFormat.JPG, DocumentFormat.PNG)
+                                : List.of(DocumentFormat.PNG, DocumentFormat.JPG),
+                        finished.files().stream().map(TaskFileResult::sourceFormat).toList());
+                assertFalse(finished.warnings().stream().anyMatch(w -> w.code() == WarningCode.IMAGE_DPI_DEFAULTED));
+                assertTrue(finished.warnings().stream().anyMatch(w -> w.code() == WarningCode.EXIF_ORIENTATION_APPLIED));
+                try (var pdf = Loader.loadPDF(service.download(created.taskId()).path().toFile())) {
+                    assertEquals(2, pdf.getNumberOfPages());
+                    int pngPage = jpegFirst ? 1 : 0;
+                    int jpegPage = 1 - pngPage;
+                    assertEquals(72d, pdf.getPage(pngPage).getMediaBox().getWidth(), 0.1d);
+                    assertEquals(36d, pdf.getPage(pngPage).getMediaBox().getHeight(), 0.1d);
+                    assertEquals(14.4d, pdf.getPage(jpegPage).getMediaBox().getWidth(), 0.1d);
+                    assertEquals(28.8d, pdf.getPage(jpegPage).getMediaBox().getHeight(), 0.1d);
+                    PDFRenderer renderer = new PDFRenderer(pdf);
+                    assertColorNear(Color.RED, new Color(renderer.renderImage(pngPage).getRGB(5, 5)), 8);
+                    assertColorNear(Color.BLUE, new Color(renderer.renderImage(jpegPage).getRGB(5, 5)), 15);
+                }
+            }
+        }
+    }
+
+    @Test
+    void validatesEachMixedImagesMimeAndHeaderAndRejectsUnsupportedExtensions() throws Exception {
+        byte[] png = pngWithDpi(solidImage(100, 50, Color.RED), 100);
+        byte[] jpeg = jpegWithExif(solidImage(40, 20, Color.BLUE), 1, 100);
+        try (ConversionTaskService service = new ConversionTaskService(batchConfig("invalid-mixed"), imageConverters())) {
+            UploadPayload first = upload("valid.png", "image/png", png);
+            IllegalArgumentException mime = assertThrows(IllegalArgumentException.class, () -> service.createTask(
+                    List.of(first, upload("wrong.jpg", "image/png", jpeg)), DocumentFormat.PDF));
+            assertTrue(mime.getMessage().contains("MIME"), mime.getMessage());
+            IllegalArgumentException jpegHeader = assertThrows(IllegalArgumentException.class, () -> service.createTask(
+                    List.of(first, upload("wrong.jpg", "image/jpeg", png)), DocumentFormat.PDF));
+            assertTrue(jpegHeader.getMessage().contains("JPEG 图片 文件头校验失败"), jpegHeader.getMessage());
+            IllegalArgumentException pngHeader = assertThrows(IllegalArgumentException.class, () -> service.createTask(
+                    List.of(upload("valid.jpg", "image/jpeg", jpeg), upload("wrong.png", "image/png", jpeg)),
+                    DocumentFormat.PDF));
+            assertTrue(pngHeader.getMessage().contains("PNG 图片 文件头校验失败"), pngHeader.getMessage());
+            assertThrows(IllegalArgumentException.class, () -> service.createTask(
+                    List.of(first, upload("unsupported.gif", "image/gif", png)), DocumentFormat.PDF));
+            assertTrue(service.listTasks(10).isEmpty());
+        }
+    }
+
+    @Test
+    void continuesToRejectMixedSourcesForOtherConversions() throws Exception {
+        byte[] png = pngWithDpi(solidImage(100, 50, Color.RED), 100);
+        byte[] jpeg = jpegWithExif(solidImage(40, 20, Color.BLUE), 1, 100);
+        List<FileConverter> routes = List.of(failingConverter(DocumentFormat.PNG, DocumentFormat.TXT),
+                failingConverter(DocumentFormat.JPG, DocumentFormat.TXT),
+                failingConverter(DocumentFormat.TXT, DocumentFormat.PDF), new ImageToPdfConverter(DocumentFormat.PNG));
+        try (ConversionTaskService service = new ConversionTaskService(batchConfig("other-mixed"), routes)) {
+            IllegalArgumentException ocr = assertThrows(IllegalArgumentException.class, () -> service.createTask(
+                    List.of(upload("first.png", "image/png", png), upload("second.jpg", "image/jpeg", jpeg)),
+                    DocumentFormat.TXT));
+            assertTrue(ocr.getMessage().contains("相同源格式"));
+            IllegalArgumentException documents = assertThrows(IllegalArgumentException.class, () -> service.createTask(
+                    List.of(upload("first.png", "image/png", png), upload("second.txt", "text/plain", new byte[]{65})),
+                    DocumentFormat.PDF));
+            assertTrue(documents.getMessage().contains("相同源格式"));
+        }
+    }
+
+    @Test
+    void recoversAndRetriesEachMixedInputFormatEvenWhenNoFileResultsWerePersisted() throws Exception {
+        byte[] png = pngWithDpi(solidImage(100, 50, Color.RED), 100);
+        byte[] jpeg = jpegWithExif(solidImage(40, 20, Color.BLUE), 6, 100);
+        for (boolean unfinished : List.of(false, true)) {
+            TaskServiceConfig config = batchConfig("retry-mixed-" + unfinished);
+            String taskId;
+            try (ConversionTaskService service = new ConversionTaskService(config, List.of(
+                    failingConverter(DocumentFormat.PNG, DocumentFormat.PDF),
+                    failingConverter(DocumentFormat.JPG, DocumentFormat.PDF)))) {
+                taskId = service.createTask(List.of(upload("first.png", "image/png", png),
+                        upload("second.jpeg", "image/jpeg", jpeg)), DocumentFormat.PDF).taskId();
+                TaskSnapshot failed = await(service, taskId);
+                assertEquals(TaskStatus.FAILED, failed.status());
+                assertEquals(List.of(DocumentFormat.PNG, DocumentFormat.JPG),
+                        failed.files().stream().map(TaskFileResult::sourceFormat).toList());
+            }
+            if (unfinished) {
+                Path manifest = config.dataRoot().resolve("tasks").resolve(taskId).resolve("manifest.json");
+                ObjectMapper mapper = new ObjectMapper();
+                ObjectNode snapshot = (ObjectNode) mapper.readTree(manifest.toFile());
+                snapshot.put("status", "WAITING");
+                snapshot.putArray("files");
+                mapper.writeValue(manifest.toFile(), snapshot);
+            }
+            try (ConversionTaskService recovered = new ConversionTaskService(config, imageConverters())) {
+                assertEquals(TaskStatus.FAILED, recovered.get(taskId).status());
+                if (unfinished) assertEquals("SERVICE_RESTARTED", recovered.get(taskId).errorCode());
+                TaskSnapshot retried = await(recovered, recovered.retry(taskId).taskId());
+                assertEquals(TaskStatus.SUCCESS, retried.status(), retried.errorMessage());
+                assertEquals(List.of(DocumentFormat.PNG, DocumentFormat.JPG),
+                        retried.files().stream().map(TaskFileResult::sourceFormat).toList());
+                assertEquals(unfinished ? List.of("document-1.png", "document-2.jpg")
+                                : List.of("first.png", "second.jpeg"),
+                        retried.files().stream().map(TaskFileResult::fileName).toList());
+                try (var pdf = Loader.loadPDF(recovered.download(retried.taskId()).path().toFile())) {
+                    assertEquals(2, pdf.getNumberOfPages());
+                    assertEquals(72d, pdf.getPage(0).getMediaBox().getWidth(), 0.1d);
+                    assertEquals(14.4d, pdf.getPage(1).getMediaBox().getWidth(), 0.1d);
+                }
+            }
+        }
+    }
+
+    private List<FileConverter> imageConverters() {
+        return List.of(new ImageToPdfConverter(DocumentFormat.PNG), new ImageToPdfConverter(DocumentFormat.JPG));
+    }
+
+    private TaskServiceConfig batchConfig(String directory) {
+        return new TaskServiceConfig(temp.resolve(directory), 1, 4,
+                Duration.ofSeconds(20), Duration.ofHours(1), ParseLimits.defaults());
+    }
+
+    private UploadPayload upload(String name, String mime, byte[] bytes) {
+        return new UploadPayload(name, mime, bytes.length, () -> new ByteArrayInputStream(bytes));
+    }
+
+    private FileConverter failingConverter(DocumentFormat source, DocumentFormat target) {
+        return new FileConverter() {
+            @Override public ConversionRoute route() { return ConversionRoute.of(source, target, "test route"); }
+            @Override public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                                       ParseLimits limits, ConversionProgress progress) throws Exception {
+                throw new ConversionFailureException("TEST_UNAVAILABLE", "暂时不可用，供重启后重试");
+            }
+        };
     }
 
     private byte[] pngWithDpi(BufferedImage image, int dpi) throws Exception {

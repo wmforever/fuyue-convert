@@ -67,6 +67,33 @@ class TesseractCapabilityTest {
     }
 
     @Test
+    void findsJpackageBundleBesideLauncherWithSpacesFromAnUnrelatedWorkingDirectory() throws Exception {
+        Path installation = temp.resolve("Program Files/Fuyue Convert");
+        Path bundled = installation.resolve("app/ocr");
+        Files.createDirectories(bundled);
+        Path outside = Files.createDirectories(temp.resolve("unrelated working directory"));
+        String oldLauncher = System.getProperty("jpackage.app-path");
+        String oldHome = System.getProperty("format.converter.app.home");
+        String oldDirectory = System.getProperty("user.dir");
+        try {
+            System.clearProperty("format.converter.app.home");
+            System.setProperty("jpackage.app-path", installation.resolve("FuyueConvert.exe").toString());
+            System.setProperty("user.dir", outside.toString());
+
+            assertEquals(bundled.toAbsolutePath().normalize(),
+                    TesseractOcrConverter.bundledRoot(Map.of()).orElseThrow(),
+                    "jpackage.app-path 是启动器文件路径，必须从其父目录寻找 app/ocr");
+            var disabled = TesseractOcrConverter.detectConfigured(Map.of("FORMAT_CONVERTER_OCR_ENABLED", "false"));
+            assertFalse(disabled.enabled(), "自动发现安装包不得覆盖用户显式关闭 OCR 的配置");
+            assertFalse(disabled.available());
+        } finally {
+            restoreProperty("jpackage.app-path", oldLauncher);
+            restoreProperty("format.converter.app.home", oldHome);
+            restoreProperty("user.dir", oldDirectory);
+        }
+    }
+
+    @Test
     void explicitFalseDisablesEvenAValidBundledRuntime() throws Exception {
         assumePosix();
         Path appHome = temp.resolve("disabled-bundle");
@@ -149,6 +176,36 @@ class TesseractCapabilityTest {
         assertEquals("OCR_CONFIG_INVALID", capability.errorCode());
     }
 
+    @Test
+    void explicitTessdataDirectoryWithSpacesIsPassedToCapabilityProbesAndRecognitionSettings() throws Exception {
+        assumePosix();
+        Path binary = temp.resolve("tesseract");
+        Path models = Files.createDirectories(temp.resolve("separate language models"));
+        String quotedModels = "'" + models.toString().replace("'", "'\\''") + "'";
+        Files.writeString(binary, "#!/bin/sh\n"
+                + "if [ \"$1\" = \"--version\" ]; then echo 'tesseract 5.5.0-test'; exit 0; fi\n"
+                + "if [ \"$1\" = \"--list-langs\" ] && [ \"$2\" = \"--tessdata-dir\" ] && [ \"$3\" = " + quotedModels + " ]; then printf 'chi_sim\\neng\\n'; exit 0; fi\n"
+                + "exit 2\n");
+        assertTrue(binary.toFile().setExecutable(true));
+        var environment = enabledEnvironment(binary);
+        environment.put("FORMAT_CONVERTER_TESSDATA_DIR", models.toString());
+        var capability = TesseractOcrConverter.detectConfigured(environment);
+        assertTrue(capability.available(), capability.message());
+        assertEquals(models.toAbsolutePath().normalize(), capability.settings().tessdataDirectory());
+        assertFalse(capability.settings().bundled());
+    }
+
+    @Test
+    void missingExplicitTessdataDirectoryReturnsActionableConfigurationFailure() throws Exception {
+        assumePosix();
+        var environment = enabledEnvironment(fakeCapabilityBinary("chi_sim\neng"));
+        environment.put("FORMAT_CONVERTER_TESSDATA_DIR", temp.resolve("missing models").toString());
+        var capability = TesseractOcrConverter.detectConfigured(environment);
+        assertFalse(capability.available());
+        assertEquals("OCR_CONFIG_INVALID", capability.errorCode());
+        assertTrue(capability.message().contains("语言包文件夹"));
+    }
+
     private Map<String, String> enabledEnvironment(Path binary) {
         Map<String, String> environment = new HashMap<>();
         environment.put("FORMAT_CONVERTER_OCR_ENABLED", "true");
@@ -175,5 +232,10 @@ class TesseractCapabilityTest {
 
     private void assumePosix() {
         assumeTrue(!System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win"));
+    }
+
+    private void restoreProperty(String key, String value) {
+        if (value == null) System.clearProperty(key);
+        else System.setProperty(key, value);
     }
 }

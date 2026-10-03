@@ -63,8 +63,15 @@ class PdfOcrConverterTest {
                 temp.resolve("docx-work"), docx, ParseLimits.defaults(), (stage, percent) -> { });
 
         try (XWPFDocument word = new XWPFDocument(Files.newInputStream(docx))) {
-            String wordText = word.getParagraphs().stream().map(paragraph -> paragraph.getText())
-                    .reduce("", (left, right) -> left + "\n" + right);
+            // POI's paragraph convenience method surrounds each VML text box
+            // with parentheses. Read the actual editable text nodes instead.
+            var xml = org.apache.poi.util.XMLHelper.newDocumentBuilder().parse(new java.io.ByteArrayInputStream(
+                    word.getDocument().xmlText().getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+            var nodes = xml.getElementsByTagNameNS(
+                    "http://schemas.openxmlformats.org/wordprocessingml/2006/main", "t");
+            StringBuilder contents = new StringBuilder();
+            for (int index = 0; index < nodes.getLength(); index++) contents.append(nodes.item(index).getTextContent());
+            String wordText = contents.toString();
             assertTrue(wordText.contains("REAL TEXT PAGE"), wordText);
             assertTrue(wordText.contains("SCANNED OCR 2026"), wordText);
             assertFalse(word.getAllPictures().isEmpty(),

@@ -57,7 +57,8 @@ abstract class PdfToImageConverter implements FileConverter {
         }
         this.route = ConversionRoute.of(DocumentFormat.PDF, targetFormat, description,
                 QualityLevel.STABLE, ConversionStrategy.FIDELITY, List.of(),
-                List.of("多页 PDF 输出 ZIP", "可按任务选择 36-600 DPI；默认 160 DPI，可通过 FORMAT_CONVERTER_IMAGE_DPI 配置 36-600 DPI"));
+                List.of("支持指定页码导出；单个选中页输出图片，多个选中页输出 ZIP，文件名保留原页码",
+                        "可按任务选择 36-600 DPI；默认 160 DPI，可通过 FORMAT_CONVERTER_IMAGE_DPI 配置 36-600 DPI"));
         this.targetFormat = targetFormat;
         this.imageFormat = imageFormat;
         this.popplerFlag = popplerFlag;
@@ -82,51 +83,65 @@ abstract class PdfToImageConverter implements FileConverter {
 
     private ConversionOutput convertWithPoppler(ConversionInput input, Path workDir, Path outputPath,
                                                 ParseLimits limits, ConversionProgress progress, float dpi) throws Exception {
-        int pageCount = validatePdfForRender(input.path(), limits, dpi);
+        RenderPlan plan = validatePdfForRender(input, limits, dpi);
         progress.update(TaskStage.RENDERING, 30);
         Path renderDir = Files.createDirectories(workDir.resolve("poppler"));
         Path prefix = renderDir.resolve("page");
-        List<String> command = new ArrayList<>(List.of(popplerBinary.toString(), "-r",
-                formatDpi(dpi), "-cropbox", popplerFlag));
-        if (targetFormat == DocumentFormat.JPG) command.addAll(List.of("-jpegopt", "quality=90,optimize=y"));
-        command.add(input.path().toString());
-        command.add(prefix.toString());
-        ConversionGuards.runProcess(command, workDir.resolve("pdftoppm.log"), Duration.ofMinutes(2),
-                "PDF 渲染 " + targetFormat.label());
+        // Render only selected ranges, keeping native source page numbers in Poppler filenames.
+        for (int index = 0; index < plan.pages().size();) {
+            int first = plan.pages().get(index);
+            int last = first;
+            while (++index < plan.pages().size() && plan.pages().get(index) == last + 1) {
+                last = plan.pages().get(index);
+            }
+            List<String> command = new ArrayList<>(List.of(popplerBinary.toString(), "-r",
+                    formatDpi(dpi), "-cropbox", popplerFlag, "-f", Integer.toString(first),
+                    "-l", Integer.toString(last)));
+            if (targetFormat == DocumentFormat.JPG) command.addAll(List.of("-jpegopt", "quality=90,optimize=y"));
+            command.add(input.path().toString());
+            command.add(prefix.toString());
+            ConversionGuards.runProcess(command, workDir.resolve("pdftoppm-" + first + ".log"), Duration.ofMinutes(2),
+                    "PDF 渲染 " + targetFormat.label());
+            ConversionGuards.requireTotalSize(renderedPages(renderDir), limits, "PDF 渲染 " + targetFormat.label());
+            progress.update(TaskStage.RENDERING, 30 + (int) (index * 55d / plan.pages().size()));
+        }
         List<Path> pages = renderedPages(renderDir);
         if (pages.isEmpty()) throw new IOException("PDF 渲染 " + targetFormat.label() + " 未生成页面");
-        if (pages.size() != pageCount) throw new IOException("PDF 渲染页数不一致：" + pages.size() + " != " + pageCount);
+        if (!pages.stream().map(this::pageNumber).toList().equals(plan.pages())) {
+            throw new IOException("PDF 渲染结果与选中页码不一致");
+        }
         ConversionGuards.requireTotalSize(pages, limits, "PDF 渲染 " + targetFormat.label());
         progress.update(TaskStage.PACKAGING, 90);
         if (pages.size() == 1) {
             Files.move(pages.get(0), outputPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            return new ConversionOutput(outputPath, outputName(input.displayName()), 1, List.of());
+            return new ConversionOutput(outputPath, outputName(input.displayName(), plan), 1, List.of());
         }
-        return packagePages(input, outputPath, pages, pages.size());
+        return packagePages(input, outputPath, pages, plan.pages());
     }
 
     private ConversionOutput convertWithPdfBox(ConversionInput input, Path workDir, Path outputPath,
                                                ParseLimits limits, ConversionProgress progress, float dpi) throws Exception {
         progress.update(TaskStage.PARSING, 20);
-        int validatedPages = validatePdfForRender(input.path(), limits, dpi);
+        RenderPlan plan = validatePdfForRender(input, limits, dpi);
         try (var document = Loader.loadPDF(input.path().toFile())) {
             PDFRenderer renderer = new PDFRenderer(document);
             int pages = document.getNumberOfPages();
             if (pages <= 0) throw new IOException("PDF 没有可转换页面");
             if (pages > limits.maxPages()) throw new IOException("PDF 页数超过限制：" + pages + " > " + limits.maxPages());
-            if (pages != validatedPages) throw new IOException("PDF 校验与渲染页数不一致");
-            if (pages == 1) {
+            if (pages != plan.totalPages()) throw new IOException("PDF 校验与渲染页数不一致");
+            if (plan.pages().size() == 1) {
                 progress.update(TaskStage.RENDERING, 70);
-                writePage(renderer, 0, outputPath, dpi);
+                writePage(renderer, plan.pages().get(0) - 1, outputPath, dpi);
                 ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "PDF 单页 " + targetFormat.label());
-                return new ConversionOutput(outputPath, outputName(input.displayName()), 1, List.of());
+                return new ConversionOutput(outputPath, outputName(input.displayName(), plan), 1, List.of());
             }
             List<Path> rendered = new ArrayList<>();
             long totalImageBytes = 0;
-            for (int i = 0; i < pages; i++) {
-                progress.update(TaskStage.RENDERING, 20 + (int) ((i + 1) * 65.0 / Math.max(1, pages)));
-                Path pageImage = workDir.resolve(pageFileName(i + 1));
-                writePage(renderer, i, pageImage, dpi);
+            for (int i = 0; i < plan.pages().size(); i++) {
+                progress.update(TaskStage.RENDERING, 20 + (int) ((i + 1) * 65.0 / plan.pages().size()));
+                int sourcePage = plan.pages().get(i);
+                Path pageImage = workDir.resolve(pageFileName(sourcePage));
+                writePage(renderer, sourcePage - 1, pageImage, dpi);
                 ConversionGuards.requireNonEmptyOutputFile(pageImage, limits, "PDF 单页 " + targetFormat.label());
                 totalImageBytes += Files.size(pageImage);
                 if (totalImageBytes > limits.maxExpandedBytes()) {
@@ -135,7 +150,7 @@ abstract class PdfToImageConverter implements FileConverter {
                 }
                 rendered.add(pageImage);
             }
-            return packagePages(input, outputPath, rendered, pages);
+            return packagePages(input, outputPath, rendered, plan.pages());
         }
     }
 
@@ -208,38 +223,41 @@ abstract class PdfToImageConverter implements FileConverter {
         return null;
     }
 
-    private int validatePdfForRender(Path input, ParseLimits limits, float dpi) throws Exception {
-        try (var document = Loader.loadPDF(input.toFile())) {
+    private record RenderPlan(int totalPages, List<Integer> pages) { }
+
+    private RenderPlan validatePdfForRender(ConversionInput input, ParseLimits limits, float dpi) throws Exception {
+        try (var document = Loader.loadPDF(input.path().toFile())) {
             int pages = document.getNumberOfPages();
             if (pages <= 0) throw new IOException("PDF 没有可转换页面");
             if (pages > limits.maxPages()) throw new IOException("PDF 页数超过限制：" + pages + " > " + limits.maxPages());
-            for (int page = 0; page < pages; page++) {
-                var pdfPage = document.getPage(page);
+            List<Integer> selected = input.options().imagePageNumbers(pages);
+            for (int page : selected) {
+                var pdfPage = document.getPage(page - 1);
                 var crop = pdfPage.getCropBox();
                 float userUnit = pdfPage.getUserUnit();
                 if (!Float.isFinite(userUnit) || userUnit <= 0) userUnit = 1f;
                 ConversionGuards.requireRenderBounds(crop.getWidth() * userUnit,
                         crop.getHeight() * userUnit, dpi, limits);
             }
-            return pages;
+            return new RenderPlan(pages, selected);
         } catch (InvalidPasswordException e) {
             throw new ConversionFailureException("PDF_PASSWORD_REQUIRED", "PDF 已加密，需要密码；当前任务 API 不接收密码。");
         }
     }
 
-    private ConversionOutput packagePages(ConversionInput input, Path outputPath, List<Path> pages, int pageCount)
+    private ConversionOutput packagePages(ConversionInput input, Path outputPath, List<Path> pages, List<Integer> sourcePages)
             throws IOException {
         Path zip = outputPath.resolveSibling(outputPath.getFileName().toString()
                 .replaceFirst("\\." + targetFormat.extension() + "$", ".zip"));
         try (ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(zip)))) {
             for (int i = 0; i < pages.size(); i++) {
-                out.putNextEntry(new ZipEntry(pageFileName(i + 1)));
+                out.putNextEntry(new ZipEntry(pageFileName(sourcePages.get(i))));
                 Files.copy(pages.get(i), out);
                 out.closeEntry();
             }
         }
         return new ConversionOutput(zip, input.displayName().replaceFirst("(?i)\\.pdf$", "-pages.zip"),
-                pageCount, List.of());
+                sourcePages.size(), List.of());
     }
 
     private List<Path> renderedPages(Path renderDir) throws IOException {
@@ -261,8 +279,10 @@ abstract class PdfToImageConverter implements FileConverter {
                 : name.endsWith("." + targetFormat.extension());
     }
 
-    private String outputName(String displayName) {
-        return displayName.replaceFirst("(?i)\\.pdf$", "." + targetFormat.extension());
+    private String outputName(String displayName, RenderPlan plan) {
+        String suffix = plan.totalPages() == 1 ? "." + targetFormat.extension()
+                : "-" + pageFileName(plan.pages().get(0));
+        return displayName.replaceFirst("(?i)\\.pdf$", suffix);
     }
 
     private String pageFileName(int page) {

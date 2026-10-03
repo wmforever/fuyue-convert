@@ -62,7 +62,7 @@ jobs:
         working-directory: desktop
         shell: pwsh
         env:
-          FORMAT_CONVERTER_BUNDLE_OCR: "false"
+          FORMAT_CONVERTER_BUNDLE_OCR: "true"
           FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME: "true"
           FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION: ${{ env.TEMURIN_RUNTIME_VERSION }}
         run: |
@@ -204,7 +204,7 @@ jobs:
       - name: Install, check, and package Full
         working-directory: desktop
         env:
-          FORMAT_CONVERTER_BUNDLE_OCR: "false"
+          FORMAT_CONVERTER_BUNDLE_OCR: "true"
           FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME: "true"
           FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION: ${{ env.TEMURIN_RUNTIME_VERSION }}
         run: |
@@ -342,7 +342,7 @@ jobs:
 
           - Lite：体积较小，不内置 LibreOffice；Office 路线使用电脑上已有的 LibreOffice。
           - Full：内置 LibreOffice 26.2.5.2，DOCX/XLSX/PPTX/WPS/ET/DPS/UOF 相关 Office 路线开箱可用。
-          - 两种版本都不内置 OCR/Tesseract 或 Poppler。
+          - 两种版本均内置中英文 OCR/Tesseract；不内置 Poppler。
           - macOS 包为 ad-hoc 签名且未经过 Apple 公证，首次打开请在“系统设置 → 隐私与安全”中选择“仍要打开”。
 
           LibreOffice 对应源码：[The Document Foundation 官方源码包](https://download.documentfoundation.org/libreoffice/src/26.2.5/libreoffice-26.2.5.2.tar.xz)，SHA-256：\`8ec785ee1fd1a1d9b9d8eba1c8ff7556695ca8f02e1f7a26bef8cd540f669fea\`。

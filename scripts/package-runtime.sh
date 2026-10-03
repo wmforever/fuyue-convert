@@ -42,17 +42,12 @@ cp README.md README_EN.md LICENSE THIRD_PARTY_NOTICES.md "$PACKAGE_DIR/"
 mkdir -p "$PACKAGE_DIR/docs"
 cp docs/known-limitations.md docs/test-report.md "$PACKAGE_DIR/docs/"
 
-BUNDLE_OCR="${FORMAT_CONVERTER_BUNDLE_OCR:-auto}"
-if [[ "$BUNDLE_OCR" != "false" && "$BUNDLE_OCR" != "0" ]]; then
-  if command -v tesseract >/dev/null 2>&1; then
-    "$ROOT_DIR/scripts/prepare-ocr-runtime.sh" "$PACKAGE_DIR/app/ocr"
-  elif [[ "$BUNDLE_OCR" == "true" || "$BUNDLE_OCR" == "1" ]]; then
-    echo "要求内置 OCR，但构建机未安装 Tesseract" >&2
-    exit 1
-  else
-    echo "构建机未安装 Tesseract，本次运行包不含内置 OCR"
-  fi
-fi
+BUNDLE_OCR="${FORMAT_CONVERTER_BUNDLE_OCR:-true}"
+case "$BUNDLE_OCR" in
+  true|1) "$ROOT_DIR/scripts/prepare-ocr-runtime.sh" "$PACKAGE_DIR/app/ocr" ;;
+  false|0) echo "已明确关闭内置 OCR，本包不支持开箱即用的扫描件识别" ;;
+  *) echo "FORMAT_CONVERTER_BUNDLE_OCR 必须为 true 或 false" >&2; exit 1 ;;
+esac
 
 if [[ -x "$JLINK_BIN" ]]; then
   "$JLINK_BIN" \

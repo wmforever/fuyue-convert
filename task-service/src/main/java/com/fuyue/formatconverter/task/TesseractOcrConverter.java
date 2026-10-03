@@ -10,7 +10,9 @@ import com.fuyue.formatconverter.parser.ParseLimits;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -103,25 +105,170 @@ public final class TesseractOcrConverter implements FileConverter {
         ConversionGuards.requireImageBounds(image, limits);
         ImageDimensions dimensions = dimensions(image);
         requireOcrPixelLimit(dimensions);
-        Path base = workDir.resolve("tesseract-page-%04d".formatted(pageNumber));
+        Path engineImage = pngForEngine(image, workDir, pageNumber, dimensions);
+        long started = System.nanoTime();
+        try {
+            RecognitionResult result = recognizeOnce(engineImage, workDir, pageNumber, physicalBox, dimensions,
+                    limits, "tesseract-page-%04d".formatted(pageNumber), settings.timeout());
+            BufferedImage pixels = ImageIO.read(engineImage.toFile());
+            if (pixels == null) return result;
+            try {
+                if (result.blocks().isEmpty() || result.confidence() < settings.warningConfidence()) {
+                    result = retryEnhanced(result, pixels, workDir, pageNumber, physicalBox, dimensions, limits, started);
+                }
+                // The original pixels, rather than enhanced pixels, remain the geometry authority.
+                return new RecognitionResult(result.blocks().stream()
+                        .map(block -> OcrWordGeometryRefiner.refine(block, pixels, physicalBox)).toList(),
+                        result.confidence(), result.wordCount(), result.imageEnhanced());
+            } finally { pixels.flush(); }
+        } finally {
+            if (!engineImage.equals(image)) {
+                try { Files.deleteIfExists(engineImage); } catch (IOException ignored) { }
+            }
+        }
+    }
+
+    private RecognitionResult recognizeOnce(Path image, Path workDir, int pageNumber, Rect physicalBox,
+                                             ImageDimensions dimensions, ParseLimits limits, String name,
+                                             Duration timeout) throws Exception {
+        Path base = workDir.resolve(name);
         List<String> command = new ArrayList<>(List.of(settings.binary().toString(), image.toString(), base.toString()));
         if (settings.tessdataDirectory() != null) {
             command.add("--tessdata-dir");
             command.add(settings.tessdataDirectory().toString());
         }
         command.addAll(List.of("-l", settings.languages(), "--psm", pageSegmentationMode(), "tsv"));
-        runTesseract(command,
-                workDir.resolve("tesseract-page-%04d.log".formatted(pageNumber)),
-                "Tesseract OCR 第 " + pageNumber + " 页");
+        runTesseract(command, workDir.resolve(name + ".log"), "Tesseract OCR 第 " + pageNumber + " 页", timeout);
         Path tsv = Path.of(base + ".tsv");
         ConversionGuards.requireOutputFile(tsv, limits, "Tesseract OCR TSV");
         return parseTsv(tsv, pageNumber, physicalBox, dimensions, limits);
     }
 
-    private void runTesseract(List<String> command, Path log, String label) throws Exception {
+    private RecognitionResult retryEnhanced(RecognitionResult original, BufferedImage pixels, Path workDir,
+                                              int pageNumber, Rect physicalBox, ImageDimensions dimensions,
+                                              ParseLimits limits, long started) throws Exception {
+        if (remainingTime(started).compareTo(Duration.ofSeconds(1)) <= 0) return original;
+        BufferedImage enhanced = OcrContrastEnhancer.enhance(pixels);
+        if (enhanced == null) return original;
+        Path temporary = null;
+        try {
+            temporary = Files.createTempFile(workDir, "tesseract-enhanced-%04d-".formatted(pageNumber), ".png");
+            if (!ImageIO.write(enhanced, "png", temporary.toFile())) return original;
+            Duration remaining = remainingTime(started);
+            if (remaining.compareTo(Duration.ofSeconds(1)) <= 0) return original;
+            RecognitionResult candidate = recognizeOnce(temporary, workDir, pageNumber, physicalBox, dimensions,
+                    limits, "tesseract-enhanced-page-%04d".formatted(pageNumber), remaining);
+            return preferEnhanced(original, candidate, settings.minimumConfidence())
+                    ? new RecognitionResult(candidate.blocks(), candidate.confidence(), candidate.wordCount(), true)
+                    : original;
+        } catch (IOException ignored) {
+            // Optional recovery must not turn a usable original recognition into a failed task.
+            return original;
+        } finally {
+            enhanced.flush();
+            if (temporary != null) {
+                try { Files.deleteIfExists(temporary); } catch (IOException ignored) { }
+            }
+        }
+    }
+
+    private Duration remainingTime(long started) {
+        return settings.timeout().minusNanos(System.nanoTime() - started);
+    }
+
+    static boolean preferEnhanced(RecognitionResult original, RecognitionResult candidate, double minimumConfidence) {
+        if (candidate.blocks().isEmpty() || candidate.confidence() < minimumConfidence
+                || candidate.confidence() + 1e-9 < original.confidence() + 0.05) return false;
+        String previous = comparisonText(original), next = comparisonText(candidate);
+        if (next.isEmpty() || next.codePointCount(0, next.length())
+                < previous.codePointCount(0, previous.length()) * 0.90) return false;
+        String reliableCandidate = reliableText(joinedText(candidate));
+        int offset = 0;
+        for (TextBlock block : original.blocks()) {
+            for (TextBlock.OcrWord word : block.ocrWords()) {
+                if (word.confidence() < 0.85) continue;
+                String reliable = reliableText(word.text());
+                if (reliable.isEmpty()) continue;
+                int match = reliableCandidate.indexOf(reliable, offset);
+                while (match >= 0 && numericBoundaryChanged(reliableCandidate, reliable, match)) {
+                    match = reliableCandidate.indexOf(reliable, match + 1);
+                }
+                if (match < 0) return false;
+                offset = match + reliable.length();
+            }
+        }
+        return true;
+    }
+
+    private static String comparisonText(RecognitionResult result) {
+        return comparisonText(joinedText(result));
+    }
+
+    private static String joinedText(RecognitionResult result) {
+        return result.blocks().stream().map(TextBlock::text).collect(java.util.stream.Collectors.joining());
+    }
+
+    private static boolean numericBoundaryChanged(String candidate, String reliable, int start) {
+        int end = start + reliable.length();
+        return Character.isDigit(reliable.codePointAt(0)) && start > 0
+                && Character.isDigit(candidate.codePointBefore(start))
+                || Character.isDigit(reliable.codePointBefore(reliable.length())) && end < candidate.length()
+                && Character.isDigit(candidate.codePointAt(end));
+    }
+
+    private static String reliableText(String text) {
+        StringBuilder result = new StringBuilder();
+        text.codePoints().filter(value -> !Character.isWhitespace(value))
+                .forEach(value -> result.appendCodePoint(Character.toLowerCase(value)));
+        return result.toString();
+    }
+
+    private static String comparisonText(String text) {
+        StringBuilder result = new StringBuilder();
+        text.codePoints().filter(Character::isLetterOrDigit)
+                .forEach(value -> result.appendCodePoint(Character.toLowerCase(value)));
+        return result.toString();
+    }
+
+    /** The bundled engine accepts PNG; orientation has already been handled by the caller. */
+    private Path pngForEngine(Path image, Path workDir, int pageNumber, ImageDimensions dimensions)
+            throws ConversionFailureException {
+        BufferedImage decoded = null;
+        Path normalized = null;
+        boolean complete = false;
+        try {
+            try (var input = Files.newInputStream(image)) {
+                if (java.util.Arrays.equals(input.readNBytes(8),
+                        new byte[]{(byte) 137, 80, 78, 71, 13, 10, 26, 10})) return image;
+            }
+            decoded = ImageIO.read(image.toFile());
+            if (decoded == null || decoded.getWidth() != dimensions.width()
+                    || decoded.getHeight() != dimensions.height()) {
+                throw new IOException("Invalid OCR image");
+            }
+            normalized = Files.createTempFile(workDir, "tesseract-input-%04d-".formatted(pageNumber), ".png");
+            if (!ImageIO.write(decoded, "png", normalized.toFile())) throw new IOException("No PNG writer");
+            complete = true;
+            return normalized;
+        } catch (IOException | RuntimeException e) {
+            throw new ConversionFailureException("OCR_IMAGE_NORMALIZATION_FAILED", "无法将 OCR 图片转换为兼容的 PNG 格式");
+        } finally {
+            if (decoded != null) decoded.flush();
+            if (!complete && normalized != null) {
+                try { Files.deleteIfExists(normalized); } catch (IOException ignored) { }
+            }
+        }
+    }
+
+    private void runTesseract(List<String> command, Path log, String label, Duration timeout) throws Exception {
+        long started = System.nanoTime();
         try (OcrProcessPermit ignored = OcrProcessPermit.acquire(settings.lockDirectory(),
-                settings.maxConcurrency(), settings.timeout())) {
-            ConversionGuards.runProcess(command, processEnvironment(settings), log, settings.timeout(), label);
+                settings.maxConcurrency(), timeout)) {
+            Duration remaining = timeout.minusNanos(System.nanoTime() - started);
+            if (remaining.isNegative() || remaining.isZero()) {
+                throw new ConversionFailureException("OCR_TIMEOUT", label + "已超过页面识别时限");
+            }
+            ConversionGuards.runProcess(command, processEnvironment(settings), log, remaining, label);
         } catch (ExternalProcessException e) {
             if (e.reason() == ExternalProcessException.Reason.TIMEOUT) {
                 throw new ConversionFailureException("OCR_TIMEOUT", label + "超过 " + settings.timeout().toSeconds() + " 秒");
@@ -192,13 +339,18 @@ public final class TesseractOcrConverter implements FileConverter {
                 int width = integer(columns[8]);
                 int height = integer(columns[9]);
                 if (width <= 0 || height <= 0) continue;
+                int right = (int) Math.min(dimensions.width(), (long) left + width);
+                int bottom = (int) Math.min(dimensions.height(), (long) top + height);
+                left = Math.max(0, left); top = Math.max(0, top);
+                width = right - left; height = bottom - top;
+                if (width <= 0 || height <= 0) continue;
                 String key = columns[2] + ":" + columns[3] + ":" + columns[4];
                 lines.computeIfAbsent(key, ignored -> new OcrLine())
-                        .add(text, left, top, width, height);
+                        .add(text, left, top, width, height, confidence / 100d);
                 confidenceTotal += confidence;
                 wordCount++;
-                if (lines.size() > limits.maxEntries()) {
-                    throw new java.io.IOException("OCR 行数超过限制：" + lines.size() + " > " + limits.maxEntries());
+                if (wordCount > limits.maxEntries()) {
+                    throw new java.io.IOException("OCR 文字对象超过限制：" + wordCount + " > " + limits.maxEntries());
                 }
             }
         }
@@ -210,9 +362,15 @@ public final class TesseractOcrConverter implements FileConverter {
             double width = Math.max(0.5d, line.width() * page.width() / dimensions.width);
             double height = Math.max(0.5d, line.height() * page.height() / dimensions.height);
             double sizePt = Math.max(5d, Math.min(72d, height * 72d / 25.4d * 0.85d));
+            List<TextBlock.OcrWord> words = line.words.stream().map(word -> new TextBlock.OcrWord(
+                    new Rect(page.x() + word.x() * page.width() / dimensions.width(),
+                            page.y() + word.y() * page.height() / dimensions.height(),
+                            word.width() * page.width() / dimensions.width(),
+                            word.height() * page.height() / dimensions.height()), word.text(), word.confidence())).toList();
             result.add(new TextBlock("ocr-p" + pageNumber + "-l" + (++index), pageNumber,
                     new Rect(x, y, width, height), line.text(), y + height * 0.85d,
-                    new FontStyle("SimSun", sizePt, false, false, null), index));
+                    new FontStyle("Arial", sizePt, false, false, null), index,
+                    0, 0, List.of(), com.fuyue.formatconverter.model.Transform2D.IDENTITY, words));
         }
         double confidence = wordCount == 0 ? 0d : confidenceTotal / wordCount / 100d;
         return new RecognitionResult(List.copyOf(result), confidence, wordCount);
@@ -234,6 +392,10 @@ public final class TesseractOcrConverter implements FileConverter {
         warnings.add(ConversionWarning.withConfidence(WarningCode.OCR_APPLIED,
                 scope + "已使用本地 Tesseract OCR，平均置信度 " + percent(result.confidence()) + "，结果必须人工复核。",
                 pageNumber, null, result.confidence()));
+        if (result.imageEnhanced()) {
+            warnings.add(ConversionWarning.of(WarningCode.OCR_IMAGE_ENHANCED,
+                    scope + "低置信度识别后采用了灰底/阴影归一化与对比度增强结果；原图和坐标未改变，仍需人工复核。", pageNumber));
+        }
         if (result.confidence() < settings.warningConfidence()) {
             warnings.add(ConversionWarning.withConfidence(WarningCode.OCR_LOW_CONFIDENCE,
                     scope + " OCR 置信度低于复核阈值 " + percent(settings.warningConfidence()) + "。",
@@ -317,6 +479,19 @@ public final class TesseractOcrConverter implements FileConverter {
                     null, requested, Set.of(), null);
         }
         EngineCandidate selected = engine.orElseThrow();
+        String configuredTessdata = environment.get("FORMAT_CONVERTER_TESSDATA_DIR");
+        if (configuredTessdata != null && !configuredTessdata.isBlank()) {
+            try {
+                Path tessdata = Path.of(configuredTessdata).toAbsolutePath().normalize();
+                if (!Files.isDirectory(tessdata) || !Files.isReadable(tessdata)) {
+                    throw new IllegalArgumentException("OCR tessdata 语言包文件夹不存在或不可读");
+                }
+                selected = new EngineCandidate(selected.binary(), tessdata, selected.libraryDirectory(), false);
+            } catch (IllegalArgumentException error) {
+                return new Capability(true, false, null, "OCR_CONFIG_INVALID", error.getMessage(), null,
+                        requested, Set.of(), null);
+            }
+        }
         Path executable = selected.binary();
         String detectedVersion = version(selected).orElse("unknown");
         Set<String> available = languages(selected);
@@ -381,10 +556,19 @@ public final class TesseractOcrConverter implements FileConverter {
                 .map(binary -> new EngineCandidate(binary.toAbsolutePath().normalize(), null, null, false));
     }
 
-    private static Optional<Path> bundledRoot(Map<String, String> environment) {
+    static Optional<Path> bundledRoot(Map<String, String> environment) {
         LinkedHashSet<Path> homes = new LinkedHashSet<>();
         addHome(homes, environment.get(APP_HOME_ENV));
         addHome(homes, System.getProperty(APP_HOME_PROPERTY));
+        String launcher = System.getProperty("jpackage.app-path");
+        if (launcher != null && !launcher.isBlank()) {
+            try {
+                Path parent = Path.of(launcher).toAbsolutePath().normalize().getParent();
+                if (parent != null) homes.add(parent);
+            } catch (RuntimeException ignored) {
+                // Ignore invalid launcher metadata, just like an invalid app-home.
+            }
+        }
         try {
             Path location = Path.of(TesseractOcrConverter.class.getProtectionDomain().getCodeSource()
                     .getLocation().toURI()).toAbsolutePath().normalize();
@@ -616,7 +800,11 @@ public final class TesseractOcrConverter implements FileConverter {
         }
     }
 
-    record RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount) {
+    record RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced) {
+        RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount) {
+            this(blocks, confidence, wordCount, false);
+        }
+
         RecognitionResult {
             blocks = blocks == null ? List.of() : List.copyOf(blocks);
         }
@@ -628,14 +816,16 @@ public final class TesseractOcrConverter implements FileConverter {
 
     private static final class OcrLine {
         private final StringBuilder text = new StringBuilder();
+        private final List<OcrWordPixels> words = new ArrayList<>();
         private int left = Integer.MAX_VALUE;
         private int top = Integer.MAX_VALUE;
         private int right;
         private int bottom;
 
-        void add(String word, int x, int y, int width, int height) {
-            if (!text.isEmpty()) text.append(' ');
+        void add(String word, int x, int y, int width, int height, double confidence) {
+            if (!text.isEmpty() && wordSeparator(text.codePointBefore(text.length()), word.codePointAt(0))) text.append(' ');
             text.append(word);
+            words.add(new OcrWordPixels(word, x, y, width, height, confidence));
             left = Math.min(left, x);
             top = Math.min(top, y);
             right = Math.max(right, x + width);
@@ -646,4 +836,18 @@ public final class TesseractOcrConverter implements FileConverter {
         int width() { return Math.max(1, right - left); }
         int height() { return Math.max(1, bottom - top); }
     }
+
+    private static boolean wordSeparator(int previous, int next) {
+        return !(eastAsian(previous) && eastAsian(next));
+    }
+
+    private static boolean eastAsian(int codePoint) {
+        Character.UnicodeScript script = Character.UnicodeScript.of(codePoint);
+        return script == Character.UnicodeScript.HAN || script == Character.UnicodeScript.HIRAGANA
+                || script == Character.UnicodeScript.KATAKANA || script == Character.UnicodeScript.HANGUL
+                || script == Character.UnicodeScript.BOPOMOFO || codePoint >= 0x3000 && codePoint <= 0x303f
+                || codePoint >= 0xff00 && codePoint <= 0xffef;
+    }
+
+    private record OcrWordPixels(String text, int x, int y, int width, int height, double confidence) { }
 }

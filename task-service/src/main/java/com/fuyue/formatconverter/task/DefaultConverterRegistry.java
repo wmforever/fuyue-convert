@@ -62,7 +62,7 @@ public final class DefaultConverterRegistry {
             converters.add(new LibreOfficeConverter(DocumentFormat.DOCX, DocumentFormat.PDF, binary, timeout,
                     "使用 LibreOffice headless 将 DOCX 高保真导出为 PDF。"));
             converters.add(new LibreOfficeConverter(DocumentFormat.XLSX, DocumentFormat.PDF, binary, timeout,
-                    "使用 LibreOffice headless 将 XLSX 高保真导出为 PDF。"));
+                    "将 Excel 所选可见工作表导出为 PDF，可将所有列缩放到一页宽度。"));
             converters.add(new LibreOfficeConverter(DocumentFormat.PPTX, DocumentFormat.PDF, binary, timeout,
                     "使用 LibreOffice headless 将 PPTX 高保真导出为 PDF。"));
             converters.add(new LibreOfficeConverter(DocumentFormat.WPS, DocumentFormat.DOCX, binary, timeout,

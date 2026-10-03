@@ -9,9 +9,12 @@ import org.apache.xmlbeans.XmlObject;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 
 import java.math.BigInteger;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.IdentityHashMap;
 import java.util.Locale;
 
 /**
@@ -21,6 +24,9 @@ import java.util.Locale;
  */
 final class FixedLayoutDocxRenderer {
     private static final int BEHIND_TEXT_Z_INDEX = -251658752;
+    private static final java.awt.font.FontRenderContext OCR_FONT_CONTEXT =
+            new java.awt.font.FontRenderContext(null, true, true);
+    private static final java.awt.Font OCR_CJK_FONT = loadOcrCjkFont();
     private int shapeSequence = 1;
 
     /**
@@ -35,9 +41,46 @@ final class FixedLayoutDocxRenderer {
                 .forEach(line -> unchecked(() -> addLine(anchor, line)));
         page.images().stream().sorted(Comparator.comparingInt(ImageBlock::zOrder))
                 .forEach(image -> unchecked(() -> addImage(docx, anchor, image)));
-        fallbackTexts.stream().sorted(Comparator.comparingInt(TextBlock::zOrder))
+        Map<TextBlock.OcrWord, ColorValue> ocrColors = addOcrMasks(anchor, page, fallbackTexts);
+        fallbackReadingOrder(page, fallbackTexts).stream()
                 .filter(text -> !text.text().isEmpty())
-                .forEach(text -> unchecked(() -> addTextBox(docx, anchor, text)));
+                .forEach(text -> unchecked(() -> addTextBox(docx, anchor, text, ocrColors)));
+    }
+
+    private List<TextBlock> fallbackReadingOrder(PageModel page, List<TextBlock> texts) {
+        List<TextBlock> sourceOrder = texts.stream()
+                .sorted(Comparator.comparingInt(TextBlock::zOrder)).toList();
+        // Keep uncertain combinations in their existing order. Coordinates and
+        // z-index remain unchanged even when plain, disjoint columns are ordered
+        // for reading and copying the text from Word.
+        if (!page.tables().isEmpty() || sourceOrder.stream().anyMatch(block ->
+                Math.abs(block.transform().rotationDegrees()) > 0.5d
+                        || block.transform().hasSkew(0.02d))) return sourceOrder;
+        return orderColumns(sourceOrder, Math.max(12d, page.physicalBox().width() * 0.06d), false);
+    }
+
+    private List<TextBlock> orderColumns(List<TextBlock> texts, double minimumGap, boolean withinColumn) {
+        if (texts.size() < 2) return texts;
+        List<TextBlock> byX = texts.stream().sorted(Comparator.comparingDouble(block -> block.box().x())).toList();
+        double right = byX.get(0).box().right();
+        double largestGap = minimumGap;
+        int split = -1;
+        for (int index = 1; index < byX.size(); index++) {
+            double gap = byX.get(index).box().x() - right;
+            if (gap > largestGap) {
+                largestGap = gap;
+                split = index;
+            }
+            right = Math.max(right, byX.get(index).box().right());
+        }
+        if (split < 1) {
+            return withinColumn ? texts.stream().sorted(Comparator.comparingDouble(TextBlock::baselineY)
+                    .thenComparingDouble(block -> block.box().x())).toList() : texts;
+        }
+        List<TextBlock> ordered = new ArrayList<>(texts.size());
+        ordered.addAll(orderColumns(byX.subList(0, split), minimumGap, true));
+        ordered.addAll(orderColumns(byX.subList(split, byX.size()), minimumGap, true));
+        return ordered;
     }
 
     private void unchecked(ThrowingAction action) {
@@ -78,6 +121,7 @@ final class FixedLayoutDocxRenderer {
         List<TextBlock> sourceTexts = page.textBlocks().isEmpty()
                 ? page.paragraphs().stream().flatMap(paragraph -> paragraph.runs().stream()).toList()
                 : page.textBlocks();
+        Map<TextBlock.OcrWord, ColorValue> ocrColors = addOcrMasks(anchor, page, sourceTexts);
         page.lines().stream().filter(line -> !insideAnyTable(line, page.tables()))
                 .forEach(line -> items.add(new FixedItem(line.zOrder(), line, null, null, null)));
         page.images().forEach(image -> items.add(new FixedItem(image.zOrder(), null, image, null, null)));
@@ -88,7 +132,7 @@ final class FixedLayoutDocxRenderer {
         for (FixedItem item : items) {
             if (item.line() != null) addLine(anchor, item.line());
             else if (item.image() != null) addImage(docx, anchor, item.image());
-            else if (item.text() != null && !item.text().text().isEmpty()) addTextBox(docx, anchor, item.text());
+            else if (item.text() != null && !item.text().text().isEmpty()) addTextBox(docx, anchor, item.text(), ocrColors);
             else if (item.table() != null) addTable(anchor, item.table(), item.zOrder());
         }
     }
@@ -108,9 +152,30 @@ final class FixedLayoutDocxRenderer {
                 .mapToInt(TextBlock::zOrder).min().orElse(0);
     }
 
-    private void addTextBox(XWPFDocument docx, XWPFParagraph anchor, TextBlock block) throws Exception {
+    private void addTextBox(XWPFDocument docx, XWPFParagraph anchor, TextBlock block,
+                            Map<TextBlock.OcrWord, ColorValue> ocrColors) throws Exception {
+        if (!block.ocrWords().isEmpty()) {
+            addOcrTextBoxes(docx, anchor, block, ocrColors);
+            return;
+        }
+        addTextBox(docx, anchor, block, false);
+    }
+
+    private void addTextBox(XWPFDocument docx, XWPFParagraph anchor, TextBlock block, boolean ocr) throws Exception {
         double topInsetMm = Math.max(0, block.textOffsetYmm() - block.style().sizePt() * 25.4d / 72d * 0.86d);
         Rect textBox = tolerantTextBox(block);
+        double rotation = block.transform().rotationDegrees();
+        String textFlow = "";
+        if (Math.abs(Math.abs(rotation) - 90d) < 0.01d) {
+            // Some Word-compatible readers rotate the VML box but leave its text
+            // horizontal. Explicit vertical flow preserves editable quarter turns.
+            double offset = (textBox.width() - textBox.height()) / 2d;
+            textBox = new Rect(textBox.x() + offset, textBox.y() - offset,
+                    textBox.height(), textBox.width());
+            textFlow = "layout-flow:vertical;mso-layout-flow-alt:"
+                    + (rotation > 0 ? "top-to-bottom;" : "bottom-to-top;");
+            rotation = 0;
+        }
         int characterSpacing = characterSpacingTwips(block);
         FontStyle font = block.style();
         String family = DocxFontSupport.familyFor(block);
@@ -118,7 +183,7 @@ final class FixedLayoutDocxRenderer {
         int halfPoints = Math.max(2, (int) Math.round(font.sizePt() * 2d));
         int lineTwips = Math.max(20, (int) Math.round(font.sizePt() * 20d));
         String runProperties = "<w:rPr>" +
-                "<w:rFonts w:ascii=\"" + attr(family) + "\" w:hAnsi=\"" + attr(family) +
+                "<w:rFonts w:ascii=\"" + attr(font.family()) + "\" w:hAnsi=\"" + attr(font.family()) +
                 "\" w:eastAsia=\"" + attr(family) + "\"/>" +
                 "<w:sz w:val=\"" + halfPoints + "\"/><w:szCs w:val=\"" + halfPoints + "\"/>" +
                 (horizontalScale == 100 ? "" : "<w:w w:val=\"" + horizontalScale + "\"/>") +
@@ -127,18 +192,119 @@ final class FixedLayoutDocxRenderer {
                 "<w:color w:val=\"" + font.color().rgbHex() + "\"/>" +
                 (characterSpacing == 0 ? "" : "<w:spacing w:val=\"" + characterSpacing + "\"/>") +
                 "</w:rPr>";
-        String xml = "<v:shape xmlns:v=\"urn:schemas-microsoft-com:vml\" " +
+        // A typeless v:shape acquires LibreOffice's default 0.15 cm frame padding
+        // despite inset=0. A standard rect honors the explicit textbox insets.
+        String element = ocr ? "rect" : "shape";
+        String xml = "<v:" + element + " xmlns:v=\"urn:schemas-microsoft-com:vml\" " +
                 "xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" " +
                 "id=\"" + attr(shapeId("text", block.id())) + "\" style=\"" +
-                attr(positionStyle(textBox, block.zOrder(), block.transform().rotationDegrees())) +
+                attr(positionStyle(textBox, block.zOrder(), rotation)) +
                 "\" filled=\"f\" stroked=\"f\">" +
                 "<v:textbox inset=\"" + pt(block.textOffsetXmm()) + "pt," + pt(topInsetMm) +
-                "pt,0pt,0pt\" style=\"mso-fit-shape-to-text:false\">" +
+                "pt,0pt,0pt\" style=\"" + textFlow + "mso-fit-shape-to-text:false\">" +
                 "<w:txbxContent><w:p><w:pPr><w:spacing w:before=\"0\" w:after=\"0\" w:line=\"" +
                 lineTwips + "\" w:lineRule=\"exact\"/></w:pPr><w:r>" + runProperties +
                 "<w:t xml:space=\"preserve\">" + text(block.text()) + "</w:t></w:r></w:p></w:txbxContent>" +
-                "</v:textbox></v:shape>";
+                "</v:textbox></v:" + element + ">";
         appendShape(anchor, xml);
+    }
+
+    private Map<TextBlock.OcrWord, ColorValue> addOcrMasks(XWPFParagraph anchor, PageModel page, List<TextBlock> texts) {
+        Map<TextBlock.OcrWord, ColorValue> colors = new IdentityHashMap<>();
+        if (texts.stream().allMatch(block -> block.ocrWords().isEmpty())) return colors;
+        for (ImageBlock background : page.images()) {
+            if (!isOcrBackground(background)) continue;
+            // Decode one background at a time, rather than retaining all scan images on a page.
+            try (OcrBackgroundMaskSampler sampler = OcrBackgroundMaskSampler.open(background)) {
+                if (sampler == null) continue;
+                for (TextBlock block : texts) for (TextBlock.OcrWord word : block.ocrWords()) {
+                    // A small antialias fringe lies just outside Tesseract's ink bounds.
+                    // Keep this per-word; never replace it with a union across unknown gaps.
+                    double x = Math.max(word.box().x() - 0.15d, background.box().x());
+                    double y = Math.max(word.box().y() - 0.15d, background.box().y());
+                    double right = Math.min(word.box().right() + 0.15d, background.box().right());
+                    double bottom = Math.min(word.box().bottom() + 0.15d, background.box().bottom());
+                    if (right <= x || bottom <= y) continue;
+                    List<OcrBackgroundMaskSampler.Fill> fills = sampler.fills(new Rect(x, y, right - x, bottom - y));
+                    if (fills.isEmpty()) continue;
+                    for (OcrBackgroundMaskSampler.Fill fill : fills) {
+                        String xml = "<v:rect xmlns:v=\"urn:schemas-microsoft-com:vml\" id=\""
+                                + attr(shapeId("ocr-mask", block.id())) + "\" style=\""
+                                + attr(positionStyle(fill.box(), BEHIND_TEXT_Z_INDEX + 1, 0, true))
+                                + "\" filled=\"t\" fillcolor=\"#" + fill.color() + "\" stroked=\"f\"/>";
+                        unchecked(() -> appendShape(anchor, xml));
+                    }
+                    colors.put(word, ocrForeground(fills, block.style().color()));
+                }
+            } catch (IOException | IllegalArgumentException ignored) {
+                // Optional background estimation cannot justify an uninformed white cover.
+            }
+        }
+        return colors;
+    }
+
+    private ColorValue ocrForeground(List<OcrBackgroundMaskSampler.Fill> fills, ColorValue original) {
+        double brightness = 0, area = 0;
+        for (OcrBackgroundMaskSampler.Fill fill : fills) {
+            int rgb = Integer.parseInt(fill.color(), 16);
+            double weight = fill.box().width() * fill.box().height();
+            brightness += (((rgb >>> 16) & 255) * .299 + ((rgb >>> 8) & 255) * .587 + (rgb & 255) * .114) * weight;
+            area += weight;
+        }
+        return area > 0 && brightness / area < 110 ? ColorValue.WHITE : original;
+    }
+
+    /** Position each recognized word separately so unknown content in the gaps stays exposed. */
+    private void addOcrTextBoxes(XWPFDocument docx, XWPFParagraph anchor, TextBlock line,
+                                 Map<TextBlock.OcrWord, ColorValue> ocrColors) throws Exception {
+        List<Double> fontSizes = new ArrayList<>();
+        for (TextBlock.OcrWord word : line.ocrWords()) {
+            if (word.text().codePoints().noneMatch(Character::isLetterOrDigit)) continue;
+            java.awt.Font font = ocrFont(word.text()).deriveFont(100f);
+            double glyphHeight = font.createGlyphVector(OCR_FONT_CONTEXT, word.text()).getVisualBounds().getHeight();
+            if (glyphHeight > 10d) fontSizes.add(word.box().height() * 72d / 25.4d * 100d / glyphHeight);
+        }
+        fontSizes.sort(Double::compareTo);
+        double sizePt = Math.max(5d, Math.min(72d, fontSizes.isEmpty() ? line.style().sizePt()
+                : fontSizes.get(fontSizes.size() / 2)));
+        double fontMm = sizePt * 25.4d / 72d;
+        double top = Math.max(0d, line.box().y() - fontMm * 0.12d);
+        int offset = 0;
+        for (int index = 0; index < line.ocrWords().size(); index++) {
+            TextBlock.OcrWord word = line.ocrWords().get(index);
+            String value = word.text();
+            int found = line.text().indexOf(value, offset);
+            int end = found < 0 ? offset + value.length() : found + value.length();
+            // Preserve the line's word separators in the XML reading/copy order without
+            // inserting a second hidden or visible copy of the recognized line.
+            if (end < line.text().length() && Character.isWhitespace(line.text().charAt(end))) value += " ";
+            offset = end;
+            java.awt.Font font = ocrFont(word.text()).deriveFont(100f);
+            java.awt.geom.Rectangle2D glyphs = font.createGlyphVector(OCR_FONT_CONTEXT, word.text()).getVisualBounds();
+            double inkWidthPt = glyphs.getWidth() * sizePt / 100d;
+            double ratio = word.box().width() * 72d / 25.4d / Math.max(1d, inkWidthPt);
+            ratio = Math.max(0.6d, Math.min(1.4d, ratio));
+            double bearingMm = glyphs.getX() * sizePt / 100d * 25.4d / 72d * ratio;
+            Rect box = new Rect(Math.max(0d, word.box().x() - bearingMm), top,
+                    word.box().width(), Math.max(line.box().height(), fontMm * 1.3d));
+            TextBlock positioned = new TextBlock(line.id() + "-word-" + index, line.pageNumber(), box,
+                    value, line.baselineY(), new FontStyle("Arial", sizePt, false, false, ocrColors.getOrDefault(word, line.style().color())),
+                    line.zOrder(), 0, 0, List.of(), new Transform2D(ratio, 0, 0, 1, 0, 0));
+            addTextBox(docx, anchor, positioned, true);
+        }
+    }
+
+    private java.awt.Font ocrFont(String text) {
+        return DocxFontSupport.containsCjkText(text) && OCR_CJK_FONT != null
+                ? OCR_CJK_FONT : new java.awt.Font("Arial", java.awt.Font.PLAIN, 100);
+    }
+
+    private static java.awt.Font loadOcrCjkFont() {
+        try (var input = FixedLayoutDocxRenderer.class.getResourceAsStream("/fonts/DroidSansFallback.ttf")) {
+            return input == null ? null : java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, input);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     /**

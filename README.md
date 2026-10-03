@@ -20,7 +20,7 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 | macOS 13+，Intel 芯片 | [下载 Lite DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Intel.dmg) | [下载 Full DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Intel-Full.dmg) |
 | macOS 13+，Apple M 系列芯片 | [下载 Lite DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Apple-Silicon.dmg) | [下载 Full DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Apple-Silicon-Full.dmg) |
 
-六个安装包均内置 Eclipse Temurin Java Runtime，不需要另外安装 Java。Lite 体积较小，不内置 LibreOffice；Full 内置经过版本与哈希锁定的 LibreOffice 26.2.5.2，Office 引擎路线开箱可用。两种版本都不内置 OCR/Tesseract 或 Poppler。许可证、组件清单和来源记录内置在应用中，SHA-256 写在 [v0.1.5 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.5) 正文。
+六个安装包均内置 Eclipse Temurin Java Runtime，不需要另外安装 Java。Lite 体积较小，不内置 LibreOffice；Full 内置经过版本与哈希锁定的 LibreOffice 26.2.5.2，Office 引擎路线开箱可用。已发布的 v0.1.5 安装包不内置 OCR/Tesseract 或 Poppler；从当前源码生成的后续 Lite/Full 包默认内置固定版本 OCR 和中英文模型，可离线识别，原有下载包不会自动改变。新版设置页提供 OCR/Office 的本机引擎和语言包选择、实际检测、保存与重启入口，无需绑定账号或云服务密钥。许可证、组件清单和来源记录内置在应用中，SHA-256 写在 [v0.1.5 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.5) 正文。
 
 Lite 的 Office 高保真路线会使用电脑上已有的 LibreOffice；Full 自动使用包内 Office 引擎。Windows 尚未做商业代码签名，可能显示 SmartScreen 或“未知发布者”。macOS 包采用 ad-hoc 签名且尚未经过 Apple 公证，首次打开如被拦截，请前往“系统设置 → 隐私与安全”确认“仍要打开”。
 
@@ -43,20 +43,20 @@ Lite 的 Office 高保真路线会使用电脑上已有的 LibreOffice；Full �
 
 | 路线 | 状态 | 默认策略 | 说明 |
 | --- | --- | --- | --- |
-| OFD -> DOCX/TXT/PDF/PNG/JPG | beta | 结构/版式 | DOCX/TXT 使用结构化解析；含中日韩文字的 DOCX 嵌入已许可的回退字体，避免换机后文字不可见。未配置 OCR 时扫描页严格失败，配置本地 Tesseract 后对扫描区域补充坐标文字，DOCX 同时保留扫描源视觉层。PDF/PNG/JPEG 按源坐标绘制文字、图片、路径和普通图片型签章；嵌套 OFD 签章外观会明确警告并跳过，正文仍保留。图片默认 160 DPI，可按任务选择 36-600 DPI，多页输出 ZIP。 |
+| OFD -> DOCX/TXT/PDF/PNG/JPG | beta | 结构/版式 | DOCX/TXT 使用结构化解析；含中日韩文字的 DOCX 嵌入已许可的回退字体，避免换机后文字不可见。未启用 OCR 时扫描页严格失败，内置或显式配置的本地 Tesseract 可对扫描区域补充坐标文字，DOCX 同时保留扫描源视觉层。PDF/PNG/JPEG 按源坐标绘制文字、图片、路径和普通图片型签章；嵌套 OFD 签章外观会明确警告并跳过，正文仍保留。图片默认 160 DPI，可按任务选择 36-600 DPI，多页输出 ZIP。 |
 | OFD -> XLSX | experimental | 数据优先 | 将高置信度有线规则表格写成真实单元格、分页工作表和合并区域；未识别到可靠表格返回 `NO_TABLE_FOUND`，扫描页返回 `OCR_REQUIRED`。 |
 | CSV <-> XLSX | stable | 数据优先 | CSV 支持 UTF-8/UTF-16 BOM/GB18030 与逗号、TAB、分号、竖线识别；输入统一写成文本以阻断公式注入。XLSX 公式导出缓存结果，日期按单元格格式输出，多工作表分别导出 CSV ZIP。 |
-| DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用隔离的 headless profile 转换，校验真实 PDF 页数；本地字体会影响结果。 |
+| DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用隔离的 headless profile 转换，校验真实 PDF 页数；Excel 可选工作表范围、所有列放在一页宽度，保留打印区域与纵向分页。本地字体会影响结果。 |
 | TXT -> DOCX/PDF | stable | 内容优先 | 支持 UTF-8、带 BOM 的 UTF-16 和严格 GB18030 解码；换页符生成真实分页，PDF 按字形宽度进行 CJK 换行。DOCX 未显式配置东亚字体时按需嵌入内置许可字体，显式配置时保持指定字体。 |
 | DOCX -> TXT | beta | 内容提取 | 按正文对象顺序提取段落和表格，并带标签追加页眉页脚、文本框、脚注尾注、批注及修订文字；不保留版式。 |
-| PDF -> TXT | beta | 内容提取 | 按页面坐标和多栏顺序提取文字并保留换页；默认对扫描页以及“少量原生文字＋大幅扫描区域”返回 `OCR_REQUIRED`，显式配置本地 OCR 后只补齐缺少文字层的区域。 |
-| PDF -> PNG/JPG | stable | 版式渲染 | 默认 160 DPI（可配置 36-600）；PNG 保留透明画布，JPEG 转为 RGB 并使用 0.9 质量；多页自动输出 ZIP。 |
-| PDF -> DOCX | beta | 可编辑优先 | 恢复真实文字、基础段落、页面尺寸和方向；含中日韩文字时嵌入已许可的 Droid Sans Fallback。默认严格拒绝缺少文字层的整页或大幅扫描区域；显式配置本地 OCR 后叠加带坐标的可编辑文字，并保留扫描源视觉层和普通照片，避免部分识别导致内容丢失。 |
+| PDF -> TXT | beta | 内容提取 | 按页面坐标和多栏顺序提取文字并保留换页；未启用 OCR 时对扫描页以及“少量原生文字＋大幅扫描区域”返回 `OCR_REQUIRED`；内置或显式配置的本地 OCR 只补齐缺少文字层的区域。 |
+| PDF -> PNG/JPG | stable | 版式渲染 | 默认 160 DPI（可配置 36-600）；支持指定页码导出，保留原页码命名，选中一页直接返回图片、多页输出 ZIP。PNG 保留透明画布，JPEG 转为 RGB 并使用 0.9 质量。 |
+| PDF -> DOCX | beta | 可编辑优先 | 恢复真实文字、有线规则表格及页面尺寸和方向；清晰单栏正文可重建为自动换行的完整段落，保留首行缩进与行距；统一页面尺寸和正文边界的连续纯正文可按明确证据跨页续接，编辑后自然分页；常见 PDF 字体名映射为 Word 字体族，并保留粗斜体。明显双栏以可编辑定位文本框保留左右位置和栏内阅读顺序。表格支持细矩形填充边线和缩放/平移坐标，避免纯表格页重复正文及单元格词间粘连。含中日韩文字时嵌入已许可的 Droid Sans Fallback。未启用 OCR 时严格拒绝缺少文字层的整页或大幅扫描区域；内置或显式配置本地 OCR 后叠加带坐标的可编辑文字，并保留扫描源视觉层和普通照片，避免部分识别导致内容丢失；词框遮罩匹配可靠采样的纸色/平滑阴影，不确定背景保留原像素。 |
 | PDF -> OFD | experimental | 版式优先 | 生成真实 OFD 包；160 DPI 页面图像层保留视觉，文字型 PDF 同时写入源坐标 OFD 文字对象。优先使用 Poppler 并保留 PDFBox 回退；复杂对象尚未逐项结构化重建。 |
 | PDF 压缩/水印 | beta | 保真优先 | 压缩支持无损、均衡和强力三级策略，先预览源 PDF，完成后再逐页预览真实压缩结果；水印支持中英文文字、不透明度、角度、颜色、位置、平铺和页码范围，并提供本地实时效果预览。修改已提交的设置后会明确要求重新生成，避免把旧结果当成新设置下载。两者均拒绝修改带数字签名的 PDF。 |
 | PDF 合并/拆分 | stable | 保真优先 | 合并按上传顺序输出单个 PDF，可切换检查每个源文件并在重排后保持预览绑定；拆分按页输出编号连续的 ZIP，可逐页确认选择范围并在提交前阻止越界页码。两类操作都会重写 PDF；检测到数字签名时返回 `PDF_SIGNATURE_PRESENT`，不生成签名失效的结果。 |
-| PNG/JPG -> PDF | stable | 版式优先 | 读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。同格式多图按上传顺序合并为多页 PDF，网页端展示源图页序，转换完成后逐页展示真实 PDF 结果。 |
-| PNG/JPG -> TXT/DOCX | experimental/按需 | OCR 提取 | 可显式配置系统 Tesseract；经许可审核的运行包未来也可内置固定 OCR 运行时。TXT 输出识别文字，DOCX 将坐标文字映射到 `DocumentModel` 后生成真实可编辑文本；两者均返回页级置信度和 OCR 警告。 |
+| PNG/JPG -> PDF | stable | 版式优先 | PNG、JPG、JPEG 可混合上传，按列表顺序合并为一个多页 PDF。支持原始尺寸、A4 自动方向/纵向/横向和 0-50 mm 页边距，等比居中且不裁切。逐张读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。网页端可预览源图、调整页序，转换完成后逐页展示真实 PDF 结果。 |
+| PNG/JPG -> TXT/DOCX | experimental/按需 | OCR 提取 | 后续运行包默认内置固定 Tesseract 与中英文模型，源码运行可显式配置系统引擎。TXT 输出识别文字，DOCX 将坐标文字映射到 `DocumentModel` 后生成真实可编辑文本；两者均返回页级置信度和 OCR 警告；低置信度图片可自动尝试灰底/阴影与对比度增强，保守选择结果并保留源图与坐标。 |
 | WPS/ET/DPS/UOF -> OOXML | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |
 | DOCX -> UOF | experimental | 兼容优先 | LibreOffice 可用时调用明确的 `UOF text` 导出过滤器写入真实 UOF XML，并验证 UOF 根元素；已覆盖正文和表格文字的 LibreOffice 往返打开。 |
 

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url'
 import crossSpawn from 'cross-spawn'
 import { enrichRuntimeRelease, javaProperty } from './lib/runtime-release.mjs'
 import { verifyLibreOfficeRuntime } from './lib/libreoffice-runtime.mjs'
+import { ocrBundlingEnabled, prepareOcrRuntime, verifyOcrRuntime } from './lib/ocr-runtime.mjs'
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const desktopDirectory = path.resolve(scriptDirectory, '..')
@@ -21,7 +22,7 @@ const publicFullRelease = ['true', '1'].includes(
 )
 
 if (argumentsSet.has('--help')) {
-  console.log(`用法: node scripts/stage-backend.mjs [--skip-build]\n\n环境变量:\n  FORMAT_CONVERTER_RUNTIME_HOME          已生成的 jlink Runtime\n  FORMAT_CONVERTER_OCR_HOME              可选 OCR 目录\n  FORMAT_CONVERTER_POPPLER_HOME          可选 Poppler 目录\n  FORMAT_CONVERTER_PUBLIC_LITE_RELEASE   正式 Lite 发布门禁（禁止 Office/OCR/Poppler）\n  FORMAT_CONVERTER_PUBLIC_FULL_RELEASE   正式 Full 发布门禁（内置 LibreOffice）\n  FORMAT_CONVERTER_LIBREOFFICE_HOME      已审核的 LibreOffice Runtime 根目录`)
+  console.log(`用法: node scripts/stage-backend.mjs [--skip-build]\n\n环境变量:\n  FORMAT_CONVERTER_RUNTIME_HOME          已生成的 jlink Runtime\n  FORMAT_CONVERTER_OCR_HOME              已验证的 OCR 目录（默认从固定源码构建）\n  FORMAT_CONVERTER_POPPLER_HOME          可选 Poppler 目录\n  FORMAT_CONVERTER_PUBLIC_LITE_RELEASE   正式 Lite 发布门禁（内置 OCR，禁止 Office/Poppler）\n  FORMAT_CONVERTER_PUBLIC_FULL_RELEASE   正式 Full 发布门禁（内置 LibreOffice）\n  FORMAT_CONVERTER_LIBREOFFICE_HOME      已审核的 LibreOffice Runtime 根目录`)
   process.exit(0)
 }
 
@@ -136,19 +137,17 @@ async function recordRuntimeIdentity(runtimeTarget, identity) {
 }
 
 async function stageOcr(target) {
-  if (process.env.FORMAT_CONVERTER_OCR_HOME) {
-    await copyRequired(process.env.FORMAT_CONVERTER_OCR_HOME, target, 'OCR Runtime')
-    console.log(`已加入 OCR Runtime: ${process.env.FORMAT_CONVERTER_OCR_HOME}`)
-    return
+  if (!ocrBundlingEnabled()) return
+  const source = process.env.FORMAT_CONVERTER_OCR_HOME || await prepareOcrRuntime()
+  await verifyOcrRuntime(source)
+  await copyRequired(source, target, 'OCR Runtime')
+  await verifyOcrRuntime(target)
+  for (const name of ['tesseract', 'leptonica', 'libpng', 'zlib', 'tessdata']) {
+    await copyRequired(path.join(target, 'licenses', `${name}.txt`),
+      path.join(destination, 'licenses', `OCR-${name.toUpperCase()}.txt`), 'OCR 许可证')
   }
-  const bundleRequested = ['true', '1'].includes((process.env.FORMAT_CONVERTER_BUNDLE_OCR || '').toLowerCase())
-  if (process.platform === 'win32' && bundleRequested) {
-    await run('powershell.exe', [
-      '-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
-      '-File', path.join(repositoryRoot, 'scripts', 'prepare-ocr-runtime.ps1'),
-      '-Destination', target
-    ])
-  }
+  await copyRequired(path.join(desktopDirectory, 'licenses/ocr-runtime-lock.json'),
+    path.join(destination, 'licenses/OCR-SOURCE-POLICY.json'), 'OCR 固定来源与哈希')
 }
 
 function assertPublicRelease() {
@@ -159,10 +158,8 @@ function assertPublicRelease() {
   if (!supportedTarget) {
     throw new Error(`公开桌面发布不支持当前平台：${process.platform} ${process.arch}`)
   }
-  const bundleOcr = ['true', '1'].includes((process.env.FORMAT_CONVERTER_BUNDLE_OCR || '').toLowerCase())
-  if (bundleOcr || process.env.FORMAT_CONVERTER_OCR_HOME || process.env.FORMAT_CONVERTER_POPPLER_HOME) {
-    throw new Error('公开桌面发布不得捆绑 OCR 或 Poppler Runtime')
-  }
+  if (!ocrBundlingEnabled()) throw new Error('公开桌面发布必须内置中英文 OCR Runtime')
+  if (process.env.FORMAT_CONVERTER_POPPLER_HOME) throw new Error('公开桌面发布不得捆绑 Poppler Runtime')
   if (!['true', '1'].includes((process.env.FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME || '').toLowerCase())) {
     throw new Error('公开桌面发布必须启用 Temurin Runtime 门禁')
   }
@@ -233,6 +230,7 @@ async function main() {
     await copyRequired(process.env.FORMAT_CONVERTER_LIBREOFFICE_HOME,
       path.join(destination, 'app', 'libreoffice'), 'LibreOffice Runtime')
   }
+  await stageOcr(path.join(destination, 'app', 'ocr'))
   if (publicLiteRelease || publicFullRelease) {
     await run(process.execPath, [
       path.join(scriptDirectory, 'generate-runtime-manifest.mjs'),
@@ -240,7 +238,6 @@ async function main() {
     ], desktopDirectory)
   }
 
-  await stageOcr(path.join(destination, 'app', 'ocr'))
   await copyOptional(process.env.FORMAT_CONVERTER_POPPLER_HOME, path.join(destination, 'app', 'poppler'), 'Poppler Runtime')
 
   console.log(`桌面后端已暂存：${destination}`)

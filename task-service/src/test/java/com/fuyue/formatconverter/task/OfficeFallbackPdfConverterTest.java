@@ -132,6 +132,36 @@ class OfficeFallbackPdfConverterTest {
         assertEquals("PAGE_LIMIT_EXCEEDED", error.code());
     }
 
+    @Test
+    void xlsxFallbackExportsAllVisibleSheetsOnSeparatePagesAndSupportsSelection() throws Exception {
+        Path source = temp.resolve("multiple.xlsx");
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            workbook.createSheet("第一表").createRow(0).createCell(0).setCellValue("FIRST-SHEET");
+            workbook.createSheet("hidden").createRow(0).createCell(0).setCellValue("HIDDEN-SECRET");
+            workbook.setSheetHidden(1, true);
+            workbook.createSheet("第三表").createRow(0).createCell(0).setCellValue("THIRD-SHEET");
+            try (var out = Files.newOutputStream(source)) { workbook.write(out); }
+        }
+        Path all = temp.resolve("all.pdf");
+        var converted = new XlsxToPdfConverter().convert(input(source, DocumentFormat.XLSX),
+                temp.resolve("all-work"), all, ParseLimits.defaults(), (stage, progress) -> { });
+        assertEquals(2, converted.pageCount());
+        assertContainsInOrder(pdfText(all), "FIRST-SHEET", "THIRD-SHEET");
+        assertFalse(pdfText(all).contains("HIDDEN-SECRET"));
+        var selected = new ConversionInput("multiple.xlsx", DocumentFormat.XLSX.contentType(), Files.size(source),
+                source, SpreadsheetPdfPreparationTest.options("3", false));
+        Path single = temp.resolve("third.pdf");
+        assertEquals(1, new XlsxToPdfConverter().convert(selected, temp.resolve("single-work"), single,
+                ParseLimits.defaults(), (stage, progress) -> { }).pageCount());
+        assertFalse(pdfText(single).contains("FIRST-SHEET"));
+        assertTrue(pdfText(single).contains("THIRD-SHEET"));
+        var width = new ConversionInput("multiple.xlsx", DocumentFormat.XLSX.contentType(), Files.size(source),
+                source, SpreadsheetPdfPreparationTest.options("all", true));
+        assertEquals("OFFICE_REQUIRED_FOR_FIT_WIDTH", assertThrows(ConversionFailureException.class,
+                () -> new XlsxToPdfConverter().convert(width, temp, temp.resolve("width.pdf"),
+                        ParseLimits.defaults(), (stage, progress) -> { })).code());
+    }
+
     private ConversionInput input(Path source, DocumentFormat format) throws Exception {
         return new ConversionInput(source.getFileName().toString(), format.contentType(), Files.size(source), source);
     }

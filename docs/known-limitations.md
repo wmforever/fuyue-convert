@@ -6,7 +6,7 @@
 2. 外部 Office 引擎、系统字体、Poppler 版本和操作系统都会影响视觉结果。
 3. 默认已使用独立 JVM Worker 实现硬超时和进程树清理；`worker-max-memory-mb` 只限制 Java 堆，CPU、总内存和外部 Office 进程的 OS 级限制需要 Docker/cgroup 或 systemd 配合。
 4. 批量任务中单个文件失败不会中断其他文件，调用方需要检查每个 `TaskFileResult`。
-5. 官方公开二进制为 Windows 10/11 x64、macOS 13+ Intel 和 macOS 13+ Apple Silicon 分别提供 Lite 与 Full：Lite 不内置 LibreOffice，Full 固定内置 LibreOffice 26.2.5.2；两者均不内置 OCR 或 Poppler。本地 `jpackage`/WiX、OCR 扩展包及 Linux 包不属于官方发行版。v0.1.5 Windows 尚未做商业代码签名，SmartScreen 可能显示未知发布者；macOS 仅作 ad-hoc 签名且未经过 Apple 公证，首次打开需由用户在“系统设置 → 隐私与安全”确认“仍要打开”。后续广泛分发仍应补 Developer ID/Windows 代码签名、公证与可信时间戳。
+5. 官方公开二进制为 Windows 10/11 x64、macOS 13+ Intel 和 macOS 13+ Apple Silicon 分别提供 Lite 与 Full：Lite 不内置 LibreOffice，Full 固定内置 LibreOffice 26.2.5.2；已发布的 v0.1.5 两者均不内置 OCR 或 Poppler；当前构建流程已改为后续 Lite/Full 包默认内置固定 OCR 和中英文模型，仍不内置 Poppler，旧下载包不变。本地 `jpackage`/WiX 及 Linux 包不属于官方发行版。v0.1.5 Windows 尚未做商业代码签名，SmartScreen 可能显示未知发布者；macOS 仅作 ad-hoc 签名且未经过 Apple 公证，首次打开需由用户在“系统设置 → 隐私与安全”确认“仍要打开”。后续广泛分发仍应补 Developer ID/Windows 代码签名、公证与可信时间戳。
 
 ## OFD
 
@@ -20,27 +20,27 @@
 
 ## PDF
 
-1. `PDF -> DOCX` 当前恢复真实文字、基础段落、页面尺寸和方向，但复杂阅读顺序、多栏、矢量图形、图片及复杂表格仍可能不完整。含中日韩文字时会嵌入 Droid Sans Fallback，保证基本字形跨机器可见，但会增大文件且不等同于恢复源字体设计。
+1. `PDF -> DOCX` 恢复真实文字、页面尺寸和方向；清晰单栏正文按连续行距、正文边界、字体与缩进重建完整段落，修改文字后可自动换行。首行缩进、行距和右侧正文边界保留；连续纯正文在所有页面尺寸、正文边界、字体、行距和上下留白一致，且每个页界均有未结束满行与下一页无缩进续行证据时，可跨页恢复为同一真实段落，由 Word 自然分页。句末标点、短尾行、下一页首行缩进、标题、页眉页脚、列表、表格、图片、图形线条、旋转或双栏页面会阻止此模式，保守维持逐页结构；暂不支持从混合文档中只挑部分连续页续接。Helvetica/Times/Courier 和常见 PostScript 字体别名映射为 Word 字体族，粗斜体独立保留；混排中的西文字体与中文回退字体分别声明。明显栏沟的双栏正文使用可编辑定位文本框，按左栏从上到下、再右栏排序。规则有线表格支持闭合描边、细矩形填充边线及缩放、平移、CropBox 和页面旋转后的坐标；普通表格写为真实 Word 单元格，含旋转文字的表格保留线框和可编辑定位文字，90°/270° 使用显式文字流方向兼容 LibreOffice；180° 及非直角旋转仍有阅读器兼容差异，并返回 `UNSUPPORTED_TEXT_TRANSFORM`。纯表格页不再重复输出正文，单元格内按位置分开的词会恢复间隔。窄栏沟、跨栏混排、无线或复杂表格、矢量图形及图片仍可能不完整。含中日韩文字时会嵌入 Droid Sans Fallback，保证基本字形跨机器可见，但会增大文件且不等同于恢复源字体设计。
 2. 纯文字 PDF 不再嵌入整页图片；因此严格 QA 以字符守恒、页数、零图片和中日韩字体部件完整为准，视觉差异仅作参考。
-3. 扫描型、纯图片型，以及同页存在“少量原生文字＋大幅扫描区域”的混合 PDF，在未启用 OCR 时严格返回 `OCR_REQUIRED`。显式配置本地 Tesseract 后，纯扫描页以 300 DPI OCR，混合页只识别缺少文字层的大图区域，并把 TSV 行坐标转成可编辑 `TextBlock`；DOCX 同时保留扫描源视觉层、原生文字和普通照片，不能用少量高置信度文字推断整幅扫描图已完整恢复。必需 OCR 区域无法解码、无有效新增文字或低置信度时严格失败。
+3. 扫描型、纯图片型，以及同页存在“少量原生文字＋大幅扫描区域”的混合 PDF，在未启用 OCR 时严格返回 `OCR_REQUIRED`。显式配置本地 Tesseract 后，纯扫描页以 300 DPI OCR，混合页只识别缺少文字层的大图区域，并把 TSV 行坐标转成可编辑 `TextBlock`；DOCX 同时保留扫描源视觉层、原生文字和普通照片，不能用少量高置信度文字推断整幅扫描图已完整恢复。必需 OCR 区域无法解码、无有效新增文字或低置信度时严格失败。扫描 Word 的识别文字使用标准坐标文本框，同一行字号与基线一致，只在背景可可靠估计的已识别词框附近覆盖邻近纸色以减少重影（仅外扩 0.15 mm 清理抗锯齿边缘）；平滑阴影每词最多用 8 个色块近似，深色纸面可切换为浅色识别文字以保持可读。保留整张原始底图，词框之间的未知区域不作整行遮盖。规则全角中文行只有在源像素验证逐字白色分隔后才校正 OCR 的切字词框，否则保留引擎几何。采样发现彩色标记、明显纹理或背景证据不足时跳过遮罩，可能保留文字重影；任一边长超过 32768 像素或超过 2500 万像素的底图也跳过这一可选细化以限制附加内存。彩色底纹、印章交叠及词框内误识别仍需人工核对，背景适配不保证印章完整修复；置信度并非逐字准确率。
 4. `PDF -> OFD` 已生成符合包结构的真实 OFD：整页 144 DPI 图像层负责版式保真，文字型页面另含源坐标 OFD 文字对象。当前表格、路径、原始图片、透明混合和表单尚未逐项重建为独立对象，因此标记为 experimental，并返回 `FIDELITY_IMAGE_LAYER`。
-5. `PDF -> PNG/JPEG` 默认 160 DPI，可通过 `FORMAT_CONVERTER_IMAGE_DPI` 配置为 36-600。PNG 由 PDFBox 以 ARGB 渲染并写入 pHYs，空白区域保留透明；JPEG 输出 RGB、JFIF DPI 和 0.9 质量，CMYK 内容会转换到显示 RGB。渲染前会按 CropBox、UserUnit 和 DPI 检查像素上限；需要非空密码的 PDF 返回 `PDF_PASSWORD_REQUIRED`，当前任务 API 不接收密码。
+5. `PDF -> PNG/JPEG` 默认 160 DPI，可通过 `FORMAT_CONVERTER_IMAGE_DPI` 配置为 36-600。PNG 由 PDFBox 以 ARGB 渲染并写入 pHYs，空白区域保留透明；JPEG 输出 RGB、JFIF DPI 和 0.9 质量，CMYK 内容会转换到显示 RGB。可用 `imagePages` 指定导出页码，按升序去重，只渲染所选页面；选择一页直接返回图片，多页 ZIP 的条目保留原页码。范围对每份输入 PDF 独立校验，越界文件严格失败。渲染前会按所选页的 CropBox、UserUnit 和 DPI 检查像素上限；需要非空密码的 PDF 返回 `PDF_PASSWORD_REQUIRED`，当前任务 API 不接收密码。
 6. `PDF -> TXT` 已按坐标重建视觉行、多栏阅读顺序和换页边界；未启用 OCR 时，纯扫描页、混合 PDF 中的无文字内容页，以及同页缺少文字层的大幅扫描区域均返回 `OCR_REQUIRED`。启用本地 OCR 后只补齐对应页或区域。复杂旋转文字、无框表格和页眉页脚归类仍需扩充样本。
 7. `PDF 压缩` 的无损模式只优化对象和内容流；均衡/强力模式会把不透明栅格图片重新编码为 JPEG，并把长边分别限制为 1800/1200 像素，透明图片保持无损编码。若输出未变小会自动返回原文件。网页端转换前只将页面标为“源文件预览”，不会模拟压缩画质；转换完成后才加载不超过 32 MiB 的真实 PDF 结果预览。数字签名会因重写失效，因此检测到签名时返回 `PDF_SIGNATURE_PRESENT`。
 8. `PDF 水印` 支持中英文文字、颜色、不透明度、角度、五种位置、平铺和页码范围；网页端会在当前设备本地渲染实时效果预览，预览用于确认位置和样式，最终字体细节以导出文件为准。PDF 合并会按文件切换源预览，PDF 拆分会标出当前页是否入选并按真实页数拒绝越界范围。压缩、水印、合并和拆分都会重写 PDF；检测到数字签名时会统一返回 `PDF_SIGNATURE_PRESENT`，不生成签名失效的结果。当前尚未支持图片水印；需要密码的 PDF 返回 `PDF_PASSWORD_REQUIRED`，任务 API 不接收密码。
 
 ## Office 与国产格式
 
-1. `DOCX/XLSX/PPTX -> PDF` 优先使用 LibreOffice headless；每次转换使用独立 profile/output 目录，输出会重新打开并校验真实页数。可通过 `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION` 锁定部署版本，但缺失字体仍会造成分页和视觉差异，生产环境应固定 LibreOffice 包及字体包镜像。LibreOffice 不可用时，DOCX/XLSX 会降级为内容优先的 Java Beta 路线：DOCX 保持正文段落/表格顺序，XLSX 仅导出第一个工作表并使用已保存的公式缓存值，两者都不保留复杂版式；PPTX 路线会明确标记为不可用。
+1. `DOCX/XLSX/PPTX -> PDF` 优先使用 LibreOffice headless；每次转换使用独立 profile/output 目录，输出会重新打开并校验真实页数。可通过 `FORMAT_CONVERTER_OFFICE_REQUIRED_VERSION` 锁定部署版本，但缺失字体仍会造成分页和视觉差异，生产环境应固定 LibreOffice 包及字体包镜像。LibreOffice 不可用时，DOCX/XLSX 会降级为内容优先的 Java Beta 路线：DOCX 保持正文段落/表格顺序，XLSX 按源顺序导出全部可见表或所选表文本，每张表独立起页，并使用已保存的公式缓存值，两者都不保留复杂版式；PPTX 路线会明确标记为不可用。XLSX 转 PDF 可用 `spreadsheetSheets` 指定工作表序号，隐藏表不会默认导出，显式选中隐藏表或越界会失败。有 LibreOffice 时可启用 `spreadsheetFitWidth` 将普通工作表的所有列缩放到一页宽度，纵向仍可多页；原打印区域、重复标题和纸张方向继续生效，列很多时文字会变小，图表工作表沿用原打印设置。Java 基础路线不支持此宽度选项，会明确返回 `OFFICE_REQUIRED_FOR_FIT_WIDTH`。
 2. `WPS/ET/DPS/UOF` 依赖 LibreOffice 对对应格式的兼容能力，当前标记为 experimental。
 3. `UOF -> DOCX` 当前由 LibreOffice 直接导入并输出可编辑 DOCX；能保留的对象取决于 LibreOffice 的 UOF 兼容性，分页、字体、脚注/尾注等自动编号和对象位置可能变化。
 4. WPS 官方命令行中的部分 PDF 转换能力可能需要登录或会员能力，不适合作为开源默认依赖。
 5. `DOCX -> TXT` 按正文 XML 对象顺序保留段落和表格，再以标签追加页眉页脚、脚注尾注和批注；修订会以插入、删除、移入、移出标签显式导出。它不还原浮动对象的视觉锚点顺序，也不保留样式、域计算结果或批注与正文的精确锚点关系。
 6. `TXT -> DOCX/PDF` 支持 UTF-8、带 BOM 的 UTF-16LE/BE 和 GB18030；无 BOM 且非 UTF-8 时会按 GB18030 严格解码并返回 `TEXT_ENCODING_GUESSED`。其他编码不会盲猜。换页符会保留为分页，但 TXT 本身不包含纸张尺寸、页边距或样式元数据。
 7. `CSV -> XLSX` 自动识别逗号、TAB、分号和竖线，所有值均写为文本以避免公式注入，因此不会猜测数值、日期或公式类型。`XLSX -> CSV` 使用工作簿中保存的公式缓存值，不执行或刷新公式；过期缓存需先由表格软件重新计算并保存。多工作表输出为 ZIP，每张表一个 UTF-8 CSV。CSV 不保留样式、合并区域和原始类型元数据。
-8. `PNG/JPEG -> PDF` 使用 36-1200 DPI 范围内的 PNG pHYs、JPEG JFIF 或 EXIF 分辨率；缺失或异常时固定按 96 DPI 并返回 `IMAGE_DPI_DEFAULTED`。支持 1-8 EXIF 方向和透明 PNG。同一批次目前要求全部是 PNG 或全部是 JPEG，不能混合两种扩展名；成功页面按上传顺序合并，部分失败时返回 `PARTIAL_BATCH_OUTPUT`。网页端的转换前画面只表示源图内容和页序，不承诺 PDF 物理页面尺寸；转换成功后以真实 PDF 结果预览为准。
+8. `PNG/JPEG -> PDF` 使用 36-1200 DPI 范围内的 PNG pHYs、JPEG JFIF 或 EXIF 分辨率；缺失或异常时固定按 96 DPI 并返回 `IMAGE_DPI_DEFAULTED`。支持原始尺寸或 A4 自动方向/纵向/横向、0-50 mm 最小页边距，A4 图片等比缩放居中且不裁切；自动方向按 EXIF 修正后的物理长宽选择。支持 1-8 EXIF 方向和透明 PNG，同一批次可混合 PNG、JPG、JPEG；每张图片独立校验格式并读取元数据。成功页面按上传顺序合并，部分失败时返回 `PARTIAL_BATCH_OUTPUT`。网页端的转换前画面只表示源图内容和页序，不承诺 PDF 物理页面尺寸；转换成功后以真实 PDF 结果预览为准。混合图片仅对转 PDF 开放，图片 OCR 及其他转换仍要求单一源格式。
 9. `DOCX -> UOF` 仅在 LibreOffice 提供 `UOF text` 导出过滤器时开放，输出是具有 `uof:UOF` 根元素和 UOF 命名空间的真实 XML，不是改扩展名。复杂绘图、嵌入对象、修订、域和字体仍可能在 LibreOffice 兼容转换中变化，因此保持 experimental。当前 LibreOffice 没有经本项目验证的 WPS/ET/DPS 写出过滤器，`DOCX -> WPS`、`XLSX -> ET`、`PPTX -> DPS` 继续保持 planned，禁止伪装支持。
-10. `PNG/JPEG -> TXT/DOCX` 仅在 OCR 能力可用时开放：源码/独立 JAR 使用系统 Tesseract 时需显式启用；经许可审核的未来运行包也可使用固定内置引擎。TXT 输出纯文本；DOCX 将 OCR 坐标映射回 `DocumentModel` 并复用布局分析和 Word 渲染，生成真实文本框架而非整页图片。任务警告提供页级平均置信度；低于复核阈值返回 `OCR_LOW_CONFIDENCE` 警告，低于最低阈值则以同名错误码失败。印刷体中英文、数字、标点和 EXIF 旋转已纳入自动化测试。竖排需配置对应 `*_vert` 语言包并自动使用竖排分割模式；当前跨版本金样门禁为字符召回率至少 50%，不代表逐字可靠。手写体、复杂表格、倾斜和噪声图片仍可能误识别，因此保持 experimental。
+10. `PNG/JPEG -> TXT/DOCX` 仅在 OCR 能力可用时开放：源码/独立 JAR 使用系统 Tesseract 时需显式启用；后续运行包默认内置固定引擎、许可证清单及中英文模型。TXT 输出纯文本；DOCX 将 OCR 坐标映射回 `DocumentModel` 并复用布局分析和 Word 渲染，生成真实文本框架而非整页图片。任务警告提供页级平均置信度；低于复核阈值返回 `OCR_LOW_CONFIDENCE` 警告，低于最低阈值则以同名错误码失败。印刷体中英文、数字、标点和 EXIF 旋转已纳入自动化测试。竖排需配置对应 `*_vert` 语言包并自动使用竖排分割模式；当前跨版本金样门禁为字符召回率至少 50%，不代表逐字可靠。低置信度或无文字时支持一次灰底/缓变阴影归一化与对比度增强重试，仅在置信度、文字量和原可靠文字保留检查通过后采用，返回 `OCR_IMAGE_ENHANCED`；源图与文字坐标不变。这不保证文字完整或准确；重复对齐的中文短行可能被引擎误分为竖列，增强不改变页分割策略。手写体、复杂表格、倾斜和噪声图片仍可能误识别，因此保持 experimental。
 
 ## QA 样本
 
