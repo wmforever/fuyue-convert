@@ -1,5 +1,8 @@
 # Cloud OCR iteration 3: shaded omissions and TXT column order
 
+Bounded vertical-shadow alternatives, unresolved-coverage warnings and a
+reviewable cloud build are recorded in [iteration4](cloud-ocr-iteration4.md).
+
 Baseline `e06a4739f76239789faa2baa2df4c46b6fce379c`, same upstream branch and
 draft [PR #1](https://github.com/wmforever/fuyue-convert/pull/1). Public warning
 semantics were proposed in [#3](https://github.com/wmforever/fuyue-convert/issues/3)

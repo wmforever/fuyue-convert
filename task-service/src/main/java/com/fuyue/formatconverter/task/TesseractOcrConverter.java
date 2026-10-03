@@ -125,10 +125,14 @@ public final class TesseractOcrConverter implements FileConverter {
             if (pixels == null) return result;
             try {
                 boolean recoveryEligible = result.blocks().isEmpty() || result.confidence() < settings.warningConfidence();
-                if (!recoveryEligible && result.confidence() <= .95 && "3".equals(pageSegmentationMode())
+                boolean uncoveredShadedInk = false;
+                if (!recoveryEligible && "3".equals(pageSegmentationMode())
                         && remainingTime(started).compareTo(Duration.ofSeconds(1)) > 0) {
-                    recoveryEligible = OcrCoverageProbe.hasUncoveredShadedInk(pixels, result.blocks(), physicalBox,
+                    uncoveredShadedInk = OcrCoverageProbe.hasUncoveredShadedInk(pixels, result.blocks(), physicalBox,
                             started + settings.timeout().toNanos());
+                    // Above 95%, the unchanged five-point gain cannot be met.
+                    // Still expose unresolved coverage; confidence is not completeness.
+                    recoveryEligible = uncoveredShadedInk && result.confidence() <= .95;
                 }
                 if (recoveryEligible) {
                     result = retryEnhanced(result, pixels, workDir, pageNumber, physicalBox, dimensions, limits, started);
@@ -138,7 +142,8 @@ public final class TesseractOcrConverter implements FileConverter {
                 // The original pixels, rather than enhanced pixels, remain the geometry authority.
                 return new RecognitionResult(result.blocks().stream()
                         .map(block -> OcrWordGeometryRefiner.refine(block, pixels, physicalBox)).toList(),
-                        result.confidence(), result.wordCount(), result.imageEnhanced());
+                        result.confidence(), result.wordCount(), result.imageEnhanced(), result.deskewDegrees(),
+                        result.conflicts(), uncoveredShadedInk && !result.imageEnhanced());
             } finally { pixels.flush(); }
         } finally {
             if (!engineImage.equals(image)) {
@@ -448,6 +453,11 @@ public final class TesseractOcrConverter implements FileConverter {
         if (result.imageEnhanced()) {
             warnings.add(ConversionWarning.of(WarningCode.OCR_IMAGE_ENHANCED,
                     scope + "采用了灰底/阴影归一化与对比度增强结果；原图和坐标未改变，仍需人工复核内容完整性。", pageNumber));
+        }
+        if (result.possibleTextOmission()) {
+            warnings.add(ConversionWarning.of(WarningCode.OCR_POSSIBLE_TEXT_OMISSION,
+                    scope + "阴影字迹覆盖探测仍发现多个未覆盖区域，可能漏识别或包含非文字图形；"
+                            + "未采用不满足保守条件的候选，平均置信度不能证明内容完整，请对照原图复核。", pageNumber));
         }
         if (result.confidence() < settings.warningConfidence()) {
             warnings.add(ConversionWarning.withConfidence(WarningCode.OCR_LOW_CONFIDENCE,
@@ -854,7 +864,11 @@ public final class TesseractOcrConverter implements FileConverter {
     }
 
     record RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
-                             double deskewDegrees, List<String> conflicts) {
+                             double deskewDegrees, List<String> conflicts, boolean possibleTextOmission) {
+        RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
+                          double deskewDegrees, List<String> conflicts) {
+            this(blocks, confidence, wordCount, imageEnhanced, deskewDegrees, conflicts, false);
+        }
         RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount) {
             this(blocks, confidence, wordCount, false, 0, List.of());
         }

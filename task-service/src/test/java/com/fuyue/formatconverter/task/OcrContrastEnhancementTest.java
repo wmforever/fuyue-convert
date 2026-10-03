@@ -193,6 +193,35 @@ class OcrContrastEnhancementTest {
     }
 
     @Test
+    void highConfidenceUncoveredInkWarnsWithoutLaunchingImpossibleGainRetry() throws Exception {
+        Path source = uncoveredShadedImage(); byte[] original = Files.readAllBytes(source);
+        var converter = fake("97", "original 2026", "99", "untrusted replacement", "exit 1");
+        Path work = temp.resolve("uncovered-high");
+        var result = converter.recognizeLayoutResult(source, work, 2, new Rect(10,20,300,200), ParseLimits.defaults());
+        assertEquals("original 2026", result.blocks().get(0).text());
+        assertEquals(.97, result.confidence(), .001);
+        assertTrue(result.possibleTextOmission());
+        assertFalse(result.imageEnhanced());
+        assertTrue(Files.notExists(work.resolve("enhanced-input-path")));
+        assertTrue(converter.warningsFor(result,2,"第 2 页").stream().anyMatch(w ->
+                w.code()==WarningCode.OCR_POSSIBLE_TEXT_OMISSION && w.pageNumber()==2));
+        assertArrayEquals(original,Files.readAllBytes(source));
+    }
+
+    @Test
+    void rejectedCoverageCandidateKeepsOriginalNumbersAndWarnsWhileAcceptedCandidateDoesNot() throws Exception {
+        Path source = uncoveredShadedImage();
+        for (boolean accepted : new boolean[]{false,true}) {
+            var converter=fake("88","original 2026","97",accepted?"original 2026 more lines":"original 20260 more lines","");
+            var result=converter.recognizeLayoutResult(source,temp.resolve("uncovered-"+accepted),1,
+                    new Rect(0,0,600,400),ParseLimits.defaults());
+            assertEquals(accepted,result.imageEnhanced());
+            assertEquals(!accepted,result.possibleTextOmission());
+            if(!accepted) assertEquals("original 2026",result.blocks().get(0).text());
+        }
+    }
+
+    @Test
     void sharesPageBudgetAndSkipsRetryWhenOriginalRecognitionUsedIt() throws Exception {
         var converter = fake("60", "usable original", "99", "enhanced", "sleep 8", "sleep 4.2");
         try {
@@ -405,6 +434,16 @@ class OcrContrastEnhancementTest {
         graphics.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 36)); graphics.drawString("OCR result 2026", 50, 140);
         graphics.dispose(); Path source = temp.resolve("shaded.png"); ImageIO.write(image, "png", source.toFile()); image.flush();
         return source;
+    }
+
+    private Path uncoveredShadedImage() throws Exception {
+        BufferedImage image=new BufferedImage(600,400,BufferedImage.TYPE_INT_RGB);
+        for(int y=0;y<400;y++) for(int x=0;x<600;x++) {
+            int gray=90+x*130/600;
+            if(y>=60 && y<350 && y%60<10 && x>60 && x<450 && x%20<12) gray=0;
+            image.setRGB(x,y,new Color(gray,gray,gray).getRGB());
+        }
+        Path path=temp.resolve("uncovered-shaded.png");ImageIO.write(image,"png",path.toFile());image.flush();return path;
     }
 
     private TesseractOcrConverter fake(String confidence, String text, String enhancedConfidence,
