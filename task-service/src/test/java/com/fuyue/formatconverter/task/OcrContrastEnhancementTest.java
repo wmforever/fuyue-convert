@@ -23,6 +23,43 @@ class OcrContrastEnhancementTest {
     @TempDir Path temp;
 
     @Test
+    void interpolationMatchesBaselinePixelsAtPartialTilesAndNarrowEdges() throws Exception {
+        // Frozen from e3ffde1: includes alpha, gradients, low-contrast strokes,
+        // one-dimensional images, partial tiles and extrapolated page edges.
+        int[][] sizes = {{1, 83}, {83, 1}, {31, 29}, {137, 91}, {257, 259}, {1400, 1000}};
+        String[] expected = {null,
+                "5e1de758e62aea3ab32eb8d7a7daa0fc1035b6ab662a98137c4c7d216fb74a64",
+                "20145ab3173e18b4143bfdce3b0730e18199904dbb0b429cc902bc2e649a51fc",
+                "a546498ec11f5acb0382f50b2b625d163f0a22cc3e4ab6b96ae7b9cb8d6c57f2",
+                "4b72f38d10e18b60de173fbb5d4f42d385576315f8d2fab23f907833995084b7",
+                "ae202966babaf85564908f336705bd6cdd141f3667547a89d5ea6d0ebc188ddd"};
+        for (int index = 0; index < sizes.length; index++) {
+            int width = sizes[index][0], height = sizes[index][1];
+            BufferedImage source = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            for (int y = 0; y < height; y++) for (int x = 0; x < width; x++) {
+                int gray = 110 + x * 70 / width + y * 30 / height;
+                if (x % 37 > 7 && x % 37 < 23 && y % 41 > 13 && y % 41 < 26) gray -= 25;
+                int alpha = (x + y) % 17 == 0 ? 180 : 255;
+                source.setRGB(x, y, (alpha << 24) | (gray << 16) | (gray << 8) | gray);
+            }
+            BufferedImage output = OcrContrastEnhancer.enhance(source);
+            if (expected[index] == null) {
+                assertNull(output);
+            } else {
+                assertNotNull(output);
+                var digest = java.security.MessageDigest.getInstance("SHA-256");
+                for (int y = 0; y < height; y++) for (int x = 0; x < width; x++) {
+                    digest.update((byte) output.getRaster().getSample(x, y, 0));
+                }
+                assertEquals(expected[index], java.util.HexFormat.of().formatHex(digest.digest()),
+                        width + "x" + height + " output pixels must remain identical");
+                output.flush();
+            }
+            source.flush();
+        }
+    }
+
+    @Test
     void removesGrayShadowWithoutMovingInkOrChangingSourcePixels() {
         BufferedImage image = new BufferedImage(512, 256, BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < 256; y++) for (int x = 0; x < 512; x++) {
@@ -218,7 +255,13 @@ class OcrContrastEnhancementTest {
         BufferedImage image = new BufferedImage(1200, 800, BufferedImage.TYPE_INT_RGB);
         var graphics = image.createGraphics();
         graphics.setColor(Color.WHITE); graphics.fillRect(0, 0, 1200, 800);
-        graphics.setColor(Color.BLACK); graphics.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 32));
+        graphics.setColor(Color.BLACK);
+        // Use the same licensed font on every platform: logical SansSerif maps
+        // to different glyphs/spacing and can change Tesseract's column split.
+        try (var font = getClass().getResourceAsStream("/fonts/LiberationSans-Regular.ttf")) {
+            assertNotNull(font);
+            graphics.setFont(Font.createFont(Font.TRUETYPE_FONT, font).deriveFont(32f));
+        }
         graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         String sentence = "Invoice OCR 2026 total amount 12345";
         for (int line = 0; line < 8; line++) graphics.drawString(sentence, 90, 100 + line * 80);
