@@ -77,7 +77,9 @@ final class OcrDeskewSelection {
             List<String> numbers = old.stream().flatMap(word -> NUMBER.matcher(word.text()).results())
                     .map(result -> result.group()).toList();
             List<String> replacements = NUMBER.matcher(next.text()).results().map(result -> result.group()).toList();
-            if (!numbers.isEmpty() && (!numbers.equals(replacements) || !prior.equals(next.text()))) {
+            boolean numericTokenChanged = old.stream().filter(word -> word.text().codePoints().anyMatch(Character::isDigit))
+                    .anyMatch(word -> !word.text().equals(next.text()));
+            if (!numbers.isEmpty() && (!numbers.equals(replacements) || numericTokenChanged)) {
                 if (numbers.size() != replacements.size() || old.size() != 1) return original;
                 // Preserve the complete reliable token, including decimal/sign,
                 // currency, percent and grouping context. Never splice regex

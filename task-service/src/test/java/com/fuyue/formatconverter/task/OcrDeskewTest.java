@@ -271,6 +271,26 @@ class OcrDeskewTest {
         }
     }
 
+    @Test void unchangedNumericTokenDoesNotBecomeANumericConflictFromOtherMappedWords() {
+        Rect box = new Rect(10, 10, 30, 10);
+        var source = new TextBlock("line", 1, box, "Amount 12345", box.bottom(), null, 1, 0, 0, List.of(),
+                Transform2D.IDENTITY, List.of(new TextBlock.OcrWord(box, "Amount", .96),
+                new TextBlock.OcrWord(box, "12345", .96)));
+        var original = new TesseractOcrConverter.RecognitionResult(List.of(source), .96, 2);
+        var recovered = new java.util.ArrayList<>(result("12345", .98, box).blocks());
+        recovered.addAll(result("additional recovered prose", .98, new Rect(50, 10, 40, 10)).blocks());
+        var candidate = new TesseractOcrConverter.RecognitionResult(recovered, .98, 2);
+        try (var prepared = new OcrDeskew.Prepared(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB),
+                6, new AffineTransform())) {
+            var selected = OcrDeskewSelection.select(original, candidate, prepared, new Rect(0, 0, 100, 100),
+                    100, 100, .35);
+            assertEquals(6, selected.deskewDegrees());
+            assertEquals("12345", selected.blocks().get(0).text());
+            assertTrue(selected.conflicts().stream().allMatch(message -> message.startsWith("文字原结果")),
+                    "The existing text conflict remains explicit, but unchanged 12345 is not rewritten");
+        }
+    }
+
     private Path writePage(int angle) throws Exception {
         BufferedImage source = page(angle);
         Path image = Files.createTempFile(temp, "deskew-input-", ".png");
