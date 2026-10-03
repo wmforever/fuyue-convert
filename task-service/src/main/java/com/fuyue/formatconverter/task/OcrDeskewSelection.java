@@ -79,7 +79,9 @@ final class OcrDeskewSelection {
             List<String> replacements = NUMBER.matcher(next.text()).results().map(result -> result.group()).toList();
             boolean numericTokenChanged = old.stream().filter(word -> word.text().codePoints().anyMatch(Character::isDigit))
                     .anyMatch(word -> !word.text().equals(next.text()));
-            if (!numbers.isEmpty() && (!numbers.equals(replacements) || numericTokenChanged)) {
+            boolean numericContextLost = old.stream().filter(word -> numericContextToken(word.text()))
+                    .anyMatch(word -> !next.text().contains(word.text()));
+            if (!numbers.isEmpty() && (!numbers.equals(replacements) || numericTokenChanged || numericContextLost)) {
                 if (numbers.size() != replacements.size() || old.size() != 1) return original;
                 // Preserve the complete reliable token, including decimal/sign,
                 // currency, percent and grouping context. Never splice regex
@@ -109,6 +111,18 @@ final class OcrDeskewSelection {
         double confidence = mapped.stream().mapToDouble(TextBlock.OcrWord::confidence).average().orElse(0);
         return new TesseractOcrConverter.RecognitionResult(lines, confidence, mapped.size(), original.imageEnhanced(),
                 prepared.degrees(), conflicts);
+    }
+
+    private static boolean numericContextToken(String text) {
+        // Isolated punctuation/currency and ISO currency codes
+        // may be separate OCR words. A generic neighboring label is not an amount.
+        if (text.matches("[A-Za-z]{3}")) {
+            try { Currency.getInstance(text.toUpperCase(Locale.ROOT)); return true; }
+            catch (IllegalArgumentException ignored) { /* Ordinary labels such as OCR are not currency codes. */ }
+        }
+        return !text.isEmpty() && text.codePoints().allMatch(codePoint ->
+                Character.getType(codePoint) == Character.CURRENCY_SYMBOL
+                        || ".,:/−－-+＋，．：／٫٬'’%％‰‱()（）".indexOf(codePoint) >= 0);
     }
 
     static String join(List<TextBlock.OcrWord> words) {

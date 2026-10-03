@@ -291,6 +291,25 @@ class OcrDeskewTest {
         }
     }
 
+    @Test void rejectsLosingSeparateReliableDecimalCurrencyPercentOrAccountingContext() {
+        Rect box = new Rect(10, 10, 30, 10);
+        try (var prepared = new OcrDeskew.Prepared(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB),
+                6, new AffineTransform())) {
+            for (String context : List.of(".", "$", "USD", "usd", "EUR", "JPY", "%", "(", "－")) {
+                var source = new TextBlock("line", 1, box, context + " 95", box.bottom(), null, 1,
+                        0, 0, List.of(), Transform2D.IDENTITY, List.of(new TextBlock.OcrWord(box, context, .96),
+                        new TextBlock.OcrWord(box, "95", .96)));
+                var original = new TesseractOcrConverter.RecognitionResult(List.of(source), .96, 2);
+                var blocks = new java.util.ArrayList<>(result("95", .98, box).blocks());
+                blocks.addAll(result("additional recovered prose", .98, new Rect(50, 10, 40, 10)).blocks());
+                var candidate = new TesseractOcrConverter.RecognitionResult(blocks, .98, 2);
+                assertSame(original, OcrDeskewSelection.select(original, candidate, prepared,
+                        new Rect(0, 0, 100, 100), 100, 100, .35),
+                        "Do not lose separately tokenized numeric context: " + context);
+            }
+        }
+    }
+
     private Path writePage(int angle) throws Exception {
         BufferedImage source = page(angle);
         Path image = Files.createTempFile(temp, "deskew-input-", ".png");
