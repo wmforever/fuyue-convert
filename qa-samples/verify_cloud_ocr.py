@@ -51,6 +51,12 @@ def metrics(expected, actual):
             'expectedNumbers': re.findall(r'\d+', expected), 'actualNumbers': re.findall(r'\d+', actual)}
 
 
+class TaskConversionError(RuntimeError):
+    def __init__(self, task):
+        self.task = task
+        super().__init__(json.dumps(task, ensure_ascii=False))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--base-url', default='http://127.0.0.1:8080')
@@ -79,7 +85,7 @@ def main():
             if task['downloadReady']:
                 return request(task_path + '/download'), round(time.monotonic() - started, 3), task
             if task['status'] in ('FAILED', 'CANCELLED'):
-                raise RuntimeError(json.dumps(task, ensure_ascii=False))
+                raise TaskConversionError(task)
             time.sleep(.2)
         raise TimeoutError(task_path)
 
@@ -93,6 +99,21 @@ def main():
         assert hashlib.sha256(data).hexdigest() == case['sha256'], name
         record = {'file': name}
         try:
+            if case.get('expectedErrors'):
+                failures = {}
+                for target in ['txt', 'docx']:
+                    try:
+                        convert(name, data, target)
+                        raise AssertionError('Blank/noise fixture unexpectedly produced text')
+                    except TaskConversionError as error:
+                        code = error.task.get('errorCode')
+                        assert code in case['expectedErrors'], error.task
+                        failures[target] = code
+                record.update(success=True, expectedFailureVerified=failures)
+                report['cases'].append(record)
+                (args.out / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+                print(name, True, failures, flush=True)
+                continue
             txt, txt_time, txt_task = convert(name, data, 'txt')
             actual = txt.decode('utf-8')
             docx, docx_time, docx_task = convert(name, data, 'docx')

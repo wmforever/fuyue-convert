@@ -143,3 +143,9 @@ Export shaded native fixtures with the test's
 source truth and image hashes. Full commands, exact runtime/font/model versions,
 measurements, numeric conflicts and unrun platform checks are in
 [the cloud batch report](../docs/cloud-ocr-batch-20261003.md).
+
+`generate_ocr_holdouts.py` freezes broader font/angle/layout/number and blank/noise
+controls, with glyph-coverage validation. `probe_word_rotation.py` measures
+actual Office PDF text direction for isolated OOXML frames. These optional QA
+tools require fontTools/Pillow and PyMuPDF respectively. Their accepted and
+rejected results are in [the follow-up report](../docs/cloud-ocr-iteration2.md).

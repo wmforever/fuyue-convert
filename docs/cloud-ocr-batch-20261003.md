@@ -3,6 +3,9 @@
 Baseline: `e3ffde164e90e766b7a9d6e3b1fae3f53b94d7d5` in
 `wmforever/fuyue-convert`. Linux x86_64, 2026-10-03.
 
+Follow-up inflated-box recovery and broader no-regression holdouts are recorded
+in [the next measured iteration](cloud-ocr-iteration2.md).
+
 ## Shipped batches
 
 1. `55cce9b`: cache horizontal paper interpolation for two tile rows. Both

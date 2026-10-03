@@ -187,6 +187,39 @@ class OcrDeskewTest {
         }
     }
 
+    @Test void matchesInflatedBoxesOnlyThroughUniqueContainedReliableExactText() {
+        Rect large = new Rect(10, 10, 100, 60), small = new Rect(20, 30, 10, 8);
+        var original = result("客户", .96, large);
+        try (var prepared = new OcrDeskew.Prepared(new BufferedImage(150, 100, BufferedImage.TYPE_INT_RGB), 6, new AffineTransform())) {
+            Rect page = new Rect(0, 0, 150, 100);
+            var adopted = OcrDeskewSelection.select(original, result("客户", .98, small), prepared, page, 150, 100, .35);
+            assertEquals(6, adopted.deskewDegrees());
+            assertEquals("客户", adopted.blocks().get(0).text());
+            assertSame(original, OcrDeskewSelection.select(original, result("客产", .98, small), prepared, page, 150, 100, .35));
+            assertSame(original, OcrDeskewSelection.select(original, result("客户", .80, small), prepared, page, 150, 100, .35));
+            var weakBlocks = new java.util.ArrayList<>(result("客户", .80, small).blocks());
+            for (int index = 0; index < 4; index++) weakBlocks.addAll(
+                    result("RELIABLE", .99, new Rect(20 + index * 25, 80, 20, 8)).blocks());
+            var highAverageWeakToken = new TesseractOcrConverter.RecognitionResult(weakBlocks, .952, 5);
+            assertSame(original, OcrDeskewSelection.select(original, highAverageWeakToken, prepared, page, 150, 100, .35),
+                    "a high page average cannot make the exact fallback token reliable");
+            assertSame(original, OcrDeskewSelection.select(original, result("客户", .98, new Rect(105, 65, 10, 8)),
+                    prepared, page, 150, 100, .35));
+            var twice = new TesseractOcrConverter.RecognitionResult(
+                    java.util.stream.Stream.concat(result("客户", .98, small).blocks().stream(),
+                            result("客户", .98, new Rect(70, 40, 10, 8)).blocks().stream()).toList(), .98, 2);
+            assertSame(original, OcrDeskewSelection.select(original, twice, prepared, page, 150, 100, .35),
+                    "two equally plausible exact tokens cannot replace a single reliable occurrence");
+            var repeat = new TesseractOcrConverter.RecognitionResult(
+                    java.util.stream.Stream.concat(original.blocks().stream(), original.blocks().stream()).toList(), .96, 2);
+            assertSame(repeat, OcrDeskewSelection.select(repeat, result("客户", .98, small), prepared, page, 150, 100, .35),
+                    "two original occurrences cannot share one exact fallback match");
+            var number = result("80424", .96, large);
+            assertSame(number, OcrDeskewSelection.select(number, result("80421", .98, small), prepared, page, 150, 100, .35),
+                    "the fallback must never manufacture a numeric correspondence from known truth");
+        }
+    }
+
     private Path writePage(int angle) throws Exception {
         BufferedImage source = page(angle);
         Path image = Files.createTempFile(temp, "deskew-input-", ".png");

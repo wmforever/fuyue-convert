@@ -31,15 +31,34 @@ final class OcrDeskewSelection {
         if (mapped.isEmpty() || candidate.confidence() < Math.max(minimumConfidence, original.confidence() - .05)) return original;
         List<List<TextBlock.OcrWord>> previous = new ArrayList<>();
         for (int index = 0; index < mapped.size(); index++) previous.add(new ArrayList<>());
+        int comparisons = 0;
         for (TextBlock line : original.blocks()) for (TextBlock.OcrWord word : line.ocrWords()) {
             if (word.confidence() < .85) continue;
             int match = -1;
             double overlap = .25;
             for (int index = 0; index < mapped.size(); index++) {
-                if ((index & 63) == 0 && System.nanoTime() >= deadline) return original;
+                if (++comparisons > 2_000_000 || ((index & 63) == 0 && System.nanoTime() >= deadline)) return original;
                 double value = word.box().intersectionArea(mapped.get(index).box())
                         / Math.max(1e-9, word.box().width() * word.box().height());
                 if (value > overlap) { match = index; overlap = value; }
+            }
+            if (match < 0) {
+                // OCR can assign a short token an inflated box. Do not relax
+                // the original overlap threshold: require exact reliable text,
+                // a unique contained majority of the candidate, and an unused
+                // candidate so distinct occurrences cannot collapse together.
+                int exact = -1;
+                for (int index = 0; index < mapped.size(); index++) {
+                    if (++comparisons > 2_000_000 || ((index & 63) == 0 && System.nanoTime() >= deadline)) return original;
+                    var next = mapped.get(index);
+                    if (next.confidence() < .85 || !normalized(word.text()).equals(normalized(next.text()))) continue;
+                    double coverage = word.box().intersectionArea(next.box())
+                            / Math.max(1e-9, next.box().width() * next.box().height());
+                    if (coverage < .50 || !word.box().contains(next.box().center(), 0)) continue;
+                    if (exact >= 0 || !previous.get(index).isEmpty()) return original;
+                    exact = index;
+                }
+                match = exact;
             }
             if (match < 0) return original; // Reliable source content cannot disappear in recovery.
             previous.get(match).add(word);
