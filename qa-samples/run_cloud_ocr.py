@@ -5,6 +5,7 @@ Activate the intended JDK/OCR environment first. Linux containers without a
 reaping PID 1 should provide --reaper path/to/reap-run.py. No token is persisted.
 """
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -27,9 +28,15 @@ def main():
     parser.add_argument('--samples', type=Path, default=ROOT / 'qa-samples/generated/cloud-handoff')
     parser.add_argument('--jar', type=Path, default=ROOT / 'web-api/target/web-api-0.1.5.jar')
     parser.add_argument('--reaper', type=Path)
+    parser.add_argument('--provenance', type=Path, help='Verified build provenance; its JAR hash must match')
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
+    artifact = {'jarSha256':hashlib.sha256(args.jar.read_bytes()).hexdigest()}
+    if args.provenance:
+        artifact.update(json.loads(args.provenance.read_text()))
+        assert artifact['jarSha256']==hashlib.sha256(args.jar.read_bytes()).hexdigest(), 'Provenance JAR mismatch'
+    (out/'artifact-provenance.json').write_text(json.dumps(artifact,indent=2)+'\n')
     with socket.socket() as listener:
         listener.bind(('127.0.0.1', 0))
         port = listener.getsockname()[1]

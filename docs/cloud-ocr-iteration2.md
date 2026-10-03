@@ -3,6 +3,9 @@
 Baseline: `d51693b7e0bc5846bb4f5dcf4d1dad8cbf48b54e`, 2026-10-03,
 Linux x86_64, wmforever/fuyue-convert only. No main, merge or release changes.
 
+The subsequent shaded-omission and TXT column-order results, including retained
+failures and coverage false positives, are in [iteration 3](cloud-ocr-iteration3.md).
+
 ## Measured change
 
 Chinese −6° recovery was rejected despite a 93.24% confidence candidate with

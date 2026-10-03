@@ -75,16 +75,20 @@ public final class TesseractOcrConverter implements FileConverter {
         progress.update(TaskStage.PARSING, 15);
         OcrImageNormalizer.Prepared prepared = OcrImageNormalizer.prepare(input.path(), sourceFormat,
                 workDir.resolve("normalized"));
+        long started = System.nanoTime();
         RecognitionResult recognized = recognizeLayoutResult(prepared.path(), workDir, 1,
                 new Rect(0d, 0d, prepared.width(), prepared.height()), limits, true);
         requireUsableResult(recognized, "图片");
         progress.update(TaskStage.RENDERING, 75);
-        String text = recognized.blocks().stream().map(TextBlock::text)
+        var ordered = OcrReadingOrder.arrange(recognized.blocks(), prepared.width(), started + settings.timeout().toNanos());
+        String text = ordered.lines().stream()
                 .reduce((left, right) -> left + System.lineSeparator() + right).orElse("");
         Files.writeString(outputPath, text + (text.isEmpty() ? "" : System.lineSeparator()), StandardCharsets.UTF_8);
         ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "Tesseract OCR");
         progress.update(TaskStage.PACKAGING, 90);
         List<ConversionWarning> warnings = new ArrayList<>(warningsFor(recognized, 1, "图片"));
+        if (ordered.adjusted()) warnings.add(ConversionWarning.of(WarningCode.OCR_READING_ORDER_ADJUSTED,
+                "根据稳定空白分栏调整为左栏后右栏的 TXT 阅读顺序；原词、数字和坐标未改变，歧义版面仍需人工复核。", 1));
         if (prepared.orientationApplied()) {
             warnings.add(ConversionWarning.of(WarningCode.EXIF_ORIENTATION_APPLIED,
                     "OCR 前已应用 EXIF Orientation=" + prepared.metadata().orientation() + "。", 1));
@@ -120,7 +124,13 @@ public final class TesseractOcrConverter implements FileConverter {
             BufferedImage pixels = ImageIO.read(engineImage.toFile());
             if (pixels == null) return result;
             try {
-                if (result.blocks().isEmpty() || result.confidence() < settings.warningConfidence()) {
+                boolean recoveryEligible = result.blocks().isEmpty() || result.confidence() < settings.warningConfidence();
+                if (!recoveryEligible && result.confidence() <= .95 && "3".equals(pageSegmentationMode())
+                        && remainingTime(started).compareTo(Duration.ofSeconds(1)) > 0) {
+                    recoveryEligible = OcrCoverageProbe.hasUncoveredShadedInk(pixels, result.blocks(), physicalBox,
+                            started + settings.timeout().toNanos());
+                }
+                if (recoveryEligible) {
                     result = retryEnhanced(result, pixels, workDir, pageNumber, physicalBox, dimensions, limits, started);
                 }
                 if (allowDeskew) result = retryDeskew(result, pixels, workDir, pageNumber, physicalBox, dimensions, limits, started);
@@ -437,7 +447,7 @@ public final class TesseractOcrConverter implements FileConverter {
         }
         if (result.imageEnhanced()) {
             warnings.add(ConversionWarning.of(WarningCode.OCR_IMAGE_ENHANCED,
-                    scope + "低置信度识别后采用了灰底/阴影归一化与对比度增强结果；原图和坐标未改变，仍需人工复核。", pageNumber));
+                    scope + "采用了灰底/阴影归一化与对比度增强结果；原图和坐标未改变，仍需人工复核内容完整性。", pageNumber));
         }
         if (result.confidence() < settings.warningConfidence()) {
             warnings.add(ConversionWarning.withConfidence(WarningCode.OCR_LOW_CONFIDENCE,

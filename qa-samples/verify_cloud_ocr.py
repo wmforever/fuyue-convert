@@ -154,6 +154,10 @@ def main():
                 scan_xml = ET.fromstring(archive.read('word/document.xml'))
                 scan_text = ''.join(n.text or '' for n in scan_xml.iter('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t'))
                 scan_media = {n: hashlib.sha256(archive.read(n)).hexdigest() for n in archive.namelist() if n.startswith('word/media/')}
+                scan_pixel_hashes = []
+                for member in scan_media:
+                    with Image.open(io.BytesIO(archive.read(member))) as scan_image:
+                        scan_pixel_hashes.append(hashlib.sha256(scan_image.convert('RGB').tobytes()).hexdigest())
             scan_pdf, scan_office_time, _ = convert(name + '.scan.docx', scan_docx, 'pdf')
             scan_pdf_path = args.out / (name + '.scan.pdf')
             scan_pdf_path.write_bytes(scan_pdf)
@@ -163,16 +167,28 @@ def main():
             with Image.open(io.BytesIO(data)) as source_image, Image.open(args.out / (name + '.scan.png')) as rendered_image:
                 source_rgb = source_image.convert('RGB')
                 rendered_rgb = rendered_image.convert('RGB')
+                scan_pixels_preserved = hashlib.sha256(source_rgb.tobytes()).hexdigest() in scan_pixel_hashes
+                assert scan_pixels_preserved, 'Scanned Word must preserve all decoded original RGB pixels'
                 # Synthetic fixtures leave this margin free of text and masks.
                 source_probe = source_rgb.getpixel((int(source_rgb.width * .02), int(source_rgb.height * .02)))
                 rendered_probe = rendered_rgb.getpixel((int(rendered_rgb.width * .02), int(rendered_rgb.height * .02)))
                 probe_delta = max(abs(a - b) for a, b in zip(source_probe, rendered_probe))
+                ink_probes = []
+                for probe in case.get('pixelProbes', []):
+                    x, y = probe['xFraction'], probe['yFraction']
+                    source_ink = source_rgb.getpixel((int(source_rgb.width*x), int(source_rgb.height*y)))
+                    rendered_ink = rendered_rgb.getpixel((int(rendered_rgb.width*x), int(rendered_rgb.height*y)))
+                    delta = max(abs(a-b) for a,b in zip(source_ink, rendered_ink))
+                    assert delta <= 12, 'Office lost or masked unrecognized synthetic ink'
+                    ink_probes.append({'sourceRgb':source_ink,'renderedRgb':rendered_ink,'maxChannelDelta':delta})
             assert scan_media and scan_text, 'Scanned Word must contain both scan media and editable text'
             assert probe_delta <= 12, 'Office lost or altered the unmasked synthetic scan margin'
 
             record.update(scan={'editableText': scan_text, 'mediaSha256': scan_media,
+                                'originalScanPixelsPreserved': scan_pixels_preserved,
                                 'sourceMarginRgb': source_probe, 'renderedMarginRgb': rendered_probe,
                                 'marginMaxChannelDelta': probe_delta,
+                                'unrecognizedInkProbes': ink_probes,
                                 'metrics': metrics('\n'.join(case['expectedLines']), scan_text),
                                 'officeMetrics': metrics('\n'.join(case['expectedLines']), scan_reopened),
                                 'seconds': {'pdf': scan_time, 'docx': scan_docx_time, 'office': scan_office_time}})
