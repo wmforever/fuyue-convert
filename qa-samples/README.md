@@ -124,3 +124,22 @@ python3 qa-samples/run_qa.py
 
 Generated `output/`, `work/`, `runtime-data/`, `report/`, and diff images are
 local artifacts and must not be committed.
+
+## Reproducible cloud OCR acceptance
+
+`generate_ocr_handoff_samples.py` provides six licensed synthetic bilingual
+inputs and source truth. `run_cloud_ocr.py` launches a production JAR with
+ephemeral authentication; `verify_cloud_ocr.py` uploads files, observes completed
+artifacts, opens Word through Office, measures text against truth and checks
+scan media, margins and an actual text edit. On Linux the runner also observes
+independent `ConversionWorkerMain` descendants. Reports contain synthetic text
+and stay under ignored `qa-samples/report/`; do not publish task data or models.
+Pillow is required for these QA scripts. `evaluate_ocr_deskew.py` additionally
+uses NumPy and is an unconstrained diagnostic, not production/Word acceptance.
+
+Export shaded native fixtures with the test's
+`format.converter.ocr-enhancement.qa-directory` property, then run
+`generate_ocr_regression_manifest.py --samples <that directory>` to attach fixed
+source truth and image hashes. Full commands, exact runtime/font/model versions,
+measurements, numeric conflicts and unrun platform checks are in
+[the cloud batch report](../docs/cloud-ocr-batch-20261003.md).

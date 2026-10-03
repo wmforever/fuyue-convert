@@ -76,7 +76,7 @@ public final class TesseractOcrConverter implements FileConverter {
         OcrImageNormalizer.Prepared prepared = OcrImageNormalizer.prepare(input.path(), sourceFormat,
                 workDir.resolve("normalized"));
         RecognitionResult recognized = recognizeLayoutResult(prepared.path(), workDir, 1,
-                new Rect(0d, 0d, prepared.width(), prepared.height()), limits);
+                new Rect(0d, 0d, prepared.width(), prepared.height()), limits, true);
         requireUsableResult(recognized, "图片");
         progress.update(TaskStage.RENDERING, 75);
         String text = recognized.blocks().stream().map(TextBlock::text)
@@ -101,6 +101,13 @@ public final class TesseractOcrConverter implements FileConverter {
 
     RecognitionResult recognizeLayoutResult(Path image, Path workDir, int pageNumber,
                                              Rect physicalBox, ParseLimits limits) throws Exception {
+        return recognizeLayoutResult(image, workDir, pageNumber, physicalBox, limits, false);
+    }
+
+    // General-angle editable text is not reliably reopened by the cloud Office runtime.
+    // Enable optional deskew for text extraction only until Word geometry is accepted.
+    RecognitionResult recognizeLayoutResult(Path image, Path workDir, int pageNumber,
+                                             Rect physicalBox, ParseLimits limits, boolean allowDeskew) throws Exception {
         Files.createDirectories(workDir);
         ConversionGuards.requireImageBounds(image, limits);
         ImageDimensions dimensions = dimensions(image);
@@ -116,6 +123,8 @@ public final class TesseractOcrConverter implements FileConverter {
                 if (result.blocks().isEmpty() || result.confidence() < settings.warningConfidence()) {
                     result = retryEnhanced(result, pixels, workDir, pageNumber, physicalBox, dimensions, limits, started);
                 }
+                if (allowDeskew) result = retryDeskew(result, pixels, workDir, pageNumber, physicalBox, dimensions, limits, started);
+                if (result.deskewDegrees() != 0) return result;
                 // The original pixels, rather than enhanced pixels, remain the geometry authority.
                 return new RecognitionResult(result.blocks().stream()
                         .map(block -> OcrWordGeometryRefiner.refine(block, pixels, physicalBox)).toList(),
@@ -169,6 +178,32 @@ public final class TesseractOcrConverter implements FileConverter {
             if (temporary != null) {
                 try { Files.deleteIfExists(temporary); } catch (IOException ignored) { }
             }
+        }
+    }
+
+    private RecognitionResult retryDeskew(RecognitionResult original, BufferedImage pixels, Path workDir,
+                                         int pageNumber, Rect physicalBox, ImageDimensions dimensions,
+                                         ParseLimits limits, long started) throws Exception {
+        double sx = physicalBox.width() / dimensions.width(), sy = physicalBox.height() / dimensions.height();
+        if (!"3".equals(pageSegmentationMode()) || sx <= 0 || sy <= 0 || Math.abs(sx / sy - 1) > .01
+                || remainingTime(started).compareTo(Duration.ofSeconds(1)) <= 0) return original;
+        long deadline = started + settings.timeout().toNanos();
+        try (var prepared = OcrDeskew.prepare(pixels, settings.maxImagePixels(), deadline)) {
+            if (prepared == null) return original;
+            Path temporary = Files.createTempFile(workDir, "tesseract-deskew-%04d-".formatted(pageNumber), ".png");
+            try {
+                if (!ImageIO.write(prepared.image(), "png", temporary.toFile())) return original;
+                Duration remaining = remainingTime(started);
+                if (remaining.compareTo(Duration.ofSeconds(1)) <= 0) return original;
+                var size = new ImageDimensions(prepared.image().getWidth(), prepared.image().getHeight());
+                var candidate = recognizeOnce(temporary, workDir, pageNumber,
+                        new Rect(0, 0, size.width() * sx, size.height() * sy), size, limits,
+                        "tesseract-deskew-page-%04d".formatted(pageNumber), remaining);
+                return OcrDeskewSelection.select(original, candidate, prepared, physicalBox,
+                        dimensions.width(), dimensions.height(), settings.minimumConfidence(), deadline);
+            } finally { Files.deleteIfExists(temporary); }
+        } catch (IOException ignored) {
+            return original; // Optional recovery cannot discard a usable original result.
         }
     }
 
@@ -392,6 +427,14 @@ public final class TesseractOcrConverter implements FileConverter {
         warnings.add(ConversionWarning.withConfidence(WarningCode.OCR_APPLIED,
                 scope + "已使用本地 Tesseract OCR，平均置信度 " + percent(result.confidence()) + "，结果必须人工复核。",
                 pageNumber, null, result.confidence()));
+        if (result.deskewDegrees() != 0) {
+            warnings.add(ConversionWarning.of(WarningCode.OCR_DESKEW_APPLIED,
+                    scope + "采用倾斜校正候选（" + String.format(Locale.ROOT, "%.2f", result.deskewDegrees())
+                            + "°）；词框已逆变换到原图坐标，仍需复核内容完整性。", pageNumber));
+        }
+        for (String conflict : result.conflicts()) {
+            warnings.add(ConversionWarning.of(WarningCode.OCR_RECOGNITION_CONFLICT, scope + conflict, pageNumber));
+        }
         if (result.imageEnhanced()) {
             warnings.add(ConversionWarning.of(WarningCode.OCR_IMAGE_ENHANCED,
                     scope + "低置信度识别后采用了灰底/阴影归一化与对比度增强结果；原图和坐标未改变，仍需人工复核。", pageNumber));
@@ -800,13 +843,17 @@ public final class TesseractOcrConverter implements FileConverter {
         }
     }
 
-    record RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced) {
+    record RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
+                             double deskewDegrees, List<String> conflicts) {
         RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount) {
-            this(blocks, confidence, wordCount, false);
+            this(blocks, confidence, wordCount, false, 0, List.of());
         }
-
+        RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced) {
+            this(blocks, confidence, wordCount, imageEnhanced, 0, List.of());
+        }
         RecognitionResult {
             blocks = blocks == null ? List.of() : List.copyOf(blocks);
+            conflicts = conflicts == null ? List.of() : List.copyOf(conflicts);
         }
     }
 
@@ -837,7 +884,7 @@ public final class TesseractOcrConverter implements FileConverter {
         int height() { return Math.max(1, bottom - top); }
     }
 
-    private static boolean wordSeparator(int previous, int next) {
+    static boolean wordSeparator(int previous, int next) {
         return !(eastAsian(previous) && eastAsian(next));
     }
 
