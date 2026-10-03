@@ -1,5 +1,8 @@
 # Cloud iteration 4: unresolved coverage warnings and review build
 
+Later bounded Word ordering experiments and rejection evidence:
+[iteration5](cloud-ocr-iteration5.md).
+
 Baseline: `ae7543e1c53e11b3945793a2bbc3869ace81af83`. Same upstream branch and
 draft [PR #1](https://github.com/wmforever/fuyue-convert/pull/1), wmforever only.
 Warning semantics were proposed in [#4](https://github.com/wmforever/fuyue-convert/issues/4)
