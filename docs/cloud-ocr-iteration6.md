@@ -1,5 +1,8 @@
 # Cloud iteration 6: numeric preservation and multi-gutter scope
 
+Subsequent bounded partial recovery and exact source-region validation are in
+[iteration7](cloud-ocr-iteration7.md). This page records the preceding safety head.
+
 The review fixes real correctness defects. Reliable `.95` could become `95`
 while merging a corrected `0.95` candidate; separate `12` and `34` could become
 `1234`. Enhancement also accepted `95` inside `.95`. Regression tests failed

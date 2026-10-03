@@ -18,7 +18,9 @@ SELECTION = {
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out', type=Path, default=ROOT / 'cloud-iteration6-contracts')
-    out = parser.parse_args().out
+    parser.add_argument('--independent', action='store_true', help='Include six independent omission holdouts and two negative controls')
+    args = parser.parse_args()
+    out = args.out
     out.mkdir(parents=True, exist_ok=True)
     cases, fonts = [], {}
     for directory, names in SELECTION.items():
@@ -31,10 +33,21 @@ def main():
             assert hashlib.sha256(source.read_bytes()).hexdigest() == case['sha256']
             shutil.copyfile(source, out / name)
             cases.append(case)
+    if args.independent:
+        for directory, names in [('cloud-omission-holdouts', None),
+                                 ('cloud-shadow-independent', ['shaded-noise.png', 'shaded-one-mark.png'])]:
+            manifest = json.loads((ROOT / directory / 'expected.json').read_text())
+            fonts[directory] = manifest.get('fonts', {})
+            for case in manifest['cases']:
+                if names is not None and case['file'] not in names: continue
+                source = ROOT / directory / case['file']
+                assert hashlib.sha256(source.read_bytes()).hexdigest() == case['sha256']
+                shutil.copyfile(source, out / case['file'])
+                cases.append(case)
     (out / 'expected.json').write_text(json.dumps({
         'provenance': 'Public synthetic frozen handoff, shading and holdout cases; no OCR-derived truth',
         'fonts': fonts, 'cases': cases}, ensure_ascii=False, indent=2) + '\n')
-    print('Selected twelve frozen public cases')
+    print('Selected', len(cases), 'frozen public cases')
 
 
 if __name__ == '__main__':

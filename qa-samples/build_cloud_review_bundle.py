@@ -63,7 +63,7 @@ def main():
     for path in sorted((ROOT/'docs').glob('cloud-ocr-*.md')):file('evidence/docs/'+path.name,path)
     assert Path(args.evidence_doc).name==args.evidence_doc
     assert (ROOT/'docs'/args.evidence_doc).is_file()
-    for path in sorted((ROOT/'docs').glob('cloud-ocr-iteration6-*.json')):file('evidence/docs/'+path.name,path)
+    for path in sorted((ROOT/'docs').glob('cloud-ocr-iteration*-*.json')):file('evidence/docs/'+path.name,path)
     assert bool(args.text_samples)==bool(args.text_report),'Provide both TXT evidence paths'
     if args.text_report:
         text_report=json.loads((args.text_report/'report.json').read_text())
@@ -87,7 +87,7 @@ def main():
         name=case['file'];assert Path(name).name==name
         source_path=args.samples/name;assert digest(source_path.read_bytes())==case['sha256']
         file('samples/'+name,source_path);r=by_name[name]
-        for suffix in ['.docx','.scan.docx','.pdf','.scan.pdf','.png','.scan.png']:
+        for suffix in ['.docx','.scan.docx','.pdf','.scan.pdf','.png','.scan.png','.edited.scan.docx','.edited.scan.pdf']:
             path=args.report/(name+suffix)
             if path.is_file():file('evidence/artifacts/'+path.name,path)
         if r.get('metrics'):

@@ -18,6 +18,33 @@ final class OcrDeskewSelection {
     static TesseractOcrConverter.RecognitionResult select(TesseractOcrConverter.RecognitionResult original,
             TesseractOcrConverter.RecognitionResult candidate, OcrDeskew.Prepared prepared,
             Rect physical, int sourceWidth, int sourceHeight, double minimumConfidence, long deadline) {
+        var selected = selectFull(original, candidate, prepared, physical, sourceWidth, sourceHeight, minimumConfidence, deadline);
+        if (selected != original) return selected;
+        if (candidate.blocks().size() > 500) return original;
+        double sx = physical.width() / sourceWidth, sy = physical.height() / sourceHeight;
+        List<TextBlock> mapped = new ArrayList<>();
+        int count = 0;
+        for (var block : candidate.blocks()) {
+            if (block.ocrWords().isEmpty() || System.nanoTime() >= deadline) return original;
+            List<TextBlock.OcrWord> words = new ArrayList<>();
+            for (var word : block.ocrWords()) {
+                if (++count > 5000 || System.nanoTime() >= deadline) return original;
+                words.add(new TextBlock.OcrWord(prepared.originalBounds(word.box(), sx, sy, physical),
+                        word.text(), word.confidence()));
+            }
+            Rect bounds = words.get(0).box();
+            for (var word : words) bounds = bounds.union(word.box());
+            mapped.add(new TextBlock(block.id(), block.pageNumber(), bounds, block.text(), bounds.bottom(),
+                    block.style(), block.zOrder(), 0, 0, List.of(), Transform2D.IDENTITY, words));
+        }
+        return OcrPartialRecovery.select(original, new TesseractOcrConverter.RecognitionResult(mapped,
+                candidate.confidence(), candidate.wordCount()), physical, minimumConfidence, -.05,
+                false, prepared.degrees(), deadline);
+    }
+
+    private static TesseractOcrConverter.RecognitionResult selectFull(TesseractOcrConverter.RecognitionResult original,
+            TesseractOcrConverter.RecognitionResult candidate, OcrDeskew.Prepared prepared,
+            Rect physical, int sourceWidth, int sourceHeight, double minimumConfidence, long deadline) {
         if (System.nanoTime() >= deadline || (long) original.wordCount() * candidate.wordCount() > 2_000_000) return original;
         double sx = physical.width() / sourceWidth, sy = physical.height() / sourceHeight;
         List<TextBlock.OcrWord> mapped = new ArrayList<>();

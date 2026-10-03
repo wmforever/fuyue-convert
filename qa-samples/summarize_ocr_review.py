@@ -21,6 +21,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--before', type=Path, required=True)
     parser.add_argument('--after', type=Path, required=True)
+    parser.add_argument('--safety', type=Path, nargs='+', help='Additional frozen safety-head reports covering the after matrix')
+    parser.add_argument('--columns-safety', type=Path)
     parser.add_argument('--columns-before', type=Path, nargs='+', required=True)
     parser.add_argument('--columns-after', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
@@ -64,6 +66,14 @@ def main():
                               'Aligned character recall is not proof of semantic completeness.',
                               'Resource counters are whole-run child usage, not isolated per-worker peaks.',
                               'TXT-only column reports do not validate Word or Office.']}
+    if args.safety:
+        safety = [record(path) for path in args.safety]
+        result['safetyCases'] = compare(safety, after)
+        result['safety'] = [identity(value) for value in safety]
+    if args.columns_safety:
+        safety_columns = record(args.columns_safety)
+        result['safetyColumns'] = compare([safety_columns], new_columns)
+        result['columnsSafety'] = identity(safety_columns)
     args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'fullCases': len(result['fullCases']), 'txtOnlyColumns': len(result['txtOnlyColumns']),
                       'summarySha256': hashlib.sha256(args.out.read_bytes()).hexdigest()}))

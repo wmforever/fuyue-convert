@@ -139,8 +139,9 @@ public final class TesseractOcrConverter implements FileConverter {
                 if (recoveryEligible) {
                     result = retryEnhanced(result, pixels, workDir, pageNumber, physicalBox, dimensions, limits, started);
                 }
+                if (result.partialRecovery()) return result;
                 if (allowDeskew) result = retryDeskew(result, pixels, workDir, pageNumber, physicalBox, dimensions, limits, started);
-                if (result.deskewDegrees() != 0) return result;
+                if (result.deskewDegrees() != 0 || result.partialRecovery()) return result;
                 // The original pixels, rather than enhanced pixels, remain the geometry authority.
                 return new RecognitionResult(result.blocks().stream()
                         .map(block -> OcrWordGeometryRefiner.refine(block, pixels, physicalBox)).toList(),
@@ -184,9 +185,14 @@ public final class TesseractOcrConverter implements FileConverter {
             if (remaining.compareTo(Duration.ofSeconds(1)) <= 0) return original;
             RecognitionResult candidate = recognizeOnce(temporary, workDir, pageNumber, physicalBox, dimensions,
                     limits, "tesseract-enhanced-page-%04d".formatted(pageNumber), remaining);
-            return preferEnhanced(original, candidate, settings.minimumConfidence())
-                    ? new RecognitionResult(candidate.blocks(), candidate.confidence(), candidate.wordCount(), true)
-                    : original;
+            if (preferEnhanced(original, candidate, settings.minimumConfidence())) {
+                return new RecognitionResult(candidate.blocks(), candidate.confidence(), candidate.wordCount(), true);
+            }
+            long deadline = started + settings.timeout().toNanos();
+            var partial = OcrPartialRecovery.select(original, candidate, physicalBox, settings.minimumConfidence(),
+                    .05, true, 0, deadline);
+            return partial.partialRecovery() && !originalGeometryStable(original, pixels, physicalBox, deadline)
+                    ? original : partial;
         } catch (IOException ignored) {
             // Optional recovery must not turn a usable original recognition into a failed task.
             return original;
@@ -216,8 +222,10 @@ public final class TesseractOcrConverter implements FileConverter {
                 var candidate = recognizeOnce(temporary, workDir, pageNumber,
                         new Rect(0, 0, size.width() * sx, size.height() * sy), size, limits,
                         "tesseract-deskew-page-%04d".formatted(pageNumber), remaining);
-                return OcrDeskewSelection.select(original, candidate, prepared, physicalBox,
+                var selected = OcrDeskewSelection.select(original, candidate, prepared, physicalBox,
                         dimensions.width(), dimensions.height(), settings.minimumConfidence(), deadline);
+                return selected.partialRecovery() && !originalGeometryStable(original, pixels, physicalBox, deadline)
+                        ? original : selected;
             } finally { Files.deleteIfExists(temporary); }
         } catch (IOException ignored) {
             return original; // Optional recovery cannot discard a usable original result.
@@ -226,6 +234,16 @@ public final class TesseractOcrConverter implements FileConverter {
 
     private Duration remainingTime(long started) {
         return settings.timeout().minusNanos(System.nanoTime() - started);
+    }
+
+    private static boolean originalGeometryStable(RecognitionResult original, BufferedImage pixels,
+                                                   Rect physical, long deadline) {
+        // The unchanged fallback normally refines some Chinese word boxes. A partial
+        // result must also preserve that API/Word geometry, not merely raw TSV boxes.
+        for (var block : original.blocks()) {
+            if (System.nanoTime() >= deadline || OcrWordGeometryRefiner.refine(block, pixels, physical) != block) return false;
+        }
+        return System.nanoTime() < deadline;
     }
 
     static boolean preferEnhanced(RecognitionResult original, RecognitionResult candidate, double minimumConfidence) {
@@ -466,19 +484,25 @@ public final class TesseractOcrConverter implements FileConverter {
         if (result.deskewDegrees() != 0) {
             warnings.add(ConversionWarning.of(WarningCode.OCR_DESKEW_APPLIED,
                     scope + "采用倾斜校正候选（" + String.format(Locale.ROOT, "%.2f", result.deskewDegrees())
-                            + "°）；词框已逆变换到原图坐标，仍需复核内容完整性。", pageNumber));
+                            + (result.partialRecovery()
+                            ? "°）中的分离新行；全部原识别行及原词框保留，仅新词框逆变换到原图坐标，仍需复核遗漏。"
+                            : "°）；词框已逆变换到原图坐标，仍需复核内容完整性。"), pageNumber));
         }
         for (String conflict : result.conflicts()) {
             warnings.add(ConversionWarning.of(WarningCode.OCR_RECOGNITION_CONFLICT, scope + conflict, pageNumber));
         }
         if (result.imageEnhanced()) {
             warnings.add(ConversionWarning.of(WarningCode.OCR_IMAGE_ENHANCED,
-                    scope + "采用了灰底/阴影归一化与对比度增强结果；原图和坐标未改变，仍需人工复核内容完整性。", pageNumber));
+                    scope + (result.partialRecovery()
+                            ? "仅补充了增强候选中严格分离的新行，全部原识别行及原词框保留；混合置信度包括原词，不能证明内容完整。"
+                            : "采用了灰底/阴影归一化与对比度增强结果；原图和坐标未改变，仍需人工复核内容完整性。"), pageNumber));
         }
         if (result.possibleTextOmission()) {
             warnings.add(ConversionWarning.of(WarningCode.OCR_POSSIBLE_TEXT_OMISSION,
-                    scope + "阴影字迹覆盖探测仍发现多个未覆盖区域，可能漏识别或包含非文字图形；"
-                            + "未采用不满足保守条件的候选，平均置信度不能证明内容完整，请对照原图复核。", pageNumber));
+                    scope + (result.partialRecovery()
+                            ? "原识别区域保留，未采用其替换候选，仅补充了严格分离的新行；仍可能漏字或保留原误识别，混合置信度不能证明内容完整，请对照原图复核。"
+                            : "阴影字迹覆盖探测仍发现多个未覆盖区域，可能漏识别或包含非文字图形；"
+                            + "未采用不满足保守条件的候选，平均置信度不能证明内容完整，请对照原图复核。"), pageNumber));
         }
         if (result.confidence() < settings.warningConfidence()) {
             warnings.add(ConversionWarning.withConfidence(WarningCode.OCR_LOW_CONFIDENCE,
@@ -885,7 +909,11 @@ public final class TesseractOcrConverter implements FileConverter {
     }
 
     record RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
-                             double deskewDegrees, List<String> conflicts, boolean possibleTextOmission) {
+                             double deskewDegrees, List<String> conflicts, boolean possibleTextOmission, boolean partialRecovery) {
+        RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
+                          double deskewDegrees, List<String> conflicts, boolean possibleTextOmission) {
+            this(blocks, confidence, wordCount, imageEnhanced, deskewDegrees, conflicts, possibleTextOmission, false);
+        }
         RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
                           double deskewDegrees, List<String> conflicts) {
             this(blocks, confidence, wordCount, imageEnhanced, deskewDegrees, conflicts, false);
