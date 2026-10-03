@@ -5,7 +5,9 @@ import java.util.*;
 
 /** TXT-only two-column inference. Ambiguous headings, short cells and crossing ink retain engine order. */
 final class OcrReadingOrder {
-    record Result(List<String> lines, boolean adjusted) { }
+    record Result(List<String> lines, boolean adjusted, boolean multipleColumns) {
+        Result(List<String> lines, boolean adjusted) { this(lines, adjusted, false); }
+    }
     private record Line(double y, String text, boolean narrative) { }
     private OcrReadingOrder() { }
 
@@ -20,13 +22,19 @@ final class OcrReadingOrder {
         if (words.size() < 6) return unchanged;
         var sorted = new ArrayList<>(words); sorted.sort(Comparator.comparingDouble(w -> w.box().x()));
         double[] heights = words.stream().mapToDouble(w -> w.box().height()).sorted().toArray();
+        double minimumGap = Math.max(pageWidth * .08, heights[heights.length / 2] * 4);
         double gap = 0, gutter = 0, right = sorted.get(0).box().right();
+        int gutters = 0;
         for (var word : sorted) {
             double space = word.box().x() - right, middle = (word.box().x() + right) / 2;
+            // Only one gutter is validated. Two significant internal gaps mean
+            // three or more columns; sorting one combined side would interleave them.
+            if (space >= minimumGap && right > 0 && word.box().x() < pageWidth && ++gutters > 1)
+                return new Result(unchanged.lines(), false, true);
             if (space > gap && middle > pageWidth * .30 && middle < pageWidth * .70) { gap = space; gutter = middle; }
             right = Math.max(right, word.box().right());
         }
-        if (gap < Math.max(pageWidth * .08, heights[heights.length / 2] * 4)) return unchanged;
+        if (gap < minimumGap) return unchanged;
         List<Line> left = new ArrayList<>(), next = new ArrayList<>();
         for (var block : blocks) {
             if (System.nanoTime() >= deadline || block.ocrWords().isEmpty()) return unchanged;

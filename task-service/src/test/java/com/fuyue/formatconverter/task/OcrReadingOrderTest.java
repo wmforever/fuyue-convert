@@ -11,6 +11,7 @@ class OcrReadingOrderTest {
         var rows = rows(false); var snapshot = List.copyOf(rows);
         var result = arrange(rows);
         assertTrue(result.adjusted());
+        assertFalse(result.multipleColumns());
         assertEquals(List.of("Shipment number 00462", "Shipment number 00463", "Shipment number 00464",
                 "Reviewing debit -307.16", "Reviewing debit -308.16", "Reviewing debit -309.16"), result.lines());
         assertEquals(snapshot, rows);
@@ -46,6 +47,49 @@ class OcrReadingOrderTest {
         rows.set(0,new TextBlock(b.id(),1,b.box(),b.text()+" unseen",b.baselineY(),null,0,0,0,List.of(),Transform2D.IDENTITY,b.ocrWords()));
         assertFalse(arrange(rows).adjusted());
         assertFalse(arrange(Collections.nCopies(501, rows.get(0))).adjusted());
+    }
+
+    @Test
+    void retainsAlreadyCorrectThreeColumnProseInsteadOfInterleavingTheLastTwoColumns() {
+        List<TextBlock> correct = new ArrayList<>();
+        for (int side = 0; side < 3; side++) for (int row = 0; row < 3; row++) {
+            double x = 50 + side * 330;
+            correct.add(block(List.of(word("Independent", x, 100 + row * 100, 70),
+                    word("column", x + 80, 100 + row * 100, 50),
+                    word("sentence" + side + row, x + 140, 100 + row * 100, 40))));
+        }
+        var arranged = arrange(correct);
+        assertFalse(arranged.adjusted(), "Three columns exceed the validated two-column inference");
+        assertTrue(arranged.multipleColumns());
+        assertEquals(correct.stream().map(TextBlock::text).toList(), arranged.lines());
+    }
+
+    @Test
+    void retainsMergedThreeColumnsAndAsymmetricOrFourColumnEngineOrder() {
+        for (double[] starts : new double[][]{{20, 330, 720}, {30, 270, 510, 750}}) {
+            List<TextBlock> columns = new ArrayList<>();
+            for (int side = 0; side < starts.length; side++) for (int row = 0; row < 3; row++)
+                columns.add(prose(starts[side], row, side));
+            var ordered = arrange(columns);
+            assertFalse(ordered.adjusted());
+            assertTrue(ordered.multipleColumns());
+            assertEquals(columns.stream().map(TextBlock::text).toList(), ordered.lines());
+        }
+        List<TextBlock> merged = new ArrayList<>();
+        for (int row = 0; row < 3; row++) {
+            List<TextBlock.OcrWord> words = new ArrayList<>();
+            for (int side = 0; side < 3; side++) words.addAll(prose(50 + side * 330, row, side).ocrWords());
+            merged.add(block(words));
+        }
+        assertFalse(arrange(merged).adjusted());
+        assertTrue(arrange(merged).multipleColumns());
+        assertEquals(merged.stream().map(TextBlock::text).toList(), arrange(merged).lines());
+    }
+
+    private static TextBlock prose(double x, int row, int side) {
+        return block(List.of(word("Independent", x, 100 + row * 100, 60),
+                word("column", x + 70, 100 + row * 100, 40),
+                word("sentence" + side + row, x + 120, 100 + row * 100, 40)));
     }
 
     private static OcrReadingOrder.Result arrange(List<TextBlock> blocks) {

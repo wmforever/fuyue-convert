@@ -62,6 +62,7 @@ def main():
     parser.add_argument('--base-url', default='http://127.0.0.1:8080')
     parser.add_argument('--samples', type=Path, default=ROOT / 'qa-samples/generated/cloud-handoff')
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--text-only', action='store_true', help='TXT acceptance only; no Word/Office acceptance claim')
     args = parser.parse_args()
     token = os.environ['FORMAT_CONVERTER_API_TOKEN']
     args.out.mkdir(parents=True, exist_ok=True)
@@ -101,7 +102,7 @@ def main():
         try:
             if case.get('expectedErrors'):
                 failures = {}
-                for target in ['txt', 'docx']:
+                for target in (['txt'] if args.text_only else ['txt', 'docx']):
                     try:
                         convert(name, data, target)
                         raise AssertionError('Blank/noise fixture unexpectedly produced text')
@@ -116,6 +117,13 @@ def main():
                 continue
             txt, txt_time, txt_task = convert(name, data, 'txt')
             actual = txt.decode('utf-8')
+            if args.text_only:
+                record.update(success=True, text=actual, metrics=metrics('\n'.join(case['expectedLines']), actual),
+                              seconds={'txt': txt_time}, warnings=txt_task.get('warnings', []), textOnly=True)
+                report['cases'].append(record)
+                (args.out / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+                print(name, True, record['metrics'], flush=True)
+                continue
             docx, docx_time, docx_task = convert(name, data, 'docx')
             (args.out / (name + '.docx')).write_bytes(docx)
             with zipfile.ZipFile(io.BytesIO(docx)) as archive:

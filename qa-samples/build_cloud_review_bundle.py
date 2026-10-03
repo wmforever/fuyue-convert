@@ -27,6 +27,9 @@ def main():
     parser.add_argument('--samples',type=Path,required=True)
     parser.add_argument('--report',type=Path,required=True)
     parser.add_argument('--out',type=Path,required=True)
+    parser.add_argument('--evidence-doc',default='cloud-ocr-iteration4.md')
+    parser.add_argument('--text-samples',type=Path)
+    parser.add_argument('--text-report',type=Path)
     args=parser.parse_args();revision=git('rev-parse','HEAD')
     assert not git('status','--porcelain'),'Commit validated work before packaging'
     provenance=json.loads(args.provenance.read_text())
@@ -58,6 +61,26 @@ def main():
     file('evidence/build-provenance.json',args.provenance)
     file('samples/expected.json',args.samples/'expected.json')
     for path in sorted((ROOT/'docs').glob('cloud-ocr-*.md')):file('evidence/docs/'+path.name,path)
+    assert Path(args.evidence_doc).name==args.evidence_doc
+    assert (ROOT/'docs'/args.evidence_doc).is_file()
+    for path in sorted((ROOT/'docs').glob('cloud-ocr-iteration6-*.json')):file('evidence/docs/'+path.name,path)
+    assert bool(args.text_samples)==bool(args.text_report),'Provide both TXT evidence paths'
+    if args.text_report:
+        text_report=json.loads((args.text_report/'report.json').read_text())
+        text_samples=json.loads((args.text_samples/'expected.json').read_text())
+        text_artifact=json.loads((args.text_report/'artifact-provenance.json').read_text())
+        assert text_artifact['jarSha256']==provenance['jarSha256'] and text_artifact['verifiedCodeRevision']==revision
+        assert 'synthetic' in text_samples['provenance'].lower()
+        assert len(text_report['cases'])==len(text_samples['cases'])
+        text_cases={c['file']:c for c in text_report['cases']}
+        for name in ['report.json','resources.json','artifact-provenance.json']:file('evidence/txt-only/'+name,args.text_report/name)
+        file('samples/txt-only/expected.json',args.text_samples/'expected.json')
+        for case in text_samples['cases']:
+            name=case['file'];assert Path(name).name==name
+            result=text_cases[name];assert result['success'] and result['textOnly']
+            assert digest((args.text_samples/name).read_bytes())==case['sha256']
+            file('samples/txt-only/'+name,args.text_samples/name)
+            put('evidence/txt-only/'+name+'.txt',result['text'].encode())
     rows=[]
     by_name={c['file']:c for c in report['cases']}
     for case in manifest['cases']:
@@ -102,7 +125,8 @@ Validated JDK: Temurin17.0.16+8. JDK is required and is not bundled.
 Office is not bundled. DOCX→PDF needs an external compatible LibreOffice. Cloud evidence used LibreOfficeDev26.8.0.0.alpha0, commit2c87e51eeaa2b413ff4ae097b2705eea1995d8e5.
 
 Open review/index.html in a browser for source/scan views and separate text, editability and PDF-order metrics.
-Read evidence/docs/cloud-ocr-iteration4.md and evidence/report.json for limitations and exact measured results.
+Read evidence/docs/{args.evidence_doc} and evidence/report.json for limitations and exact measured results.
+Optional evidence/txt-only contains TXT-only tests, not Word/Office acceptance.
 All sample/document evidence is synthetic. No API token, server logs, task storage, private uploads or unrelated files are included.
 
 This is a cloud review build, not a release or desktop installer. Windows/macOS, Microsoft Word, other Linux distributions and native release Office are unrun. Arbitrary Word text rotation remains unresolved. Health reports an inherited0.1.4 version string; use SHA/provenance, not that string, for identity.

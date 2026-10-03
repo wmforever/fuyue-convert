@@ -1,5 +1,8 @@
 # Cloud iteration 5: bounded Word line-frame rejection
 
+Subsequent numeric/scope fixes and their measured regressions are documented in
+[iteration 6](cloud-ocr-iteration6.md). This page remains historical rejected evidence.
+
 Baseline `11f6ce779b118c623cebeeccb7bfe3e430f0f39a`, same wmforever branch and
 draft PR #1. No production renderer change is adopted. The implemented offline
 prototypes and measured results are committed so the next iteration does not

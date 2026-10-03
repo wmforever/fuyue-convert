@@ -29,6 +29,7 @@ def main():
     parser.add_argument('--jar', type=Path, default=ROOT / 'web-api/target/web-api-0.1.5.jar')
     parser.add_argument('--reaper', type=Path)
     parser.add_argument('--provenance', type=Path, help='Verified build provenance; its JAR hash must match')
+    parser.add_argument('--text-only', action='store_true', help='Run only TXT; separate from full Word/Office acceptance')
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -92,7 +93,8 @@ def main():
             else:
                 raise TimeoutError('Backend startup timed out')
             subprocess.run([sys.executable, str(ROOT / 'qa-samples/verify_cloud_ocr.py'),
-                            '--base-url', base, '--samples', str(args.samples.resolve()), '--out', str(out)], env=env, check=True)
+                            '--base-url', base, '--samples', str(args.samples.resolve()), '--out', str(out),
+                            *(['--text-only'] if args.text_only else [])], env=env, check=True)
             if not worker_pids:
                 raise RuntimeError('No independent JVM worker observed; isolation acceptance is unverified')
         finally:
