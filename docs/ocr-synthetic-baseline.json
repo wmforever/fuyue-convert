@@ -1,0 +1,89 @@
+{
+  "pillowVersion": "12.2.0",
+  "cases": [
+    {
+      "file": "english-tilt-+0.png",
+      "sourceSha256": "2f7be40cca24d3b61ed560a26ba6ab9098c2e2b2b5542f6a16837f7f9f61f8b9",
+      "angle": 0,
+      "engine": "bundled Tesseract 5.5.2",
+      "strategy": "original image, PSM 3, no enhancement or deskew",
+      "expectedCharacters": 293,
+      "recognizedCharacters": 293,
+      "characterEdits": 0,
+      "characterErrorRate": 0.0,
+      "words": 51,
+      "confidencePercent": 96.2592
+    },
+    {
+      "file": "english-tilt--6.png",
+      "sourceSha256": "8b33e2a6003a72a4b0c1e7ecbd1f37271b31e625aabacf5ae43ab74d39ebcdf8",
+      "angle": -6,
+      "engine": "bundled Tesseract 5.5.2",
+      "strategy": "original image, PSM 3, no enhancement or deskew",
+      "expectedCharacters": 293,
+      "recognizedCharacters": 294,
+      "characterEdits": 82,
+      "characterErrorRate": 0.279863,
+      "words": 54,
+      "confidencePercent": 92.9418
+    },
+    {
+      "file": "english-tilt-+6.png",
+      "sourceSha256": "451d2054d8d8c4eb530b3ea6c387ab45287b77faf9630829fdb4c4dc0dd37d45",
+      "angle": 6,
+      "engine": "bundled Tesseract 5.5.2",
+      "strategy": "original image, PSM 3, no enhancement or deskew",
+      "expectedCharacters": 293,
+      "recognizedCharacters": 61,
+      "characterEdits": 233,
+      "characterErrorRate": 0.795222,
+      "words": 11,
+      "confidencePercent": 93.6534
+    },
+    {
+      "file": "chinese-tilt-+0.png",
+      "sourceSha256": "f41d38fd1742d042d841964ad5907eefc8e118d787b70503a01d2af3e581d9b7",
+      "angle": 0,
+      "engine": "bundled Tesseract 5.5.2",
+      "strategy": "original image, PSM 3, no enhancement or deskew",
+      "expectedCharacters": 98,
+      "recognizedCharacters": 97,
+      "characterEdits": 3,
+      "characterErrorRate": 0.030612,
+      "words": 67,
+      "confidencePercent": 92.6909
+    },
+    {
+      "file": "chinese-tilt--6.png",
+      "sourceSha256": "fcf1d00ef1f12848469b8774eb985ff556f075650382997d7de31f13e826db1d",
+      "angle": -6,
+      "engine": "bundled Tesseract 5.5.2",
+      "strategy": "original image, PSM 3, no enhancement or deskew",
+      "expectedCharacters": 98,
+      "recognizedCharacters": 95,
+      "characterEdits": 19,
+      "characterErrorRate": 0.193878,
+      "words": 69,
+      "confidencePercent": 85.114
+    },
+    {
+      "file": "chinese-tilt-+6.png",
+      "sourceSha256": "3bba970a4f8ee1b063987ecd11ed05911ccabb20e4771ff7492f0cc293bc8477",
+      "angle": 6,
+      "engine": "bundled Tesseract 5.5.2",
+      "strategy": "original image, PSM 3, no enhancement or deskew",
+      "expectedCharacters": 98,
+      "recognizedCharacters": 83,
+      "characterEdits": 27,
+      "characterErrorRate": 0.27551,
+      "words": 57,
+      "confidencePercent": 82.4814
+    }
+  ],
+  "measurementNotes": {
+    "normalization": "Remove whitespace and lowercase Latin letters; retain punctuation and digits.",
+    "characterErrorRate": "Levenshtein edits divided by expected normalized character count. Includes missing text, insertions, substitutions and ordering errors.",
+    "environment": "macOS Intel; bundled Tesseract 5.5.2; eng or chi_sim+eng models pinned by desktop/licenses/ocr-runtime-lock.json.",
+    "scope": "Direct native CLI on original synthetic PNGs with PSM 3. No image enhancement, no deskew, no HTTP or Word verification in this measurement. Not a claim about all OCR documents."
+  }
+}
