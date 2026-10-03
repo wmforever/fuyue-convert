@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 /** Conservative spatial conservation; reliable numbers are never silently replaced. */
 final class OcrDeskewSelection {
-    private static final Pattern NUMBER = Pattern.compile("[-+−－＋]?\\p{Nd}+(?:[.,:/，．：／−－-]\\p{Nd}+)*");
+    private static final Pattern NUMBER = Pattern.compile("[-+−－＋]?[.,，．٫]?\\p{Nd}+(?:[.,:/，．：／−－٫٬-]\\p{Nd}+)*");
     private OcrDeskewSelection() { }
 
     static TesseractOcrConverter.RecognitionResult select(TesseractOcrConverter.RecognitionResult original,
@@ -71,18 +71,19 @@ final class OcrDeskewSelection {
             old.sort(Comparator.comparingDouble(word -> word.box().center().x() * Math.cos(radians)
                     + word.box().center().y() * Math.sin(radians)));
             var next = mapped.get(index);
-            String prior = old.stream().map(TextBlock.OcrWord::text).reduce("", String::concat);
-            List<String> numbers = NUMBER.matcher(prior).results().map(result -> result.group()).toList();
+            String prior = join(old);
+            // Extract within each original word: joining two numeric tokens first
+            // can manufacture a new amount ("12" + "34" -> "1234").
+            List<String> numbers = old.stream().flatMap(word -> NUMBER.matcher(word.text()).results())
+                    .map(result -> result.group()).toList();
             List<String> replacements = NUMBER.matcher(next.text()).results().map(result -> result.group()).toList();
-            if (!numbers.isEmpty() && !numbers.equals(replacements)) {
-                if (numbers.size() != replacements.size()) return original;
-                var matcher = NUMBER.matcher(next.text());
-                StringBuilder preserved = new StringBuilder();
-                int number = 0;
-                while (matcher.find()) matcher.appendReplacement(preserved, java.util.regex.Matcher.quoteReplacement(numbers.get(number++)));
-                matcher.appendTail(preserved);
+            if (!numbers.isEmpty() && (!numbers.equals(replacements) || !prior.equals(next.text()))) {
+                if (numbers.size() != replacements.size() || old.size() != 1) return original;
+                // Preserve the complete reliable token, including decimal/sign,
+                // currency, percent and grouping context. Never splice regex
+                // fragments into candidate text to create a third numeric value.
                 conflicts.add("数字原结果“" + prior + "”与校正候选“" + next.text() + "”冲突；保留原数字。");
-                mapped.set(index, new TextBlock.OcrWord(next.box(), preserved.toString(),
+                mapped.set(index, new TextBlock.OcrWord(next.box(), old.get(0).text(),
                         Math.min(next.confidence(), old.stream().mapToDouble(TextBlock.OcrWord::confidence).min().orElse(next.confidence()))));
             } else if (!normalized(next.text()).contains(normalized(prior))) {
                 conflicts.add("文字原结果“" + prior + "”与校正候选“" + next.text() + "”不同；请对照原图复核。");

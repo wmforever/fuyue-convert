@@ -268,6 +268,46 @@ class OcrContrastEnhancementTest {
     }
 
     @Test
+    void rejectsNumericTokenExtensionsAcrossDecimalSignCurrencyAndPercentBoundaries() {
+        Rect box = new Rect(0, 0, 100, 20);
+        for (String[] pair : new String[][]{{"95", ".95"}, {".95", "0.95"},
+                {"95", "-95"}, {"95", "95%"}, {"$95", "$95.0"}, {"９５", "．９５"},
+                {"95", "$95"}, {"95", "(95)"}, {"95", "95,00"}, {"95", "95‰"},
+                {"٫٩٥", "٠٫٩٥"}, {"USD1\u202f234.50", "USD1234.50"},
+                {"1'234", "01'234"}, {"1,234.50", "1,234.500"}}) {
+            var originalBlock = new com.fuyue.formatconverter.model.TextBlock("line", 1, box, pair[0], 16, null,
+                    0, 0, 0, java.util.List.of(), com.fuyue.formatconverter.model.Transform2D.IDENTITY,
+                    java.util.List.of(new com.fuyue.formatconverter.model.TextBlock.OcrWord(box, pair[0], 0.96)));
+            var candidateBlock = new com.fuyue.formatconverter.model.TextBlock("line", 1, box, pair[1], 16, null, 0);
+            assertFalse(TesseractOcrConverter.preferEnhanced(
+                    new TesseractOcrConverter.RecognitionResult(java.util.List.of(originalBlock), .60, 1),
+                    new TesseractOcrConverter.RecognitionResult(java.util.List.of(candidateBlock), .90, 1), .35),
+                    pair[0] + " must not become " + pair[1]);
+        }
+    }
+
+    @Test
+    void retainsUnchangedNumericSurfacesAndSeparateAmountsDuringEnhancement() {
+        Rect box = new Rect(0, 0, 100, 20);
+        for (String value : java.util.List.of(".95", "-.95", "$0.95", "95%", "９５．００", "1\u202f234.50")) {
+            var block = new com.fuyue.formatconverter.model.TextBlock("line", 1, box, value, 16, null,
+                    0, 0, 0, java.util.List.of(), com.fuyue.formatconverter.model.Transform2D.IDENTITY,
+                    java.util.List.of(new com.fuyue.formatconverter.model.TextBlock.OcrWord(box, value, .96)));
+            assertTrue(TesseractOcrConverter.preferEnhanced(
+                    new TesseractOcrConverter.RecognitionResult(java.util.List.of(block), .60, 1),
+                    new TesseractOcrConverter.RecognitionResult(java.util.List.of(block), .90, 1), .35));
+        }
+        var original = new com.fuyue.formatconverter.model.TextBlock("line", 1, box, "12 34", 16, null,
+                0, 0, 0, java.util.List.of(), com.fuyue.formatconverter.model.Transform2D.IDENTITY,
+                java.util.List.of(new com.fuyue.formatconverter.model.TextBlock.OcrWord(box, "12", .96),
+                        new com.fuyue.formatconverter.model.TextBlock.OcrWord(box, "34", .96)));
+        var merged = new com.fuyue.formatconverter.model.TextBlock("line", 1, box, "1234", 16, null, 0);
+        assertFalse(TesseractOcrConverter.preferEnhanced(
+                new TesseractOcrConverter.RecognitionResult(java.util.List.of(original), .60, 2),
+                new TesseractOcrConverter.RecognitionResult(java.util.List.of(merged), .90, 1), .35));
+    }
+
+    @Test
     void recoversNoTextButDoesNotAcceptCandidateBelowMinimumConfidence() throws Exception {
         var recovered = recognize(fake("-1", "", "92", "recovered 2026", ""), "empty");
         assertTrue(recovered.imageEnhanced());

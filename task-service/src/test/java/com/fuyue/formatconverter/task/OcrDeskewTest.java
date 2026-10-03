@@ -220,6 +220,57 @@ class OcrDeskewTest {
         }
     }
 
+    @Test void neverDropsTheDecimalPointFromAReliableLeadingDecimalWithALabel() {
+        Rect box = new Rect(10, 10, 30, 10);
+        var original = result("Balance:.95", .96, box);
+        try (var prepared = new OcrDeskew.Prepared(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB),
+                6, new AffineTransform())) {
+            var selected = OcrDeskewSelection.select(original, result("Balance:0.95", .98, box), prepared,
+                    new Rect(0, 0, 100, 100), 100, 100, .35);
+            assertEquals("Balance:.95", selected.blocks().get(0).text(),
+                    "A numeric conflict may retain the original, never fabricate Balance:95");
+        }
+    }
+
+    @Test void neverFusesSeparateReliableNumericWordsIntoOneAmount() {
+        Rect left = new Rect(10, 10, 10, 10), right = new Rect(30, 10, 10, 10);
+        Rect box = left.union(right);
+        var block = new TextBlock("line", 1, box, "12 34", box.bottom(), null, 1, 0, 0, List.of(),
+                Transform2D.IDENTITY, List.of(new TextBlock.OcrWord(left, "12", .96),
+                new TextBlock.OcrWord(right, "34", .96)));
+        var original = new TesseractOcrConverter.RecognitionResult(List.of(block), .96, 2);
+        try (var prepared = new OcrDeskew.Prepared(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB),
+                6, new AffineTransform())) {
+            var selected = OcrDeskewSelection.select(original, result("1234", .98, box), prepared,
+                    new Rect(0, 0, 100, 100), 100, 100, .35);
+            assertSame(original, selected, "Two reliable amounts must not become a new concatenated amount");
+        }
+    }
+
+    @Test void preservesCompleteReliableNumericTokensAcrossFormatsOrRejectsTheCandidate() {
+        Rect box = new Rect(10, 10, 30, 10);
+        String[][] pairs = {{"Balance:-.95", "Balance:-0.95"}, {"Balance:．９５", "Balance:０．９５"},
+                {"Balance:－．９５", "Balance:-0.95"}, {"EUR,95", "EUR0,95"},
+                {"USD.95", "USD0.95"}, {"$0.95", "$95"}, {"Rate:.95%", "Rate:0.95%"},
+                {"Rate:95%", "Rate:95"}, {"Amount:(.95)", "Amount:.95"},
+                {"Amount:1,234.50", "Amount:1234.50"}, {"Amount:1.234,50", "Amount:1234.50"},
+                {"Amount:1'234.50", "Amount:1'235.50"}, {"Amount:1\u202f234.50", "Amount:1234.50"},
+                {"A:.95B:1.25", "A:0.95B:1.25"}, {"ID:00424", "ID:80424"},
+                {"Balance:0.95", "Balance:.95"}, {".95", "0.95"}, {"-.95", "-0.95"},
+                {"Balance:٫٩٥", "Balance:٠٫٩٥"}, {"Amount:95USD", "Amount:.95USD"}};
+        try (var prepared = new OcrDeskew.Prepared(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB),
+                6, new AffineTransform())) {
+            assertAll(java.util.Arrays.stream(pairs).map(pair -> () -> {
+                var original = result(pair[0], .96, box);
+                var selected = OcrDeskewSelection.select(original, result(pair[1], .98, box), prepared,
+                        new Rect(0, 0, 100, 100), 100, 100, .35);
+                assertEquals(pair[0], selected.blocks().get(0).text(),
+                        "Preserve the complete original lexeme or reject: " + pair[0] + " -> " + pair[1]);
+                if (selected != original) assertFalse(selected.conflicts().isEmpty());
+            }));
+        }
+    }
+
     private Path writePage(int angle) throws Exception {
         BufferedImage source = page(angle);
         Path image = Files.createTempFile(temp, "deskew-input-", ".png");

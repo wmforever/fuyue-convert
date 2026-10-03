@@ -233,10 +233,23 @@ public final class TesseractOcrConverter implements FileConverter {
         if (next.isEmpty() || next.codePointCount(0, next.length())
                 < previous.codePointCount(0, previous.length()) * 0.90) return false;
         String reliableCandidate = reliableText(joinedText(candidate));
+        String numericCandidate = joinedText(candidate).toLowerCase(Locale.ROOT);
         int offset = 0;
+        int numericOffset = 0;
         for (TextBlock block : original.blocks()) {
             for (TextBlock.OcrWord word : block.ocrWords()) {
                 if (word.confidence() < 0.85) continue;
+                if (word.text().codePoints().anyMatch(Character::isDigit)) {
+                    // Numeric surfaces retain grouping whitespace and punctuation;
+                    // stripping these can merge independent amounts or lose signs/units.
+                    String numeric = word.text().toLowerCase(Locale.ROOT);
+                    int numberMatch = numericCandidate.indexOf(numeric, numericOffset);
+                    while (numberMatch >= 0 && numericBoundaryChanged(numericCandidate, numeric, numberMatch)) {
+                        numberMatch = numericCandidate.indexOf(numeric, numberMatch + 1);
+                    }
+                    if (numberMatch < 0) return false;
+                    numericOffset = numberMatch + numeric.length();
+                }
                 String reliable = reliableText(word.text());
                 if (reliable.isEmpty()) continue;
                 int match = reliableCandidate.indexOf(reliable, offset);
@@ -259,11 +272,17 @@ public final class TesseractOcrConverter implements FileConverter {
     }
 
     private static boolean numericBoundaryChanged(String candidate, String reliable, int start) {
+        if (reliable.codePoints().noneMatch(Character::isDigit)) return false;
         int end = start + reliable.length();
-        return Character.isDigit(reliable.codePointAt(0)) && start > 0
-                && Character.isDigit(candidate.codePointBefore(start))
-                || Character.isDigit(reliable.codePointBefore(reliable.length())) && end < candidate.length()
-                && Character.isDigit(candidate.codePointAt(end));
+        return numericContinuation(reliable.codePointAt(0)) && start > 0
+                && numericContinuation(candidate.codePointBefore(start))
+                || numericContinuation(reliable.codePointBefore(reliable.length())) && end < candidate.length()
+                && numericContinuation(candidate.codePointAt(end));
+    }
+
+    private static boolean numericContinuation(int codePoint) {
+        return Character.isDigit(codePoint) || Character.getType(codePoint) == Character.CURRENCY_SYMBOL
+                || ".,:/−－-+＋，．：／٫٬'’%％‰‱()（）".indexOf(codePoint) >= 0;
     }
 
     private static String reliableText(String text) {
