@@ -51,10 +51,18 @@ final class OcrTextDeduplicator {
             }
             while (right < value.length()) {
                 int marker = right;
+                boolean sameLine = true;
                 while (marker < value.length() && numericSpace(value.codePointAt(marker))) {
+                    sameLine &= !numericLineBreak(value.codePointAt(marker));
                     marker += Character.charCount(value.codePointAt(marker));
                 }
-                if (marker == value.length() || !numericSuffix(value.codePointAt(marker))) break;
+                if (marker == value.length()) break;
+                int c = value.codePointAt(marker);
+                // A terminal accounting sign is part of the literal amount.
+                // A range/list/field separator followed by more content is not.
+                // Never borrow a sign from the next logical line.
+                if (!numericSuffix(c) && !(sameLine && numericSign(c)
+                        && terminalNumericSign(value, marker))) break;
                 right = marker + Character.charCount(value.codePointAt(marker));
             }
             result.add(value.substring(left, right).codePoints().filter(c -> !numericSpace(c))
@@ -75,6 +83,25 @@ final class OcrTextDeduplicator {
 
     private static boolean numericSpace(int c) {
         return Character.isWhitespace(c) || Character.isSpaceChar(c);
+    }
+
+    private static boolean numericSign(int c) {
+        return c == '+' || c == '-' || c == '−' || c == '－' || c == '＋';
+    }
+
+    private static boolean numericLineBreak(int c) {
+        return c == '\n' || c == '\r' || c == '\f' || c == '\u000b'
+                || c == '\u0085' || c == '\u2028' || c == '\u2029';
+    }
+
+    private static boolean terminalNumericSign(String value, int marker) {
+        int after = marker + Character.charCount(value.codePointAt(marker));
+        while (after < value.length()) {
+            int c = value.codePointAt(after);
+            if (!numericSpace(c) && !numericSuffix(c)) return false;
+            after += Character.charCount(c);
+        }
+        return true;
     }
 
     private static String letters(String text) {

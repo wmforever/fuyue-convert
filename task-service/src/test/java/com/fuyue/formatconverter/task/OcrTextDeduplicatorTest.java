@@ -92,6 +92,50 @@ class OcrTextDeduplicatorTest {
         assertFalse(OcrTextDeduplicator.numericConflict(text("Price 10%",10,10),List.of(nativeText)),"unrelated label alone is not a conflict");
     }
 
+    @Test void retainsTerminalAccountingSignsWithoutChoosingEitherSourceValue() {
+        for (String[] pair : new String[][] {
+                {"Amount 048.65-", "Amount 048.65"}, {"Amount 048.65 -", "Amount 048.65"},
+                {"Amount 048.65−", "Amount 048.65"}, {"Amount 048.65\u00a0−", "Amount 048.65"},
+                {"Amount 048.65+", "Amount 048.65"}, {"Amount 048.65 +", "Amount 048.65"},
+                {"Amount 048.65－", "Amount 048.65"}, {"Amount 048.65＋", "Amount 048.65"},
+                {"Amount $048.65-", "Amount $048.65"}, {"Amount 048.65$-", "Amount 048.65$"},
+                {"Amount (048.65-)", "Amount (048.65)"}, {"Amount 048.65-€", "Amount 048.65€"},
+                {"Amount 048.65−", "Amount 048.65-"}}) {
+            var a=text(pair[0],10,10);var b=text(pair[1],10,10);
+            assertFalse(OcrTextDeduplicator.duplicates(a,List.of(b)),java.util.Arrays.toString(pair));
+            assertFalse(OcrTextDeduplicator.duplicates(b,List.of(a)),"reverse source comparison");
+            assertTrue(OcrTextDeduplicator.numericConflict(a,List.of(b)),"retain both literal sources and warn");
+        }
+    }
+
+    @Test void toleratesSpacesAroundTheSameTerminalSignButNotDifferentNumericBoundaries() {
+        for (String[] pair : new String[][] {
+                {"Amount 048.65-", "Amount 048.65 -"}, {"Amount 048.65−", "Amount 048.65\u00a0−"},
+                {"Amount (048.65-)", "Amount ( 048.65 - )"}, {"Amount $048.65-", "Amount $ 048.65 -"}}) {
+            var a=text(pair[0],10,10);var b=text(pair[1],10,10);
+            assertTrue(OcrTextDeduplicator.duplicates(a,List.of(b)),java.util.Arrays.toString(pair));
+            assertFalse(OcrTextDeduplicator.numericConflict(a,List.of(b)));
+        }
+        assertFalse(OcrTextDeduplicator.duplicates(text("Values 12 34-",10,10),List.of(text("Values 1234-",10,10))));
+    }
+
+    @Test void doesNotTreatRangeListOrNextFieldSeparatorsAsTerminalAmountSigns() {
+        for (String[] pair : new String[][] {
+                {"Range: 048.65-049.65", "Range 048.65-049.65"},
+                {"Range: 048.65 - 049.65", "Range 048.65 - 049.65"},
+                {"Values 048.65 + 049.65", "Values 048.65 +049.65"},
+                {"Amount 048.65 - NOTE", "Amount 048.65 NOTE"},
+                {"Amount 048.65\n- NOTE", "Amount 048.65 NOTE"},
+                {"Amount 048.65\u2028-", "Amount 048.65"},
+                {"Range 048.65\n- 049.65", "Range 048.65 - 049.65"}}) {
+            var a=text(pair[0],10,10);var b=text(pair[1],10,10);
+            assertTrue(OcrTextDeduplicator.duplicates(a,List.of(b)),java.util.Arrays.toString(pair));
+            assertFalse(OcrTextDeduplicator.numericConflict(a,List.of(b)));
+        }
+        assertFalse(OcrTextDeduplicator.duplicates(text("Fields 048.65 | -049.65",10,10),List.of(text("Fields 048.65 | 049.65",10,10))));
+        assertTrue(OcrTextDeduplicator.numericConflict(text("Fields 048.65 | -049.65",10,10),List.of(text("Fields 048.65 | 049.65",10,10))));
+    }
+
     private TextBlock text(String value, double x, double y) {
         return new TextBlock(value + x + y, 1, new Rect(x, y, 40, 8), value, y + 7,
                 new FontStyle("Sans", 10, false, false, ColorValue.BLACK), 0);
