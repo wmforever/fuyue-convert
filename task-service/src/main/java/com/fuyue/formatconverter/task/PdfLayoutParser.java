@@ -15,6 +15,12 @@ import com.fuyue.formatconverter.model.Transform2D;
 import com.fuyue.formatconverter.model.WarningCode;
 import com.fuyue.formatconverter.parser.ParseLimits;
 import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSInteger;
+import org.apache.pdfbox.contentstream.operator.markedcontent.BeginMarkedContentSequence;
+import org.apache.pdfbox.contentstream.operator.markedcontent.BeginMarkedContentSequenceWithProperties;
+import org.apache.pdfbox.contentstream.operator.markedcontent.EndMarkedContentSequence;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
@@ -71,8 +77,18 @@ public final class PdfLayoutParser {
         return parse(source, displayName, limits, ParseMode.TEXT_EXTRACTION_OCR);
     }
 
+    DocumentModel parseForTextSections(Path source, String name, ParseLimits limits,
+                                       boolean acceptsOcr, PdfTextSectionOrder sections) throws IOException {
+        return parse(source, name, limits, acceptsOcr ? ParseMode.TEXT_EXTRACTION_OCR : ParseMode.TEXT_EXTRACTION, sections);
+    }
+
     private DocumentModel parse(Path source, String displayName, ParseLimits limits,
                                 ParseMode mode) throws IOException {
+        return parse(source, displayName, limits, mode, null);
+    }
+
+    private DocumentModel parse(Path source, String displayName, ParseLimits limits,
+                                ParseMode mode, PdfTextSectionOrder sections) throws IOException {
         try (PDDocument document = Loader.loadPDF(source.toFile())) {
             int pageCount = document.getNumberOfPages();
             if (pageCount < 1) throw new IOException("PDF 没有可转换页面");
@@ -87,7 +103,8 @@ public final class PdfLayoutParser {
                 states.add(state);
             }
 
-            LayoutTextStripper stripper = new LayoutTextStripper(states, limits.maxEntries());
+            if (sections != null) sections.initialize(document, limits.maxEntries());
+            LayoutTextStripper stripper = new LayoutTextStripper(states, limits.maxEntries(), sections);
             stripper.setSortByPosition(true);
             stripper.setShouldSeparateByBeads(false);
             stripper.setSuppressDuplicateOverlappingText(true);
@@ -230,10 +247,20 @@ public final class PdfLayoutParser {
         private final Map<PDFont, PdfFontNames.Face> fontFaces = new IdentityHashMap<>();
         private PageState current;
         private int textObjects;
+        private final PdfTextSectionOrder sections;
+        private final Map<TextPosition, Integer> positionGroups = new IdentityHashMap<>();
+        private final java.util.Deque<Integer> marked = new java.util.ArrayDeque<>();
+        private int markedDepth;
 
-        private LayoutTextStripper(List<PageState> pages, int maxTextObjects) {
+        private LayoutTextStripper(List<PageState> pages, int maxTextObjects, PdfTextSectionOrder sections) {
             this.pages = pages;
             this.maxTextObjects = Math.max(1, maxTextObjects);
+            this.sections = sections != null && sections.enabled() ? sections : null;
+            if (this.sections != null) {
+                addOperator(new BeginMarkedContentSequence(this));
+                addOperator(new BeginMarkedContentSequenceWithProperties(this));
+                addOperator(new EndMarkedContentSequence(this));
+            }
         }
 
         @Override
@@ -241,11 +268,49 @@ public final class PdfLayoutParser {
             int index = getCurrentPageNo() - 1;
             if (index < 0 || index >= pages.size()) throw new IOException("PDF 页面索引不一致");
             current = pages.get(index);
+            positionGroups.clear();marked.clear();markedDepth = 0;
             super.startPage(page);
         }
 
         @Override
+        public void beginMarkedContentSequence(COSName tag, COSDictionary properties) {
+            if (sections == null) return;
+            if (++markedDepth > 64) { sections.disablePage(current.pageNumber()); return; }
+            int group;
+            if (properties != null && properties.containsKey(COSName.MCID)) {
+                var id = properties.getDictionaryObject(COSName.MCID);
+                group = id instanceof COSInteger number && number.longValue() >= 0
+                        && number.longValue() <= Integer.MAX_VALUE
+                        ? sections.group(current.pageNumber(), number.intValue()) : -1;
+            } else group = marked.isEmpty() ? -1 : marked.peek();
+            marked.push("Artifact".equals(tag.getName()) ? -1 : group);
+        }
+
+        @Override
+        public void endMarkedContentSequence() {
+            if (sections == null) return;
+            if (markedDepth <= 0) { sections.disablePage(current.pageNumber()); return; }
+            if (markedDepth-- <= 64) marked.pop();
+        }
+
+        @Override
+        protected void endPage(PDPage page) throws IOException {
+            if (sections != null && markedDepth != 0) sections.disablePage(current.pageNumber());
+            super.endPage(page);
+        }
+
+        @Override
+        public void showForm(org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject form) throws IOException {
+            // Form MCIDs use another content namespace; retain the legacy path
+            // until stream-scoped structure references are supported.
+            if (sections != null) sections.disablePage(current.pageNumber());
+            super.showForm(form);
+        }
+
+        @Override
         protected void processTextPosition(TextPosition text) {
+            if (sections != null) positionGroups.put(text,
+                    markedDepth > 64 || marked.isEmpty() ? -1 : marked.peek());
             try {
                 int rgb = getGraphicsState().getNonStrokingColor().toRGB();
                 colors.put(text, new ColorValue((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, 255));
@@ -279,6 +344,14 @@ public final class PdfLayoutParser {
         private void addRun(List<TextPosition> positions, RunKey key) throws IOException {
             if (++textObjects > maxTextObjects) {
                 throw new IOException("PDF 文字对象数量超过限制：" + textObjects + " > " + maxTextObjects);
+            }
+            if (sections != null) {
+                int group = positionGroups.getOrDefault(positions.get(0), -1);
+                for (TextPosition position : positions) {
+                    if (positionGroups.getOrDefault(position, -1) != group) group = -1;
+                }
+                for (TextPosition position : positions) positionGroups.remove(position);
+                sections.record("pdf-p" + current.pageNumber() + "-t" + textObjects, group);
             }
             String text = positions.stream().map(TextPosition::getUnicode).reduce("", String::concat);
             if (text.isEmpty()) return;

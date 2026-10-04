@@ -1,0 +1,28 @@
+{
+  "parentRevision": "b11b15ef89f27139ab75303eb0c975a235d1361f",
+  "route": "PdfToTextConverter -> parseForTextExtraction -> PageLayoutAnalyzer -> OfdToTextConverter.text; global vertical gap ordering traverses both left sections before right sections.",
+  "sourceEvidence": "Accepted22 cjk-heading-control-office.pdf has StructTreeRoot/Document with separate paragraph containers for heading1+its frames and heading2+its frames. Within each container the raw tag-child sequence is not necessarily column-major; preserve the explicit container boundary then reuse existing geometric ordering.",
+  "rejectedApproaches": "Do not repeat rejected20 narrow inference/reflow/Word geometry changes. Pure whitespace-first ordering is ambiguous for continuous columns with paragraph gaps, so do not adopt it.",
+  "candidate": "Text-only optional tagged-section mapping. Require bounded acyclic supported structure, unique page/MCID assignment and complete mapping of every native text block. Reject tables, images/OCR, conflicting/partial/unsupported mappings and use unchanged spatial fallback. Do not infer missing tags or rewrite text/geometry.",
+  "corpus": "Seven independent PDFs: tagged wide heading regions, tagged mixed-script heading regions, tagged unequal tails, untagged continuous wide columns with aligned paragraph gap, single column+blank page, ruled numeric table, ambiguous unruled numeric ledger. Plus immutable accepted22 Office PDF regression copied with original truth. Mixed heading and ruled table get new Word/Office control chains.",
+  "budget": {
+    "beforeHttp": 14,
+    "afterHttp": 14,
+    "maximumPrimaryHttp": 42,
+    "suiteSeconds": 480,
+    "contractSeconds": 120,
+    "requestSeconds": 30,
+    "teardownSeconds": 15,
+    "candidateHttp": 14
+  },
+  "acceptance": [
+    "Actual HTTP/Worker reproduction before edits",
+    "CER/order plus exact character/numeric inventories, whitespace policy explicit",
+    "All original parser blocks/coordinates and Word/Office visual/editable controls unchanged",
+    "Tagged partial/duplicate/cyclic/missing/unmarked/table fallbacks and blank-page limits",
+    "Fresh build/provenance, zero new leaks, same draft PR exact-SHA CI"
+  ],
+  "limits": "Tags express author grouping, not universal reading intent. Unsupported or incomplete metadata must not drop, duplicate, infer or replace text. No new font matrix/OCR angle sweep/native installer acceptance.",
+  "finalScopeReview": "Before final HTTP, constrain adoption to multiple multi-line groups with nonoverlapping vertical bounds in declared order. First446-test build passed but broader tag traversal scope was narrowed; preserve source/JAR/counts. No candidate HTTP matrix was run.",
+  "finalContentIdGuard": "Writer-normalized invalid fixtures were rejected after inspecting emitted PDF. Corrected fixtures emit raw numeric operands and assert saved bytes. Old compiled parser/helper classes match the afdd candidate JAR and fail2/17; strict integer/range capture recompiles and passes17/17. An incremental run with preserved old source mtime used cached strict classes and is explicitly excluded. Final main-source fingerprint remains f62fa7aea6742b8d1e99afc34cc244c095013b09855b05a300ab4adcd43db647; rebuild after fixture correction, then14 accepted HTTP contracts."
+}
