@@ -1,0 +1,157 @@
+{
+  "buildAudit": {
+    "tests": {
+      "tests": 471,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "skips": [
+      {
+        "class": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+        "name": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning"
+      }
+    ],
+    "bundledTests": [
+      {
+        "class": "com.fuyue.formatconverter.task.OcrDeskewTest",
+        "name": "bundledEngineRecoversMissingLinesWithSourceGeometryAndReviewWarnings",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.PdfToImageConverterTest",
+        "name": "discoversBundledPopplerFromAppHome",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.ForkedFileConverterTest",
+        "name": "retainsAutoDiscoveredBundledOcrWhenTheWorkerChangesItsWorkingDirectory",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "discoversBundledRuntimeFromPackagedApplicationRoot",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "validBundledRuntimeAutoEnablesWithoutHostInstallation",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "explicitFalseDisablesEvenAValidBundledRuntime",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.BundledOcrRuntimeIntegrationTest",
+        "name": "bundledBinaryModelsAndLibrariesRunWithoutSystemDiscovery",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.TesseractPngInputTest",
+        "name": "bundledPngEngineRecognizesRealJpegText",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+        "name": "bundledEngineRecoversShadedLowContrastPrintedText",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+        "name": "bundledEngineRecoversChineseFaintTextWithDigitsAndPunctuation",
+        "skipped": false
+      }
+    ],
+    "provenance": {
+      "buildInputSha256": "0474de63ffeea08c27831a7a92ebed2199fc113ba4424f60f9b5791a8689cfec",
+      "parentRevision": "f4a2649eb26085da465d66683abda51bfa369dc2",
+      "workingTreeDirtyAtBuildStart": true,
+      "jarSha256": "eb46974700a79e276ad2831be3c8006e60d4bca556a0a7697cb4787ca58ecf09",
+      "applicationClassCount": 229,
+      "applicationClassSha256": "f469c444e963111174a669476cefdac7988a43b80cd927c323ad75648b64b7c9",
+      "packagedClassesMatchTargets": true
+    },
+    "changedClassesFromAccepted28": [
+      "BOOT-INF/lib/ofd-parser-0.1.5.jar/com/fuyue/formatconverter/parser/OfdrwParser$NormalizedImage.class",
+      "BOOT-INF/lib/ofd-parser-0.1.5.jar/com/fuyue/formatconverter/parser/OfdrwParser$StampImage.class",
+      "BOOT-INF/lib/ofd-parser-0.1.5.jar/com/fuyue/formatconverter/parser/OfdrwParser.class",
+      "BOOT-INF/lib/ofd-parser-0.1.5.jar/com/fuyue/formatconverter/parser/OfdrwParser$ParseTraversal.class"
+    ],
+    "allOtherApplicationClassesByteExact": true,
+    "frontendFilesExact": 7,
+    "buildReceipt": {
+      "status": "reaped",
+      "rootExitCode": 0,
+      "waitpidNoChildren": true
+    }
+  },
+  "pins": {
+    "java": "Temurin 17.0.16+8",
+    "maven": "3.9.11",
+    "node": "22.17.0",
+    "python": "3.12.14",
+    "pymupdf": "1.26.6",
+    "liberationSans": "2.1.5",
+    "notoCjk": "2.004",
+    "linux": "6.18.44",
+    "office": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5"
+  },
+  "font": {
+    "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+    "version": "LiberationSans2.1.5",
+    "license": "SIL-OFL-1.1"
+  },
+  "runtimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+  "helperSha256": {
+    "verify_sparse_ofd29.py": "205cee840904e1b0660f8f963e84454ce340b740b84bc80d53ea5319f1502086",
+    "control_sparse_prefix29.py": "c0a2a266821ef0332fc256aebf36cdf81f88343ace3e1227128f9ddf767f6c36",
+    "validate_sparse_prefix29.py": "129332fbde7f39e6aeea1958bbfa43547b01330aab490fd5383b687dd4ddb616",
+    "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf"
+  },
+  "health": {
+    "status": "UP",
+    "version": "0.1.4",
+    "parser": "OFDRW 2.3.9",
+    "javaVersion": "17.0.16",
+    "os": "Linux",
+    "arch": "amd64",
+    "office": {
+      "enabled": true,
+      "available": true,
+      "binaryName": "soffice",
+      "version": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+      "message": "Office 引擎可用"
+    },
+    "ocr": {
+      "enabled": true,
+      "available": true,
+      "binaryName": "tesseract",
+      "version": "tesseract 5.5.2",
+      "requestedLanguages": "chi_sim+eng",
+      "availableLanguages": [
+        "eng",
+        "osd",
+        "chi_sim_vert",
+        "chi_sim"
+      ],
+      "timeoutSeconds": 120,
+      "maxConcurrency": 1,
+      "maxImagePixels": 25000000,
+      "minimumConfidence": 0.35,
+      "bundled": true,
+      "errorCode": null,
+      "message": "内置 Tesseract OCR 可用"
+    },
+    "time": "2026-10-04T15:09:31.471068604Z"
+  },
+  "acceptance": {
+    "httpRequests": 8,
+    "contentSuccess": 6,
+    "expectedNoNewTextFailures": 2,
+    "allWorkersExited": true,
+    "newZombies": []
+  }
+}

@@ -18,6 +18,8 @@ import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class OfdrwParserMultiPageTest {
     @TempDir Path temp;
@@ -142,5 +144,48 @@ class OfdrwParserMultiPageTest {
         Paragraph paragraph = new Paragraph(text, 5d);
         paragraph.setPosition(Position.Absolute).setBox(15d, 15d, width - 30d, 15d);
         return new VirtualPage(width, height).add(paragraph);
+    }
+
+    @Test void alternateAndDefaultNamespacePrefixesPreserveNestedTextPathsAndBlankPages() throws Exception {
+        Path source = temp.resolve("prefix-source.ofd");
+        try (OFDDoc doc = new OFDDoc(source)) {
+            Canvas line = new Canvas(30d, 10d).setDrawer(c -> c.beginPath().moveTo(0, 0).lineTo(20, 5).stroke());
+            line.setPosition(Position.Absolute).setBox(10d, 50d, 30d, 10d);
+            doc.addVPage(page(100, 100, "金额 -00085.20").add(line));
+            doc.addVPage(new VirtualPage(100d, 100d));
+        }
+        DocumentModel expected = new OfdrwParser().parse(new SafeOfdExtractor().extract(source,
+                temp.resolve("base-unpacked"), ParseLimits.defaults()), "source.ofd", ParseLimits.defaults());
+        assertTrue(expected.pages().get(0).textBlocks().stream().anyMatch(t -> t.text().contains("-00085.20")));
+        assertTrue(expected.pages().get(1).textBlocks().isEmpty());
+        for (String prefix : java.util.List.of("alias", "ns0", "")) {
+            Path changed = temp.resolve("prefix-" + prefix + ".ofd"); Files.copy(source, changed);
+            rewritePagePrefix(changed, prefix, "http://www.ofdspec.org/2016");
+            byte[] input = Files.readAllBytes(changed);
+            DocumentModel actual = new OfdrwParser().parse(new SafeOfdExtractor().extract(changed,
+                    temp.resolve("unpacked-" + prefix), ParseLimits.defaults()), "source.ofd", ParseLimits.defaults());
+            assertEquals(expected.pages(), actual.pages(), "Prefix must not change semantic text, geometry, order or blank pages");
+            assertArrayEquals(input, Files.readAllBytes(changed), "Source ZIP must not be rewritten");
+        }
+    }
+
+    @Test void foreignNamespaceCannotBeAcceptedAsAnEmptySuccessfulPage() throws Exception {
+        Path source = temp.resolve("foreign.ofd");
+        try (OFDDoc doc = new OFDDoc(source)) { doc.addVPage(page(100, 100, "Record 00085")); }
+        rewritePagePrefix(source, "alias", "urn:foreign-not-ofd");
+        var unpacked = new SafeOfdExtractor().extract(source, temp.resolve("foreign-unpacked"), ParseLimits.defaults());
+        assertThrows(OfdParseException.class, () -> new OfdrwParser().parse(unpacked, "foreign.ofd", ParseLimits.defaults()));
+    }
+
+    private void rewritePagePrefix(Path archive, String prefix, String namespace) throws Exception {
+        try (FileSystem zip = FileSystems.newFileSystem(archive, Map.of()); var paths = Files.walk(zip.getPath("/"))) {
+            for (Path p : paths.filter(path -> path.toString().endsWith("Content.xml")).toList()) {
+                String xml = Files.readString(p);
+                xml = xml.replace("xmlns:ofd=\"http://www.ofdspec.org/2016\"", (prefix.isEmpty() ? "xmlns" : "xmlns:" + prefix) + "=\"" + namespace + "\"");
+                xml = xml.replace("<ofd:", prefix.isEmpty() ? "<" : "<" + prefix + ":")
+                        .replace("</ofd:", prefix.isEmpty() ? "</" : "</" + prefix + ":");
+                Files.writeString(p, xml);
+            }
+        }
     }
 }

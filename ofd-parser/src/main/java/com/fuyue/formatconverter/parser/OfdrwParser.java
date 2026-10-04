@@ -61,7 +61,7 @@ public final class OfdrwParser implements OfdParser {
                 ParseTraversal traversal = new ParseTraversal(limits.maxEntries());
                 int z = 0;
                 for (CT_Layer layer : info.getAllLayer()) {
-                    z = parseBlocks(layer.getPageBlocks(), pageNumber, z, resources, texts, lines, images,
+                    z = parseBlocks(namespaceAwareBlocks(layer, limits.maxEntries()), pageNumber, z, resources, texts, lines, images,
                             pageWarnings, traversal, 0);
                 }
                 String pageRef = info.getId() == null ? String.valueOf(reader.getPageObjectId(pageNumber)) : info.getId().toString();
@@ -117,7 +117,7 @@ public final class OfdrwParser implements OfdParser {
             else if (block instanceof PathObject path) parsePath(path, page, z++, resources, lines, warnings);
             else if (block instanceof ImageObject image) parseImage(image, page, z++, resources, images, warnings);
             else if (block instanceof CT_PageBlock nested) {
-                z = parseBlocks(nested.getPageBlocks(), page, z, resources, texts, lines, images, warnings,
+                z = parseBlocks(namespaceAwareBlocks(nested, traversal.maxObjects), page, z, resources, texts, lines, images, warnings,
                         traversal, depth + 1);
             } else {
                 warnings.add(ConversionWarning.of(WarningCode.UNSUPPORTED_OFD_ELEMENT,
@@ -125,6 +125,29 @@ public final class OfdrwParser implements OfdParser {
             }
         }
         return z;
+    }
+
+    /** OFDRW 2.3.9 dispatches blocks by literal qualified name, silently dropping other prefixes. */
+    private List<PageBlockType> namespaceAwareBlocks(org.dom4j.Element parent, int maxEntries) throws OfdParseException {
+        List<org.dom4j.Element> children = parent.elements();
+        if (children.size() > Math.max(1, maxEntries)) {
+            throw new OfdParseException("OFD_TOO_MANY_PAGE_OBJECTS", "OFD 页面对象数量超过限制");
+        }
+        List<PageBlockType> blocks = new ArrayList<>();
+        for (org.dom4j.Element child : children) {
+            String namespace = child.getNamespaceURI();
+            if ("http://www.ofdspec.org/2016".equals(namespace)) {
+                // Change only the reader's in-memory prefix; source ZIP/XML,
+                // namespace URI, text, transforms and object order are untouched.
+                child.setQName(org.dom4j.QName.get(child.getName(), "ofd", namespace));
+            } else if (!namespace.isEmpty() && java.util.Set.of("TextObject", "PathObject", "ImageObject",
+                    "CompositeObject", "PageBlock", "Layer").contains(child.getName())) {
+                throw new OfdParseException("OFD_UNSUPPORTED_NAMESPACE", "OFD 页面对象使用不支持的命名空间，拒绝静默丢失内容");
+            }
+            PageBlockType block = PageBlockType.getInstance(child);
+            if (block != null) blocks.add(block);
+        }
+        return blocks;
     }
 
     private void parseText(TextObject object, int page, int z, ResourceManage resources,
