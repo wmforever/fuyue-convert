@@ -5,8 +5,9 @@ import java.util.*;
 
 /** TXT-only two-column inference. Ambiguous headings, short cells and crossing ink retain engine order. */
 final class OcrReadingOrder {
-    record Result(List<String> lines, boolean adjusted, boolean multipleColumns) {
-        Result(List<String> lines, boolean adjusted) { this(lines, adjusted, false); }
+    record Result(List<String> lines, boolean adjusted, boolean multipleColumns, boolean fragmentedColumnsValidated) {
+        Result(List<String> lines, boolean adjusted) { this(lines, adjusted, false, false); }
+        Result(List<String> lines, boolean adjusted, boolean multipleColumns) { this(lines, adjusted, multipleColumns, false); }
     }
     private record Line(double y, String text, boolean narrative) { }
     private OcrReadingOrder() { }

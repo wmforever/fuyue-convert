@@ -12,9 +12,24 @@ class OcrFragmentedColumnsTest {
         var arranged = arrange(blocks);
         assertTrue(arranged.adjusted());
         assertTrue(arranged.multipleColumns());
+        assertTrue(arranged.fragmentedColumnsValidated());
         assertEquals(expected("keeps"), arranged.lines());
         assertEquals(snapshot, blocks);
         for (int i=0;i<blocks.size();i++) assertSame(snapshot.get(i), blocks.get(i));
+    }
+
+    @Test void alreadyOrderedFragmentsExposeValidationWithoutTextOrderChange() {
+        var source = distinctColumns(0);
+        var ordered = new ArrayList<TextBlock>();
+        for (int side=0;side<3;side++) for (int row=0;row<3;row++) for (int part=0;part<3;part++)
+            ordered.add(source.get(side*9+part*3+row));
+        var snapshot = List.copyOf(ordered);
+        var result = arrange(ordered);
+        assertFalse(result.adjusted());
+        assertTrue(result.multipleColumns());
+        assertTrue(result.fragmentedColumnsValidated());
+        assertEquals(distinctExpected(),result.lines());
+        for (int i=0;i<ordered.size();i++) assertSame(snapshot.get(i),ordered.get(i));
     }
 
     @Test void retainsExactDecimalSignCurrencyFullwidthAndSeparatedNumericLexemes() {
@@ -37,7 +52,9 @@ class OcrFragmentedColumnsTest {
         var close = fragments("keeps", false);
         close.set(1,block("Column",40,115,60)); assertUnchanged(close);
         assertUnchanged(Collections.nCopies(501, close.get(0)));
-        assertFalse(OcrReadingOrder.arrange(fragments("keeps",false),1000,System.nanoTime()-1).adjusted());
+        var expired = OcrReadingOrder.arrange(fragments("keeps",false),1000,System.nanoTime()-1);
+        assertFalse(expired.adjusted());
+        assertFalse(expired.fragmentedColumnsValidated());
     }
 
     @Test void narrowGuttersMergedColumnRowsAndAlreadyCompleteLinesRetainEngineOrder() {
@@ -67,6 +84,7 @@ class OcrFragmentedColumnsTest {
         assertEquals(27,sections.size());
         var arranged = arrange(sections);
         assertFalse(arranged.adjusted(), () -> String.join("\n",arranged.lines()));
+        assertFalse(arranged.fragmentedColumnsValidated());
         assertEquals(sections.stream().map(TextBlock::text).toList(),arranged.lines());
     }
 
@@ -86,6 +104,7 @@ class OcrFragmentedColumnsTest {
         for (double offset : new double[]{49.9, 50.0}) {
             var result = arrange(distinctColumns(offset));
             assertTrue(result.adjusted(), "accepted coverage at offset " + offset);
+            assertTrue(result.fragmentedColumnsValidated());
             assertEquals(distinctExpected(),result.lines());
         }
         // Just below 60%, and more strongly staggered short columns, retain
@@ -132,6 +151,7 @@ class OcrFragmentedColumnsTest {
     }
     private static void assertUnchanged(List<TextBlock> blocks) {
         var result=arrange(blocks);assertFalse(result.adjusted());
+        assertFalse(result.fragmentedColumnsValidated());
         assertEquals(blocks.stream().map(TextBlock::text).toList(),result.lines());
     }
 }

@@ -158,6 +158,18 @@ class OcrDeskewTest {
     }
 
     @Test void staggeredUprightColumnFragmentsDoNotTriggerGlobalDeskew() throws Exception {
+        staggeredColumnGuard(false, false, false);
+    }
+
+    @Test void alreadyOrderedStaggeredFragmentsDoNotTriggerGlobalDeskew() throws Exception {
+        staggeredColumnGuard(true, false, false);
+    }
+
+    @Test void multipleColumnFallbackStillRetriesDeskew() throws Exception {
+        staggeredColumnGuard(true, true, true);
+    }
+
+    private void staggeredColumnGuard(boolean rowOrder, boolean numericCell, boolean expectDeskew) throws Exception {
         assumeTrue(!System.getProperty("os.name").toLowerCase().contains("win"));
         var image = new BufferedImage(2400,1500,BufferedImage.TYPE_INT_RGB);
         var graphics = image.createGraphics();
@@ -166,9 +178,11 @@ class OcrDeskewTest {
         var tsv = new StringBuilder("level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n");
         String[] labels = {"Harbor","Meadow","Copper"};
         int block = 0;
-        for (int column=0;column<3;column++) for (int part=0;part<3;part++) for (int row=0;row<4;row++) {
+        for (int column=0;column<3;column++) for (int outer=0;outer<(rowOrder?4:3);outer++)
+                for (int inner=0;inner<(rowOrder?3:4);inner++) {
+            int part=rowOrder?inner:outer, row=rowOrder?outer:inner;
             int x=120+column*720+part*80, y=250+row*290+column*35;
-            String text = part==0 ? labels[column] : part==1 ? "keeps" : "record0"+(row+1);
+            String text = part==0 ? labels[column] : part==1 ? "keeps" : numericCell ? "12" : "record0"+(row+1);
             graphics.fillRect(x,y,60,20);
             tsv.append("5\t1\t").append(++block).append("\t1\t1\t1\t").append(x).append('\t')
                 .append(y).append("\t60\t20\t90\t").append(text).append('\n');
@@ -188,14 +202,22 @@ class OcrDeskewTest {
             binary,"eng","fake",Duration.ofSeconds(5),1,.35,.75,25_000_000,temp.resolve("locks")));
         Path work=temp.resolve("column-work");
         var result=converter.recognizeLayoutResult(input,work,1,new Rect(0,0,2400,1500),ParseLimits.defaults(),true);
-        assertFalse(Files.exists(work.resolve("deskew-attempted")),
-            "already aligned fragments must not receive a global rotation inferred from staggered columns");
+        assertEquals(expectDeskew,Files.exists(work.resolve("deskew-attempted")),
+            "valid fragment geometry must skip deskew regardless of engine order; fallback must still retry");
         assertEquals(0,result.deskewDegrees());
         assertEquals(36,result.wordCount());
         var ordered=OcrReadingOrder.arrange(result.blocks(),2400,System.nanoTime()+Duration.ofSeconds(1).toNanos());
         var expected=new java.util.ArrayList<String>();
         for (String label:labels) for (int row=1;row<=4;row++) expected.add(label+" keeps record0"+row);
-        assertEquals(expected,ordered.lines());
+        if (!numericCell) {
+            assertTrue(ordered.fragmentedColumnsValidated());
+            assertEquals(expected,ordered.lines());
+            assertEquals(!rowOrder,ordered.adjusted(), "text-order change is not a geometry-validation signal");
+        } else {
+            assertTrue(ordered.multipleColumns());
+            assertFalse(ordered.adjusted());
+            assertFalse(ordered.fragmentedColumnsValidated());
+        }
         assertArrayEquals(original,Files.readAllBytes(input));
     }
 

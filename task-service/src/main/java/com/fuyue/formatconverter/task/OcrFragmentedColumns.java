@@ -93,7 +93,7 @@ final class OcrFragmentedColumns {
         if (used.size() != blocks.size() || System.nanoTime() >= deadline
                 || !inventory(output).equals(inventory(fallback.lines()))) return fallback;
         boolean adjusted = !compact(String.join("",output)).equals(compact(String.join("",fallback.lines())));
-        return new OcrReadingOrder.Result(List.copyOf(output), adjusted, true);
+        return new OcrReadingOrder.Result(List.copyOf(output), adjusted, true, true);
     }
 
     private static String compact(String text) { return text.replaceAll("\\s", ""); }

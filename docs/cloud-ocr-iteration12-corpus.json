@@ -1,0 +1,3711 @@
+{
+  "seed": 120042026,
+  "provenance": "Independent public synthetic true-tilt risk corpus frozen before algorithm edits; new text/layouts, not prior angle corpus",
+  "license": "Apache-2.0 generated text/code; separate SIL-OFL-1.1 fonts",
+  "fonts": {
+    "mono": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+      "sha256": "5883330d94debd992952cd8f0571b225f478c2d797d3f36c7521b0a5c9bde0f2",
+      "versions": [
+        "Version 2.1.5"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/liberationfonts/liberation-fonts"
+    },
+    "serif": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
+      "sha256": "9caef765d2e891c10dd73658894f01e660fe0c1c83e0bda7d6edf561d8f623d4",
+      "versions": [
+        "Version 2.1.5"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/liberationfonts/liberation-fonts"
+    },
+    "sans": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+      "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+      "versions": [
+        "Version 2.1.5"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/liberationfonts/liberation-fonts"
+    },
+    "cjk": {
+      "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+      "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+      "versions": [
+        "Version 2.004;hotconv 1.0.118;makeotfexe 2.5.65603"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/notofonts/noto-cjk"
+    }
+  },
+  "versions": {
+    "Pillow": "12.3.0"
+  },
+  "generatorSha256": "a3be4af7ddf23ff7a3ed807881bc0e213cadaf4794bcf1ced4c184030bb35355",
+  "limits": [
+    "Synthetic horizontal-print columns; no private handwriting or native Word acceptance",
+    "Short column spans intentionally challenge original fragmentation while truly tilted",
+    "Angles are applied transforms, not detector estimates; no inference of table intent"
+  ],
+  "cases": [
+    {
+      "file": "mono-short-angle+0.00.png",
+      "sha256": "a6b24d98001eda129c343ad9c45a0e5da16be6d18e5de609c4c1e1ff9a03ed96",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 35,
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        3,
+        4
+      ],
+      "rowStep": 95,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            565
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            660
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            470
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            565
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            660
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            565
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            660
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            755
+          ]
+        }
+      ],
+      "purpose": "new upright matched control"
+    },
+    {
+      "file": "mono-short-angle-1.05.png",
+      "sha256": "728879fdefa86da761a11ae1e980c6b82bbb39882d0c9f14090de3e23a5954f9",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 35,
+      "sourceSkewDegrees": -1.05,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        3,
+        4
+      ],
+      "rowStep": 95,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            565
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            660
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            470
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            565
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            660
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            565
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            660
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            755
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "mono-short-angle+1.05.png",
+      "sha256": "f3b279f5b020cc575d54bd679a67757f4e0683b6831ad639cdcfab3cf8c0bb47",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 35,
+      "sourceSkewDegrees": 1.05,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        3,
+        4
+      ],
+      "rowStep": 95,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            565
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            660
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            470
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            565
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            660
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            565
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            660
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            755
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "mono-short-angle-1.40.png",
+      "sha256": "76244489b89204a99d1f5404f15a31040af54a8871d8487b088f469e4b4bab44",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 35,
+      "sourceSkewDegrees": -1.4,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        3,
+        4
+      ],
+      "rowStep": 95,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            565
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            660
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            470
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            565
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            660
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            565
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            660
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            755
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "mono-short-angle+2.20.png",
+      "sha256": "6a8652a5dbc62e7e2f91a770acaee54e793526c7b781d53cc31dfcfa7ad739b0",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 35,
+      "sourceSkewDegrees": 2.2,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        3,
+        4
+      ],
+      "rowStep": 95,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            565
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            660
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            470
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            565
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            660
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            565
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            660
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            755
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "mono-stagger-angle+0.00.png",
+      "sha256": "f7069e258dacb485aa1f1bffed188930dcb751b4befac650dfdbfd0f5f0ce104",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Birch keeps lot064",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 33,
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 110,
+      "columnStagger": [
+        0,
+        18,
+        -12
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            580
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            690
+          ]
+        },
+        {
+          "text": "Birch keeps lot064",
+          "column": 0,
+          "baseline": [
+            180,
+            800
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            488
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            598
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            708
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            458
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            568
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            678
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            788
+          ]
+        }
+      ],
+      "purpose": "new upright matched control"
+    },
+    {
+      "file": "mono-stagger-angle-1.05.png",
+      "sha256": "0187b6306a9113c05c4162fd70f173bd2fb4ec5228e39de55ea8c429e927df5c",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Birch keeps lot064",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 33,
+      "sourceSkewDegrees": -1.05,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 110,
+      "columnStagger": [
+        0,
+        18,
+        -12
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            580
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            690
+          ]
+        },
+        {
+          "text": "Birch keeps lot064",
+          "column": 0,
+          "baseline": [
+            180,
+            800
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            488
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            598
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            708
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            458
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            568
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            678
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            788
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "mono-stagger-angle+1.05.png",
+      "sha256": "dec5af652805d537d000733ca35af29684ae213a13ec220d56d8e467f50b849f",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Birch keeps lot064",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 33,
+      "sourceSkewDegrees": 1.05,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 110,
+      "columnStagger": [
+        0,
+        18,
+        -12
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            580
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            690
+          ]
+        },
+        {
+          "text": "Birch keeps lot064",
+          "column": 0,
+          "baseline": [
+            180,
+            800
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            488
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            598
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            708
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            458
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            568
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            678
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            788
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "mono-stagger-angle-1.40.png",
+      "sha256": "dafe71370978d0116c5ccf396863484d9969dc6fbb0a9c90c084f551b3660dab",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Birch keeps lot064",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 33,
+      "sourceSkewDegrees": -1.4,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 110,
+      "columnStagger": [
+        0,
+        18,
+        -12
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            580
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            690
+          ]
+        },
+        {
+          "text": "Birch keeps lot064",
+          "column": 0,
+          "baseline": [
+            180,
+            800
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            488
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            598
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            708
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            458
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            568
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            678
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            788
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "mono-stagger-angle+2.20.png",
+      "sha256": "08db166b591b1e53498de346e8bf329b40c4ed0c894d7677c0091fcd04ed9fa4",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Birch keeps lot064",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 33,
+      "sourceSkewDegrees": 2.2,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 110,
+      "columnStagger": [
+        0,
+        18,
+        -12
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            580
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            690
+          ]
+        },
+        {
+          "text": "Birch keeps lot064",
+          "column": 0,
+          "baseline": [
+            180,
+            800
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            488
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            598
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            708
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            458
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            568
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            678
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            788
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "mono-numeric-angle+0.00.png",
+      "sha256": "230069917d09f9d5f278057d25354c78f8400ff8c337b7ae96e5bc87a32c5817",
+      "expectedLines": [
+        "Birch keeps Date2028-05-17",
+        "Birch keeps USD-043.70",
+        "Birch keeps qty006",
+        "Hazel keeps Date2028-05-18",
+        "Hazel keeps USD-044.70",
+        "Hazel keeps qty007",
+        "Hazel keeps rate08.25%",
+        "Maple keeps Date2028-05-19",
+        "Maple keeps USD-045.70",
+        "Maple keeps qty008"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 32,
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        4,
+        3
+      ],
+      "rowStep": 125,
+      "columnStagger": [
+        0,
+        10,
+        20
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps Date2028-05-17",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps USD-043.70",
+          "column": 0,
+          "baseline": [
+            180,
+            595
+          ]
+        },
+        {
+          "text": "Birch keeps qty006",
+          "column": 0,
+          "baseline": [
+            180,
+            720
+          ]
+        },
+        {
+          "text": "Hazel keeps Date2028-05-18",
+          "column": 1,
+          "baseline": [
+            1030,
+            480
+          ]
+        },
+        {
+          "text": "Hazel keeps USD-044.70",
+          "column": 1,
+          "baseline": [
+            1030,
+            605
+          ]
+        },
+        {
+          "text": "Hazel keeps qty007",
+          "column": 1,
+          "baseline": [
+            1030,
+            730
+          ]
+        },
+        {
+          "text": "Hazel keeps rate08.25%",
+          "column": 1,
+          "baseline": [
+            1030,
+            855
+          ]
+        },
+        {
+          "text": "Maple keeps Date2028-05-19",
+          "column": 2,
+          "baseline": [
+            1880,
+            490
+          ]
+        },
+        {
+          "text": "Maple keeps USD-045.70",
+          "column": 2,
+          "baseline": [
+            1880,
+            615
+          ]
+        },
+        {
+          "text": "Maple keeps qty008",
+          "column": 2,
+          "baseline": [
+            1880,
+            740
+          ]
+        }
+      ],
+      "purpose": "new upright matched control"
+    },
+    {
+      "file": "mono-numeric-angle-1.05.png",
+      "sha256": "d1b888651b02a4962d7c990176ab09e72a7fb8dd5f549a6d24d6f2f07624edad",
+      "expectedLines": [
+        "Birch keeps Date2028-05-17",
+        "Birch keeps USD-043.70",
+        "Birch keeps qty006",
+        "Hazel keeps Date2028-05-18",
+        "Hazel keeps USD-044.70",
+        "Hazel keeps qty007",
+        "Hazel keeps rate08.25%",
+        "Maple keeps Date2028-05-19",
+        "Maple keeps USD-045.70",
+        "Maple keeps qty008"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 32,
+      "sourceSkewDegrees": -1.05,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        4,
+        3
+      ],
+      "rowStep": 125,
+      "columnStagger": [
+        0,
+        10,
+        20
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps Date2028-05-17",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps USD-043.70",
+          "column": 0,
+          "baseline": [
+            180,
+            595
+          ]
+        },
+        {
+          "text": "Birch keeps qty006",
+          "column": 0,
+          "baseline": [
+            180,
+            720
+          ]
+        },
+        {
+          "text": "Hazel keeps Date2028-05-18",
+          "column": 1,
+          "baseline": [
+            1030,
+            480
+          ]
+        },
+        {
+          "text": "Hazel keeps USD-044.70",
+          "column": 1,
+          "baseline": [
+            1030,
+            605
+          ]
+        },
+        {
+          "text": "Hazel keeps qty007",
+          "column": 1,
+          "baseline": [
+            1030,
+            730
+          ]
+        },
+        {
+          "text": "Hazel keeps rate08.25%",
+          "column": 1,
+          "baseline": [
+            1030,
+            855
+          ]
+        },
+        {
+          "text": "Maple keeps Date2028-05-19",
+          "column": 2,
+          "baseline": [
+            1880,
+            490
+          ]
+        },
+        {
+          "text": "Maple keeps USD-045.70",
+          "column": 2,
+          "baseline": [
+            1880,
+            615
+          ]
+        },
+        {
+          "text": "Maple keeps qty008",
+          "column": 2,
+          "baseline": [
+            1880,
+            740
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "mono-numeric-angle+1.05.png",
+      "sha256": "b78b0f78b9b1776eee67f24741b1ff1d7c35eb22203b514f2861052536632678",
+      "expectedLines": [
+        "Birch keeps Date2028-05-17",
+        "Birch keeps USD-043.70",
+        "Birch keeps qty006",
+        "Hazel keeps Date2028-05-18",
+        "Hazel keeps USD-044.70",
+        "Hazel keeps qty007",
+        "Hazel keeps rate08.25%",
+        "Maple keeps Date2028-05-19",
+        "Maple keeps USD-045.70",
+        "Maple keeps qty008"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 32,
+      "sourceSkewDegrees": 1.05,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        4,
+        3
+      ],
+      "rowStep": 125,
+      "columnStagger": [
+        0,
+        10,
+        20
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps Date2028-05-17",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps USD-043.70",
+          "column": 0,
+          "baseline": [
+            180,
+            595
+          ]
+        },
+        {
+          "text": "Birch keeps qty006",
+          "column": 0,
+          "baseline": [
+            180,
+            720
+          ]
+        },
+        {
+          "text": "Hazel keeps Date2028-05-18",
+          "column": 1,
+          "baseline": [
+            1030,
+            480
+          ]
+        },
+        {
+          "text": "Hazel keeps USD-044.70",
+          "column": 1,
+          "baseline": [
+            1030,
+            605
+          ]
+        },
+        {
+          "text": "Hazel keeps qty007",
+          "column": 1,
+          "baseline": [
+            1030,
+            730
+          ]
+        },
+        {
+          "text": "Hazel keeps rate08.25%",
+          "column": 1,
+          "baseline": [
+            1030,
+            855
+          ]
+        },
+        {
+          "text": "Maple keeps Date2028-05-19",
+          "column": 2,
+          "baseline": [
+            1880,
+            490
+          ]
+        },
+        {
+          "text": "Maple keeps USD-045.70",
+          "column": 2,
+          "baseline": [
+            1880,
+            615
+          ]
+        },
+        {
+          "text": "Maple keeps qty008",
+          "column": 2,
+          "baseline": [
+            1880,
+            740
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "mono-numeric-angle-1.40.png",
+      "sha256": "3ed65dca986ae2164f849a216232c769924e5468eeba25cf8d9b24eb1fb50748",
+      "expectedLines": [
+        "Birch keeps Date2028-05-17",
+        "Birch keeps USD-043.70",
+        "Birch keeps qty006",
+        "Hazel keeps Date2028-05-18",
+        "Hazel keeps USD-044.70",
+        "Hazel keeps qty007",
+        "Hazel keeps rate08.25%",
+        "Maple keeps Date2028-05-19",
+        "Maple keeps USD-045.70",
+        "Maple keeps qty008"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 32,
+      "sourceSkewDegrees": -1.4,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        4,
+        3
+      ],
+      "rowStep": 125,
+      "columnStagger": [
+        0,
+        10,
+        20
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps Date2028-05-17",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps USD-043.70",
+          "column": 0,
+          "baseline": [
+            180,
+            595
+          ]
+        },
+        {
+          "text": "Birch keeps qty006",
+          "column": 0,
+          "baseline": [
+            180,
+            720
+          ]
+        },
+        {
+          "text": "Hazel keeps Date2028-05-18",
+          "column": 1,
+          "baseline": [
+            1030,
+            480
+          ]
+        },
+        {
+          "text": "Hazel keeps USD-044.70",
+          "column": 1,
+          "baseline": [
+            1030,
+            605
+          ]
+        },
+        {
+          "text": "Hazel keeps qty007",
+          "column": 1,
+          "baseline": [
+            1030,
+            730
+          ]
+        },
+        {
+          "text": "Hazel keeps rate08.25%",
+          "column": 1,
+          "baseline": [
+            1030,
+            855
+          ]
+        },
+        {
+          "text": "Maple keeps Date2028-05-19",
+          "column": 2,
+          "baseline": [
+            1880,
+            490
+          ]
+        },
+        {
+          "text": "Maple keeps USD-045.70",
+          "column": 2,
+          "baseline": [
+            1880,
+            615
+          ]
+        },
+        {
+          "text": "Maple keeps qty008",
+          "column": 2,
+          "baseline": [
+            1880,
+            740
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "mono-numeric-angle+2.20.png",
+      "sha256": "ad274a94f9e4e33a0e9612ef3a1ce3b73bcf152f2c72c798fe5dd4531810a55c",
+      "expectedLines": [
+        "Birch keeps Date2028-05-17",
+        "Birch keeps USD-043.70",
+        "Birch keeps qty006",
+        "Hazel keeps Date2028-05-18",
+        "Hazel keeps USD-044.70",
+        "Hazel keeps qty007",
+        "Hazel keeps rate08.25%",
+        "Maple keeps Date2028-05-19",
+        "Maple keeps USD-045.70",
+        "Maple keeps qty008"
+      ],
+      "layout": "three-columns",
+      "font": "mono",
+      "fontSize": 32,
+      "sourceSkewDegrees": 2.2,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        4,
+        3
+      ],
+      "rowStep": 125,
+      "columnStagger": [
+        0,
+        10,
+        20
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps Date2028-05-17",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps USD-043.70",
+          "column": 0,
+          "baseline": [
+            180,
+            595
+          ]
+        },
+        {
+          "text": "Birch keeps qty006",
+          "column": 0,
+          "baseline": [
+            180,
+            720
+          ]
+        },
+        {
+          "text": "Hazel keeps Date2028-05-18",
+          "column": 1,
+          "baseline": [
+            1030,
+            480
+          ]
+        },
+        {
+          "text": "Hazel keeps USD-044.70",
+          "column": 1,
+          "baseline": [
+            1030,
+            605
+          ]
+        },
+        {
+          "text": "Hazel keeps qty007",
+          "column": 1,
+          "baseline": [
+            1030,
+            730
+          ]
+        },
+        {
+          "text": "Hazel keeps rate08.25%",
+          "column": 1,
+          "baseline": [
+            1030,
+            855
+          ]
+        },
+        {
+          "text": "Maple keeps Date2028-05-19",
+          "column": 2,
+          "baseline": [
+            1880,
+            490
+          ]
+        },
+        {
+          "text": "Maple keeps USD-045.70",
+          "column": 2,
+          "baseline": [
+            1880,
+            615
+          ]
+        },
+        {
+          "text": "Maple keeps qty008",
+          "column": 2,
+          "baseline": [
+            1880,
+            740
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "serif-short-angle+0.00.png",
+      "sha256": "54873ae385a0da02d0b323f62be5aac7571fced022e9322d6c1d6ad0d5e6a01f",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Birch keeps lot064",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "serif",
+      "fontSize": 40,
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 105,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            575
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            680
+          ]
+        },
+        {
+          "text": "Birch keeps lot064",
+          "column": 0,
+          "baseline": [
+            180,
+            785
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            470
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            575
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            680
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            575
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            680
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            785
+          ]
+        }
+      ],
+      "purpose": "new upright matched control"
+    },
+    {
+      "file": "serif-short-angle-1.05.png",
+      "sha256": "771a742b3c7a3a821bc6f17fec924edd92fb5b297d73fc9cab4d7165a3c1637a",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Birch keeps lot064",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "serif",
+      "fontSize": 40,
+      "sourceSkewDegrees": -1.05,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 105,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            575
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            680
+          ]
+        },
+        {
+          "text": "Birch keeps lot064",
+          "column": 0,
+          "baseline": [
+            180,
+            785
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            470
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            575
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            680
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            575
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            680
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            785
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "serif-short-angle+1.05.png",
+      "sha256": "cc7a4684f57593848dd540b986b7754dec2bab7accbb1baf1f7012de286f06b3",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Birch keeps lot064",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "serif",
+      "fontSize": 40,
+      "sourceSkewDegrees": 1.05,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 105,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            575
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            680
+          ]
+        },
+        {
+          "text": "Birch keeps lot064",
+          "column": 0,
+          "baseline": [
+            180,
+            785
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            470
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            575
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            680
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            575
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            680
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            785
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "serif-short-angle-1.40.png",
+      "sha256": "cd71151dd79eb82ecec854046b2eec05fdfe043cf7b3f4dd866551d3d3f344ab",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Birch keeps lot064",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "serif",
+      "fontSize": 40,
+      "sourceSkewDegrees": -1.4,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 105,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            575
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            680
+          ]
+        },
+        {
+          "text": "Birch keeps lot064",
+          "column": 0,
+          "baseline": [
+            180,
+            785
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            470
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            575
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            680
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            575
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            680
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            785
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "serif-short-angle+2.20.png",
+      "sha256": "6782bbc0759531fb2d3e4d91d0254d4149c5e3e83f26d314453a64a81df401c5",
+      "expectedLines": [
+        "Birch keeps lot061",
+        "Birch keeps lot062",
+        "Birch keeps lot063",
+        "Birch keeps lot064",
+        "Hazel keeps lot071",
+        "Hazel keeps lot072",
+        "Hazel keeps lot073",
+        "Maple keeps lot081",
+        "Maple keeps lot082",
+        "Maple keeps lot083",
+        "Maple keeps lot084"
+      ],
+      "layout": "three-columns",
+      "font": "serif",
+      "fontSize": 40,
+      "sourceSkewDegrees": 2.2,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 105,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps lot061",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps lot062",
+          "column": 0,
+          "baseline": [
+            180,
+            575
+          ]
+        },
+        {
+          "text": "Birch keeps lot063",
+          "column": 0,
+          "baseline": [
+            180,
+            680
+          ]
+        },
+        {
+          "text": "Birch keeps lot064",
+          "column": 0,
+          "baseline": [
+            180,
+            785
+          ]
+        },
+        {
+          "text": "Hazel keeps lot071",
+          "column": 1,
+          "baseline": [
+            1030,
+            470
+          ]
+        },
+        {
+          "text": "Hazel keeps lot072",
+          "column": 1,
+          "baseline": [
+            1030,
+            575
+          ]
+        },
+        {
+          "text": "Hazel keeps lot073",
+          "column": 1,
+          "baseline": [
+            1030,
+            680
+          ]
+        },
+        {
+          "text": "Maple keeps lot081",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps lot082",
+          "column": 2,
+          "baseline": [
+            1880,
+            575
+          ]
+        },
+        {
+          "text": "Maple keeps lot083",
+          "column": 2,
+          "baseline": [
+            1880,
+            680
+          ]
+        },
+        {
+          "text": "Maple keeps lot084",
+          "column": 2,
+          "baseline": [
+            1880,
+            785
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "sans-unequal-angle+0.00.png",
+      "sha256": "d56d26665ab2fb83f0400f1a93f6871e7a828f1e3d64ae731f0540e1d9b4cd5c",
+      "expectedLines": [
+        "Birch keeps Date2028-05-17",
+        "Birch keeps USD-043.70",
+        "Birch keeps qty006",
+        "Hazel keeps Date2028-05-18",
+        "Hazel keeps USD-044.70",
+        "Hazel keeps qty007",
+        "Hazel keeps rate08.25%",
+        "Maple keeps Date2028-05-19",
+        "Maple keeps USD-045.70",
+        "Maple keeps qty008",
+        "Maple keeps rate09.25%"
+      ],
+      "layout": "three-columns",
+      "font": "sans",
+      "fontSize": 38,
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        4,
+        4
+      ],
+      "rowStep": 120,
+      "columnStagger": [
+        0,
+        15,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps Date2028-05-17",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps USD-043.70",
+          "column": 0,
+          "baseline": [
+            180,
+            590
+          ]
+        },
+        {
+          "text": "Birch keeps qty006",
+          "column": 0,
+          "baseline": [
+            180,
+            710
+          ]
+        },
+        {
+          "text": "Hazel keeps Date2028-05-18",
+          "column": 1,
+          "baseline": [
+            1030,
+            485
+          ]
+        },
+        {
+          "text": "Hazel keeps USD-044.70",
+          "column": 1,
+          "baseline": [
+            1030,
+            605
+          ]
+        },
+        {
+          "text": "Hazel keeps qty007",
+          "column": 1,
+          "baseline": [
+            1030,
+            725
+          ]
+        },
+        {
+          "text": "Hazel keeps rate08.25%",
+          "column": 1,
+          "baseline": [
+            1030,
+            845
+          ]
+        },
+        {
+          "text": "Maple keeps Date2028-05-19",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps USD-045.70",
+          "column": 2,
+          "baseline": [
+            1880,
+            590
+          ]
+        },
+        {
+          "text": "Maple keeps qty008",
+          "column": 2,
+          "baseline": [
+            1880,
+            710
+          ]
+        },
+        {
+          "text": "Maple keeps rate09.25%",
+          "column": 2,
+          "baseline": [
+            1880,
+            830
+          ]
+        }
+      ],
+      "purpose": "new upright matched control"
+    },
+    {
+      "file": "sans-unequal-angle-1.05.png",
+      "sha256": "c82038a83f4186acf80a54a554e49e5efd8e715294bd3671e74baae39ec706f5",
+      "expectedLines": [
+        "Birch keeps Date2028-05-17",
+        "Birch keeps USD-043.70",
+        "Birch keeps qty006",
+        "Hazel keeps Date2028-05-18",
+        "Hazel keeps USD-044.70",
+        "Hazel keeps qty007",
+        "Hazel keeps rate08.25%",
+        "Maple keeps Date2028-05-19",
+        "Maple keeps USD-045.70",
+        "Maple keeps qty008",
+        "Maple keeps rate09.25%"
+      ],
+      "layout": "three-columns",
+      "font": "sans",
+      "fontSize": 38,
+      "sourceSkewDegrees": -1.05,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        4,
+        4
+      ],
+      "rowStep": 120,
+      "columnStagger": [
+        0,
+        15,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps Date2028-05-17",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps USD-043.70",
+          "column": 0,
+          "baseline": [
+            180,
+            590
+          ]
+        },
+        {
+          "text": "Birch keeps qty006",
+          "column": 0,
+          "baseline": [
+            180,
+            710
+          ]
+        },
+        {
+          "text": "Hazel keeps Date2028-05-18",
+          "column": 1,
+          "baseline": [
+            1030,
+            485
+          ]
+        },
+        {
+          "text": "Hazel keeps USD-044.70",
+          "column": 1,
+          "baseline": [
+            1030,
+            605
+          ]
+        },
+        {
+          "text": "Hazel keeps qty007",
+          "column": 1,
+          "baseline": [
+            1030,
+            725
+          ]
+        },
+        {
+          "text": "Hazel keeps rate08.25%",
+          "column": 1,
+          "baseline": [
+            1030,
+            845
+          ]
+        },
+        {
+          "text": "Maple keeps Date2028-05-19",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps USD-045.70",
+          "column": 2,
+          "baseline": [
+            1880,
+            590
+          ]
+        },
+        {
+          "text": "Maple keeps qty008",
+          "column": 2,
+          "baseline": [
+            1880,
+            710
+          ]
+        },
+        {
+          "text": "Maple keeps rate09.25%",
+          "column": 2,
+          "baseline": [
+            1880,
+            830
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "sans-unequal-angle+1.05.png",
+      "sha256": "bf1fd0928843b0b7f5871d530a068cc2c6a3952c00a9c2bcbf4090b3348f0fb0",
+      "expectedLines": [
+        "Birch keeps Date2028-05-17",
+        "Birch keeps USD-043.70",
+        "Birch keeps qty006",
+        "Hazel keeps Date2028-05-18",
+        "Hazel keeps USD-044.70",
+        "Hazel keeps qty007",
+        "Hazel keeps rate08.25%",
+        "Maple keeps Date2028-05-19",
+        "Maple keeps USD-045.70",
+        "Maple keeps qty008",
+        "Maple keeps rate09.25%"
+      ],
+      "layout": "three-columns",
+      "font": "sans",
+      "fontSize": 38,
+      "sourceSkewDegrees": 1.05,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        4,
+        4
+      ],
+      "rowStep": 120,
+      "columnStagger": [
+        0,
+        15,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps Date2028-05-17",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps USD-043.70",
+          "column": 0,
+          "baseline": [
+            180,
+            590
+          ]
+        },
+        {
+          "text": "Birch keeps qty006",
+          "column": 0,
+          "baseline": [
+            180,
+            710
+          ]
+        },
+        {
+          "text": "Hazel keeps Date2028-05-18",
+          "column": 1,
+          "baseline": [
+            1030,
+            485
+          ]
+        },
+        {
+          "text": "Hazel keeps USD-044.70",
+          "column": 1,
+          "baseline": [
+            1030,
+            605
+          ]
+        },
+        {
+          "text": "Hazel keeps qty007",
+          "column": 1,
+          "baseline": [
+            1030,
+            725
+          ]
+        },
+        {
+          "text": "Hazel keeps rate08.25%",
+          "column": 1,
+          "baseline": [
+            1030,
+            845
+          ]
+        },
+        {
+          "text": "Maple keeps Date2028-05-19",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps USD-045.70",
+          "column": 2,
+          "baseline": [
+            1880,
+            590
+          ]
+        },
+        {
+          "text": "Maple keeps qty008",
+          "column": 2,
+          "baseline": [
+            1880,
+            710
+          ]
+        },
+        {
+          "text": "Maple keeps rate09.25%",
+          "column": 2,
+          "baseline": [
+            1880,
+            830
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "sans-unequal-angle-1.40.png",
+      "sha256": "34b0c3b2de2758d9dc8fa94420df90809662396e14b13e75c9783c6a8abc173e",
+      "expectedLines": [
+        "Birch keeps Date2028-05-17",
+        "Birch keeps USD-043.70",
+        "Birch keeps qty006",
+        "Hazel keeps Date2028-05-18",
+        "Hazel keeps USD-044.70",
+        "Hazel keeps qty007",
+        "Hazel keeps rate08.25%",
+        "Maple keeps Date2028-05-19",
+        "Maple keeps USD-045.70",
+        "Maple keeps qty008",
+        "Maple keeps rate09.25%"
+      ],
+      "layout": "three-columns",
+      "font": "sans",
+      "fontSize": 38,
+      "sourceSkewDegrees": -1.4,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        4,
+        4
+      ],
+      "rowStep": 120,
+      "columnStagger": [
+        0,
+        15,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps Date2028-05-17",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps USD-043.70",
+          "column": 0,
+          "baseline": [
+            180,
+            590
+          ]
+        },
+        {
+          "text": "Birch keeps qty006",
+          "column": 0,
+          "baseline": [
+            180,
+            710
+          ]
+        },
+        {
+          "text": "Hazel keeps Date2028-05-18",
+          "column": 1,
+          "baseline": [
+            1030,
+            485
+          ]
+        },
+        {
+          "text": "Hazel keeps USD-044.70",
+          "column": 1,
+          "baseline": [
+            1030,
+            605
+          ]
+        },
+        {
+          "text": "Hazel keeps qty007",
+          "column": 1,
+          "baseline": [
+            1030,
+            725
+          ]
+        },
+        {
+          "text": "Hazel keeps rate08.25%",
+          "column": 1,
+          "baseline": [
+            1030,
+            845
+          ]
+        },
+        {
+          "text": "Maple keeps Date2028-05-19",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps USD-045.70",
+          "column": 2,
+          "baseline": [
+            1880,
+            590
+          ]
+        },
+        {
+          "text": "Maple keeps qty008",
+          "column": 2,
+          "baseline": [
+            1880,
+            710
+          ]
+        },
+        {
+          "text": "Maple keeps rate09.25%",
+          "column": 2,
+          "baseline": [
+            1880,
+            830
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "sans-unequal-angle+2.20.png",
+      "sha256": "1d74c98bb8c02105b9ed6e9cfc7518ff546a906c73e924cf5b5d7c6031da6831",
+      "expectedLines": [
+        "Birch keeps Date2028-05-17",
+        "Birch keeps USD-043.70",
+        "Birch keeps qty006",
+        "Hazel keeps Date2028-05-18",
+        "Hazel keeps USD-044.70",
+        "Hazel keeps qty007",
+        "Hazel keeps rate08.25%",
+        "Maple keeps Date2028-05-19",
+        "Maple keeps USD-045.70",
+        "Maple keeps qty008",
+        "Maple keeps rate09.25%"
+      ],
+      "layout": "three-columns",
+      "font": "sans",
+      "fontSize": 38,
+      "sourceSkewDegrees": 2.2,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        4,
+        4
+      ],
+      "rowStep": 120,
+      "columnStagger": [
+        0,
+        15,
+        0
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps Date2028-05-17",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps USD-043.70",
+          "column": 0,
+          "baseline": [
+            180,
+            590
+          ]
+        },
+        {
+          "text": "Birch keeps qty006",
+          "column": 0,
+          "baseline": [
+            180,
+            710
+          ]
+        },
+        {
+          "text": "Hazel keeps Date2028-05-18",
+          "column": 1,
+          "baseline": [
+            1030,
+            485
+          ]
+        },
+        {
+          "text": "Hazel keeps USD-044.70",
+          "column": 1,
+          "baseline": [
+            1030,
+            605
+          ]
+        },
+        {
+          "text": "Hazel keeps qty007",
+          "column": 1,
+          "baseline": [
+            1030,
+            725
+          ]
+        },
+        {
+          "text": "Hazel keeps rate08.25%",
+          "column": 1,
+          "baseline": [
+            1030,
+            845
+          ]
+        },
+        {
+          "text": "Maple keeps Date2028-05-19",
+          "column": 2,
+          "baseline": [
+            1880,
+            470
+          ]
+        },
+        {
+          "text": "Maple keeps USD-045.70",
+          "column": 2,
+          "baseline": [
+            1880,
+            590
+          ]
+        },
+        {
+          "text": "Maple keeps qty008",
+          "column": 2,
+          "baseline": [
+            1880,
+            710
+          ]
+        },
+        {
+          "text": "Maple keeps rate09.25%",
+          "column": 2,
+          "baseline": [
+            1880,
+            830
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "bilingual-stagger-angle+0.00.png",
+      "sha256": "9290837d181960ffc87248bbf794a727098bea8a6cc979edc57ba5fcf38287ef",
+      "expectedLines": [
+        "Birch keeps 档案00241号",
+        "Birch keeps 档案00242号",
+        "Birch keeps 档案00243号",
+        "Birch keeps 档案00244号",
+        "Hazel keeps 档案00251号",
+        "Hazel keeps 档案00252号",
+        "Hazel keeps 档案00253号",
+        "Maple keeps 档案00261号",
+        "Maple keeps 档案00262号",
+        "Maple keeps 档案00263号",
+        "Maple keeps 档案00264号"
+      ],
+      "layout": "three-columns",
+      "font": "cjk",
+      "fontSize": 36,
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 110,
+      "columnStagger": [
+        0,
+        -15,
+        15
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps 档案00241号",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00242号",
+          "column": 0,
+          "baseline": [
+            180,
+            580
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00243号",
+          "column": 0,
+          "baseline": [
+            180,
+            690
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00244号",
+          "column": 0,
+          "baseline": [
+            180,
+            800
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00251号",
+          "column": 1,
+          "baseline": [
+            1030,
+            455
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00252号",
+          "column": 1,
+          "baseline": [
+            1030,
+            565
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00253号",
+          "column": 1,
+          "baseline": [
+            1030,
+            675
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00261号",
+          "column": 2,
+          "baseline": [
+            1880,
+            485
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00262号",
+          "column": 2,
+          "baseline": [
+            1880,
+            595
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00263号",
+          "column": 2,
+          "baseline": [
+            1880,
+            705
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00264号",
+          "column": 2,
+          "baseline": [
+            1880,
+            815
+          ]
+        }
+      ],
+      "purpose": "new upright matched control"
+    },
+    {
+      "file": "bilingual-stagger-angle-1.05.png",
+      "sha256": "55c4a6f2c7cf7f4bdd6d03d7580bbc0b8c1f0d079597cf0345248fe2c2b53352",
+      "expectedLines": [
+        "Birch keeps 档案00241号",
+        "Birch keeps 档案00242号",
+        "Birch keeps 档案00243号",
+        "Birch keeps 档案00244号",
+        "Hazel keeps 档案00251号",
+        "Hazel keeps 档案00252号",
+        "Hazel keeps 档案00253号",
+        "Maple keeps 档案00261号",
+        "Maple keeps 档案00262号",
+        "Maple keeps 档案00263号",
+        "Maple keeps 档案00264号"
+      ],
+      "layout": "three-columns",
+      "font": "cjk",
+      "fontSize": 36,
+      "sourceSkewDegrees": -1.05,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 110,
+      "columnStagger": [
+        0,
+        -15,
+        15
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps 档案00241号",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00242号",
+          "column": 0,
+          "baseline": [
+            180,
+            580
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00243号",
+          "column": 0,
+          "baseline": [
+            180,
+            690
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00244号",
+          "column": 0,
+          "baseline": [
+            180,
+            800
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00251号",
+          "column": 1,
+          "baseline": [
+            1030,
+            455
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00252号",
+          "column": 1,
+          "baseline": [
+            1030,
+            565
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00253号",
+          "column": 1,
+          "baseline": [
+            1030,
+            675
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00261号",
+          "column": 2,
+          "baseline": [
+            1880,
+            485
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00262号",
+          "column": 2,
+          "baseline": [
+            1880,
+            595
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00263号",
+          "column": 2,
+          "baseline": [
+            1880,
+            705
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00264号",
+          "column": 2,
+          "baseline": [
+            1880,
+            815
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "bilingual-stagger-angle+1.05.png",
+      "sha256": "5a7526fc2f8300cac1cf5ae5d614063e71acdaee08434d8e01dce160f2309836",
+      "expectedLines": [
+        "Birch keeps 档案00241号",
+        "Birch keeps 档案00242号",
+        "Birch keeps 档案00243号",
+        "Birch keeps 档案00244号",
+        "Hazel keeps 档案00251号",
+        "Hazel keeps 档案00252号",
+        "Hazel keeps 档案00253号",
+        "Maple keeps 档案00261号",
+        "Maple keeps 档案00262号",
+        "Maple keeps 档案00263号",
+        "Maple keeps 档案00264号"
+      ],
+      "layout": "three-columns",
+      "font": "cjk",
+      "fontSize": 36,
+      "sourceSkewDegrees": 1.05,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 110,
+      "columnStagger": [
+        0,
+        -15,
+        15
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps 档案00241号",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00242号",
+          "column": 0,
+          "baseline": [
+            180,
+            580
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00243号",
+          "column": 0,
+          "baseline": [
+            180,
+            690
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00244号",
+          "column": 0,
+          "baseline": [
+            180,
+            800
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00251号",
+          "column": 1,
+          "baseline": [
+            1030,
+            455
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00252号",
+          "column": 1,
+          "baseline": [
+            1030,
+            565
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00253号",
+          "column": 1,
+          "baseline": [
+            1030,
+            675
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00261号",
+          "column": 2,
+          "baseline": [
+            1880,
+            485
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00262号",
+          "column": 2,
+          "baseline": [
+            1880,
+            595
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00263号",
+          "column": 2,
+          "baseline": [
+            1880,
+            705
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00264号",
+          "column": 2,
+          "baseline": [
+            1880,
+            815
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "bilingual-stagger-angle-1.40.png",
+      "sha256": "25e811f30832f63aceb127d47eee2315c41f40a65986d0c5d4d5c7484fc60d31",
+      "expectedLines": [
+        "Birch keeps 档案00241号",
+        "Birch keeps 档案00242号",
+        "Birch keeps 档案00243号",
+        "Birch keeps 档案00244号",
+        "Hazel keeps 档案00251号",
+        "Hazel keeps 档案00252号",
+        "Hazel keeps 档案00253号",
+        "Maple keeps 档案00261号",
+        "Maple keeps 档案00262号",
+        "Maple keeps 档案00263号",
+        "Maple keeps 档案00264号"
+      ],
+      "layout": "three-columns",
+      "font": "cjk",
+      "fontSize": 36,
+      "sourceSkewDegrees": -1.4,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 110,
+      "columnStagger": [
+        0,
+        -15,
+        15
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps 档案00241号",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00242号",
+          "column": 0,
+          "baseline": [
+            180,
+            580
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00243号",
+          "column": 0,
+          "baseline": [
+            180,
+            690
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00244号",
+          "column": 0,
+          "baseline": [
+            180,
+            800
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00251号",
+          "column": 1,
+          "baseline": [
+            1030,
+            455
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00252号",
+          "column": 1,
+          "baseline": [
+            1030,
+            565
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00253号",
+          "column": 1,
+          "baseline": [
+            1030,
+            675
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00261号",
+          "column": 2,
+          "baseline": [
+            1880,
+            485
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00262号",
+          "column": 2,
+          "baseline": [
+            1880,
+            595
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00263号",
+          "column": 2,
+          "baseline": [
+            1880,
+            705
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00264号",
+          "column": 2,
+          "baseline": [
+            1880,
+            815
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "bilingual-stagger-angle+2.20.png",
+      "sha256": "7221a185b466689e97b37b71e9ee50388d5235974b59b10aa48925337a042bb2",
+      "expectedLines": [
+        "Birch keeps 档案00241号",
+        "Birch keeps 档案00242号",
+        "Birch keeps 档案00243号",
+        "Birch keeps 档案00244号",
+        "Hazel keeps 档案00251号",
+        "Hazel keeps 档案00252号",
+        "Hazel keeps 档案00253号",
+        "Maple keeps 档案00261号",
+        "Maple keeps 档案00262号",
+        "Maple keeps 档案00263号",
+        "Maple keeps 档案00264号"
+      ],
+      "layout": "three-columns",
+      "font": "cjk",
+      "fontSize": 36,
+      "sourceSkewDegrees": 2.2,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        3,
+        4
+      ],
+      "rowStep": 110,
+      "columnStagger": [
+        0,
+        -15,
+        15
+      ],
+      "unrotatedLineEvidence": [
+        {
+          "text": "Birch keeps 档案00241号",
+          "column": 0,
+          "baseline": [
+            180,
+            470
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00242号",
+          "column": 0,
+          "baseline": [
+            180,
+            580
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00243号",
+          "column": 0,
+          "baseline": [
+            180,
+            690
+          ]
+        },
+        {
+          "text": "Birch keeps 档案00244号",
+          "column": 0,
+          "baseline": [
+            180,
+            800
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00251号",
+          "column": 1,
+          "baseline": [
+            1030,
+            455
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00252号",
+          "column": 1,
+          "baseline": [
+            1030,
+            565
+          ]
+        },
+        {
+          "text": "Hazel keeps 档案00253号",
+          "column": 1,
+          "baseline": [
+            1030,
+            675
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00261号",
+          "column": 2,
+          "baseline": [
+            1880,
+            485
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00262号",
+          "column": 2,
+          "baseline": [
+            1880,
+            595
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00263号",
+          "column": 2,
+          "baseline": [
+            1880,
+            705
+          ]
+        },
+        {
+          "text": "Maple keeps 档案00264号",
+          "column": 2,
+          "baseline": [
+            1880,
+            815
+          ]
+        }
+      ],
+      "purpose": "independent genuinely tilted short/unequal multi-column guard-risk control"
+    },
+    {
+      "file": "blank-tilted.png",
+      "sha256": "b8148223a3d5ed1efa9f929a34fdb470791d780d5417752f21d39c59b8b57b72",
+      "expectedLines": [],
+      "font": null,
+      "layout": "blank-noise",
+      "sourceSkewDegrees": 2.2,
+      "expectedErrors": [
+        "OCR_NO_TEXT",
+        "OCR_LOW_CONFIDENCE"
+      ],
+      "dpi": 300
+    },
+    {
+      "file": "noise-tilted.png",
+      "sha256": "f5e3e3b9a1148fc906645af9d5301f86c2126082d2be364470b8bd2c71545e3c",
+      "expectedLines": [],
+      "font": null,
+      "layout": "blank-noise",
+      "sourceSkewDegrees": -1.4,
+      "expectedErrors": [
+        "OCR_NO_TEXT",
+        "OCR_LOW_CONFIDENCE"
+      ],
+      "dpi": 300
+    }
+  ],
+  "containerCases": []
+}

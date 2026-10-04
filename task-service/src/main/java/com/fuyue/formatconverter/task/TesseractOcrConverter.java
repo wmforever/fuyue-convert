@@ -217,7 +217,7 @@ public final class TesseractOcrConverter implements FileConverter {
         // If the original already meets all strict aligned-fragment bounds,
         // retain its words/geometry rather than rotate the whole page.
         var columns = OcrReadingOrder.arrange(original.blocks(), physicalBox.width(), deadline);
-        if (columns.multipleColumns() && columns.adjusted()) return original;
+        if (columns.fragmentedColumnsValidated()) return original;
         try (var prepared = OcrDeskew.prepare(pixels, settings.maxImagePixels(), deadline)) {
             if (prepared == null) return original;
             Path temporary = Files.createTempFile(workDir, "tesseract-deskew-%04d-".formatted(pageNumber), ".png");
