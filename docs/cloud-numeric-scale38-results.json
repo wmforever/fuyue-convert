@@ -1,0 +1,2315 @@
+{
+  "status": "completed; no measured production improvement adopted",
+  "parentRevision": "822442bb0df0fa1adda5c246b840ed9d6ab0c9d6",
+  "productionChanged": false,
+  "jarSha256": "73b2aada867097614e5ed3bae08a840a8a232b313c8595075086c5c5254dc597",
+  "buildInputSha256": "8c0313636afba2fc18ad2db414e3952de7c5a38050aadfd83f9355faa3d7acd9",
+  "manifestSha256": "665649835059620e00f8d397f3a017f796fc31d2aafff99c197e3c58825113ba",
+  "aggregates": {
+    "current1600": {
+      "truthChars": 492,
+      "charErrors": 1,
+      "contentCER": 0.0020325203252032522,
+      "exactTextCases": 5,
+      "exactNumericSequenceCases": 5,
+      "textCases": 6,
+      "emptyControlsNoInventedText": true
+    },
+    "pdfOriginal2000": {
+      "truthChars": 492,
+      "charErrors": 8,
+      "contentCER": 0.016260162601626018,
+      "exactTextCases": 4,
+      "exactNumericSequenceCases": 5,
+      "textCases": 6,
+      "emptyControlsNoInventedText": true
+    },
+    "rawPngOriginal2000": {
+      "truthChars": 492,
+      "charErrors": 4,
+      "contentCER": 0.008130081300813009,
+      "exactTextCases": 5,
+      "exactNumericSequenceCases": 5,
+      "textCases": 6,
+      "emptyControlsNoInventedText": true
+    },
+    "bilinear1600": {
+      "truthChars": 492,
+      "charErrors": 1,
+      "contentCER": 0.0020325203252032522,
+      "exactTextCases": 5,
+      "exactNumericSequenceCases": 5,
+      "textCases": 6,
+      "emptyControlsNoInventedText": true
+    }
+  },
+  "rows": [
+    {
+      "id": "en-56",
+      "fontPixels": 56,
+      "control": false,
+      "current1600": {
+        "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "actual": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "truthChars": 98,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "pdfOriginal2000": {
+        "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "actual": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "truthChars": 98,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "rawPngOriginal2000": {
+        "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "actual": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "truthChars": 98,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "bilinear1600": {
+        "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "actual": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "truthChars": 98,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "originalPngVsPdfDecodedSource": {
+        "rgbPixelsExact": true,
+        "pngDpi": [
+          299.9994,
+          299.9994
+        ],
+        "pdfDecodedPngDpi": null
+      },
+      "http": {
+        "status": "SUCCESS",
+        "metrics": {
+          "expected": "INDEPENDENT HEADER 0061\nNUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+          "actual": "INDEPENDENT HEADER 0061\nNUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+          "truthChars": 119,
+          "charErrors": 0,
+          "contentCER": 0.0,
+          "exactTextWithoutWhitespace": true,
+          "expectedNumericTokens": [
+            "0061",
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "actualNumericTokens": [
+            "0061",
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "exactNumericSequence": true,
+          "exactLines": 8
+        },
+        "warningConfidence": [
+          0.9239871082352938
+        ],
+        "engineCalls": 1
+      },
+      "word": {
+        "editableScanTextMetrics": {
+          "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+          "actual": "NUMERIC \nSOURCE \nREVIEW \n2089\nRecord \n00946\nDate \n2089-07-23\nAmount \n+073.26\nBalance \n-0058.40\nSeparate \n12 \n34\nRate \n15.25%",
+          "truthChars": 98,
+          "charErrors": 0,
+          "contentCER": 0.0,
+          "exactTextWithoutWhitespace": true,
+          "expectedNumericTokens": [
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "actualNumericTokens": [
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "exactNumericSequence": true,
+          "exactLines": 0
+        },
+        "nativeHeaderPreservedExactlyOnce": true,
+        "nativeHeaderXmlAfterScan": true,
+        "xmlOrderNotVisualReadingOrder": true,
+        "sourceScans": [
+          {
+            "part": "word/media/image1.png",
+            "sha256": "d243d7b22cc8192f16eff1ad3e65fcdaf9a1982764a26d43ba907eadf6242d7b",
+            "pixelExact": true
+          }
+        ],
+        "maskCount": 17,
+        "officeReopenUnrun": true
+      },
+      "current1600Model": {
+        "confidence": 0.9239871082352938,
+        "wordCount": 17,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "pdfOriginal2000Model": {
+        "confidence": 0.9186006147058822,
+        "wordCount": 17,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "bilinear1600Model": {
+        "confidence": 0.9228935964705882,
+        "wordCount": 17,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      }
+    },
+    {
+      "id": "en-38",
+      "fontPixels": 38,
+      "control": false,
+      "current1600": {
+        "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "actual": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "truthChars": 98,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "pdfOriginal2000": {
+        "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "actual": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "truthChars": 98,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "rawPngOriginal2000": {
+        "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "actual": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "truthChars": 98,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "bilinear1600": {
+        "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "actual": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "truthChars": 98,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "originalPngVsPdfDecodedSource": {
+        "rgbPixelsExact": true,
+        "pngDpi": [
+          299.9994,
+          299.9994
+        ],
+        "pdfDecodedPngDpi": null
+      },
+      "http": {
+        "status": "SUCCESS",
+        "metrics": {
+          "expected": "INDEPENDENT HEADER 0061\nNUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+          "actual": "INDEPENDENT HEADER 0061\nNUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+          "truthChars": 119,
+          "charErrors": 0,
+          "contentCER": 0.0,
+          "exactTextWithoutWhitespace": true,
+          "expectedNumericTokens": [
+            "0061",
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "actualNumericTokens": [
+            "0061",
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "exactNumericSequence": true,
+          "exactLines": 8
+        },
+        "warningConfidence": [
+          0.9226844205882355
+        ],
+        "engineCalls": 1
+      },
+      "word": {
+        "editableScanTextMetrics": {
+          "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+          "actual": "NUMERIC \nSOURCE \nREVIEW \n2089\nRecord \n00946\nDate \n2089-07-23\nAmount \n+073.26\nBalance \n-0058.40\nSeparate \n12 \n34\nRate \n15.25%",
+          "truthChars": 98,
+          "charErrors": 0,
+          "contentCER": 0.0,
+          "exactTextWithoutWhitespace": true,
+          "expectedNumericTokens": [
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "actualNumericTokens": [
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "exactNumericSequence": true,
+          "exactLines": 0
+        },
+        "nativeHeaderPreservedExactlyOnce": true,
+        "nativeHeaderXmlAfterScan": true,
+        "xmlOrderNotVisualReadingOrder": true,
+        "sourceScans": [
+          {
+            "part": "word/media/image1.png",
+            "sha256": "4a95466fe3fc5c5bbf7c27d02a4929b692b361f0fa38a6e323133683dfe1501e",
+            "pixelExact": true
+          }
+        ],
+        "maskCount": 17,
+        "officeReopenUnrun": true
+      },
+      "current1600Model": {
+        "confidence": 0.9226844205882355,
+        "wordCount": 17,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "pdfOriginal2000Model": {
+        "confidence": 0.9209830652941176,
+        "wordCount": 17,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "bilinear1600Model": {
+        "confidence": 0.9245164005882351,
+        "wordCount": 17,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      }
+    },
+    {
+      "id": "en-24",
+      "fontPixels": 24,
+      "control": false,
+      "current1600": {
+        "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "actual": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "truthChars": 98,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "pdfOriginal2000": {
+        "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "actual": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "truthChars": 98,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "rawPngOriginal2000": {
+        "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "actual": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "truthChars": 98,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "bilinear1600": {
+        "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "actual": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+        "truthChars": 98,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "originalPngVsPdfDecodedSource": {
+        "rgbPixelsExact": true,
+        "pngDpi": [
+          299.9994,
+          299.9994
+        ],
+        "pdfDecodedPngDpi": null
+      },
+      "http": {
+        "status": "SUCCESS",
+        "metrics": {
+          "expected": "INDEPENDENT HEADER 0061\nNUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+          "actual": "INDEPENDENT HEADER 0061\nNUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+          "truthChars": 119,
+          "charErrors": 0,
+          "contentCER": 0.0,
+          "exactTextWithoutWhitespace": true,
+          "expectedNumericTokens": [
+            "0061",
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "actualNumericTokens": [
+            "0061",
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "exactNumericSequence": true,
+          "exactLines": 8
+        },
+        "warningConfidence": [
+          0.9129057188235294
+        ],
+        "engineCalls": 1
+      },
+      "word": {
+        "editableScanTextMetrics": {
+          "expected": "NUMERIC SOURCE REVIEW 2089\nRecord 00946\nDate 2089-07-23\nAmount +073.26\nBalance -0058.40\nSeparate 12 34\nRate 15.25%\n",
+          "actual": "NUMERIC \nSOURCE \nREVIEW \n2089\nRecord \n00946\nDate \n2089-07-23\nAmount \n+073.26\nBalance \n-0058.40\nSeparate \n12 \n34\nRate \n15.25%",
+          "truthChars": 98,
+          "charErrors": 0,
+          "contentCER": 0.0,
+          "exactTextWithoutWhitespace": true,
+          "expectedNumericTokens": [
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "actualNumericTokens": [
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "exactNumericSequence": true,
+          "exactLines": 0
+        },
+        "nativeHeaderPreservedExactlyOnce": true,
+        "nativeHeaderXmlAfterScan": true,
+        "xmlOrderNotVisualReadingOrder": true,
+        "sourceScans": [
+          {
+            "part": "word/media/image1.png",
+            "sha256": "d71c530640a3463383e2a80a2e2a483ecd1f5be0312f1afcee78f1b63242fc46",
+            "pixelExact": true
+          }
+        ],
+        "maskCount": 17,
+        "officeReopenUnrun": true
+      },
+      "current1600Model": {
+        "confidence": 0.9129057188235294,
+        "wordCount": 17,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "pdfOriginal2000Model": {
+        "confidence": 0.9262526935294116,
+        "wordCount": 17,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "bilinear1600Model": {
+        "confidence": 0.9433918447058823,
+        "wordCount": 17,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      }
+    },
+    {
+      "id": "zh-56",
+      "fontPixels": 56,
+      "control": false,
+      "current1600": {
+        "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "actual": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "truthChars": 66,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "pdfOriginal2000": {
+        "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "actual": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "truthChars": 66,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "rawPngOriginal2000": {
+        "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "actual": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "truthChars": 66,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "bilinear1600": {
+        "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "actual": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "truthChars": 66,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "originalPngVsPdfDecodedSource": {
+        "rgbPixelsExact": true,
+        "pngDpi": [
+          299.9994,
+          299.9994
+        ],
+        "pdfDecodedPngDpi": null
+      },
+      "http": {
+        "status": "SUCCESS",
+        "metrics": {
+          "expected": "INDEPENDENT HEADER 0061\n独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+          "actual": "INDEPENDENT HEADER 0061\n独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+          "truthChars": 87,
+          "charErrors": 0,
+          "contentCER": 0.0,
+          "exactTextWithoutWhitespace": true,
+          "expectedNumericTokens": [
+            "0061",
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "actualNumericTokens": [
+            "0061",
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "exactNumericSequence": true,
+          "exactLines": 8
+        },
+        "warningConfidence": [
+          0.923287360909091
+        ],
+        "engineCalls": 1
+      },
+      "word": {
+        "editableScanTextMetrics": {
+          "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+          "actual": "独立\n数字\n核验 \n2089\n记录\n编号 \n00946\n日\n期 \n2089-07-23\n金额 \n+073.26\n余额 \n-0058.40\n分\n开\n数\n字 \n12 \n34\n利率 \n15.25%",
+          "truthChars": 66,
+          "charErrors": 0,
+          "contentCER": 0.0,
+          "exactTextWithoutWhitespace": true,
+          "expectedNumericTokens": [
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "actualNumericTokens": [
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "exactNumericSequence": true,
+          "exactLines": 0
+        },
+        "nativeHeaderPreservedExactlyOnce": true,
+        "nativeHeaderXmlAfterScan": true,
+        "xmlOrderNotVisualReadingOrder": true,
+        "sourceScans": [
+          {
+            "part": "word/media/image1.png",
+            "sha256": "b77716ca21bae97d119e0cd8278ae0fdebbe89b59f784827927d8d7f2bab5fb6",
+            "pixelExact": true
+          }
+        ],
+        "maskCount": 19,
+        "officeReopenUnrun": true
+      },
+      "current1600Model": {
+        "confidence": 0.923287360909091,
+        "wordCount": 22,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "pdfOriginal2000Model": {
+        "confidence": 0.9294365571428572,
+        "wordCount": 21,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "bilinear1600Model": {
+        "confidence": 0.9269134863636362,
+        "wordCount": 22,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      }
+    },
+    {
+      "id": "zh-38",
+      "fontPixels": 38,
+      "control": false,
+      "current1600": {
+        "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "actual": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "truthChars": 66,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "pdfOriginal2000": {
+        "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "actual": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 f073.26\n余额 -0058.40\nSe\n分开数字 12 34\n对\n利率 15.25%\n",
+        "truthChars": 66,
+        "charErrors": 4,
+        "contentCER": 0.06060606060606061,
+        "exactTextWithoutWhitespace": false,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": false,
+        "exactLines": 6
+      },
+      "rawPngOriginal2000": {
+        "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "actual": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 f073.26\n余额 -0058.40\nSe\n分开数字 12 34\n对\n利率 15.25%\n",
+        "truthChars": 66,
+        "charErrors": 4,
+        "contentCER": 0.06060606060606061,
+        "exactTextWithoutWhitespace": false,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": false,
+        "exactLines": 6
+      },
+      "bilinear1600": {
+        "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "actual": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "truthChars": 66,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "originalPngVsPdfDecodedSource": {
+        "rgbPixelsExact": true,
+        "pngDpi": [
+          299.9994,
+          299.9994
+        ],
+        "pdfDecodedPngDpi": null
+      },
+      "http": {
+        "status": "SUCCESS",
+        "metrics": {
+          "expected": "INDEPENDENT HEADER 0061\n独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+          "actual": "INDEPENDENT HEADER 0061\n独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+          "truthChars": 87,
+          "charErrors": 0,
+          "contentCER": 0.0,
+          "exactTextWithoutWhitespace": true,
+          "expectedNumericTokens": [
+            "0061",
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "actualNumericTokens": [
+            "0061",
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "exactNumericSequence": true,
+          "exactLines": 8
+        },
+        "warningConfidence": [
+          0.8945103823809525
+        ],
+        "engineCalls": 1
+      },
+      "word": {
+        "editableScanTextMetrics": {
+          "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+          "actual": "独立\n数字\n核验 \n2089\n记录\n编号 \n00946\n日\n期 \n2089-07-23\n金额 \n+073.26\n余额 \n-0058.40\n分\n开\n数字 \n12 \n34\n利率 \n15.25%",
+          "truthChars": 66,
+          "charErrors": 0,
+          "contentCER": 0.0,
+          "exactTextWithoutWhitespace": true,
+          "expectedNumericTokens": [
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "actualNumericTokens": [
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "exactNumericSequence": true,
+          "exactLines": 0
+        },
+        "nativeHeaderPreservedExactlyOnce": true,
+        "nativeHeaderXmlAfterScan": true,
+        "xmlOrderNotVisualReadingOrder": true,
+        "sourceScans": [
+          {
+            "part": "word/media/image1.png",
+            "sha256": "02126f2cfdbee00ac62a8d53d8a59c64ddc02cd0f77db26aeb1132ca2c94b381",
+            "pixelExact": true
+          }
+        ],
+        "maskCount": 18,
+        "officeReopenUnrun": true
+      },
+      "current1600Model": {
+        "confidence": 0.8945103823809525,
+        "wordCount": 21,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "pdfOriginal2000Model": {
+        "confidence": 0.8870007495833333,
+        "wordCount": 24,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "bilinear1600Model": {
+        "confidence": 0.9038970295238095,
+        "wordCount": 21,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      }
+    },
+    {
+      "id": "zh-24",
+      "fontPixels": 24,
+      "control": false,
+      "current1600": {
+        "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "actual": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 f073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "truthChars": 66,
+        "charErrors": 1,
+        "contentCER": 0.015151515151515152,
+        "exactTextWithoutWhitespace": false,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": false,
+        "exactLines": 6
+      },
+      "pdfOriginal2000": {
+        "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "actual": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n数字 12 34\ny\n局\n利率 15.25%\n",
+        "truthChars": 66,
+        "charErrors": 4,
+        "contentCER": 0.06060606060606061,
+        "exactTextWithoutWhitespace": false,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 6
+      },
+      "rawPngOriginal2000": {
+        "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "actual": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "truthChars": 66,
+        "charErrors": 0,
+        "contentCER": 0.0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": true,
+        "exactLines": 7
+      },
+      "bilinear1600": {
+        "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "actual": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 f073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+        "truthChars": 66,
+        "charErrors": 1,
+        "contentCER": 0.015151515151515152,
+        "exactTextWithoutWhitespace": false,
+        "expectedNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "+073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "actualNumericTokens": [
+          "2089",
+          "00946",
+          "2089-07-23",
+          "073.26",
+          "-0058.40",
+          "12",
+          "34",
+          "15.25%"
+        ],
+        "exactNumericSequence": false,
+        "exactLines": 6
+      },
+      "originalPngVsPdfDecodedSource": {
+        "rgbPixelsExact": true,
+        "pngDpi": [
+          299.9994,
+          299.9994
+        ],
+        "pdfDecodedPngDpi": null
+      },
+      "http": {
+        "status": "SUCCESS",
+        "metrics": {
+          "expected": "INDEPENDENT HEADER 0061\n独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+          "actual": "INDEPENDENT HEADER 0061\n独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 f073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+          "truthChars": 87,
+          "charErrors": 1,
+          "contentCER": 0.011494252873563218,
+          "exactTextWithoutWhitespace": false,
+          "expectedNumericTokens": [
+            "0061",
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "actualNumericTokens": [
+            "0061",
+            "2089",
+            "00946",
+            "2089-07-23",
+            "073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "exactNumericSequence": false,
+          "exactLines": 7
+        },
+        "warningConfidence": [
+          0.9217214236363636
+        ],
+        "engineCalls": 1
+      },
+      "word": {
+        "editableScanTextMetrics": {
+          "expected": "独立数字核验 2089\n记录编号 00946\n日期 2089-07-23\n金额 +073.26\n余额 -0058.40\n分开数字 12 34\n利率 15.25%\n",
+          "actual": "独立\n数字\n核验 \n2089\n记录\n编号 \n00946\n日\n期 \n2089-07-23\n金额 \nf073.26\n余额 \n-0058.40\n分\n开\n数\n字 \n12 \n34\n利率 \n15.25%",
+          "truthChars": 66,
+          "charErrors": 1,
+          "contentCER": 0.015151515151515152,
+          "exactTextWithoutWhitespace": false,
+          "expectedNumericTokens": [
+            "2089",
+            "00946",
+            "2089-07-23",
+            "+073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "actualNumericTokens": [
+            "2089",
+            "00946",
+            "2089-07-23",
+            "073.26",
+            "-0058.40",
+            "12",
+            "34",
+            "15.25%"
+          ],
+          "exactNumericSequence": false,
+          "exactLines": 0
+        },
+        "nativeHeaderPreservedExactlyOnce": true,
+        "nativeHeaderXmlAfterScan": true,
+        "xmlOrderNotVisualReadingOrder": true,
+        "sourceScans": [
+          {
+            "part": "word/media/image1.png",
+            "sha256": "b8a98fbfa7918358789f9286e349d8ecc8e97765a9fa420a64fa1825d0bbbbd5",
+            "pixelExact": true
+          }
+        ],
+        "maskCount": 16,
+        "officeReopenUnrun": true,
+        "wrongAmountEditable": "f073.26",
+        "lowConfidenceAmountMaskNotPromoted": true,
+        "lowConfidenceMaskZIndices": [
+          -251658751
+        ]
+      },
+      "current1600Model": {
+        "confidence": 0.9217214236363636,
+        "wordCount": 22,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "pdfOriginal2000Model": {
+        "confidence": 0.85249942,
+        "wordCount": 21,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "bilinear1600Model": {
+        "confidence": 0.9249755385714287,
+        "wordCount": 21,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      }
+    },
+    {
+      "id": "blank",
+      "fontPixels": null,
+      "control": true,
+      "current1600": {
+        "expected": "",
+        "actual": "",
+        "truthChars": 0,
+        "charErrors": 0,
+        "contentCER": 0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [],
+        "actualNumericTokens": [],
+        "exactNumericSequence": true,
+        "exactLines": 0
+      },
+      "pdfOriginal2000": {
+        "expected": "",
+        "actual": "",
+        "truthChars": 0,
+        "charErrors": 0,
+        "contentCER": 0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [],
+        "actualNumericTokens": [],
+        "exactNumericSequence": true,
+        "exactLines": 0
+      },
+      "rawPngOriginal2000": {
+        "expected": "",
+        "actual": "",
+        "truthChars": 0,
+        "charErrors": 0,
+        "contentCER": 0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [],
+        "actualNumericTokens": [],
+        "exactNumericSequence": true,
+        "exactLines": 0
+      },
+      "bilinear1600": {
+        "expected": "",
+        "actual": "",
+        "truthChars": 0,
+        "charErrors": 0,
+        "contentCER": 0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [],
+        "actualNumericTokens": [],
+        "exactNumericSequence": true,
+        "exactLines": 0
+      },
+      "originalPngVsPdfDecodedSource": {
+        "rgbPixelsExact": true,
+        "pngDpi": [
+          299.9994,
+          299.9994
+        ],
+        "pdfDecodedPngDpi": null
+      },
+      "http": {
+        "status": "SUCCESS",
+        "metrics": {
+          "expected": "INDEPENDENT HEADER 0061\n",
+          "actual": "INDEPENDENT HEADER 0061\n",
+          "truthChars": 21,
+          "charErrors": 0,
+          "contentCER": 0.0,
+          "exactTextWithoutWhitespace": true,
+          "expectedNumericTokens": [
+            "0061"
+          ],
+          "actualNumericTokens": [
+            "0061"
+          ],
+          "exactNumericSequence": true,
+          "exactLines": 1
+        },
+        "warningConfidence": [],
+        "engineCalls": 0
+      },
+      "current1600Model": {
+        "confidence": 0.0,
+        "wordCount": 0,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "pdfOriginal2000Model": {
+        "confidence": 0.0,
+        "wordCount": 0,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "bilinear1600Model": {
+        "confidence": 0.0,
+        "wordCount": 0,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      }
+    },
+    {
+      "id": "noise",
+      "fontPixels": null,
+      "control": true,
+      "current1600": {
+        "expected": "",
+        "actual": "",
+        "truthChars": 0,
+        "charErrors": 0,
+        "contentCER": 0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [],
+        "actualNumericTokens": [],
+        "exactNumericSequence": true,
+        "exactLines": 0
+      },
+      "pdfOriginal2000": {
+        "expected": "",
+        "actual": "",
+        "truthChars": 0,
+        "charErrors": 0,
+        "contentCER": 0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [],
+        "actualNumericTokens": [],
+        "exactNumericSequence": true,
+        "exactLines": 0
+      },
+      "rawPngOriginal2000": {
+        "expected": "",
+        "actual": "",
+        "truthChars": 0,
+        "charErrors": 0,
+        "contentCER": 0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [],
+        "actualNumericTokens": [],
+        "exactNumericSequence": true,
+        "exactLines": 0
+      },
+      "bilinear1600": {
+        "expected": "",
+        "actual": "",
+        "truthChars": 0,
+        "charErrors": 0,
+        "contentCER": 0,
+        "exactTextWithoutWhitespace": true,
+        "expectedNumericTokens": [],
+        "actualNumericTokens": [],
+        "exactNumericSequence": true,
+        "exactLines": 0
+      },
+      "originalPngVsPdfDecodedSource": {
+        "rgbPixelsExact": true,
+        "pngDpi": [
+          299.9994,
+          299.9994
+        ],
+        "pdfDecodedPngDpi": null
+      },
+      "http": {
+        "status": "SUCCESS",
+        "metrics": {
+          "expected": "INDEPENDENT HEADER 0061\n",
+          "actual": "INDEPENDENT HEADER 0061\n",
+          "truthChars": 21,
+          "charErrors": 0,
+          "contentCER": 0.0,
+          "exactTextWithoutWhitespace": true,
+          "expectedNumericTokens": [
+            "0061"
+          ],
+          "actualNumericTokens": [
+            "0061"
+          ],
+          "exactNumericSequence": true,
+          "exactLines": 1
+        },
+        "warningConfidence": [],
+        "engineCalls": 0
+      },
+      "current1600Model": {
+        "confidence": 0.0,
+        "wordCount": 0,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "pdfOriginal2000Model": {
+        "confidence": 0.0,
+        "wordCount": 0,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      },
+      "bilinear1600Model": {
+        "confidence": 0.0,
+        "wordCount": 0,
+        "possibleTextOmission": false,
+        "imageEnhanced": false,
+        "deskewDegrees": 0,
+        "conflicts": []
+      }
+    }
+  ],
+  "settings": {
+    "binary": "file:///workspace/fuyue-convert/qa-samples/work/iteration25-review-app/ocr/bin/tesseract",
+    "languages": "chi_sim+eng",
+    "version": "tesseract 5.5.2",
+    "timeout": 120.0,
+    "maxConcurrency": 1,
+    "minimumConfidence": 0.35,
+    "warningConfidence": 0.75,
+    "maxImagePixels": 25000000,
+    "lockDirectory": "file:///tmp/format-converter-ocr-agent/",
+    "tessdataDirectory": "file:///workspace/fuyue-convert/qa-samples/work/iteration25-review-app/ocr/tessdata/",
+    "libraryDirectory": null,
+    "bundled": true
+  },
+  "versionsRetainedFrom36": {
+    "java": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nopenjdk version \"17.0.16\" 2025-07-15\nOpenJDK Runtime Environment Temurin-17.0.16+8 (build 17.0.16+8)\nOpenJDK 64-Bit Server VM Temurin-17.0.16+8 (build 17.0.16+8, mixed mode, sharing)",
+    "maven": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nApache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)\nMaven home: /workspace/fuyue-env/tools/apache-maven-3.9.11\nJava version: 17.0.16, vendor: Eclipse Adoptium, runtime: /workspace/fuyue-env/tools/jdk-17.0.16+8\nDefault locale: en, platform encoding: UTF-8\nOS name: \"linux\", version: \"6.18.44\", arch: \"amd64\", family: \"unix\"",
+    "node": "v22.17.0",
+    "ocr": "tesseract 5.5.2\n leptonica-1.87.0\n  libpng 1.6.57 : zlib 1.3.1\n Found AVX512BW\n Found AVX512F\n Found AVX512VNNI\n Found AVX2\n Found AVX\n Found FMA\n Found SSE4.1",
+    "office": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "pymupdf": "1.26.6",
+    "linux": "6.18.44"
+  },
+  "fonts": [
+    {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+      "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3"
+    },
+    {
+      "path": "/workspace/fuyue-convert/task-service/src/main/resources/fonts/DroidSansFallback.ttf",
+      "sha256": "21b96a0377f067833a93af3082eb28d4ffab7a8cd46bfd513286f1d64b7b0949"
+    }
+  ],
+  "pillowVersion": "12.3.0",
+  "pymupdfVersion": "1.26.6",
+  "resources": {
+    "rawPngCurrent1600": {
+      "medianWallSeconds": 1.6754092974988453,
+      "totalWallSeconds": 10.150025241993717,
+      "maxDescendantRssKiB": 151296,
+      "totalUserSeconds": 15.901422,
+      "totalSystemSeconds": 2.1186409999999998
+    },
+    "rawPngOriginal2000": {
+      "medianWallSeconds": 1.4757418949993735,
+      "totalWallSeconds": 8.767352438000671,
+      "maxDescendantRssKiB": 114132,
+      "totalUserSeconds": 13.68547,
+      "totalSystemSeconds": 1.510997
+    },
+    "rawPngBilinear1600": {
+      "medianWallSeconds": 1.5013088755003992,
+      "totalWallSeconds": 9.08881831799954,
+      "maxDescendantRssKiB": 144236,
+      "totalUserSeconds": 14.046209999999999,
+      "totalSystemSeconds": 1.8519999999999999
+    },
+    "pdfDecodedOriginal2000": {
+      "medianWallSeconds": 2.1620389329982572,
+      "totalWallSeconds": 13.432457958006125,
+      "maxDescendantRssKiB": 349912,
+      "totalUserSeconds": 28.98614,
+      "totalSystemSeconds": 2.984441
+    }
+  },
+  "httpResources": {
+    "wallSeconds": 64.14560684800381,
+    "userSeconds": 163.260176,
+    "systemSeconds": 13.770334,
+    "maxChildRssKiB": 365324
+  },
+  "httpRequests": 14,
+  "httpSuccesses": 14,
+  "httpTextExactCases": 5,
+  "httpTextCases": 6,
+  "wordOutputs": 6,
+  "blankNoiseApiNoOcr": true,
+  "wordSourcePixelsExact": true,
+  "originalCoordinateWordBoundsChecked": 348,
+  "newDiagnosticEngineCalls": 32,
+  "newHttpEngineCalls": 12,
+  "extraEngineCallsForReplayAndNormalizationChecks": 0,
+  "newOfficeInvocations": 0,
+  "rawPngDiagnosticCalls": 24,
+  "pdfDecodedOriginalCalls": 8,
+  "fullModelsMissingDuringInitialSerializationRecoveredByActualHttpTsvReplay": true,
+  "failuresRetained": [
+    "missing /usr/bin/time:0enginecalls",
+    "initial post-OCR Duration JSON serialization failure:1enginecall; saved TSV reused without new OCR"
+  ],
+  "productionPipelineParity": "all6 current HTTP complete TSVs byte-exact to cached current1600 PNG; all8 PDF-decoded bilinear prepared PNGs byte-exact to cached candidate",
+  "resourceLimitsUnchanged": true,
+  "timeoutSeconds": 120,
+  "maxImagePixels": 25000000,
+  "maxConcurrency": 1,
+  "noGlobalResolutionIncrease": true,
+  "noExtraProductionRetry": true,
+  "resourceCostScope": "fresh per-recognition Python RUSAGE_CHILDREN max descendant RSS; not simultaneous total; raw PNG costs exclude PDF parse and cannot be directly compared to PDF-decoded-original costs or HTTP totals",
+  "rejectedCandidates": [
+    "retain original2000: repairs small numeric sign but PDF-origin text errors increase1→8 and numeric regression on zh38",
+    "bilinear1600:same error and exact numeric results as current; no measured gain"
+  ],
+  "remaining": [
+    "1600px zh24 +073.26 recognized f073.26; API SUCCESS with92.17% average; word56.86% preserves original lowconfidence scan region",
+    "2000px raw PNG versus PDF-decoded source recognition differs despite RGB pixel equality; metadata/DPI sensitivity not causally isolated",
+    "no broader-resolution/alternative-kernel evidence; do not select candidate by truth or mean confidence",
+    "new6Word Office/MicrosoftWord/nativepackages/signedfixture unrun; prior accepted matrices not rerun",
+    "prior Chinese mixedAPI strictvisibility/sparseOFD/adjacentlongedit/perMille/sourceconflicts retained"
+  ],
+  "receipts": [
+    {
+      "path": "qa-samples/work/iteration38-bilinear/blank-bilinear1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/blank-bilinear1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/en-24-bilinear1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/en-24-bilinear1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/en-38-bilinear1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/en-38-bilinear1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/en-56-bilinear1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/en-56-bilinear1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/noise-bilinear1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/noise-bilinear1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/zh-24-bilinear1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/zh-24-bilinear1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/zh-38-bilinear1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/zh-38-bilinear1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/zh-56-bilinear1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear/zh-56-bilinear1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-bilinear-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-http-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure/en-56-current1600-receipt.json",
+      "rootExitCode": 127,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure-receipt.json",
+      "rootExitCode": 1,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure2/en-56-current1600-java-receipt.json",
+      "rootExitCode": 1,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure2/en-56-current1600-receipt.json",
+      "rootExitCode": 1,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure2-receipt.json",
+      "rootExitCode": 1,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/blank-current1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/blank-current1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/blank-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/blank-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/en-24-current1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/en-24-current1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/en-24-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/en-24-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/en-38-current1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/en-38-current1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/en-38-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/en-38-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/en-56-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/en-56-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/noise-current1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/noise-current1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/noise-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/noise-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/zh-24-current1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/zh-24-current1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/zh-24-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/zh-24-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/zh-38-current1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/zh-38-current1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/zh-38-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/zh-38-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/zh-56-current1600-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/zh-56-current1600-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/zh-56-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3/zh-56-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-measure3-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/blank-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/blank-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/en-24-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/en-24-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/en-38-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/en-38-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/en-56-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/en-56-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/noise-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/noise-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/zh-24-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/zh-24-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/zh-38-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/zh-38-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/zh-56-original-java-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original/zh-56-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-pdf-original-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-prepare-check/blank-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-prepare-check/en-24-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-prepare-check/en-38-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-prepare-check/en-56-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-prepare-check/noise-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-prepare-check/replay-first-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-prepare-check/zh-24-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-prepare-check/zh-38-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-prepare-check/zh-56-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-prepare-check-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-verify-receipt.json",
+      "rootExitCode": 1,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-verify2-receipt.json",
+      "rootExitCode": 1,
+      "ECHILD": true
+    },
+    {
+      "path": "qa-samples/work/iteration38-verify3-receipt.json",
+      "rootExitCode": 0,
+      "ECHILD": true
+    }
+  ],
+  "helpers": {
+    "generate_numeric_scale38.py": "281b67074e382d08e607e7e67370547ae3c7236271a9efccedf3b276987895b7",
+    "measure_numeric_scale38.py": "975d452bf7f4ab4e006f5fc1c7d6b69d4a775bde642f0eb5546171be38afc29d",
+    "OcrScaleProbe38.java": "9ceaeedc615f6034d68eebf2503b2ef380f95fbf01d5abbeb2efb33e8ddf07bc",
+    "verify_numeric_scale38.py": "298b9829782b37ca33358f7576fb5d9b957a0a50b32f5fb2ea6d7312e3ba1eef"
+  },
+  "runtimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+  "runtimePayloadFilesReverified": 12,
+  "models": [
+    {
+      "name": "eng",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/eng.traineddata",
+      "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+    },
+    {
+      "name": "chi_sim",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim.traineddata",
+      "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+    },
+    {
+      "name": "chi_sim_vert",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim_vert.traineddata",
+      "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+    },
+    {
+      "name": "osd",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/osd.traineddata",
+      "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+    }
+  ],
+  "runtimeComponents": [
+    {
+      "id": "zlib",
+      "version": "1.3.1",
+      "source": "https://codeload.github.com/madler/zlib/tar.gz/v1.3.1",
+      "sourceSha256": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c",
+      "spdx": "Zlib"
+    },
+    {
+      "id": "libpng",
+      "version": "1.6.57",
+      "source": "https://codeload.github.com/pnggroup/libpng/tar.gz/v1.6.57",
+      "sourceSha256": "4cbb7b0746edc1683c9581b373365e955133b7f1243f171b7d1535b4415dfedb",
+      "spdx": "libpng-2.0"
+    },
+    {
+      "id": "leptonica",
+      "version": "1.87.0",
+      "source": "https://codeload.github.com/DanBloomberg/leptonica/tar.gz/1.87.0",
+      "sourceSha256": "fa2b40c5caea96d1bb93a97486262aed8731b69ce25a84a6bf5d25323e33f631",
+      "spdx": "BSD-2-Clause"
+    },
+    {
+      "id": "tesseract",
+      "version": "5.5.2",
+      "source": "https://codeload.github.com/tesseract-ocr/tesseract/tar.gz/5.5.2",
+      "sourceSha256": "6235ea0dae45ea137f59c09320406f5888383741924d98855bd2ce0d16b54f21",
+      "spdx": "Apache-2.0"
+    }
+  ],
+  "fontVersionsBoundToAcceptedHashes": {
+    "Liberation Sans": "2.1.5",
+    "Droid Sans Fallback": "2.55"
+  },
+  "sourcePixelSize": [
+    2000,
+    1700
+  ],
+  "currentPreparedPixelSize": [
+    1600,
+    1360
+  ],
+  "preservedOriginalPixelSize": [
+    2000,
+    1700
+  ],
+  "sourcePixels": 3400000,
+  "currentPreparedPixels": 2176000
+}
