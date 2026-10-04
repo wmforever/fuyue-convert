@@ -47,9 +47,16 @@ final class FixedLayoutDocxRenderer {
         page.images().stream().sorted(Comparator.comparingInt(ImageBlock::zOrder))
                 .forEach(image -> unchecked(() -> addImage(docx, anchor, image)));
         Map<TextBlock.OcrWord, ColorValue> ocrColors = addOcrMasks(anchor, page, fallbackTexts);
-        fallbackReadingOrder(page, fallbackTexts).stream()
-                .filter(text -> !text.text().isEmpty())
-                .forEach(text -> unchecked(() -> addTextBox(docx, textAnchors.getOrDefault(text, anchor), text, ocrColors)));
+        // A heading separates independent layout regions. Sorting their union
+        // can erase each region's valid gutter when columns shift horizontally.
+        Map<XWPFParagraph, List<TextBlock>> regions = new java.util.LinkedHashMap<>();
+        for (var text : fallbackTexts) regions.computeIfAbsent(textAnchors.getOrDefault(text, anchor),
+                ignored -> new ArrayList<>()).add(text);
+        for (var region : regions.entrySet()) {
+            for (var text : fallbackReadingOrder(page, region.getValue())) {
+                if (!text.text().isEmpty()) addTextBox(docx, region.getKey(), text, ocrColors);
+            }
+        }
     }
 
     private List<TextBlock> fallbackReadingOrder(PageModel page, List<TextBlock> texts) {

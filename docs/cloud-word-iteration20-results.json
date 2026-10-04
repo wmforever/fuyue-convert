@@ -1,0 +1,4161 @@
+{
+  "parentRevision": "57d13a8450fb466ab6a4afa212f6c88cba5c55f8",
+  "checks": [
+    {
+      "file": "narrow-balanced.pdf",
+      "wordCerBefore": 0.34172661870503596,
+      "wordCerAfter": 0.34172661870503596,
+      "officeCerBefore": 0.34172661870503596,
+      "officeCerAfter": 0.34172661870503596,
+      "httpTextCerBefore": 0.34172661870503596,
+      "httpTextCerAfter": 0.34172661870503596,
+      "charactersAndDigitsConserved": true,
+      "pages": 1,
+      "framesBefore": 0,
+      "framesAfter": 0,
+      "matchedSourceLinesBefore": 6,
+      "matchedSourceLinesAfter": 6,
+      "maxSourceOfficeBoxShiftPtBefore": 32.726043701171875,
+      "maxSourceOfficeBoxShiftPtAfter": 32.726043701171875,
+      "existingFramesStylesExactExceptGeneratedIds": true,
+      "officePixelsAndWordBoxesExact": true
+    },
+    {
+      "file": "narrow-left-tail.pdf",
+      "wordCerBefore": 0.4342857142857143,
+      "wordCerAfter": 0.4342857142857143,
+      "officeCerBefore": 0.4342857142857143,
+      "officeCerAfter": 0.4342857142857143,
+      "httpTextCerBefore": 0.4342857142857143,
+      "httpTextCerAfter": 0.4342857142857143,
+      "charactersAndDigitsConserved": true,
+      "pages": 1,
+      "framesBefore": 0,
+      "framesAfter": 0,
+      "matchedSourceLinesBefore": 8,
+      "matchedSourceLinesAfter": 8,
+      "maxSourceOfficeBoxShiftPtBefore": 32.726043701171875,
+      "maxSourceOfficeBoxShiftPtAfter": 32.726043701171875,
+      "existingFramesStylesExactExceptGeneratedIds": true,
+      "officePixelsAndWordBoxesExact": true
+    },
+    {
+      "file": "narrow-right-tail.pdf",
+      "wordCerBefore": 0.30063291139240506,
+      "wordCerAfter": 0.30063291139240506,
+      "officeCerBefore": 0.30063291139240506,
+      "officeCerAfter": 0.30063291139240506,
+      "httpTextCerBefore": 0.30063291139240506,
+      "httpTextCerAfter": 0.30063291139240506,
+      "charactersAndDigitsConserved": true,
+      "pages": 1,
+      "framesBefore": 0,
+      "framesAfter": 0,
+      "matchedSourceLinesBefore": 6,
+      "matchedSourceLinesAfter": 6,
+      "maxSourceOfficeBoxShiftPtBefore": 32.726043701171875,
+      "maxSourceOfficeBoxShiftPtAfter": 32.726043701171875,
+      "existingFramesStylesExactExceptGeneratedIds": true,
+      "officePixelsAndWordBoxesExact": true
+    },
+    {
+      "file": "narrow-same-font.pdf",
+      "wordCerBefore": 0.10285714285714286,
+      "wordCerAfter": 0.10285714285714286,
+      "officeCerBefore": 0.10285714285714286,
+      "officeCerAfter": 0.10285714285714286,
+      "httpTextCerBefore": 0.10285714285714286,
+      "httpTextCerAfter": 0.10285714285714286,
+      "charactersAndDigitsConserved": true,
+      "pages": 1,
+      "framesBefore": 0,
+      "framesAfter": 0,
+      "matchedSourceLinesBefore": 10,
+      "matchedSourceLinesAfter": 10,
+      "maxSourceOfficeBoxShiftPtBefore": 53.462432861328125,
+      "maxSourceOfficeBoxShiftPtAfter": 53.462432861328125,
+      "existingFramesStylesExactExceptGeneratedIds": true,
+      "officePixelsAndWordBoxesExact": true
+    },
+    {
+      "file": "shifted-wide-regions.pdf",
+      "wordCerBefore": 0.0,
+      "wordCerAfter": 0.0,
+      "officeCerBefore": 0.39634146341463417,
+      "officeCerAfter": 0.39634146341463417,
+      "httpTextCerBefore": 0.3475609756097561,
+      "httpTextCerAfter": 0.3475609756097561,
+      "charactersAndDigitsConserved": true,
+      "pages": 1,
+      "framesBefore": 16,
+      "framesAfter": 16,
+      "matchedSourceLinesBefore": 18,
+      "matchedSourceLinesAfter": 18,
+      "maxSourceOfficeBoxShiftPtBefore": 13.722015380859375,
+      "maxSourceOfficeBoxShiftPtAfter": 13.722015380859375,
+      "existingFramesStylesExactExceptGeneratedIds": true,
+      "officePixelsAndWordBoxesExact": true
+    },
+    {
+      "file": "single-mixed-longlines.pdf",
+      "wordCerBefore": 0.0,
+      "wordCerAfter": 0.0,
+      "officeCerBefore": 0.0,
+      "officeCerAfter": 0.0,
+      "httpTextCerBefore": 0.0,
+      "httpTextCerAfter": 0.0,
+      "charactersAndDigitsConserved": true,
+      "pages": 1,
+      "framesBefore": 0,
+      "framesAfter": 0,
+      "matchedSourceLinesBefore": 14,
+      "matchedSourceLinesAfter": 14,
+      "maxSourceOfficeBoxShiftPtBefore": 37.917938232421875,
+      "maxSourceOfficeBoxShiftPtAfter": 37.917938232421875,
+      "existingFramesStylesExactExceptGeneratedIds": true,
+      "officePixelsAndWordBoxesExact": true
+    },
+    {
+      "file": "numeric-ruled.pdf",
+      "wordCerBefore": 0.0,
+      "wordCerAfter": 0.0,
+      "officeCerBefore": 0.0,
+      "officeCerAfter": 0.0,
+      "httpTextCerBefore": 0.0,
+      "httpTextCerAfter": 0.0,
+      "charactersAndDigitsConserved": true,
+      "pages": 1,
+      "framesBefore": 0,
+      "framesAfter": 0,
+      "matchedSourceLinesBefore": 12,
+      "matchedSourceLinesAfter": 12,
+      "maxSourceOfficeBoxShiftPtBefore": 8.4840087890625,
+      "maxSourceOfficeBoxShiftPtAfter": 8.4840087890625,
+      "existingFramesStylesExactExceptGeneratedIds": true,
+      "officePixelsAndWordBoxesExact": true
+    },
+    {
+      "file": "numeric-ledger.pdf",
+      "wordCerBefore": 0.6666666666666666,
+      "wordCerAfter": 0.6666666666666666,
+      "officeCerBefore": 0.34444444444444444,
+      "officeCerAfter": 0.34444444444444444,
+      "httpTextCerBefore": 0.6666666666666666,
+      "httpTextCerAfter": 0.6666666666666666,
+      "charactersAndDigitsConserved": true,
+      "pages": 1,
+      "framesBefore": 12,
+      "framesAfter": 12,
+      "matchedSourceLinesBefore": 12,
+      "matchedSourceLinesAfter": 12,
+      "maxSourceOfficeBoxShiftPtBefore": 6.395988464355469,
+      "maxSourceOfficeBoxShiftPtAfter": 6.395988464355469,
+      "existingFramesStylesExactExceptGeneratedIds": true,
+      "officePixelsAndWordBoxesExact": true
+    },
+    {
+      "file": "shifted-exact-regions.pdf",
+      "wordCerBefore": 0.208955223880597,
+      "wordCerAfter": 0.0,
+      "officeCerBefore": 0.30845771144278605,
+      "officeCerAfter": 0.34328358208955223,
+      "httpTextCerBefore": 0.0,
+      "httpTextCerAfter": 0.0,
+      "charactersAndDigitsConserved": true,
+      "pages": 1,
+      "framesBefore": 16,
+      "framesAfter": 16,
+      "matchedSourceLinesBefore": 18,
+      "matchedSourceLinesAfter": 18,
+      "maxSourceOfficeBoxShiftPtBefore": 22.381439208984375,
+      "maxSourceOfficeBoxShiftPtAfter": 22.381439208984375,
+      "existingFramesStylesExactExceptGeneratedIds": true,
+      "officePixelsAndWordBoxesExact": true
+    }
+  ],
+  "runs": [
+    {
+      "before": {
+        "jarSha256": "db957453eee857d659f5aef6fe0196385226bd2e3520ea4b0a3520a8ed6db443",
+        "manifestSha256": "5efeee3c268106f06e779bbe91274f91fe1b5a7cee91579ade7aeffe65e51872",
+        "cases": [
+          {
+            "case": "narrow-balanced",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 3.5711358420012402,
+            "task": {
+              "taskId": "1861091a-9f38-4cf9-a4c6-211932cd9835",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-balanced.pdf",
+                  "success": true,
+                  "outputName": "narrow-balanced.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-balanced.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T09:59:49.255152376Z",
+              "updatedAt": "2026-10-04T09:59:52.534062495Z",
+              "expiresAt": "2026-10-05T09:59:52.534062495Z"
+            },
+            "artifact": "narrow-balanced-word.docx",
+            "sha256": "40828438f7484fedc8e52f8a32694aeabf37ef8644567c2ed67b6686a7be873d"
+          },
+          {
+            "case": "narrow-balanced",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 2.3191445209995436,
+            "task": {
+              "taskId": "e5e7bc9f-9cde-4a1f-917a-136e1844a856",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-balanced-word.docx",
+                  "success": true,
+                  "outputName": "narrow-balanced-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-balanced-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T09:59:52.671751365Z",
+              "updatedAt": "2026-10-04T09:59:54.859477589Z",
+              "expiresAt": "2026-10-05T09:59:54.859477589Z"
+            },
+            "artifact": "narrow-balanced-office.pdf",
+            "sha256": "5c339d467d6f314b412df81ab7bdc1362287bc113ce1f30aa9ae2d9812a69778"
+          },
+          {
+            "case": "narrow-balanced",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.203507805999834,
+            "task": {
+              "taskId": "5ebef1dd-1861-40fd-be45-a4b4fcd15a91",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-balanced-office.pdf",
+                  "success": true,
+                  "outputName": "narrow-balanced-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-balanced-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T09:59:54.972207963Z",
+              "updatedAt": "2026-10-04T09:59:56.110757953Z",
+              "expiresAt": "2026-10-05T09:59:56.110757953Z"
+            },
+            "artifact": "narrow-balanced-text.txt",
+            "sha256": "e09e02a2c6c9abe8f0e4bc7974a6ccf9e974459db77a89f428626631d2ca2bad"
+          },
+          {
+            "case": "narrow-left-tail",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 3.8823783389998425,
+            "task": {
+              "taskId": "b3783dd7-1245-4f77-a260-35020d726ffc",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-left-tail.pdf",
+                  "success": true,
+                  "outputName": "narrow-left-tail.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-left-tail.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T09:59:56.308186318Z",
+              "updatedAt": "2026-10-04T10:00:00.047604144Z",
+              "expiresAt": "2026-10-05T10:00:00.047604144Z"
+            },
+            "artifact": "narrow-left-tail-word.docx",
+            "sha256": "20ad59019b8b04bd76bb4a236c780d4c6bf8d356e84c85370d1274934faaf223"
+          },
+          {
+            "case": "narrow-left-tail",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 2.2710681339995062,
+            "task": {
+              "taskId": "9035ad7c-82c0-4a3a-beff-608bfb126e98",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-left-tail-word.docx",
+                  "success": true,
+                  "outputName": "narrow-left-tail-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-left-tail-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:00:00.105245026Z",
+              "updatedAt": "2026-10-04T10:00:02.270219245Z",
+              "expiresAt": "2026-10-05T10:00:02.270219245Z"
+            },
+            "artifact": "narrow-left-tail-office.pdf",
+            "sha256": "4e34053692dd7856732e5635ea005065cdb29351802b2d30f217feffa84891ca"
+          },
+          {
+            "case": "narrow-left-tail",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.5235095690004528,
+            "task": {
+              "taskId": "4730f82a-0fce-4187-be68-4b95130fca0f",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-left-tail-office.pdf",
+                  "success": true,
+                  "outputName": "narrow-left-tail-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-left-tail-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:00:02.370384673Z",
+              "updatedAt": "2026-10-04T10:00:03.804778420Z",
+              "expiresAt": "2026-10-05T10:00:03.804778420Z"
+            },
+            "artifact": "narrow-left-tail-text.txt",
+            "sha256": "a4004c336a9301ab4ba1612db701db56516868631b68b4c75ba3fbff88926e66"
+          },
+          {
+            "case": "narrow-right-tail",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 4.4216960330013535,
+            "task": {
+              "taskId": "05b58107-e662-478d-803f-b8a9c738f24e",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-right-tail.pdf",
+                  "success": true,
+                  "outputName": "narrow-right-tail.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-right-tail.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:00:03.998913560Z",
+              "updatedAt": "2026-10-04T10:00:08.271069727Z",
+              "expiresAt": "2026-10-05T10:00:08.271069727Z"
+            },
+            "artifact": "narrow-right-tail-word.docx",
+            "sha256": "62927fb80aec6ce9f3fbde72b74b673dac071b6c6fe686988963863f33eade4f"
+          },
+          {
+            "case": "narrow-right-tail",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 1.9440329319986631,
+            "task": {
+              "taskId": "1526d174-1c5c-4db1-acda-b7472709af62",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-right-tail-word.docx",
+                  "success": true,
+                  "outputName": "narrow-right-tail-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-right-tail-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:00:08.362142506Z",
+              "updatedAt": "2026-10-04T10:00:10.242111957Z",
+              "expiresAt": "2026-10-05T10:00:10.242111957Z"
+            },
+            "artifact": "narrow-right-tail-office.pdf",
+            "sha256": "5fdfd3d10e8b7eceeb54b048bfb517fe3e764e1d6a509b6db6d25b1ae62264cb"
+          },
+          {
+            "case": "narrow-right-tail",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.4486612979999336,
+            "task": {
+              "taskId": "8ce8f7f8-85b1-433d-a0fb-bf604b896ecf",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-right-tail-office.pdf",
+                  "success": true,
+                  "outputName": "narrow-right-tail-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-right-tail-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:00:10.298909076Z",
+              "updatedAt": "2026-10-04T10:00:11.726703267Z",
+              "expiresAt": "2026-10-05T10:00:11.726703267Z"
+            },
+            "artifact": "narrow-right-tail-text.txt",
+            "sha256": "bf1b2a4744fc2b5dd2a6e592a3e44a10d380417b941805bc58cd25a8927808d6"
+          },
+          {
+            "case": "narrow-same-font",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 3.3508672729985847,
+            "task": {
+              "taskId": "3aa5a515-594a-44f5-827d-19d16645fe01",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-same-font.pdf",
+                  "success": true,
+                  "outputName": "narrow-same-font.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-same-font.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:00:11.874310423Z",
+              "updatedAt": "2026-10-04T10:00:15.072978200Z",
+              "expiresAt": "2026-10-05T10:00:15.072978200Z"
+            },
+            "artifact": "narrow-same-font-word.docx",
+            "sha256": "fce8a16ea820c6b76818b13cbd568146715e391e1c04096154918f28190104a9"
+          },
+          {
+            "case": "narrow-same-font",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 2.2195122849989275,
+            "task": {
+              "taskId": "2c3ee8f1-01bc-4a95-bedd-adf17ecb9fa4",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-same-font-word.docx",
+                  "success": true,
+                  "outputName": "narrow-same-font-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-same-font-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:00:15.151785339Z",
+              "updatedAt": "2026-10-04T10:00:17.296712649Z",
+              "expiresAt": "2026-10-05T10:00:17.296712649Z"
+            },
+            "artifact": "narrow-same-font-office.pdf",
+            "sha256": "e826f3de1b36d3f9d7af7e41e3dde853ddcf2207e49f3867d902bfd65e07f2b5"
+          },
+          {
+            "case": "narrow-same-font",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.189010648002295,
+            "task": {
+              "taskId": "d8b252b1-eb5c-45be-9331-85c7c0e79400",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-same-font-office.pdf",
+                  "success": true,
+                  "outputName": "narrow-same-font-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-same-font-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:00:17.364223920Z",
+              "updatedAt": "2026-10-04T10:00:18.440152825Z",
+              "expiresAt": "2026-10-05T10:00:18.440152825Z"
+            },
+            "artifact": "narrow-same-font-text.txt",
+            "sha256": "af02f6990a2245910e335045eb78a343289a34559153c817dafe1a1f21d383be"
+          },
+          {
+            "case": "shifted-wide-regions",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 3.372322349998285,
+            "task": {
+              "taskId": "735e9f4e-2130-438b-a9e2-615ad0025eb0",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-wide-regions.pdf",
+                  "success": true,
+                  "outputName": "shifted-wide-regions.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-wide-regions.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:00:18.650431202Z",
+              "updatedAt": "2026-10-04T10:00:21.939098422Z",
+              "expiresAt": "2026-10-05T10:00:21.939098422Z"
+            },
+            "artifact": "shifted-wide-regions-word.docx",
+            "sha256": "c447a63dc1759a860459cbeadce483f93d4b759a1bbcb5768dec5fcdf5c62808"
+          },
+          {
+            "case": "shifted-wide-regions",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 1.932604869001807,
+            "task": {
+              "taskId": "bfde0540-e3d5-4920-8d52-aedcfdb6c00a",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-wide-regions-word.docx",
+                  "success": true,
+                  "outputName": "shifted-wide-regions-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-wide-regions-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:00:21.976581062Z",
+              "updatedAt": "2026-10-04T10:00:23.840275700Z",
+              "expiresAt": "2026-10-05T10:00:23.840275700Z"
+            },
+            "artifact": "shifted-wide-regions-office.pdf",
+            "sha256": "cad4bf92ec7d326470c250a11a933489b78da64bfe0f59a3b1179d471aeabac6"
+          },
+          {
+            "case": "shifted-wide-regions",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.1806216740005766,
+            "task": {
+              "taskId": "f5e48566-c66d-417e-b31f-316ba445fa49",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-wide-regions-office.pdf",
+                  "success": true,
+                  "outputName": "shifted-wide-regions-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-wide-regions-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:00:23.900837387Z",
+              "updatedAt": "2026-10-04T10:00:24.999140801Z",
+              "expiresAt": "2026-10-05T10:00:24.999140801Z"
+            },
+            "artifact": "shifted-wide-regions-text.txt",
+            "sha256": "f08297d0f03d6c98e50f6de600fbb43e08bfce8818a140d3d5c05829572b4109"
+          },
+          {
+            "case": "single-mixed-longlines",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 3.910930993002694,
+            "task": {
+              "taskId": "fe92fa58-e140-4bd1-ab93-8bd4b0006362",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "single-mixed-longlines.pdf",
+                  "success": true,
+                  "outputName": "single-mixed-longlines.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "single-mixed-longlines.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:00:25.208846839Z",
+              "updatedAt": "2026-10-04T10:00:28.995235585Z",
+              "expiresAt": "2026-10-05T10:00:28.995235585Z"
+            },
+            "artifact": "single-mixed-longlines-word.docx",
+            "sha256": "1bbed9f294aa4e542c986c60f457d03a843c398b3cf2f48cbe6711326e46d438"
+          },
+          {
+            "case": "single-mixed-longlines",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 1.9552871759988193,
+            "task": {
+              "taskId": "f9ddfa59-ccea-4e46-b2c0-de0091a9cabc",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "single-mixed-longlines-word.docx",
+                  "success": true,
+                  "outputName": "single-mixed-longlines-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "single-mixed-longlines-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:00:29.052923999Z",
+              "updatedAt": "2026-10-04T10:00:30.944731322Z",
+              "expiresAt": "2026-10-05T10:00:30.944731322Z"
+            },
+            "artifact": "single-mixed-longlines-office.pdf",
+            "sha256": "73208e7160b48ebdf9e0139f87b7a5f04b96cb298f198a6d964ebb2f01779917"
+          },
+          {
+            "case": "single-mixed-longlines",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.7112685210013296,
+            "task": {
+              "taskId": "1157dc72-82fe-4f21-8211-19c4f5570974",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "single-mixed-longlines-office.pdf",
+                  "success": true,
+                  "outputName": "single-mixed-longlines-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "single-mixed-longlines-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:00:31.002535291Z",
+              "updatedAt": "2026-10-04T10:00:32.680368316Z",
+              "expiresAt": "2026-10-05T10:00:32.680368316Z"
+            },
+            "artifact": "single-mixed-longlines-text.txt",
+            "sha256": "361bb54b3ae1f7577e545ccf3bac8ceace8dea6c2f83f5d6b78b9074ce82ff94"
+          },
+          {
+            "case": "numeric-ruled",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 4.583507394003391,
+            "task": {
+              "taskId": "adc1a083-9725-499b-b75a-af6b9dbfa1fc",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "numeric-ruled.pdf",
+                  "success": true,
+                  "outputName": "numeric-ruled.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "numeric-ruled.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:00:32.823313156Z",
+              "updatedAt": "2026-10-04T10:00:37.306532824Z",
+              "expiresAt": "2026-10-05T10:00:37.306532824Z"
+            },
+            "artifact": "numeric-ruled-word.docx",
+            "sha256": "225355fcf0bccea9bb93d7801803c38cf4cd83f164cccb108bb6514df5cf26bb"
+          },
+          {
+            "case": "numeric-ruled",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 1.8189711979975982,
+            "task": {
+              "taskId": "84d6c25a-5045-40f2-9d1e-27ef5e235511",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "numeric-ruled-word.docx",
+                  "success": true,
+                  "outputName": "numeric-ruled-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "numeric-ruled-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:00:37.350559213Z",
+              "updatedAt": "2026-10-04T10:00:39.049787085Z",
+              "expiresAt": "2026-10-05T10:00:39.049787085Z"
+            },
+            "artifact": "numeric-ruled-office.pdf",
+            "sha256": "17082a9acebb4ea9da8ffdcc4c6a70099bb3a9dc0cb5abab1ce8d7330a784432"
+          },
+          {
+            "case": "numeric-ruled",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.695594278997305,
+            "task": {
+              "taskId": "c8769742-dbb8-43e5-82f3-e528331fa28c",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "numeric-ruled-office.pdf",
+                  "success": true,
+                  "outputName": "numeric-ruled-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "numeric-ruled-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:00:39.157222871Z",
+              "updatedAt": "2026-10-04T10:00:40.822671402Z",
+              "expiresAt": "2026-10-05T10:00:40.822671402Z"
+            },
+            "artifact": "numeric-ruled-text.txt",
+            "sha256": "cf10aa024b35afb20bfa81b260c0e32fd2b01e03ea7e0276a395e77c330f205a"
+          },
+          {
+            "case": "numeric-ledger",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 4.289939863996551,
+            "task": {
+              "taskId": "b6b8bda5-4ad7-49b2-ad6b-545441e5fbe3",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "numeric-ledger.pdf",
+                  "success": true,
+                  "outputName": "numeric-ledger.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "numeric-ledger.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:00:40.959467284Z",
+              "updatedAt": "2026-10-04T10:00:45.122403360Z",
+              "expiresAt": "2026-10-05T10:00:45.122403360Z"
+            },
+            "artifact": "numeric-ledger-word.docx",
+            "sha256": "85434fd4cbccca8368f482d91754b91bfa535161ed4cee956bd1e4560cfa8d29"
+          },
+          {
+            "case": "numeric-ledger",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 2.2305744540026353,
+            "task": {
+              "taskId": "3853aa85-eca8-495c-a6cc-5b9523cf230a",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "numeric-ledger-word.docx",
+                  "success": true,
+                  "outputName": "numeric-ledger-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "numeric-ledger-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:00:45.202028992Z",
+              "updatedAt": "2026-10-04T10:00:47.324174065Z",
+              "expiresAt": "2026-10-05T10:00:47.324174065Z"
+            },
+            "artifact": "numeric-ledger-office.pdf",
+            "sha256": "600e3773c78814d1730d07cd477d8b681cba8fd3c0be1b48c62454bb82e6e6f5"
+          },
+          {
+            "case": "numeric-ledger",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.5879399890000059,
+            "task": {
+              "taskId": "30279262-359a-4e53-bd34-54e5dcec2777",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "numeric-ledger-office.pdf",
+                  "success": true,
+                  "outputName": "numeric-ledger-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "numeric-ledger-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:00:47.424294260Z",
+              "updatedAt": "2026-10-04T10:00:48.949369864Z",
+              "expiresAt": "2026-10-05T10:00:48.949369864Z"
+            },
+            "artifact": "numeric-ledger-text.txt",
+            "sha256": "cd591b72f8530191527cd46425352fce114a28b956456cc2eb1032b21d32ac46"
+          }
+        ],
+        "status": "completed",
+        "failures": [],
+        "workerPids": [
+          47855,
+          47925,
+          48002,
+          48045,
+          48121,
+          48197,
+          48242,
+          48322,
+          48396,
+          48443,
+          48513,
+          48597,
+          48639,
+          48707,
+          48782,
+          48824,
+          48898,
+          48970,
+          49017,
+          49101,
+          49172,
+          49220,
+          49298,
+          49375
+        ],
+        "health": {
+          "status": "UP",
+          "version": "0.1.4",
+          "parser": "OFDRW 2.3.9",
+          "javaVersion": "17.0.16",
+          "os": "Linux",
+          "arch": "amd64",
+          "office": {
+            "enabled": true,
+            "available": true,
+            "binaryName": "soffice",
+            "version": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+            "message": "Office 引擎可用"
+          },
+          "ocr": {
+            "enabled": false,
+            "available": false,
+            "binaryName": null,
+            "version": null,
+            "requestedLanguages": null,
+            "availableLanguages": [],
+            "timeoutSeconds": null,
+            "maxConcurrency": null,
+            "maxImagePixels": null,
+            "minimumConfidence": null,
+            "bundled": null,
+            "errorCode": null,
+            "message": "本地 OCR 未启用"
+          },
+          "time": "2026-10-04T09:59:48.924809605Z"
+        },
+        "supervision": {
+          "supervisor": {
+            "pid": 47763,
+            "state": "R",
+            "parent": 47762,
+            "startTicks": "2115861"
+          },
+          "root": {
+            "pid": 47764,
+            "state": "R",
+            "parent": 47763,
+            "startTicks": "2115865"
+          },
+          "registered": [
+            {
+              "pid": 47764,
+              "state": "Z",
+              "parent": 47763,
+              "startTicks": "2115865"
+            },
+            {
+              "pid": 47804,
+              "state": "R",
+              "parent": 47764,
+              "startTicks": "2116264"
+            },
+            {
+              "pid": 47809,
+              "state": "S",
+              "parent": 47804,
+              "startTicks": "2116265"
+            },
+            {
+              "pid": 47819,
+              "state": "R",
+              "parent": 47809,
+              "startTicks": "2116267"
+            },
+            {
+              "pid": 47820,
+              "state": "Z",
+              "parent": 47804,
+              "startTicks": "2116284"
+            },
+            {
+              "pid": 47824,
+              "state": "R",
+              "parent": 47821,
+              "startTicks": "2116286"
+            },
+            {
+              "pid": 47821,
+              "state": "R",
+              "parent": 47764,
+              "startTicks": "2116285"
+            },
+            {
+              "pid": 47825,
+              "state": "Z",
+              "parent": 47821,
+              "startTicks": "2116286"
+            },
+            {
+              "pid": 47835,
+              "state": "R",
+              "parent": 47825,
+              "startTicks": "2116288"
+            },
+            {
+              "pid": 47855,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2116443"
+            },
+            {
+              "pid": 47925,
+              "state": "S",
+              "parent": 47764,
+              "startTicks": "2116778"
+            },
+            {
+              "pid": 47961,
+              "state": "S",
+              "parent": 47925,
+              "startTicks": "2116884"
+            },
+            {
+              "pid": 47964,
+              "state": "S",
+              "parent": 47961,
+              "startTicks": "2116885"
+            },
+            {
+              "pid": 47965,
+              "state": "R",
+              "parent": 47964,
+              "startTicks": "2116885"
+            },
+            {
+              "pid": 47970,
+              "state": "R",
+              "parent": 47961,
+              "startTicks": "2116886"
+            },
+            {
+              "pid": 47976,
+              "state": "R",
+              "parent": 47961,
+              "startTicks": "2116893"
+            },
+            {
+              "pid": 48002,
+              "state": "S",
+              "parent": 47764,
+              "startTicks": "2117008"
+            },
+            {
+              "pid": 48045,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2117141"
+            },
+            {
+              "pid": 48121,
+              "state": "S",
+              "parent": 47764,
+              "startTicks": "2117521"
+            },
+            {
+              "pid": 48157,
+              "state": "Z",
+              "parent": 48121,
+              "startTicks": "2117634"
+            },
+            {
+              "pid": 48165,
+              "state": "R",
+              "parent": 48157,
+              "startTicks": "2117636"
+            },
+            {
+              "pid": 48172,
+              "state": "R",
+              "parent": 48157,
+              "startTicks": "2117641"
+            },
+            {
+              "pid": 48197,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2117747"
+            },
+            {
+              "pid": 48242,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2117910"
+            },
+            {
+              "pid": 48322,
+              "state": "S",
+              "parent": 47764,
+              "startTicks": "2118348"
+            },
+            {
+              "pid": 48358,
+              "state": "S",
+              "parent": 48322,
+              "startTicks": "2118441"
+            },
+            {
+              "pid": 48373,
+              "state": "R",
+              "parent": 48358,
+              "startTicks": "2118448"
+            },
+            {
+              "pid": 48378,
+              "state": "R",
+              "parent": 48373,
+              "startTicks": "2118473"
+            },
+            {
+              "pid": 48396,
+              "state": "R",
+              "parent": 47764,
+              "startTicks": "2118540"
+            },
+            {
+              "pid": 48443,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2118698"
+            },
+            {
+              "pid": 48513,
+              "state": "S",
+              "parent": 47764,
+              "startTicks": "2119025"
+            },
+            {
+              "pid": 48559,
+              "state": "S",
+              "parent": 48513,
+              "startTicks": "2119140"
+            },
+            {
+              "pid": 48574,
+              "state": "R",
+              "parent": 48559,
+              "startTicks": "2119146"
+            },
+            {
+              "pid": 48597,
+              "state": "S",
+              "parent": 47764,
+              "startTicks": "2119247"
+            },
+            {
+              "pid": 48639,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2119375"
+            },
+            {
+              "pid": 48707,
+              "state": "S",
+              "parent": 47764,
+              "startTicks": "2119708"
+            },
+            {
+              "pid": 48741,
+              "state": "S",
+              "parent": 48707,
+              "startTicks": "2119784"
+            },
+            {
+              "pid": 48746,
+              "state": "R",
+              "parent": 48741,
+              "startTicks": "2119786"
+            },
+            {
+              "pid": 48755,
+              "state": "R",
+              "parent": 48741,
+              "startTicks": "2119792"
+            },
+            {
+              "pid": 48782,
+              "state": "S",
+              "parent": 47764,
+              "startTicks": "2119901"
+            },
+            {
+              "pid": 48824,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2120031"
+            },
+            {
+              "pid": 48898,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2120415"
+            },
+            {
+              "pid": 48934,
+              "state": "S",
+              "parent": 48898,
+              "startTicks": "2120513"
+            },
+            {
+              "pid": 48935,
+              "state": "S",
+              "parent": 48934,
+              "startTicks": "2120514"
+            },
+            {
+              "pid": 48936,
+              "state": "R",
+              "parent": 48935,
+              "startTicks": "2120514"
+            },
+            {
+              "pid": 48948,
+              "state": "R",
+              "parent": 48934,
+              "startTicks": "2120519"
+            },
+            {
+              "pid": 48970,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2120610"
+            },
+            {
+              "pid": 49017,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2120793"
+            },
+            {
+              "pid": 49101,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2121245"
+            },
+            {
+              "pid": 49135,
+              "state": "S",
+              "parent": 49101,
+              "startTicks": "2121325"
+            },
+            {
+              "pid": 49150,
+              "state": "R",
+              "parent": 49135,
+              "startTicks": "2121331"
+            },
+            {
+              "pid": 49172,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2121426"
+            },
+            {
+              "pid": 49220,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2121606"
+            },
+            {
+              "pid": 49298,
+              "state": "Z",
+              "parent": 47764,
+              "startTicks": "2122030"
+            },
+            {
+              "pid": 49335,
+              "state": "S",
+              "parent": 49298,
+              "startTicks": "2122140"
+            },
+            {
+              "pid": 49349,
+              "state": "R",
+              "parent": 49335,
+              "startTicks": "2122145"
+            },
+            {
+              "pid": 49375,
+              "state": "S",
+              "parent": 47764,
+              "startTicks": "2122253"
+            }
+          ],
+          "reaped": [
+            {
+              "pid": 47764,
+              "exitCode": 143
+            }
+          ],
+          "signals": [
+            {
+              "identity": {
+                "pid": 47764,
+                "state": "S",
+                "parent": 47763,
+                "startTicks": "2115865"
+              },
+              "signal": 15
+            }
+          ],
+          "status": "reaped",
+          "rootExitCode": 143,
+          "waitpidNoChildren": true
+        },
+        "workerIdentities": [
+          {
+            "pid": 47855,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2116443"
+          },
+          {
+            "pid": 47925,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2116778"
+          },
+          {
+            "pid": 48002,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2117008"
+          },
+          {
+            "pid": 48045,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2117141"
+          },
+          {
+            "pid": 48121,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2117521"
+          },
+          {
+            "pid": 48197,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2117747"
+          },
+          {
+            "pid": 48242,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2117910"
+          },
+          {
+            "pid": 48322,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2118348"
+          },
+          {
+            "pid": 48396,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2118540"
+          },
+          {
+            "pid": 48443,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2118698"
+          },
+          {
+            "pid": 48513,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2119025"
+          },
+          {
+            "pid": 48597,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2119247"
+          },
+          {
+            "pid": 48639,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2119375"
+          },
+          {
+            "pid": 48707,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2119708"
+          },
+          {
+            "pid": 48782,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2119901"
+          },
+          {
+            "pid": 48824,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2120031"
+          },
+          {
+            "pid": 48898,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2120415"
+          },
+          {
+            "pid": 48970,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2120610"
+          },
+          {
+            "pid": 49017,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2120793"
+          },
+          {
+            "pid": 49101,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2121245"
+          },
+          {
+            "pid": 49172,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2121426"
+          },
+          {
+            "pid": 49220,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2121606"
+          },
+          {
+            "pid": 49298,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2122030"
+          },
+          {
+            "pid": 49375,
+            "state": "S",
+            "parent": 47764,
+            "startTicks": "2122253"
+          }
+        ],
+        "newZombies": [],
+        "resources": {
+          "wallSeconds": 65.7317932090009,
+          "userSeconds": 175.106802,
+          "systemSeconds": 12.318204,
+          "maxChildRssKiB": 437184
+        }
+      },
+      "after": {
+        "jarSha256": "0bfefe757c430925f45d5a40f0024bc313e69286ca2cc305ad07a1f761a98321",
+        "manifestSha256": "5efeee3c268106f06e779bbe91274f91fe1b5a7cee91579ade7aeffe65e51872",
+        "cases": [
+          {
+            "case": "narrow-balanced",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 4.054717959003028,
+            "task": {
+              "taskId": "e41d6c4b-e7ea-46d3-9f6e-7c28a40a292f",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-balanced.pdf",
+                  "success": true,
+                  "outputName": "narrow-balanced.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-balanced.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:15:10.691994656Z",
+              "updatedAt": "2026-10-04T10:15:14.459431234Z",
+              "expiresAt": "2026-10-05T10:15:14.459431234Z"
+            },
+            "artifact": "narrow-balanced-word.docx",
+            "sha256": "d6d129cea5b69b9279c9c2aba8596c21a45eeba70b90e577e4b6fc274cbbf342"
+          },
+          {
+            "case": "narrow-balanced",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 2.1374300590032362,
+            "task": {
+              "taskId": "85d6f0d9-604f-4b16-ae20-86e735fcf93d",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-balanced-word.docx",
+                  "success": true,
+                  "outputName": "narrow-balanced-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-balanced-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:15:14.626246660Z",
+              "updatedAt": "2026-10-04T10:15:16.631931325Z",
+              "expiresAt": "2026-10-05T10:15:16.631931325Z"
+            },
+            "artifact": "narrow-balanced-office.pdf",
+            "sha256": "d923efbb7f1757fbdefcb720d1d2360a767b74a4d90b6036c3cc4890e8cb0d2f"
+          },
+          {
+            "case": "narrow-balanced",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.7424126619989693,
+            "task": {
+              "taskId": "33f93315-12e2-41b3-b012-6044a744514a",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-balanced-office.pdf",
+                  "success": true,
+                  "outputName": "narrow-balanced-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-balanced-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:15:16.719287423Z",
+              "updatedAt": "2026-10-04T10:15:18.373137788Z",
+              "expiresAt": "2026-10-05T10:15:18.373137788Z"
+            },
+            "artifact": "narrow-balanced-text.txt",
+            "sha256": "e09e02a2c6c9abe8f0e4bc7974a6ccf9e974459db77a89f428626631d2ca2bad"
+          },
+          {
+            "case": "narrow-left-tail",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 4.955411065999215,
+            "task": {
+              "taskId": "62405a18-cc77-49d5-b6ca-faf8a1035563",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-left-tail.pdf",
+                  "success": true,
+                  "outputName": "narrow-left-tail.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-left-tail.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:15:18.596360036Z",
+              "updatedAt": "2026-10-04T10:15:23.338250932Z",
+              "expiresAt": "2026-10-05T10:15:23.338250932Z"
+            },
+            "artifact": "narrow-left-tail-word.docx",
+            "sha256": "43853af02e3ca5da669bb2c5ec1c6b493cecc841904d359bab21a3f5c72782ee"
+          },
+          {
+            "case": "narrow-left-tail",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 2.35598316100004,
+            "task": {
+              "taskId": "f5b6a7d5-270c-40bd-a5b5-d94611f07d92",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-left-tail-word.docx",
+                  "success": true,
+                  "outputName": "narrow-left-tail-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-left-tail-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:15:23.473730088Z",
+              "updatedAt": "2026-10-04T10:15:25.765429380Z",
+              "expiresAt": "2026-10-05T10:15:25.765429380Z"
+            },
+            "artifact": "narrow-left-tail-office.pdf",
+            "sha256": "f2c78b18a1dd76ac89236203bd0d5b1a5d0c6ba0819f90594539e0d211779f48"
+          },
+          {
+            "case": "narrow-left-tail",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.8674858949998452,
+            "task": {
+              "taskId": "57bb8681-75e4-4693-bdb4-a4cb513483c5",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-left-tail-office.pdf",
+                  "success": true,
+                  "outputName": "narrow-left-tail-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-left-tail-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:15:25.823815884Z",
+              "updatedAt": "2026-10-04T10:15:27.592783394Z",
+              "expiresAt": "2026-10-05T10:15:27.592783394Z"
+            },
+            "artifact": "narrow-left-tail-text.txt",
+            "sha256": "a4004c336a9301ab4ba1612db701db56516868631b68b4c75ba3fbff88926e66"
+          },
+          {
+            "case": "narrow-right-tail",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 4.338075899002433,
+            "task": {
+              "taskId": "2520dbfa-0ac5-4db5-9008-581f27cf3bee",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-right-tail.pdf",
+                  "success": true,
+                  "outputName": "narrow-right-tail.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-right-tail.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:15:27.802026815Z",
+              "updatedAt": "2026-10-04T10:15:31.966340578Z",
+              "expiresAt": "2026-10-05T10:15:31.966340578Z"
+            },
+            "artifact": "narrow-right-tail-word.docx",
+            "sha256": "6786f034f183f7a40841138832b79cc00281f092833c16be0ddaf608fa7007d9"
+          },
+          {
+            "case": "narrow-right-tail",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 2.2594116760010365,
+            "task": {
+              "taskId": "17640402-fc6a-42de-9ba8-981d5d44c5f5",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-right-tail-word.docx",
+                  "success": true,
+                  "outputName": "narrow-right-tail-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-right-tail-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:15:32.084736149Z",
+              "updatedAt": "2026-10-04T10:15:34.305527302Z",
+              "expiresAt": "2026-10-05T10:15:34.305527302Z"
+            },
+            "artifact": "narrow-right-tail-office.pdf",
+            "sha256": "4cc13dea8a5ffd7cff9b430dec2038ef5b85a444c8457bcb86509b14e33b7372"
+          },
+          {
+            "case": "narrow-right-tail",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.8422065179984202,
+            "task": {
+              "taskId": "87ca106f-1a9a-49c9-bc03-8d80b27bfe9b",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-right-tail-office.pdf",
+                  "success": true,
+                  "outputName": "narrow-right-tail-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-right-tail-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:15:34.337176657Z",
+              "updatedAt": "2026-10-04T10:15:36.082082359Z",
+              "expiresAt": "2026-10-05T10:15:36.082082359Z"
+            },
+            "artifact": "narrow-right-tail-text.txt",
+            "sha256": "bf1b2a4744fc2b5dd2a6e592a3e44a10d380417b941805bc58cd25a8927808d6"
+          },
+          {
+            "case": "narrow-same-font",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 3.3868931110009726,
+            "task": {
+              "taskId": "ca439546-25c3-4aaa-86f6-eba257f8dd1a",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-same-font.pdf",
+                  "success": true,
+                  "outputName": "narrow-same-font.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-same-font.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:15:36.292988572Z",
+              "updatedAt": "2026-10-04T10:15:39.523918505Z",
+              "expiresAt": "2026-10-05T10:15:39.523918505Z"
+            },
+            "artifact": "narrow-same-font-word.docx",
+            "sha256": "2b885175a4ec74d8cdf9ed0d67e58d274cd3d1cf94f1a31d2598f68c9aefe330"
+          },
+          {
+            "case": "narrow-same-font",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 2.246413165001286,
+            "task": {
+              "taskId": "e1d31319-c9c2-468e-abb7-772a1599a6dc",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-same-font-word.docx",
+                  "success": true,
+                  "outputName": "narrow-same-font-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-same-font-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:15:39.621121257Z",
+              "updatedAt": "2026-10-04T10:15:41.772232088Z",
+              "expiresAt": "2026-10-05T10:15:41.772232088Z"
+            },
+            "artifact": "narrow-same-font-office.pdf",
+            "sha256": "254b58aff2b53e1a0cd11accc6175bddad6e35430b627096387f1fd5322a0a6c"
+          },
+          {
+            "case": "narrow-same-font",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.195516920000955,
+            "task": {
+              "taskId": "23ea8c95-029f-4b6b-88da-69c3ee46f14b",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "narrow-same-font-office.pdf",
+                  "success": true,
+                  "outputName": "narrow-same-font-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "narrow-same-font-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:15:41.861347573Z",
+              "updatedAt": "2026-10-04T10:15:43.032187092Z",
+              "expiresAt": "2026-10-05T10:15:43.032187092Z"
+            },
+            "artifact": "narrow-same-font-text.txt",
+            "sha256": "af02f6990a2245910e335045eb78a343289a34559153c817dafe1a1f21d383be"
+          },
+          {
+            "case": "shifted-wide-regions",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 7.538403907001339,
+            "task": {
+              "taskId": "4df46cc1-b92f-4495-bb4b-b341850a4e9a",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-wide-regions.pdf",
+                  "success": true,
+                  "outputName": "shifted-wide-regions.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-wide-regions.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:15:43.179267085Z",
+              "updatedAt": "2026-10-04T10:15:50.539767390Z",
+              "expiresAt": "2026-10-05T10:15:50.539767390Z"
+            },
+            "artifact": "shifted-wide-regions-word.docx",
+            "sha256": "bb491850a9474c131ecfd230ea98231619358b3478178bb785998b2d98caa776"
+          },
+          {
+            "case": "shifted-wide-regions",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 3.0920423720017425,
+            "task": {
+              "taskId": "3e546416-172e-43e0-bf51-426e2d3816d3",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-wide-regions-word.docx",
+                  "success": true,
+                  "outputName": "shifted-wide-regions-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-wide-regions-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:15:50.685947844Z",
+              "updatedAt": "2026-10-04T10:15:53.674390763Z",
+              "expiresAt": "2026-10-05T10:15:53.674390763Z"
+            },
+            "artifact": "shifted-wide-regions-office.pdf",
+            "sha256": "3e0eeb9ef5d397cf98d7fa76f4a9787c74f4d2be92524c3978f7fc32e739f95a"
+          },
+          {
+            "case": "shifted-wide-regions",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.9431928100020741,
+            "task": {
+              "taskId": "2c8aa039-5522-4d63-84d6-ac9eb4080b0a",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-wide-regions-office.pdf",
+                  "success": true,
+                  "outputName": "shifted-wide-regions-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-wide-regions-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:15:53.756467296Z",
+              "updatedAt": "2026-10-04T10:15:55.591553940Z",
+              "expiresAt": "2026-10-05T10:15:55.591553940Z"
+            },
+            "artifact": "shifted-wide-regions-text.txt",
+            "sha256": "f08297d0f03d6c98e50f6de600fbb43e08bfce8818a140d3d5c05829572b4109"
+          },
+          {
+            "case": "single-mixed-longlines",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 4.722644733999914,
+            "task": {
+              "taskId": "adae020f-0296-4de2-b0c7-02620bc630e4",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "single-mixed-longlines.pdf",
+                  "success": true,
+                  "outputName": "single-mixed-longlines.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "single-mixed-longlines.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:15:55.817155672Z",
+              "updatedAt": "2026-10-04T10:16:00.410065868Z",
+              "expiresAt": "2026-10-05T10:16:00.410065868Z"
+            },
+            "artifact": "single-mixed-longlines-word.docx",
+            "sha256": "e524c62c990087d7e4ac7a43726f1afe5934dc8660c48aef41c2888898736283"
+          },
+          {
+            "case": "single-mixed-longlines",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 2.3556722379980783,
+            "task": {
+              "taskId": "35114ccd-58c2-4ade-adaf-fea4c7165c2d",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "single-mixed-longlines-word.docx",
+                  "success": true,
+                  "outputName": "single-mixed-longlines-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "single-mixed-longlines-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:16:00.474903058Z",
+              "updatedAt": "2026-10-04T10:16:02.788834691Z",
+              "expiresAt": "2026-10-05T10:16:02.788834691Z"
+            },
+            "artifact": "single-mixed-longlines-office.pdf",
+            "sha256": "d9e4f9bc83cc977addcc2d57d318d35dbd60ed93d133c3fa83d93a94fece38b4"
+          },
+          {
+            "case": "single-mixed-longlines",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.511127187000966,
+            "task": {
+              "taskId": "bc0728c0-beed-48b7-952b-4e96f44b4259",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "single-mixed-longlines-office.pdf",
+                  "success": true,
+                  "outputName": "single-mixed-longlines-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "single-mixed-longlines-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:16:02.825795092Z",
+              "updatedAt": "2026-10-04T10:16:04.291583961Z",
+              "expiresAt": "2026-10-05T10:16:04.291583961Z"
+            },
+            "artifact": "single-mixed-longlines-text.txt",
+            "sha256": "361bb54b3ae1f7577e545ccf3bac8ceace8dea6c2f83f5d6b78b9074ce82ff94"
+          },
+          {
+            "case": "numeric-ruled",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 4.514791485002206,
+            "task": {
+              "taskId": "ad077b72-ef73-49a5-8332-730e3bd11830",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "numeric-ruled.pdf",
+                  "success": true,
+                  "outputName": "numeric-ruled.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "numeric-ruled.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:16:04.453949255Z",
+              "updatedAt": "2026-10-04T10:16:08.808967137Z",
+              "expiresAt": "2026-10-05T10:16:08.808967137Z"
+            },
+            "artifact": "numeric-ruled-word.docx",
+            "sha256": "3c3b93900034c698dfcecfa39fa787f291d34f3f7308cd777b33c84429d1aaf5"
+          },
+          {
+            "case": "numeric-ruled",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 2.2351419480000914,
+            "task": {
+              "taskId": "62648f15-577c-43f2-b2de-21d023345ae4",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "numeric-ruled-word.docx",
+                  "success": true,
+                  "outputName": "numeric-ruled-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "numeric-ruled-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:16:08.904644720Z",
+              "updatedAt": "2026-10-04T10:16:11.053702290Z",
+              "expiresAt": "2026-10-05T10:16:11.053702290Z"
+            },
+            "artifact": "numeric-ruled-office.pdf",
+            "sha256": "2ceb31d919f6b9bbd6511a7c7145c02118420b4418b7ea0149ab4ffc67255d93"
+          },
+          {
+            "case": "numeric-ruled",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.8328760329968645,
+            "task": {
+              "taskId": "7c6009a9-db9f-4525-a36c-c0a8d72eda1b",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "numeric-ruled-office.pdf",
+                  "success": true,
+                  "outputName": "numeric-ruled-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "numeric-ruled-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:16:11.134746858Z",
+              "updatedAt": "2026-10-04T10:16:12.896630667Z",
+              "expiresAt": "2026-10-05T10:16:12.896630667Z"
+            },
+            "artifact": "numeric-ruled-text.txt",
+            "sha256": "cf10aa024b35afb20bfa81b260c0e32fd2b01e03ea7e0276a395e77c330f205a"
+          },
+          {
+            "case": "numeric-ledger",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 3.3358443300021463,
+            "task": {
+              "taskId": "77555699-f79c-4e29-b1a6-a0336ea44dc2",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "numeric-ledger.pdf",
+                  "success": true,
+                  "outputName": "numeric-ledger.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "numeric-ledger.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:16:13.095781767Z",
+              "updatedAt": "2026-10-04T10:16:16.248224042Z",
+              "expiresAt": "2026-10-05T10:16:16.248224042Z"
+            },
+            "artifact": "numeric-ledger-word.docx",
+            "sha256": "eab15d8a53cbd8322142aa81b2599ae4213550dfd2f80461c4d8f9b1ec6af663"
+          },
+          {
+            "case": "numeric-ledger",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 2.224989922000532,
+            "task": {
+              "taskId": "eacb9ad8-54ba-4195-833c-8f8665c7454c",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "numeric-ledger-word.docx",
+                  "success": true,
+                  "outputName": "numeric-ledger-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "numeric-ledger-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:16:16.362692703Z",
+              "updatedAt": "2026-10-04T10:16:18.544851740Z",
+              "expiresAt": "2026-10-05T10:16:18.544851740Z"
+            },
+            "artifact": "numeric-ledger-office.pdf",
+            "sha256": "ccc6782d9ff9917d19cd96c3c167918f69ff7c7d4b2ee2ed68cb4b87d63d13d9"
+          },
+          {
+            "case": "numeric-ledger",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.5073495489996276,
+            "task": {
+              "taskId": "3f90e455-7bcb-4bb5-aa59-023363fef6f5",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "numeric-ledger-office.pdf",
+                  "success": true,
+                  "outputName": "numeric-ledger-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "numeric-ledger-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:16:18.580614274Z",
+              "updatedAt": "2026-10-04T10:16:19.973603331Z",
+              "expiresAt": "2026-10-05T10:16:19.973603331Z"
+            },
+            "artifact": "numeric-ledger-text.txt",
+            "sha256": "cd591b72f8530191527cd46425352fce114a28b956456cc2eb1032b21d32ac46"
+          }
+        ],
+        "status": "completed",
+        "failures": [],
+        "workerPids": [
+          57355,
+          57429,
+          57507,
+          57554,
+          57636,
+          57714,
+          57763,
+          57842,
+          57918,
+          57966,
+          58032,
+          58115,
+          58159,
+          58262,
+          58346,
+          58400,
+          58487,
+          58564,
+          58608,
+          58691,
+          58767,
+          58815,
+          58882,
+          58959
+        ],
+        "helperSha256": {
+          "run_word_iteration19.py": "5204cf6e5c3191352ccd17784554be6b5cab3131970936a453b14348348cd73e",
+          "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85",
+          "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9"
+        },
+        "health": {
+          "status": "UP",
+          "version": "0.1.4",
+          "parser": "OFDRW 2.3.9",
+          "javaVersion": "17.0.16",
+          "os": "Linux",
+          "arch": "amd64",
+          "office": {
+            "enabled": true,
+            "available": true,
+            "binaryName": "soffice",
+            "version": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+            "message": "Office 引擎可用"
+          },
+          "ocr": {
+            "enabled": false,
+            "available": false,
+            "binaryName": null,
+            "version": null,
+            "requestedLanguages": null,
+            "availableLanguages": [],
+            "timeoutSeconds": null,
+            "maxConcurrency": null,
+            "maxImagePixels": null,
+            "minimumConfidence": null,
+            "bundled": null,
+            "errorCode": null,
+            "message": "本地 OCR 未启用"
+          },
+          "time": "2026-10-04T10:15:10.371465355Z"
+        },
+        "supervision": {
+          "supervisor": {
+            "pid": 57257,
+            "state": "R",
+            "parent": 57256,
+            "startTicks": "2207305"
+          },
+          "root": {
+            "pid": 57258,
+            "state": "R",
+            "parent": 57257,
+            "startTicks": "2207308"
+          },
+          "registered": [
+            {
+              "pid": 57258,
+              "state": "Z",
+              "parent": 57257,
+              "startTicks": "2207308"
+            },
+            {
+              "pid": 57297,
+              "state": "S",
+              "parent": 57258,
+              "startTicks": "2207898"
+            },
+            {
+              "pid": 57299,
+              "state": "S",
+              "parent": 57297,
+              "startTicks": "2207902"
+            },
+            {
+              "pid": 57300,
+              "state": "R",
+              "parent": 57299,
+              "startTicks": "2207902"
+            },
+            {
+              "pid": 57301,
+              "state": "Z",
+              "parent": 57297,
+              "startTicks": "2207903"
+            },
+            {
+              "pid": 57302,
+              "state": "S",
+              "parent": 57297,
+              "startTicks": "2207904"
+            },
+            {
+              "pid": 57310,
+              "state": "R",
+              "parent": 57302,
+              "startTicks": "2207906"
+            },
+            {
+              "pid": 57312,
+              "state": "R",
+              "parent": 57302,
+              "startTicks": "2207907"
+            },
+            {
+              "pid": 57315,
+              "state": "S",
+              "parent": 57258,
+              "startTicks": "2207928"
+            },
+            {
+              "pid": 57319,
+              "state": "S",
+              "parent": 57315,
+              "startTicks": "2207931"
+            },
+            {
+              "pid": 57322,
+              "state": "Z",
+              "parent": 57319,
+              "startTicks": "2207932"
+            },
+            {
+              "pid": 57329,
+              "state": "R",
+              "parent": 57319,
+              "startTicks": "2207935"
+            },
+            {
+              "pid": 57330,
+              "state": "R",
+              "parent": 57315,
+              "startTicks": "2207946"
+            },
+            {
+              "pid": 57355,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2208586"
+            },
+            {
+              "pid": 57429,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2208973"
+            },
+            {
+              "pid": 57468,
+              "state": "S",
+              "parent": 57429,
+              "startTicks": "2209072"
+            },
+            {
+              "pid": 57473,
+              "state": "S",
+              "parent": 57468,
+              "startTicks": "2209073"
+            },
+            {
+              "pid": 57474,
+              "state": "R",
+              "parent": 57473,
+              "startTicks": "2209073"
+            },
+            {
+              "pid": 57482,
+              "state": "R",
+              "parent": 57468,
+              "startTicks": "2209079"
+            },
+            {
+              "pid": 57507,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2209183"
+            },
+            {
+              "pid": 57554,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2209370"
+            },
+            {
+              "pid": 57636,
+              "state": "S",
+              "parent": 57258,
+              "startTicks": "2209858"
+            },
+            {
+              "pid": 57674,
+              "state": "S",
+              "parent": 57636,
+              "startTicks": "2209974"
+            },
+            {
+              "pid": 57679,
+              "state": "S",
+              "parent": 57674,
+              "startTicks": "2209975"
+            },
+            {
+              "pid": 57688,
+              "state": "R",
+              "parent": 57674,
+              "startTicks": "2209981"
+            },
+            {
+              "pid": 57714,
+              "state": "S",
+              "parent": 57258,
+              "startTicks": "2210093"
+            },
+            {
+              "pid": 57763,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2210290"
+            },
+            {
+              "pid": 57842,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2210719"
+            },
+            {
+              "pid": 57880,
+              "state": "R",
+              "parent": 57842,
+              "startTicks": "2210836"
+            },
+            {
+              "pid": 57883,
+              "state": "S",
+              "parent": 57880,
+              "startTicks": "2210837"
+            },
+            {
+              "pid": 57889,
+              "state": "R",
+              "parent": 57880,
+              "startTicks": "2210838"
+            },
+            {
+              "pid": 57895,
+              "state": "R",
+              "parent": 57880,
+              "startTicks": "2210844"
+            },
+            {
+              "pid": 57918,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2210944"
+            },
+            {
+              "pid": 57966,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2211140"
+            },
+            {
+              "pid": 58032,
+              "state": "S",
+              "parent": 57258,
+              "startTicks": "2211472"
+            },
+            {
+              "pid": 58068,
+              "state": "S",
+              "parent": 58032,
+              "startTicks": "2211584"
+            },
+            {
+              "pid": 58072,
+              "state": "S",
+              "parent": 58068,
+              "startTicks": "2211586"
+            },
+            {
+              "pid": 58080,
+              "state": "R",
+              "parent": 58068,
+              "startTicks": "2211587"
+            },
+            {
+              "pid": 58091,
+              "state": "R",
+              "parent": 58068,
+              "startTicks": "2211594"
+            },
+            {
+              "pid": 58115,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2211696"
+            },
+            {
+              "pid": 58159,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2211828"
+            },
+            {
+              "pid": 58262,
+              "state": "S",
+              "parent": 57258,
+              "startTicks": "2212579"
+            },
+            {
+              "pid": 58306,
+              "state": "S",
+              "parent": 58262,
+              "startTicks": "2212773"
+            },
+            {
+              "pid": 58310,
+              "state": "S",
+              "parent": 58306,
+              "startTicks": "2212775"
+            },
+            {
+              "pid": 58318,
+              "state": "Z",
+              "parent": 58306,
+              "startTicks": "2212776"
+            },
+            {
+              "pid": 58322,
+              "state": "R",
+              "parent": 58306,
+              "startTicks": "2212780"
+            },
+            {
+              "pid": 58327,
+              "state": "R",
+              "parent": 58322,
+              "startTicks": "2212810"
+            },
+            {
+              "pid": 58346,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2212886"
+            },
+            {
+              "pid": 58400,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2213092"
+            },
+            {
+              "pid": 58487,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2213558"
+            },
+            {
+              "pid": 58525,
+              "state": "S",
+              "parent": 58487,
+              "startTicks": "2213683"
+            },
+            {
+              "pid": 58536,
+              "state": "Z",
+              "parent": 58525,
+              "startTicks": "2213685"
+            },
+            {
+              "pid": 58540,
+              "state": "R",
+              "parent": 58525,
+              "startTicks": "2213690"
+            },
+            {
+              "pid": 58564,
+              "state": "S",
+              "parent": 57258,
+              "startTicks": "2213793"
+            },
+            {
+              "pid": 58608,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2213956"
+            },
+            {
+              "pid": 58691,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2214401"
+            },
+            {
+              "pid": 58728,
+              "state": "S",
+              "parent": 58691,
+              "startTicks": "2214514"
+            },
+            {
+              "pid": 58729,
+              "state": "R",
+              "parent": 58728,
+              "startTicks": "2214515"
+            },
+            {
+              "pid": 58730,
+              "state": "Z",
+              "parent": 58729,
+              "startTicks": "2214515"
+            },
+            {
+              "pid": 58736,
+              "state": "R",
+              "parent": 58728,
+              "startTicks": "2214516"
+            },
+            {
+              "pid": 58743,
+              "state": "R",
+              "parent": 58728,
+              "startTicks": "2214522"
+            },
+            {
+              "pid": 58748,
+              "state": "S",
+              "parent": 58743,
+              "startTicks": "2214556"
+            },
+            {
+              "pid": 58767,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2214624"
+            },
+            {
+              "pid": 58815,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2214820"
+            },
+            {
+              "pid": 58882,
+              "state": "S",
+              "parent": 57258,
+              "startTicks": "2215147"
+            },
+            {
+              "pid": 58918,
+              "state": "S",
+              "parent": 58882,
+              "startTicks": "2215260"
+            },
+            {
+              "pid": 58919,
+              "state": "S",
+              "parent": 58918,
+              "startTicks": "2215261"
+            },
+            {
+              "pid": 58920,
+              "state": "R",
+              "parent": 58919,
+              "startTicks": "2215261"
+            },
+            {
+              "pid": 58929,
+              "state": "Z",
+              "parent": 58918,
+              "startTicks": "2215263"
+            },
+            {
+              "pid": 58933,
+              "state": "R",
+              "parent": 58918,
+              "startTicks": "2215267"
+            },
+            {
+              "pid": 58959,
+              "state": "Z",
+              "parent": 57258,
+              "startTicks": "2215368"
+            }
+          ],
+          "reaped": [
+            {
+              "pid": 57258,
+              "exitCode": 143
+            }
+          ],
+          "signals": [
+            {
+              "identity": {
+                "pid": 57258,
+                "state": "S",
+                "parent": 57257,
+                "startTicks": "2207308"
+              },
+              "signal": 15
+            }
+          ],
+          "status": "reaped",
+          "rootExitCode": 143,
+          "waitpidNoChildren": true
+        },
+        "workerIdentities": [
+          {
+            "pid": 57355,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2208586"
+          },
+          {
+            "pid": 57429,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2208973"
+          },
+          {
+            "pid": 57507,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2209183"
+          },
+          {
+            "pid": 57554,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2209370"
+          },
+          {
+            "pid": 57636,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2209858"
+          },
+          {
+            "pid": 57714,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2210093"
+          },
+          {
+            "pid": 57763,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2210290"
+          },
+          {
+            "pid": 57842,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2210719"
+          },
+          {
+            "pid": 57918,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2210944"
+          },
+          {
+            "pid": 57966,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2211140"
+          },
+          {
+            "pid": 58032,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2211472"
+          },
+          {
+            "pid": 58115,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2211696"
+          },
+          {
+            "pid": 58159,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2211828"
+          },
+          {
+            "pid": 58262,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2212579"
+          },
+          {
+            "pid": 58346,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2212886"
+          },
+          {
+            "pid": 58400,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2213092"
+          },
+          {
+            "pid": 58487,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2213558"
+          },
+          {
+            "pid": 58564,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2213793"
+          },
+          {
+            "pid": 58608,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2213956"
+          },
+          {
+            "pid": 58691,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2214401"
+          },
+          {
+            "pid": 58767,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2214624"
+          },
+          {
+            "pid": 58815,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2214820"
+          },
+          {
+            "pid": 58882,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2215147"
+          },
+          {
+            "pid": 58959,
+            "state": "S",
+            "parent": 57258,
+            "startTicks": "2215368"
+          }
+        ],
+        "newZombies": [],
+        "resources": {
+          "wallSeconds": 82.3880335190006,
+          "userSeconds": 215.380457,
+          "systemSeconds": 16.430486,
+          "maxChildRssKiB": 433436
+        }
+      }
+    },
+    {
+      "before": {
+        "jarSha256": "db957453eee857d659f5aef6fe0196385226bd2e3520ea4b0a3520a8ed6db443",
+        "manifestSha256": "e24c847ab52e02005255538f00c82d76179fdfc77ee9db1614583e5062451085",
+        "cases": [
+          {
+            "case": "shifted-exact-regions",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 3.4724323369991907,
+            "task": {
+              "taskId": "692533a5-be47-4429-b696-d63cc26ea035",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-exact-regions.pdf",
+                  "success": true,
+                  "outputName": "shifted-exact-regions.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-exact-regions.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:03:52.244685432Z",
+              "updatedAt": "2026-10-04T10:03:55.485137350Z",
+              "expiresAt": "2026-10-05T10:03:55.485137350Z"
+            },
+            "artifact": "shifted-exact-regions-word.docx",
+            "sha256": "e42fbf6f5b96030ccfd7eb68f6e5b86a9f59738e906321f87684707ba6afab97"
+          },
+          {
+            "case": "shifted-exact-regions",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 2.1552622689996497,
+            "task": {
+              "taskId": "40eee060-aea9-42a2-a293-d9237c4f03d7",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-exact-regions-word.docx",
+                  "success": true,
+                  "outputName": "shifted-exact-regions-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-exact-regions-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:03:55.542683233Z",
+              "updatedAt": "2026-10-04T10:03:57.649711993Z",
+              "expiresAt": "2026-10-05T10:03:57.649711993Z"
+            },
+            "artifact": "shifted-exact-regions-office.pdf",
+            "sha256": "e88f0072203a54aa474f1d0a2d8617f1ebbe0a17a9336cfa72a8794585548779"
+          },
+          {
+            "case": "shifted-exact-regions",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 1.720890092998161,
+            "task": {
+              "taskId": "e9480da1-2824-4ad6-911d-7365364953dd",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-exact-regions-office.pdf",
+                  "success": true,
+                  "outputName": "shifted-exact-regions-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-exact-regions-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:03:57.694098096Z",
+              "updatedAt": "2026-10-04T10:03:59.347605375Z",
+              "expiresAt": "2026-10-05T10:03:59.347605375Z"
+            },
+            "artifact": "shifted-exact-regions-text.txt",
+            "sha256": "106ea394ff7b19e4be9adfe775eadb9bd6797a10606ab656a318f64540472668"
+          }
+        ],
+        "status": "completed",
+        "failures": [],
+        "workerPids": [
+          50043,
+          50111,
+          50187
+        ],
+        "health": {
+          "status": "UP",
+          "version": "0.1.4",
+          "parser": "OFDRW 2.3.9",
+          "javaVersion": "17.0.16",
+          "os": "Linux",
+          "arch": "amd64",
+          "office": {
+            "enabled": true,
+            "available": true,
+            "binaryName": "soffice",
+            "version": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+            "message": "Office 引擎可用"
+          },
+          "ocr": {
+            "enabled": false,
+            "available": false,
+            "binaryName": null,
+            "version": null,
+            "requestedLanguages": null,
+            "availableLanguages": [],
+            "timeoutSeconds": null,
+            "maxConcurrency": null,
+            "maxImagePixels": null,
+            "minimumConfidence": null,
+            "bundled": null,
+            "errorCode": null,
+            "message": "本地 OCR 未启用"
+          },
+          "time": "2026-10-04T10:03:51.924500013Z"
+        },
+        "supervision": {
+          "supervisor": {
+            "pid": 49944,
+            "state": "R",
+            "parent": 49939,
+            "startTicks": "2140299"
+          },
+          "root": {
+            "pid": 49957,
+            "state": "R",
+            "parent": 49944,
+            "startTicks": "2140303"
+          },
+          "registered": [
+            {
+              "pid": 49957,
+              "state": "Z",
+              "parent": 49944,
+              "startTicks": "2140303"
+            },
+            {
+              "pid": 49993,
+              "state": "S",
+              "parent": 49991,
+              "startTicks": "2140591"
+            },
+            {
+              "pid": 49994,
+              "state": "R",
+              "parent": 49993,
+              "startTicks": "2140591"
+            },
+            {
+              "pid": 49991,
+              "state": "S",
+              "parent": 49957,
+              "startTicks": "2140591"
+            },
+            {
+              "pid": 50000,
+              "state": "Z",
+              "parent": 49996,
+              "startTicks": "2140593"
+            },
+            {
+              "pid": 49996,
+              "state": "S",
+              "parent": 49991,
+              "startTicks": "2140592"
+            },
+            {
+              "pid": 50006,
+              "state": "R",
+              "parent": 49996,
+              "startTicks": "2140594"
+            },
+            {
+              "pid": 50008,
+              "state": "S",
+              "parent": 49957,
+              "startTicks": "2140606"
+            },
+            {
+              "pid": 50009,
+              "state": "S",
+              "parent": 50008,
+              "startTicks": "2140607"
+            },
+            {
+              "pid": 50012,
+              "state": "S",
+              "parent": 50008,
+              "startTicks": "2140607"
+            },
+            {
+              "pid": 50022,
+              "state": "R",
+              "parent": 50012,
+              "startTicks": "2140609"
+            },
+            {
+              "pid": 50043,
+              "state": "Z",
+              "parent": 49957,
+              "startTicks": "2140743"
+            },
+            {
+              "pid": 50111,
+              "state": "Z",
+              "parent": 49957,
+              "startTicks": "2141065"
+            },
+            {
+              "pid": 50148,
+              "state": "S",
+              "parent": 50111,
+              "startTicks": "2141181"
+            },
+            {
+              "pid": 50150,
+              "state": "Z",
+              "parent": 50148,
+              "startTicks": "2141183"
+            },
+            {
+              "pid": 50163,
+              "state": "R",
+              "parent": 50148,
+              "startTicks": "2141188"
+            },
+            {
+              "pid": 50187,
+              "state": "Z",
+              "parent": 49957,
+              "startTicks": "2141280"
+            }
+          ],
+          "reaped": [
+            {
+              "pid": 49957,
+              "exitCode": 143
+            }
+          ],
+          "signals": [
+            {
+              "identity": {
+                "pid": 49957,
+                "state": "S",
+                "parent": 49944,
+                "startTicks": "2140303"
+              },
+              "signal": 15
+            }
+          ],
+          "status": "reaped",
+          "rootExitCode": 143,
+          "waitpidNoChildren": true
+        },
+        "workerIdentities": [
+          {
+            "pid": 50043,
+            "state": "S",
+            "parent": 49957,
+            "startTicks": "2140743"
+          },
+          {
+            "pid": 50111,
+            "state": "S",
+            "parent": 49957,
+            "startTicks": "2141065"
+          },
+          {
+            "pid": 50187,
+            "state": "S",
+            "parent": 49957,
+            "startTicks": "2141280"
+          }
+        ],
+        "newZombies": [],
+        "resources": {
+          "wallSeconds": 11.748255501002859,
+          "userSeconds": 34.379093,
+          "systemSeconds": 2.16236,
+          "maxChildRssKiB": 333584
+        }
+      },
+      "after": {
+        "jarSha256": "0bfefe757c430925f45d5a40f0024bc313e69286ca2cc305ad07a1f761a98321",
+        "manifestSha256": "e24c847ab52e02005255538f00c82d76179fdfc77ee9db1614583e5062451085",
+        "cases": [
+          {
+            "case": "shifted-exact-regions",
+            "stage": "word",
+            "target": "docx",
+            "seconds": 2.656275626999559,
+            "task": {
+              "taskId": "d33e37b5-89dd-45c1-a4d4-87f5cf43e45d",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-exact-regions.pdf",
+                  "success": true,
+                  "outputName": "shifted-exact-regions.docx",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "docx"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-exact-regions.docx",
+              "sourceFormat": "pdf",
+              "targetFormat": "docx",
+              "createdAt": "2026-10-04T10:17:45.953811933Z",
+              "updatedAt": "2026-10-04T10:17:48.291923647Z",
+              "expiresAt": "2026-10-05T10:17:48.291923647Z"
+            },
+            "artifact": "shifted-exact-regions-word.docx",
+            "sha256": "439871f68fca00fdb5d4cdefc4e3044024266a6b10523eafc2d3918cff56d31b"
+          },
+          {
+            "case": "shifted-exact-regions",
+            "stage": "office",
+            "target": "pdf",
+            "seconds": 2.115913023997564,
+            "task": {
+              "taskId": "921eb6e4-57be-4562-aa76-7ae63e9913f8",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-exact-regions-word.docx",
+                  "success": true,
+                  "outputName": "shifted-exact-regions-word.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-exact-regions-word.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:17:48.409967478Z",
+              "updatedAt": "2026-10-04T10:17:50.487987953Z",
+              "expiresAt": "2026-10-05T10:17:50.487987953Z"
+            },
+            "artifact": "shifted-exact-regions-office.pdf",
+            "sha256": "9fc52f0675dd80bbec1bd961e76c8f00a8e961c50f3ebabe4fd4ddc630a2fc70"
+          },
+          {
+            "case": "shifted-exact-regions",
+            "stage": "text",
+            "target": "txt",
+            "seconds": 2.081653790999553,
+            "task": {
+              "taskId": "36946b85-1679-4668-bbd4-527b1d9cb7dc",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-exact-regions-office.pdf",
+                  "success": true,
+                  "outputName": "shifted-exact-regions-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-exact-regions-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:17:50.523743624Z",
+              "updatedAt": "2026-10-04T10:17:52.564267432Z",
+              "expiresAt": "2026-10-05T10:17:52.564267432Z"
+            },
+            "artifact": "shifted-exact-regions-text.txt",
+            "sha256": "106ea394ff7b19e4be9adfe775eadb9bd6797a10606ab656a318f64540472668"
+          },
+          {
+            "case": "shifted-exact-regions",
+            "stage": "edited-office",
+            "target": "pdf",
+            "seconds": 2.071271706998232,
+            "task": {
+              "taskId": "c5a83ff0-3d8c-428f-8069-795bc2685b6f",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-exact-regions-edited.docx",
+                  "success": true,
+                  "outputName": "shifted-exact-regions-edited.pdf",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "docx",
+                  "targetFormat": "pdf"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-exact-regions-edited.pdf",
+              "sourceFormat": "docx",
+              "targetFormat": "pdf",
+              "createdAt": "2026-10-04T10:17:52.609835553Z",
+              "updatedAt": "2026-10-04T10:17:54.651486716Z",
+              "expiresAt": "2026-10-05T10:17:54.651486716Z"
+            },
+            "artifact": "shifted-exact-regions-edited-office.pdf",
+            "sha256": "eff08518f50757658f21a68ca4da98577f3501ce292c7a9607347222e3f28e1a"
+          },
+          {
+            "case": "shifted-exact-regions",
+            "stage": "edited-text",
+            "target": "txt",
+            "seconds": 1.6149075760004052,
+            "task": {
+              "taskId": "f6ac26d3-90fe-4a47-83ab-182623d7b440",
+              "status": "SUCCESS",
+              "stage": "COMPLETED",
+              "progress": 100,
+              "errorCode": null,
+              "errorMessage": null,
+              "warnings": [],
+              "files": [
+                {
+                  "fileName": "shifted-exact-regions-edited-office.pdf",
+                  "success": true,
+                  "outputName": "shifted-exact-regions-edited-office.txt",
+                  "pageCount": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "sourceFormat": "pdf",
+                  "targetFormat": "txt"
+                }
+              ],
+              "downloadReady": true,
+              "downloadName": "shifted-exact-regions-edited-office.txt",
+              "sourceFormat": "pdf",
+              "targetFormat": "txt",
+              "createdAt": "2026-10-04T10:17:54.681907299Z",
+              "updatedAt": "2026-10-04T10:17:56.216176167Z",
+              "expiresAt": "2026-10-05T10:17:56.216176167Z"
+            },
+            "artifact": "shifted-exact-regions-edited-text.txt",
+            "sha256": "5cd3d8323d4f3f387207e26f28a685793a7f255c0798ec615176f639fc1d4f09"
+          }
+        ],
+        "status": "completed",
+        "failures": [],
+        "workerPids": [
+          59178,
+          59236,
+          59310,
+          59359,
+          59436
+        ],
+        "helperSha256": {
+          "run_word_iteration19.py": "5204cf6e5c3191352ccd17784554be6b5cab3131970936a453b14348348cd73e",
+          "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85",
+          "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9"
+        },
+        "health": {
+          "status": "UP",
+          "version": "0.1.4",
+          "parser": "OFDRW 2.3.9",
+          "javaVersion": "17.0.16",
+          "os": "Linux",
+          "arch": "amd64",
+          "office": {
+            "enabled": true,
+            "available": true,
+            "binaryName": "soffice",
+            "version": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+            "message": "Office 引擎可用"
+          },
+          "ocr": {
+            "enabled": false,
+            "available": false,
+            "binaryName": null,
+            "version": null,
+            "requestedLanguages": null,
+            "availableLanguages": [],
+            "timeoutSeconds": null,
+            "maxConcurrency": null,
+            "maxImagePixels": null,
+            "minimumConfidence": null,
+            "bundled": null,
+            "errorCode": null,
+            "message": "本地 OCR 未启用"
+          },
+          "time": "2026-10-04T10:17:45.582314303Z"
+        },
+        "edits": [
+          {
+            "case": "shifted-exact-regions",
+            "artifact": "shifted-exact-regions-edited.docx",
+            "sha256": "68aaae2eae521a38ea6e6d9dd308acd6696a43477a716b7d77cfa56cbd89862e",
+            "change": {
+              "replace": [
+                "00731",
+                "00739"
+              ],
+              "textFrameOnly": true,
+              "occurrences": 1
+            }
+          }
+        ],
+        "supervision": {
+          "supervisor": {
+            "pid": 59089,
+            "state": "R",
+            "parent": 59088,
+            "startTicks": "2223543"
+          },
+          "root": {
+            "pid": 59090,
+            "state": "R",
+            "parent": 59089,
+            "startTicks": "2223547"
+          },
+          "registered": [
+            {
+              "pid": 59090,
+              "state": "Z",
+              "parent": 59089,
+              "startTicks": "2223547"
+            },
+            {
+              "pid": 59128,
+              "state": "R",
+              "parent": 59126,
+              "startTicks": "2223934"
+            },
+            {
+              "pid": 59126,
+              "state": "S",
+              "parent": 59090,
+              "startTicks": "2223934"
+            },
+            {
+              "pid": 59138,
+              "state": "Z",
+              "parent": 59131,
+              "startTicks": "2223936"
+            },
+            {
+              "pid": 59131,
+              "state": "S",
+              "parent": 59126,
+              "startTicks": "2223935"
+            },
+            {
+              "pid": 59141,
+              "state": "R",
+              "parent": 59131,
+              "startTicks": "2223936"
+            },
+            {
+              "pid": 59147,
+              "state": "S",
+              "parent": 59143,
+              "startTicks": "2223949"
+            },
+            {
+              "pid": 59148,
+              "state": "S",
+              "parent": 59147,
+              "startTicks": "2223949"
+            },
+            {
+              "pid": 59143,
+              "state": "S",
+              "parent": 59090,
+              "startTicks": "2223948"
+            },
+            {
+              "pid": 59157,
+              "state": "R",
+              "parent": 59147,
+              "startTicks": "2223951"
+            },
+            {
+              "pid": 59178,
+              "state": "Z",
+              "parent": 59090,
+              "startTicks": "2224113"
+            },
+            {
+              "pid": 59236,
+              "state": "Z",
+              "parent": 59090,
+              "startTicks": "2224351"
+            },
+            {
+              "pid": 59272,
+              "state": "S",
+              "parent": 59236,
+              "startTicks": "2224462"
+            },
+            {
+              "pid": 59273,
+              "state": "S",
+              "parent": 59272,
+              "startTicks": "2224463"
+            },
+            {
+              "pid": 59274,
+              "state": "R",
+              "parent": 59273,
+              "startTicks": "2224463"
+            },
+            {
+              "pid": 59286,
+              "state": "R",
+              "parent": 59272,
+              "startTicks": "2224470"
+            },
+            {
+              "pid": 59310,
+              "state": "Z",
+              "parent": 59090,
+              "startTicks": "2224563"
+            },
+            {
+              "pid": 59359,
+              "state": "Z",
+              "parent": 59090,
+              "startTicks": "2224771"
+            },
+            {
+              "pid": 59397,
+              "state": "Z",
+              "parent": 59359,
+              "startTicks": "2224872"
+            },
+            {
+              "pid": 59398,
+              "state": "Z",
+              "parent": 59397,
+              "startTicks": "2224873"
+            },
+            {
+              "pid": 59408,
+              "state": "Z",
+              "parent": 59397,
+              "startTicks": "2224874"
+            },
+            {
+              "pid": 59412,
+              "state": "R",
+              "parent": 59397,
+              "startTicks": "2224880"
+            },
+            {
+              "pid": 59436,
+              "state": "Z",
+              "parent": 59090,
+              "startTicks": "2224978"
+            }
+          ],
+          "reaped": [
+            {
+              "pid": 59090,
+              "exitCode": 143
+            }
+          ],
+          "signals": [
+            {
+              "identity": {
+                "pid": 59090,
+                "state": "S",
+                "parent": 59089,
+                "startTicks": "2223547"
+              },
+              "signal": 15
+            }
+          ],
+          "status": "reaped",
+          "rootExitCode": 143,
+          "waitpidNoChildren": true
+        },
+        "workerIdentities": [
+          {
+            "pid": 59178,
+            "state": "S",
+            "parent": 59090,
+            "startTicks": "2224113"
+          },
+          {
+            "pid": 59236,
+            "state": "S",
+            "parent": 59090,
+            "startTicks": "2224351"
+          },
+          {
+            "pid": 59310,
+            "state": "S",
+            "parent": 59090,
+            "startTicks": "2224563"
+          },
+          {
+            "pid": 59359,
+            "state": "S",
+            "parent": 59090,
+            "startTicks": "2224771"
+          },
+          {
+            "pid": 59436,
+            "state": "S",
+            "parent": 59090,
+            "startTicks": "2224978"
+          }
+        ],
+        "newZombies": [],
+        "resources": {
+          "wallSeconds": 16.272985202998825,
+          "userSeconds": 45.952532,
+          "systemSeconds": 3.654715,
+          "maxChildRssKiB": 291776
+        }
+      }
+    }
+  ],
+  "edit": {
+    "replacement": [
+      "00731",
+      "00739"
+    ],
+    "wordOrderExact": true,
+    "officeAndApiCharactersExact": true,
+    "pages": 1
+  },
+  "rejectedNarrowCandidate": "cloud-word-iteration20-rejected.json",
+  "limits": [
+    "Raw Office PDF text extraction order is measured separately, not claimed fixed",
+    "Unruled numeric ledger order remains unresolved",
+    "Narrow prose inference rejected after Office/API regressions; original narrow behavior retained",
+    "Native Microsoft Word and native installers unrun"
+  ],
+  "cleanup": {
+    "runs": [
+      {
+        "name": "iteration20-before",
+        "contracts": 24,
+        "directWorkerIdentities": 24,
+        "resources": {
+          "wallSeconds": 65.7317932090009,
+          "userSeconds": 175.106802,
+          "systemSeconds": 12.318204,
+          "maxChildRssKiB": 437184
+        },
+        "registeredGone": true
+      },
+      {
+        "name": "iteration20-region-before",
+        "contracts": 3,
+        "directWorkerIdentities": 3,
+        "resources": {
+          "wallSeconds": 11.748255501002859,
+          "userSeconds": 34.379093,
+          "systemSeconds": 2.16236,
+          "maxChildRssKiB": 333584
+        },
+        "registeredGone": true
+      },
+      {
+        "name": "iteration20-after",
+        "contracts": 26,
+        "directWorkerIdentities": 26,
+        "resources": {
+          "wallSeconds": 69.2670419160022,
+          "userSeconds": 185.988178,
+          "systemSeconds": 12.565504,
+          "maxChildRssKiB": 431044
+        },
+        "registeredGone": true
+      },
+      {
+        "name": "iteration20-region-after",
+        "contracts": 3,
+        "directWorkerIdentities": 3,
+        "resources": {
+          "wallSeconds": 11.866160549001506,
+          "userSeconds": 35.092793,
+          "systemSeconds": 2.13963,
+          "maxChildRssKiB": 319680
+        },
+        "registeredGone": true
+      },
+      {
+        "name": "iteration20-final",
+        "contracts": 24,
+        "directWorkerIdentities": 24,
+        "resources": {
+          "wallSeconds": 82.3880335190006,
+          "userSeconds": 215.380457,
+          "systemSeconds": 16.430486,
+          "maxChildRssKiB": 433436
+        },
+        "registeredGone": true
+      },
+      {
+        "name": "iteration20-region-final",
+        "contracts": 5,
+        "directWorkerIdentities": 5,
+        "resources": {
+          "wallSeconds": 16.272985202998825,
+          "userSeconds": 45.952532,
+          "systemSeconds": 3.654715,
+          "maxChildRssKiB": 291776
+        },
+        "registeredGone": true
+      }
+    ],
+    "totalContracts": 85,
+    "newZombies": 0,
+    "oldAuditZombiesUnchanged": 10,
+    "finalHelpersMatchCurrentSource": true
+  },
+  "cleanBuild": {
+    "counts": {
+      "tests": 424,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "skips": [
+      {
+        "class": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+        "method": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning",
+        "reason": "org.opentest4j.TestAbortedException: Assumption failed: 可选真实签章 OFD 回归样本未提供\n\tat org.junit.jupiter.api.Assumptions.throwAssumptionFailed(Assumptions.java:321)\n\tat org.junit.jupiter.api.Assumptions.assumeTrue(Assumptions.java:120)\n\tat com.fuyue.formatconverter.parser.OfdrwParserSignatureTest.skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning(OfdrwParserSignatureTest.java:28)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:569)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1511)\n\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1511)\n"
+      }
+    ],
+    "selected": [
+      {
+        "name": "com.fuyue.formatconverter.task.PdfColumnHeadingOrderTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.fuyue.formatconverter.task.BundledOcrRuntimeIntegrationTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.fuyue.formatconverter.task.LibreOfficePdfConverterTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+        "tests": "24",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      }
+    ]
+  },
+  "provenance": {
+    "buildInputSha256": "b1c868ea657b3b642bf465871c0870b713f2ae0714261a53e2b7ced635c3dbea",
+    "parentRevision": "57d13a8450fb466ab6a4afa212f6c88cba5c55f8",
+    "workingTreeDirtyAtBuildStart": true,
+    "jarSha256": "0bfefe757c430925f45d5a40f0024bc313e69286ca2cc305ad07a1f761a98321",
+    "applicationClassCount": 223,
+    "applicationClassSha256": "c3d256428ffed6f7883744f36cb8d5611cfc62114a91ad02b425901607a696e8",
+    "packagedClassesMatchTargets": true
+  },
+  "classDiff": {
+    "beforeCount": 223,
+    "afterCount": 223,
+    "changed": [
+      "docx-renderer/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$1.class",
+      "docx-renderer/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$FixedItem.class",
+      "docx-renderer/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OverlayRenderException.class",
+      "docx-renderer/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer.class"
+    ],
+    "added": [],
+    "removed": [],
+    "unchanged": 219
+  },
+  "runtime": {
+    "fontHashesReverified": {
+      "en": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
+        "sha256": "9caef765d2e891c10dd73658894f01e660fe0c1c83e0bda7d6edf561d8f623d4",
+        "family": "Liberation Serif",
+        "version": "Version 2.1.5"
+      },
+      "zh": {
+        "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+        "family": "Noto Sans CJK JP",
+        "version": "Version 2.004;hotconv 1.0.118;makeotfexe 2.5.65603"
+      }
+    },
+    "bundledOcrFilesRehashed": {
+      "desktop/.runtime/ocr/tessdata/eng.traineddata": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+      "desktop/.runtime/ocr/tessdata/osd.traineddata": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff",
+      "desktop/.runtime/ocr/tessdata/chi_sim.traineddata": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730",
+      "desktop/.runtime/ocr/tessdata/chi_sim_vert.traineddata": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da",
+      "desktop/.runtime/ocr/bin/tesseract": "90730922627269352568d54e788c7e42fd2e1783e03795d75560efa385de1489"
+    },
+    "runtimePins": "Temurin17.0.16+8 Maven3.9.11 Node22.17.0 Python3.12.14 PyMuPDF1.26.6 Linux6.18.44; LibreOfficeDev26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5; Tesseract5.5.2 Leptonica1.87.0 libpng1.6.57 zlib1.3.1; tessdata_fast87416418657359cb625c412a48b6e1d6d41c29bd",
+    "fontLicenses": "SIL OFL1.1",
+    "newNativeOcrAccuracySweep": false
+  },
+  "deadlineTests": {
+    "tests": 5,
+    "passed": 5,
+    "seconds": 0.247
+  }
+}

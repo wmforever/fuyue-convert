@@ -1,0 +1,59 @@
+{
+  "parentRevision": "57d13a8450fb466ab6a4afa212f6c88cba5c55f8",
+  "scope": "Finite independent native PDF column investigation; preserve iteration19 truth and raw failures",
+  "corpus": [
+    "Balanced bilingual narrow columns",
+    "Unequal narrow columns with left tail",
+    "Unequal narrow columns with right tail",
+    "Two wide-column regions at different horizontal positions and spanning headings",
+    "Single-column long lines with mixed fonts",
+    "Ruled numeric table",
+    "Unruled numeric ledger",
+    "Same-font narrow columns whose parser may fuse runs"
+  ],
+  "predeclaredDecision": "Only use independent original native text boxes and repeated layout evidence. Do not lower global gutter thresholds. Reproduce each defect before adopting changes; fused boxes or ambiguous ledger/prose intent may remain unsupported. Distinct wide regions are ordered within their existing heading anchors.",
+  "measurement": "Eight PDF to DOCX to Office PDF to TXT chains before and after; two final edit/reopen contracts. Maximum50 primary HTTP contracts. No iteration19 matrix repeat.",
+  "bounds": {
+    "suiteWorkSeconds": 480,
+    "startupSeconds": 36,
+    "contractIncludingDownloadSeconds": 120,
+    "requestAbsoluteSeconds": 30,
+    "reaperShutdownAllowanceSeconds": 15,
+    "observerJoinSeconds": 2
+  },
+  "deadlineQualification": "Absolute monotonic socket deadlines include trickling headers/body. Teardown is separate; an unkillable process retains its owning reaper and blocks further work rather than promising a kernel-level hard exit.",
+  "controls": [
+    "Exact characters/digits and source block geometry",
+    "Editable structures and real Office reopening",
+    "Unchanged original frame geometry and visual output for anchor-only changes",
+    "No new zombies and all registered process identities gone",
+    "No OCR, deskew, rotation, general flow or native Microsoft Word acceptance claim"
+  ],
+  "supplementalControl": {
+    "reason": "Initial distinct-region sample retained a shared wide gutter and did not reproduce proposal; source evidence preserved. Add one independently specified exact-width geometry case before candidate artifact build.",
+    "frozenInitialManifest": "5efeee3c268106f06e779bbe91274f91fe1b5a7cee91579ade7aeffe65e51872",
+    "frozenSupplementalManifest": "e24c847ab52e02005255538f00c82d76179fdfc77ee9db1614583e5062451085",
+    "boundsMm": [
+      [
+        15,
+        65,
+        110,
+        160
+      ],
+      [
+        60,
+        100,
+        145,
+        185
+      ]
+    ],
+    "beforeWordCer": 0.208955223880597,
+    "maximumPrimaryHttpContractsRevised": 56
+  },
+  "adoptionDecision": {
+    "rejected": "Narrow prose inference lowers DOCX CER but regresses Office/API extraction and some source-to-Office geometry; preserve candidate JAR, source patch,430-test reports and29 HTTP outputs, remove inference from final production.",
+    "acceptedScope": "Independent heading-region ordering only, unchanged existing frames and Office pixels/boxes; API TXT stays zero on reproduced control. QA absolute deadlines retained.",
+    "finalValidation": "Clean final artifact build;8 original controls (24 HTTP) plus exact-region source/Office/TXT and one frame edit/reopen (5 HTTP). Only final-source changes justify this29-contract rerun.",
+    "maximumPrimaryHttpContractsRevised": 85
+  }
+}

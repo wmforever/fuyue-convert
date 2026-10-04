@@ -16,7 +16,9 @@ class PdfColumnHeadingOrderTest {
     @TempDir Path temp;
     @Test void headingsSeparateTwoColumnRegionsInDocumentTextOrder() throws Exception { verify(1); }
     @Test void columnAnchorsStayWithTheirOwnPageAndHeading() throws Exception { verify(2); }
-    private void verify(int pages) throws Exception {
+    @Test void horizontallyShiftedRegionsKeepTheirIndependentColumnOrder() throws Exception { verify(1, true); }
+    private void verify(int pages) throws Exception { verify(pages, false); }
+    private void verify(int pages, boolean shifted) throws Exception {
         Path source=temp.resolve("headings.pdf"),output=temp.resolve("headings.docx");
         List<String> expected=new ArrayList<>();
         try(var pdf=new PDDocument()) {
@@ -31,7 +33,12 @@ class PdfColumnHeadingOrderTest {
                         List<String> left=new ArrayList<>(),right=new ArrayList<>();
                         for(int row=1;row<=2;row++) {
                             String l="L"+p+section+row+" ID00643 .95",r="R"+p+section+row+" ID00817 -17.40";
-                            draw(stream,font,50,top-row*30,l);draw(stream,font,350,top-row*30,r);left.add(l);right.add(r);
+                            if (shifted) {
+                                float sizeLeft=(section==1?50:40)*72/25.4f/(font.getStringWidth(l)/1000);
+                                float sizeRight=(section==1?50:40)*72/25.4f/(font.getStringWidth(r)/1000);
+                                drawSized(stream,font,(section==1?15:60)*72/25.4f,top-row*30,l,sizeLeft);
+                                drawSized(stream,font,(section==1?110:145)*72/25.4f,top-row*30,r,sizeRight);
+                            } else { draw(stream,font,50,top-row*30,l);draw(stream,font,350,top-row*30,r); }left.add(l);right.add(r);
                         }
                         expected.addAll(left);expected.addAll(right);
                     }
@@ -53,6 +60,9 @@ class PdfColumnHeadingOrderTest {
         }
     }
     private void draw(PDPageContentStream stream,PDFont font,float x,float y,String text) throws Exception {
-        stream.beginText();stream.setFont(font,11);stream.newLineAtOffset(x,y);stream.showText(text);stream.endText();
+        drawSized(stream,font,x,y,text,11);
+    }
+    private void drawSized(PDPageContentStream stream,PDFont font,float x,float y,String text,float size) throws Exception {
+        stream.beginText();stream.setFont(font,size);stream.newLineAtOffset(x,y);stream.showText(text);stream.endText();
     }
 }
