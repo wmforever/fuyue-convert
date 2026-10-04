@@ -9,8 +9,10 @@ was recorded before new measurements.
 
 Two font-independent controlled regressions fail before the production change:
 missing enhancement warning and missing image-scoped low-confidence warning.
-They already pass the text/numeric/offset-coordinate and weighted-confidence
-assertions. The correction retains one page `OCR_APPLIED` weighted summary and
+The text/numeric and weighted-confidence assertions pass before the missing
+warning failure. Original-scan/offset-coordinate assertions later in each test
+are reached after the correction; the independent paired artifact comparison
+also verifies unchanged geometry. The correction retains one page `OCR_APPLIED` weighted summary and
 adds the existing supplemental warnings with `OFD 第 N 页图片 M` scope. It does
 not OR image flags onto the page result. Thus a partial-recovery warning retains
 its own image's wording; it does not claim another scan was partially recovered.
