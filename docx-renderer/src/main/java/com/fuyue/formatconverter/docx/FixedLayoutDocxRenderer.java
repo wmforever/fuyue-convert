@@ -224,6 +224,16 @@ final class FixedLayoutDocxRenderer {
     private Map<TextBlock.OcrWord, ColorValue> addOcrMasks(XWPFParagraph anchor, PageModel page, List<TextBlock> texts) {
         Map<TextBlock.OcrWord, ColorValue> colors = new IdentityHashMap<>();
         if (texts.stream().allMatch(block -> block.ocrWords().isEmpty())) return colors;
+        // LibreOffice paints negative VML shapes before a DrawingML scan anchor,
+        // regardless of XML order. On a scan-only page, put sampled word masks
+        // in front of that image and below the editable OCR boxes. Mixed pages
+        // retain their old layering: foreground masks could cover native body
+        // text, tables, vectors or other images whose ordering is independent.
+        boolean scanOnly = page.images().size() == 1 && page.lines().isEmpty() && page.tables().isEmpty()
+                && texts.stream().allMatch(block -> !block.ocrWords().isEmpty())
+                && page.textBlocks().stream().allMatch(block -> !block.ocrWords().isEmpty())
+                && page.paragraphs().stream().flatMap(paragraph -> paragraph.runs().stream())
+                        .allMatch(block -> !block.ocrWords().isEmpty());
         for (ImageBlock background : page.images()) {
             if (!isOcrBackground(background)) continue;
             // Decode one background at a time, rather than retaining all scan images on a page.
@@ -242,7 +252,7 @@ final class FixedLayoutDocxRenderer {
                     for (OcrBackgroundMaskSampler.Fill fill : fills) {
                         String xml = "<v:rect xmlns:v=\"urn:schemas-microsoft-com:vml\" id=\""
                                 + attr(shapeId("ocr-mask", block.id())) + "\" style=\""
-                                + attr(positionStyle(fill.box(), BEHIND_TEXT_Z_INDEX + 1, 0, true))
+                                + attr(positionStyle(fill.box(), scanOnly ? 1 : BEHIND_TEXT_Z_INDEX + 1, 0, true))
                                 + "\" filled=\"t\" fillcolor=\"#" + fill.color() + "\" stroked=\"f\"/>";
                         unchecked(() -> appendShape(anchor, xml));
                     }
@@ -301,7 +311,7 @@ final class FixedLayoutDocxRenderer {
                     word.box().width(), Math.max(line.box().height(), fontMm * 1.3d));
             TextBlock positioned = new TextBlock(line.id() + "-word-" + index, line.pageNumber(), box,
                     value, line.baselineY(), new FontStyle("Arial", sizePt, false, false, ocrColors.getOrDefault(word, line.style().color())),
-                    line.zOrder(), 0, 0, List.of(), new Transform2D(ratio, 0, 0, 1, 0, 0));
+                    Math.max(1, line.zOrder()), 0, 0, List.of(), new Transform2D(ratio, 0, 0, 1, 0, 0));
             addTextBox(docx, anchor, positioned, true);
         }
     }

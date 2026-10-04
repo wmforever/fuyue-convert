@@ -1,0 +1,695 @@
+{
+  "buildAudit": {
+    "tests": {
+      "tests": 453,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "skips": [
+      {
+        "class": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+        "name": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning"
+      }
+    ],
+    "bundledTests": [
+      {
+        "class": "com.fuyue.formatconverter.task.OcrDeskewTest",
+        "name": "bundledEngineRecoversMissingLinesWithSourceGeometryAndReviewWarnings",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.PdfToImageConverterTest",
+        "name": "discoversBundledPopplerFromAppHome",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.ForkedFileConverterTest",
+        "name": "retainsAutoDiscoveredBundledOcrWhenTheWorkerChangesItsWorkingDirectory",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "discoversBundledRuntimeFromPackagedApplicationRoot",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "validBundledRuntimeAutoEnablesWithoutHostInstallation",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "explicitFalseDisablesEvenAValidBundledRuntime",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.BundledOcrRuntimeIntegrationTest",
+        "name": "bundledBinaryModelsAndLibrariesRunWithoutSystemDiscovery",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.TesseractPngInputTest",
+        "name": "bundledPngEngineRecognizesRealJpegText",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+        "name": "bundledEngineRecoversShadedLowContrastPrintedText",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+        "name": "bundledEngineRecoversChineseFaintTextWithDigitsAndPunctuation",
+        "skipped": false
+      }
+    ],
+    "changedApplicationClasses": [
+      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer.class",
+      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$1.class",
+      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$FixedItem.class"
+    ],
+    "frontendRebuiltFilesMatchPackaged": {
+      "app-icon.svg": "5bf05198f99e53b7fabf0fbfd25577c9aca004a6b1ea6f7e901457fe89db2568",
+      "index.html": "a9767e4111073749ff7c178800d9c7c3786b05ea9094c8b37334a3a696097a24",
+      "assets/pdf-CPbOiMa_.js": "fa75f2d6b363ee4a3386e4bf1d3f104c8dce5eef2be79159be1d253e1f4e323a",
+      "assets/pdf.worker.min-CMqTMPr3.js": "73568c62796be3043a57aad8bb5027f9602bae4b54bbea029b0a3af80c5b7166",
+      "assets/pdf.worker.min-r-TJsTTt.mjs": "c964e291707ad492e6e90ff7f4f352b75e05ea2734c3dd3a80b94983b1b7ce3d",
+      "assets/index-J-Vb5Aua.css": "084b610dc78c0213ec817bcb26aeff3dccd2c4d7fce88514a85ab56395e43366",
+      "assets/index-BiUc2Ubb.js": "4d62648a0d61aabdbd47f5a66c6df465acfef075355f3eb0d2e5fc142a6b61b1"
+    },
+    "provenance": {
+      "buildInputSha256": "de9b7e4c8cfefb4ba38051f3b93ef3477bea60553fb37387674dd06ac315effd",
+      "parentRevision": "ea5467d5f11748c6a4246abaeba5fa04ed62dbab",
+      "workingTreeDirtyAtBuildStart": true,
+      "jarSha256": "ca91ec75cffd892697870cb84d9b9f32cfef9570218d7d3b0843b8144493f782",
+      "applicationClassCount": 225,
+      "applicationClassSha256": "2ab85c1d752fd2e9a1cd4e799749529511e61c2e6e165f474b1efe93f579976a",
+      "packagedClassesMatchTargets": true
+    }
+  },
+  "runtimeManifest": {
+    "schemaVersion": 1,
+    "platform": "linux",
+    "arch": "x64",
+    "policySha256": "54c6ae7291fc983cb7b946bc0b90832ec4b589d493fef01b5f974a0ab26d8735",
+    "components": [
+      {
+        "id": "zlib",
+        "version": "1.3.1",
+        "source": "https://codeload.github.com/madler/zlib/tar.gz/v1.3.1",
+        "sourceSha256": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c",
+        "spdx": "Zlib"
+      },
+      {
+        "id": "libpng",
+        "version": "1.6.57",
+        "source": "https://codeload.github.com/pnggroup/libpng/tar.gz/v1.6.57",
+        "sourceSha256": "4cbb7b0746edc1683c9581b373365e955133b7f1243f171b7d1535b4415dfedb",
+        "spdx": "libpng-2.0"
+      },
+      {
+        "id": "leptonica",
+        "version": "1.87.0",
+        "source": "https://codeload.github.com/DanBloomberg/leptonica/tar.gz/1.87.0",
+        "sourceSha256": "fa2b40c5caea96d1bb93a97486262aed8731b69ce25a84a6bf5d25323e33f631",
+        "spdx": "BSD-2-Clause"
+      },
+      {
+        "id": "tesseract",
+        "version": "5.5.2",
+        "source": "https://codeload.github.com/tesseract-ocr/tesseract/tar.gz/5.5.2",
+        "sourceSha256": "6235ea0dae45ea137f59c09320406f5888383741924d98855bd2ce0d16b54f21",
+        "spdx": "Apache-2.0"
+      }
+    ],
+    "models": [
+      {
+        "name": "eng",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/eng.traineddata",
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      {
+        "name": "chi_sim",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim.traineddata",
+        "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+      },
+      {
+        "name": "chi_sim_vert",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim_vert.traineddata",
+        "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+      },
+      {
+        "name": "osd",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/osd.traineddata",
+        "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+      }
+    ],
+    "files": [
+      {
+        "path": "bin/tesseract",
+        "size": 6678328,
+        "sha256": "90730922627269352568d54e788c7e42fd2e1783e03795d75560efa385de1489"
+      },
+      {
+        "path": "licenses/OCR-SOURCE-POLICY.json",
+        "size": 4186,
+        "sha256": "1ea79f27bafb87a8692d2b37d0ab2f3cb2236f228d6e76eedf7aa6b40dacf808"
+      },
+      {
+        "path": "licenses/leptonica.txt",
+        "size": 1521,
+        "sha256": "87829abb5bbb00b55a107365da89e9a33f86c4250169e5a1e5588505be7d5806"
+      },
+      {
+        "path": "licenses/libpng.txt",
+        "size": 5345,
+        "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+      },
+      {
+        "path": "licenses/tessdata.txt",
+        "size": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      {
+        "path": "licenses/tesseract.txt",
+        "size": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      {
+        "path": "licenses/zlib.txt",
+        "size": 1002,
+        "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+      },
+      {
+        "path": "tessdata/chi_sim.traineddata",
+        "size": 2469156,
+        "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+      },
+      {
+        "path": "tessdata/chi_sim_vert.traineddata",
+        "size": 1927902,
+        "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+      },
+      {
+        "path": "tessdata/configs/tsv",
+        "size": 22,
+        "sha256": "59d079bb75d8b3d7c839a3564580cb559e362c93a9d70f234e421c0c3e767e04"
+      },
+      {
+        "path": "tessdata/eng.traineddata",
+        "size": 4113088,
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      {
+        "path": "tessdata/osd.traineddata",
+        "size": 10562727,
+        "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+      }
+    ]
+  },
+  "runtimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+  "health": {
+    "status": "UP",
+    "version": "0.1.4",
+    "parser": "OFDRW 2.3.9",
+    "javaVersion": "17.0.16",
+    "os": "Linux",
+    "arch": "amd64",
+    "office": {
+      "enabled": true,
+      "available": true,
+      "binaryName": "soffice",
+      "version": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+      "message": "Office 引擎可用"
+    },
+    "ocr": {
+      "enabled": true,
+      "available": true,
+      "binaryName": "tesseract",
+      "version": "tesseract 5.5.2",
+      "requestedLanguages": "chi_sim+eng",
+      "availableLanguages": [
+        "eng",
+        "chi_sim",
+        "chi_sim_vert",
+        "osd"
+      ],
+      "timeoutSeconds": 120,
+      "maxConcurrency": 1,
+      "maxImagePixels": 25000000,
+      "minimumConfidence": 0.35,
+      "bundled": true,
+      "errorCode": null,
+      "message": "内置 Tesseract OCR 可用"
+    },
+    "time": "2026-10-04T13:45:23.980777771Z"
+  },
+  "font": {
+    "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+    "version": "LiberationSans2.1.5",
+    "license": "SIL-OFL-1.1"
+  },
+  "pins": {
+    "java": "Temurin 17.0.16+8",
+    "maven": "3.9.11",
+    "node": "22.17.0",
+    "python": "3.12.14",
+    "pymupdf": "1.26.6",
+    "liberationSans": "2.1.5",
+    "notoCjk": "2.004",
+    "linux": "6.18.44",
+    "office": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5"
+  },
+  "helperSha256": {
+    "generate_edit_direct26.py": "5b654b81bc7095b7c15040abd4a8f527aa8c355769956163c21c17d82d8a3982",
+    "generate_edit_iteration26.py": "bc36546cb28bb66254b8b75bd6debd823c33987b9c26a5fa307c49cbf031f2a1",
+    "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf",
+    "verify_edit_iteration26.py": "f194670627b48ae11d2f3f3766e2a7d5cf0b1cc548dcff62a69d83cca52bfb9b",
+    "compare_edit_iteration26.py": "7baba6ac68aa39e409b206296aa26889efbaa4f3d71d9cd8e9868f085936569b",
+    "verify_edit_original26.py": "3bf40794c0459922d4a518d1fcb534adc58f4b58521f472ab7093317df3bc061",
+    "PdfReviewRasterProbe.java": "6e9ec0592b258fddd372c40cc90ae95d55990a3dabcac5db89c40244536037de",
+    "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9",
+    "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85"
+  },
+  "frozenManifest": {
+    "generatorSha256": "5b654b81bc7095b7c15040abd4a8f527aa8c355769956163c21c17d82d8a3982",
+    "parentRevision": "ea5467d5f11748c6a4246abaeba5fa04ed62dbab",
+    "sources": {
+      "decimal.png": "0fb125eb61fb2de04113d03226e96e0bcc543583aae7032c21eb38dd7b18c4c7",
+      "negative.png": "4a1df951741a7c32b4b8e058d0f05ea5a5c6b611bcd31b4406b73a91cabc05dd",
+      "leading-zero.png": "11676d04eebcb4bda10eb09ba4dc802a8aaf75ace572baa59ff1ac8507a2a134",
+      "shorter-gray.png": "795412c7dbb376eab8d71e9a24eeb45e56cc2ec4efde65cce454e8db352e9ec4",
+      "longer-gray.png": "a8db067f2b921917541a1705b291b4227c3d8da7f91620a7ad90e3db082c5b42",
+      "shadow.png": "268771e4c2b6a537e9d111ad1c80a7b5e45663fc8909fd0dd5bc7ce41a41c1a9",
+      "uncertain.png": "287a9d8f0494e5982100ea33380b9881e1444121a94b3aebe79617d6e72c134e"
+    },
+    "cases": [
+      {
+        "id": "decimal",
+        "file": "decimal.png",
+        "paper": "white",
+        "old": "312.40",
+        "new": "319.65",
+        "expected": "EDIT REVIEW 2041\nRecord 00571\nAmount 312.40\nDate 2041-08-23\nControl 38.25\n",
+        "editedExpected": "EDIT REVIEW 2041\nRecord 00571\nAmount 319.65\nDate 2041-08-23\nControl 38.25\n",
+        "editingNotPromised": false
+      },
+      {
+        "id": "negative",
+        "file": "negative.png",
+        "paper": "white",
+        "old": "-48.20",
+        "new": "-49.70",
+        "expected": "EDIT REVIEW 2041\nRecord 00571\nAmount -48.20\nDate 2041-08-23\nControl 38.25\n",
+        "editedExpected": "EDIT REVIEW 2041\nRecord 00571\nAmount -49.70\nDate 2041-08-23\nControl 38.25\n",
+        "editingNotPromised": false
+      },
+      {
+        "id": "leading-zero",
+        "file": "leading-zero.png",
+        "paper": "white",
+        "old": "00412.30",
+        "new": "00419.80",
+        "expected": "EDIT REVIEW 2041\nRecord 00571\nAmount 00412.30\nDate 2041-08-23\nControl 38.25\n",
+        "editedExpected": "EDIT REVIEW 2041\nRecord 00571\nAmount 00419.80\nDate 2041-08-23\nControl 38.25\n",
+        "editingNotPromised": false
+      },
+      {
+        "id": "shorter-gray",
+        "file": "shorter-gray.png",
+        "paper": "gray",
+        "old": "9827.50",
+        "new": "27.50",
+        "expected": "EDIT REVIEW 2041\nRecord 00571\nAmount 9827.50\nDate 2041-08-23\nControl 38.25\n",
+        "editedExpected": "EDIT REVIEW 2041\nRecord 00571\nAmount 27.50\nDate 2041-08-23\nControl 38.25\n",
+        "editingNotPromised": false
+      },
+      {
+        "id": "longer-gray",
+        "file": "longer-gray.png",
+        "paper": "gray",
+        "old": "7.50",
+        "new": "187.50",
+        "expected": "EDIT REVIEW 2041\nRecord 00571\nAmount 7.50\nDate 2041-08-23\nControl 38.25\n",
+        "editedExpected": "EDIT REVIEW 2041\nRecord 00571\nAmount 187.50\nDate 2041-08-23\nControl 38.25\n",
+        "editingNotPromised": false
+      },
+      {
+        "id": "shadow",
+        "file": "shadow.png",
+        "paper": "shadow",
+        "old": "-062.40",
+        "new": "-068.95",
+        "expected": "EDIT REVIEW 2041\nRecord 00571\nAmount -062.40\nDate 2041-08-23\nControl 38.25\n",
+        "editedExpected": "EDIT REVIEW 2041\nRecord 00571\nAmount -068.95\nDate 2041-08-23\nControl 38.25\n",
+        "editingNotPromised": false
+      },
+      {
+        "id": "uncertain",
+        "file": "uncertain.png",
+        "paper": "uncertain",
+        "old": "542.10",
+        "new": "542.70",
+        "expected": "EDIT REVIEW 2041\nRecord 00571\nAmount 542.10\nDate 2041-08-23\nControl 38.25\n",
+        "editedExpected": "EDIT REVIEW 2041\nRecord 00571\nAmount 542.70\nDate 2041-08-23\nControl 38.25\n",
+        "editingNotPromised": true
+      }
+    ],
+    "actions": [
+      {
+        "id": "decimal-pdf",
+        "input": "decimal.png",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "decimal-word",
+        "input": "@decimal-pdf",
+        "target": "docx",
+        "edit": null
+      },
+      {
+        "id": "decimal-office",
+        "input": "@decimal-word",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "decimal-edited-office",
+        "input": "@decimal-word",
+        "target": "pdf",
+        "edit": {
+          "old": "312.40",
+          "new": "319.65"
+        }
+      },
+      {
+        "id": "decimal-edited-text",
+        "input": "@decimal-edited-office",
+        "target": "txt",
+        "edit": null
+      },
+      {
+        "id": "negative-pdf",
+        "input": "negative.png",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "negative-word",
+        "input": "@negative-pdf",
+        "target": "docx",
+        "edit": null
+      },
+      {
+        "id": "negative-office",
+        "input": "@negative-word",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "negative-edited-office",
+        "input": "@negative-word",
+        "target": "pdf",
+        "edit": {
+          "old": "-48.20",
+          "new": "-49.70"
+        }
+      },
+      {
+        "id": "negative-edited-text",
+        "input": "@negative-edited-office",
+        "target": "txt",
+        "edit": null
+      },
+      {
+        "id": "leading-zero-pdf",
+        "input": "leading-zero.png",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "leading-zero-word",
+        "input": "@leading-zero-pdf",
+        "target": "docx",
+        "edit": null
+      },
+      {
+        "id": "leading-zero-office",
+        "input": "@leading-zero-word",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "leading-zero-edited-office",
+        "input": "@leading-zero-word",
+        "target": "pdf",
+        "edit": {
+          "old": "00412.30",
+          "new": "00419.80"
+        }
+      },
+      {
+        "id": "leading-zero-edited-text",
+        "input": "@leading-zero-edited-office",
+        "target": "txt",
+        "edit": null
+      },
+      {
+        "id": "shorter-gray-pdf",
+        "input": "shorter-gray.png",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "shorter-gray-word",
+        "input": "@shorter-gray-pdf",
+        "target": "docx",
+        "edit": null
+      },
+      {
+        "id": "shorter-gray-office",
+        "input": "@shorter-gray-word",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "shorter-gray-edited-office",
+        "input": "@shorter-gray-word",
+        "target": "pdf",
+        "edit": {
+          "old": "9827.50",
+          "new": "27.50"
+        }
+      },
+      {
+        "id": "shorter-gray-edited-text",
+        "input": "@shorter-gray-edited-office",
+        "target": "txt",
+        "edit": null
+      },
+      {
+        "id": "longer-gray-pdf",
+        "input": "longer-gray.png",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "longer-gray-word",
+        "input": "@longer-gray-pdf",
+        "target": "docx",
+        "edit": null
+      },
+      {
+        "id": "longer-gray-office",
+        "input": "@longer-gray-word",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "longer-gray-edited-office",
+        "input": "@longer-gray-word",
+        "target": "pdf",
+        "edit": {
+          "old": "7.50",
+          "new": "187.50"
+        }
+      },
+      {
+        "id": "longer-gray-edited-text",
+        "input": "@longer-gray-edited-office",
+        "target": "txt",
+        "edit": null
+      },
+      {
+        "id": "shadow-pdf",
+        "input": "shadow.png",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "shadow-word",
+        "input": "@shadow-pdf",
+        "target": "docx",
+        "edit": null
+      },
+      {
+        "id": "shadow-office",
+        "input": "@shadow-word",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "shadow-edited-office",
+        "input": "@shadow-word",
+        "target": "pdf",
+        "edit": {
+          "old": "-062.40",
+          "new": "-068.95"
+        }
+      },
+      {
+        "id": "shadow-edited-text",
+        "input": "@shadow-edited-office",
+        "target": "txt",
+        "edit": null
+      },
+      {
+        "id": "uncertain-pdf",
+        "input": "uncertain.png",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "uncertain-word",
+        "input": "@uncertain-pdf",
+        "target": "docx",
+        "edit": null
+      },
+      {
+        "id": "uncertain-office",
+        "input": "@uncertain-word",
+        "target": "pdf",
+        "edit": null
+      },
+      {
+        "id": "uncertain-edited-office",
+        "input": "@uncertain-word",
+        "target": "pdf",
+        "edit": {
+          "old": "542.10",
+          "new": "542.70"
+        }
+      },
+      {
+        "id": "uncertain-edited-text",
+        "input": "@uncertain-edited-office",
+        "target": "txt",
+        "edit": null
+      }
+    ],
+    "font": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+      "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+      "version": "LiberationSans2.1.5",
+      "license": "SIL-OFL-1.1"
+    },
+    "parentManifestSha256": "12b46cab79d69e63d26e65f3ae21546332ffbd6b45a8056bb08d5b796194673b",
+    "route": "PNG->PDF->scan DOCX->edited Office PDF->TXT",
+    "routeGeneratorSha256": "bc36546cb28bb66254b8b75bd6debd823c33987b9c26a5fa307c49cbf031f2a1"
+  },
+  "directPngControl": {
+    "contracts": 28,
+    "status": "completed",
+    "qualification": "PNG->Word lacks a retained scan image and cannot accept the scan-mask fix; retained as independent control only.",
+    "manifestSha256": "12b46cab79d69e63d26e65f3ae21546332ffbd6b45a8056bb08d5b796194673b",
+    "jarSha256": "c4b2f202d0dd3c8952a7a61d7b36bbcd7054702d84714d12c9be0a8a2ea3cb9d"
+  },
+  "scanHttp": {
+    "before": {
+      "status": "completed",
+      "jarSha256": "c4b2f202d0dd3c8952a7a61d7b36bbcd7054702d84714d12c9be0a8a2ea3cb9d",
+      "helperSha256": {
+        "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf",
+        "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85",
+        "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9"
+      },
+      "resources": {
+        "wallSeconds": 132.22187263000524,
+        "userSeconds": 329.25462,
+        "systemSeconds": 28.545033,
+        "maxChildRssKiB": 342852
+      },
+      "newZombies": []
+    },
+    "after": {
+      "status": "completed",
+      "jarSha256": "ca91ec75cffd892697870cb84d9b9f32cfef9570218d7d3b0843b8144493f782",
+      "helperSha256": {
+        "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf",
+        "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85",
+        "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9"
+      },
+      "resources": {
+        "wallSeconds": 97.21312064900121,
+        "userSeconds": 254.794624,
+        "systemSeconds": 19.314283,
+        "maxChildRssKiB": 345600
+      },
+      "newZombies": []
+    }
+  },
+  "originalRegression": {
+    "contracts": 4,
+    "apiSuccess": 4,
+    "reportStatus": "failed",
+    "cleanupReconciliation": {
+      "originalReportPreservedAsFailed": true,
+      "cause": "Global observer sampled a separate PDFBox verifier child between exit and waitpid; original API workers were reaped. No HTTP contract repeated.",
+      "observed": {
+        "pid": 110521,
+        "state": "Z",
+        "parent": 110520,
+        "startTicks": "3482867"
+      },
+      "ownerReceipts": [
+        {
+          "receipt": "qa-samples/work/iteration26-scan-after-visible/uncertain-source-pdfbox.receipt.json",
+          "root": {
+            "pid": 110521,
+            "state": "R",
+            "parent": 110520,
+            "startTicks": "3482867"
+          },
+          "supervisor": {
+            "pid": 110520,
+            "state": "R",
+            "parent": 109886,
+            "startTicks": "3482863"
+          },
+          "rootExitCode": 0,
+          "ECHILD": true,
+          "reaped": [
+            {
+              "pid": 110521,
+              "exitCode": 0
+            }
+          ]
+        }
+      ],
+      "originalWorkersAbsent": 4,
+      "originalSupervisorECHILD": true,
+      "historicalZombieIdentitiesUnchanged": 17,
+      "currentZombieCount": 17
+    }
+  },
+  "notAccepted": [
+    "Edited Office PDF -> API TXT still rereads old scan amounts",
+    "Longer fixed-box edit 7.50 -> 187.50 wraps and fails numeric lexical boundaries",
+    "Uncertain paper/color and mixed native/vector/table pages have no general edit guarantee",
+    "Queued sparse digital OFD OCR_NO_NEW_TEXT remains unchanged",
+    "Native Microsoft Word, macOS and Windows package acceptance unrun"
+  ]
+}

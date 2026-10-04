@@ -1,0 +1,2225 @@
+{
+  "parentRevision": "ea5467d5f11748c6a4246abaeba5fa04ed62dbab",
+  "manifestSha256": "6bacad75cda98b80d3bf9f90703c9eec74e298cd02d9001853788f0d0e5ecab3",
+  "cases": [
+    {
+      "case": "decimal",
+      "editingNotPromised": false,
+      "geometryAndNativeWordBoxesUnchanged": true,
+      "sourceMediaBytesUnchanged": true,
+      "pixelsUnchangedOutsideSampledMasks": true,
+      "editPixelsUnchangedOutsideAmountRegion": true,
+      "before": {
+        "pageOcr": {
+          "text": "EDIT REWEAW2041\n\nRecord 00571\n\nAmount 319.46\n\nDate 2041-08-23\n\nControl 38.25\n",
+          "seconds": 1.1874630919992342,
+          "numericLexemesExact": false,
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 63,
+            "editDistance": 5,
+            "cer": 0.07936507936507936,
+            "alignedCharacterRecall": 0.9523809523809523,
+            "exactLines": 3,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "319",
+              "65",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "319",
+              "46",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "319.66\n",
+          "seconds": 0.31409246799739776,
+          "numericLexemesExact": false,
+          "metrics": {
+            "expectedCharacters": 6,
+            "actualCharacters": 6,
+            "editDistance": 1,
+            "cer": 0.16666666666666666,
+            "alignedCharacterRecall": 0.8333333333333334,
+            "exactLines": 0,
+            "expectedNumbers": [
+              "319",
+              "65"
+            ],
+            "actualNumbers": [
+              "319",
+              "66"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount 312.40Amount 319.65\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 126,
+            "editDistance": 63,
+            "cer": 1.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "319",
+              "65",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "312",
+              "40",
+              "319",
+              "65",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "after": {
+        "pageOcr": {
+          "text": "EDIT REVIEW2041\n\nRecord 00571\n\nAmount 319.65\n\nDate 2041-08-23\n\nControl 38.25\n",
+          "seconds": 0.7863436269981321,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 63,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "319",
+              "65",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "319",
+              "65",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "319.65\n",
+          "seconds": 0.460612831004255,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 6,
+            "actualCharacters": 6,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 1,
+            "expectedNumbers": [
+              "319",
+              "65"
+            ],
+            "actualNumbers": [
+              "319",
+              "65"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount 312.40Amount 319.65\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 126,
+            "editDistance": 63,
+            "cer": 1.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "319",
+              "65",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "312",
+              "40",
+              "319",
+              "65",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "masks": [
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:24.055pt;width:29.890pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:58.855pt;margin-top:24.055pt;width:52.690pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:115.255pt;margin-top:23.815pt;width:29.170pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:69.175pt;width:42.130pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:69.415pt;width:37.090pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:23.575pt;margin-top:115.255pt;width:46.930pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:74.215pt;margin-top:115.015pt;width:40.930pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:170.455pt;width:27.490pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:56.455pt;margin-top:170.215pt;width:68.291pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:24.295pt;margin-top:222.775pt;width:42.610pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:223.015pt;width:33.490pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        }
+      ],
+      "paintOrderBefore": [
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-image",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ],
+      "paintOrderAfter": [
+        "fill-image",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ]
+    },
+    {
+      "case": "negative",
+      "editingNotPromised": false,
+      "geometryAndNativeWordBoxesUnchanged": true,
+      "sourceMediaBytesUnchanged": true,
+      "pixelsUnchangedOutsideSampledMasks": true,
+      "editPixelsUnchangedOutsideAmountRegion": true,
+      "before": {
+        "pageOcr": {
+          "text": "EDIT REWEAW2041\n\nRecord 00571\n\nAmouwnit -49.20\n\nDate 2041-08-23\n\nControl 38.25\n",
+          "seconds": 0.5836928369972156,
+          "numericLexemesExact": false,
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 65,
+            "editDistance": 6,
+            "cer": 0.09523809523809523,
+            "alignedCharacterRecall": 0.9523809523809523,
+            "exactLines": 3,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "49",
+              "70",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "49",
+              "20",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "-49.20\n",
+          "seconds": 0.46751352499995846,
+          "numericLexemesExact": false,
+          "metrics": {
+            "expectedCharacters": 6,
+            "actualCharacters": 6,
+            "editDistance": 1,
+            "cer": 0.16666666666666666,
+            "alignedCharacterRecall": 0.8333333333333334,
+            "exactLines": 0,
+            "expectedNumbers": [
+              "49",
+              "70"
+            ],
+            "actualNumbers": [
+              "49",
+              "20"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount -48.20Amount -49.70\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 126,
+            "editDistance": 63,
+            "cer": 1.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "49",
+              "70",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "48",
+              "20",
+              "49",
+              "70",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "after": {
+        "pageOcr": {
+          "text": "EDIT REVIEW2041\n\nRecord 00571\n\nAmount -49.70\n\nDate 2041-08-23\n\nControl 38.25\n",
+          "seconds": 0.5849983259977307,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 63,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "49",
+              "70",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "49",
+              "70",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "-49.70\n",
+          "seconds": 0.3326638689977699,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 6,
+            "actualCharacters": 6,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 1,
+            "expectedNumbers": [
+              "49",
+              "70"
+            ],
+            "actualNumbers": [
+              "49",
+              "70"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount -48.20Amount -49.70\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 126,
+            "editDistance": 63,
+            "cer": 1.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "49",
+              "70",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "48",
+              "20",
+              "49",
+              "70",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "masks": [
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:24.055pt;width:29.890pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:58.855pt;margin-top:24.055pt;width:52.690pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:115.255pt;margin-top:23.815pt;width:29.170pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:69.175pt;width:42.130pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:69.415pt;width:37.090pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:23.575pt;margin-top:115.255pt;width:46.930pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:74.215pt;margin-top:115.015pt;width:37.810pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:170.455pt;width:27.490pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:56.455pt;margin-top:170.215pt;width:68.291pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:24.295pt;margin-top:222.775pt;width:42.610pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:223.015pt;width:33.490pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        }
+      ],
+      "paintOrderBefore": [
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-image",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ],
+      "paintOrderAfter": [
+        "fill-image",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ]
+    },
+    {
+      "case": "leading-zero",
+      "editingNotPromised": false,
+      "geometryAndNativeWordBoxesUnchanged": true,
+      "sourceMediaBytesUnchanged": true,
+      "pixelsUnchangedOutsideSampledMasks": true,
+      "editPixelsUnchangedOutsideAmountRegion": true,
+      "before": {
+        "pageOcr": {
+          "text": "EDIT REWEAW2041\n\nRecord 00571\n\nAmoumtt 00419.80\n\nDate 2041-08-23\n\nControl 38.25\n",
+          "seconds": 0.4482355880027171,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 65,
+            "actualCharacters": 66,
+            "editDistance": 5,
+            "cer": 0.07692307692307693,
+            "alignedCharacterRecall": 0.9538461538461539,
+            "exactLines": 3,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "00419",
+              "80",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "00419",
+              "80",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "00419.80\n",
+          "seconds": 0.9491009890043642,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 8,
+            "actualCharacters": 8,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 1,
+            "expectedNumbers": [
+              "00419",
+              "80"
+            ],
+            "actualNumbers": [
+              "00419",
+              "80"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount 00412.30Amount 00419.80\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 65,
+            "actualCharacters": 130,
+            "editDistance": 65,
+            "cer": 1.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "00419",
+              "80",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "00412",
+              "30",
+              "00419",
+              "80",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "after": {
+        "pageOcr": {
+          "text": "EDIT REVIEW2041\n\nRecord 00571\n\nAmount 00419.80\n\nDate 2041-08-23\n\nControl 38.25\n",
+          "seconds": 0.7187562489998527,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 65,
+            "actualCharacters": 65,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "00419",
+              "80",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "00419",
+              "80",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "00419.80\n",
+          "seconds": 0.4800145980043453,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 8,
+            "actualCharacters": 8,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 1,
+            "expectedNumbers": [
+              "00419",
+              "80"
+            ],
+            "actualNumbers": [
+              "00419",
+              "80"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount 00412.30Amount 00419.80\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 65,
+            "actualCharacters": 130,
+            "editDistance": 65,
+            "cer": 1.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "00419",
+              "80",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "00412",
+              "30",
+              "00419",
+              "80",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "masks": [
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:24.055pt;width:29.890pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:58.855pt;margin-top:24.055pt;width:52.690pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:115.255pt;margin-top:23.815pt;width:29.170pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:69.175pt;width:42.130pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:69.415pt;width:37.090pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:23.575pt;margin-top:115.255pt;width:46.930pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:74.215pt;margin-top:115.015pt;width:55.811pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:170.455pt;width:27.490pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:56.455pt;margin-top:170.215pt;width:68.291pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:24.295pt;margin-top:222.775pt;width:42.610pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:223.015pt;width:33.490pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        }
+      ],
+      "paintOrderBefore": [
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-image",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ],
+      "paintOrderAfter": [
+        "fill-image",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ]
+    },
+    {
+      "case": "shorter-gray",
+      "editingNotPromised": false,
+      "geometryAndNativeWordBoxesUnchanged": true,
+      "sourceMediaBytesUnchanged": true,
+      "pixelsUnchangedOutsideSampledMasks": true,
+      "editPixelsUnchangedOutsideAmountRegion": true,
+      "before": {
+        "pageOcr": {
+          "text": "EDIT REWEAW2041\n\nRecord 00571\n\nAmaurtt 932050\n\nDate 2041-08-23\n\nControl 38.25\n",
+          "seconds": 1.7715627119978308,
+          "numericLexemesExact": false,
+          "metrics": {
+            "expectedCharacters": 62,
+            "actualCharacters": 64,
+            "editDistance": 10,
+            "cer": 0.16129032258064516,
+            "alignedCharacterRecall": 0.9032258064516129,
+            "exactLines": 3,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "27",
+              "50",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "932050",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "982U50\n",
+          "seconds": 0.5317744030035101,
+          "numericLexemesExact": false,
+          "metrics": {
+            "expectedCharacters": 5,
+            "actualCharacters": 6,
+            "editDistance": 4,
+            "cer": 0.8,
+            "alignedCharacterRecall": 0.6,
+            "exactLines": 0,
+            "expectedNumbers": [
+              "27",
+              "50"
+            ],
+            "actualNumbers": [
+              "982",
+              "50"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount 9827.50Amount 27.50\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 62,
+            "actualCharacters": 126,
+            "editDistance": 64,
+            "cer": 1.032258064516129,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "27",
+              "50",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "9827",
+              "50",
+              "27",
+              "50",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "after": {
+        "pageOcr": {
+          "text": "EDIT REVIEW2041\n\nRecord 00571\n\nAmount 27.50\n\nDate 2041-08-23\n\nControl 38.25\n",
+          "seconds": 0.6249163879983826,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 62,
+            "actualCharacters": 62,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "27",
+              "50",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "27",
+              "50",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "27.50\n",
+          "seconds": 0.35988290200475603,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 5,
+            "actualCharacters": 5,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 1,
+            "expectedNumbers": [
+              "27",
+              "50"
+            ],
+            "actualNumbers": [
+              "27",
+              "50"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount 9827.50Amount 27.50\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 62,
+            "actualCharacters": 126,
+            "editDistance": 64,
+            "cer": 1.032258064516129,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "27",
+              "50",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "9827",
+              "50",
+              "27",
+              "50",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "masks": [
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:24.055pt;width:29.890pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:58.855pt;margin-top:24.055pt;width:52.690pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:115.255pt;margin-top:23.815pt;width:29.170pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:69.175pt;width:42.130pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:69.415pt;width:37.090pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:23.575pt;margin-top:115.255pt;width:46.930pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:74.455pt;margin-top:115.015pt;width:48.130pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:170.455pt;width:27.490pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:56.455pt;margin-top:170.215pt;width:68.291pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:24.295pt;margin-top:222.775pt;width:42.610pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:223.015pt;width:33.490pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        }
+      ],
+      "paintOrderBefore": [
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-image",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ],
+      "paintOrderAfter": [
+        "fill-image",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ]
+    },
+    {
+      "case": "longer-gray",
+      "editingNotPromised": false,
+      "geometryAndNativeWordBoxesUnchanged": true,
+      "sourceMediaBytesUnchanged": true,
+      "pixelsUnchangedOutsideSampledMasks": true,
+      "editPixelsUnchangedOutsideAmountRegion": true,
+      "before": {
+        "pageOcr": {
+          "text": "EDIT REWERW/2041\nRecord 00571\n\nAmouwntt 7805\n0\nDate 2041-08-23\n\nControl 38.25\n",
+          "seconds": 1.5062941549986135,
+          "numericLexemesExact": false,
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 65,
+            "editDistance": 9,
+            "cer": 0.14285714285714285,
+            "alignedCharacterRecall": 0.9206349206349206,
+            "exactLines": 3,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "187",
+              "50",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "7805",
+              "0",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "T&05\n0\n",
+          "seconds": 1.357538153999485,
+          "numericLexemesExact": false,
+          "metrics": {
+            "expectedCharacters": 6,
+            "actualCharacters": 5,
+            "editDistance": 4,
+            "cer": 0.6666666666666666,
+            "alignedCharacterRecall": 0.3333333333333333,
+            "exactLines": 0,
+            "expectedNumbers": [
+              "187",
+              "50"
+            ],
+            "actualNumbers": [
+              "05",
+              "0"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount 7.50Amount 187.5\n0\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 124,
+            "editDistance": 61,
+            "cer": 0.9682539682539683,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "187",
+              "50",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "7",
+              "50",
+              "187",
+              "5",
+              "0",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "after": {
+        "pageOcr": {
+          "text": "EDIT REVIEW2041\nRecord 00571\n\nAmount 187.5\n0\n\nDate 2041-08-23\n\nControl 38.25\n",
+          "seconds": 0.7272219430014957,
+          "numericLexemesExact": false,
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 63,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "187",
+              "50",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "187",
+              "5",
+              "0",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "187.5\n0\n",
+          "seconds": 0.30818990499392385,
+          "numericLexemesExact": false,
+          "metrics": {
+            "expectedCharacters": 6,
+            "actualCharacters": 6,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 1,
+            "expectedNumbers": [
+              "187",
+              "50"
+            ],
+            "actualNumbers": [
+              "187",
+              "5",
+              "0"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount 7.50Amount 187.5\n0\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 124,
+            "editDistance": 61,
+            "cer": 0.9682539682539683,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "187",
+              "50",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "7",
+              "50",
+              "187",
+              "5",
+              "0",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "masks": [
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:24.055pt;width:29.890pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:58.855pt;margin-top:24.055pt;width:52.690pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:115.255pt;margin-top:23.815pt;width:29.170pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:69.175pt;width:42.130pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:69.415pt;width:37.090pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:23.575pt;margin-top:115.255pt;width:46.930pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:74.455pt;margin-top:115.015pt;width:25.570pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:170.455pt;width:27.490pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:56.455pt;margin-top:170.215pt;width:68.291pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:24.295pt;margin-top:222.775pt;width:42.610pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:223.015pt;width:33.490pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E2E2E2"
+        }
+      ],
+      "paintOrderBefore": [
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-image",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ],
+      "paintOrderAfter": [
+        "fill-image",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ]
+    },
+    {
+      "case": "shadow",
+      "editingNotPromised": false,
+      "geometryAndNativeWordBoxesUnchanged": true,
+      "sourceMediaBytesUnchanged": true,
+      "pixelsUnchangedOutsideSampledMasks": true,
+      "editPixelsUnchangedOutsideAmountRegion": true,
+      "before": {
+        "pageOcr": {
+          "text": "EDIT REWEAW2041\n\nRecord 00571\n\nAmouwntt -062.96\n\nDate 2041-08-23\n\nConitrall 38.25\n",
+          "seconds": 0.605106902999978,
+          "numericLexemesExact": false,
+          "metrics": {
+            "expectedCharacters": 64,
+            "actualCharacters": 68,
+            "editDistance": 10,
+            "cer": 0.15625,
+            "alignedCharacterRecall": 0.921875,
+            "exactLines": 2,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "068",
+              "95",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "062",
+              "96",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "-062.96\n",
+          "seconds": 0.41597413099952973,
+          "numericLexemesExact": false,
+          "metrics": {
+            "expectedCharacters": 7,
+            "actualCharacters": 7,
+            "editDistance": 2,
+            "cer": 0.2857142857142857,
+            "alignedCharacterRecall": 0.7142857142857143,
+            "exactLines": 0,
+            "expectedNumbers": [
+              "068",
+              "95"
+            ],
+            "actualNumbers": [
+              "062",
+              "96"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount -062.40Amount -068.95\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 64,
+            "actualCharacters": 128,
+            "editDistance": 64,
+            "cer": 1.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "068",
+              "95",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "062",
+              "40",
+              "068",
+              "95",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "after": {
+        "pageOcr": {
+          "text": "EDIT REVIEW2041\n\nRecord 00571\n\nAmount -068.95\n\nDate 2041-08-23\n\nControl 38.25\n",
+          "seconds": 0.9751754850003636,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 64,
+            "actualCharacters": 64,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "068",
+              "95",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "068",
+              "95",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "-068.95\n",
+          "seconds": 0.35852465600328287,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 7,
+            "actualCharacters": 7,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 1,
+            "expectedNumbers": [
+              "068",
+              "95"
+            ],
+            "actualNumbers": [
+              "068",
+              "95"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount -062.40Amount -068.95\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 64,
+            "actualCharacters": 128,
+            "editDistance": 64,
+            "cer": 1.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "068",
+              "95",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "062",
+              "40",
+              "068",
+              "95",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "masks": [
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:24.055pt;width:29.890pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#C8C8C8"
+        },
+        {
+          "style": "position:absolute;margin-left:58.855pt;margin-top:24.055pt;width:52.690pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#C8C8C8"
+        },
+        {
+          "style": "position:absolute;margin-left:115.255pt;margin-top:23.815pt;width:29.170pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#C8C8C8"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:69.175pt;width:42.130pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#CFCFCF"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:69.415pt;width:37.090pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#CFCFCF"
+        },
+        {
+          "style": "position:absolute;margin-left:23.575pt;margin-top:115.255pt;width:46.930pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#D7D7D7"
+        },
+        {
+          "style": "position:absolute;margin-left:74.215pt;margin-top:115.015pt;width:45.250pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#D7D7D7"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:170.455pt;width:27.490pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E0E0E0"
+        },
+        {
+          "style": "position:absolute;margin-left:56.455pt;margin-top:170.215pt;width:68.291pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E0E0E0"
+        },
+        {
+          "style": "position:absolute;margin-left:24.295pt;margin-top:222.775pt;width:42.610pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E8E8E8"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:223.015pt;width:33.490pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#E8E8E8"
+        }
+      ],
+      "paintOrderBefore": [
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-image",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ],
+      "paintOrderAfter": [
+        "fill-image",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ]
+    },
+    {
+      "case": "uncertain",
+      "editingNotPromised": true,
+      "geometryAndNativeWordBoxesUnchanged": true,
+      "sourceMediaBytesUnchanged": true,
+      "pixelsUnchangedOutsideSampledMasks": true,
+      "editPixelsUnchangedOutsideAmountRegion": true,
+      "before": {
+        "pageOcr": {
+          "text": "EDIT REWEAW2041\n\nRecord 00571\n\nArmountt 542.70\n\nDate 2041-08-23\n\nControl 38.25\n",
+          "seconds": 0.8101042449998204,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 65,
+            "editDistance": 5,
+            "cer": 0.07936507936507936,
+            "alignedCharacterRecall": 0.9682539682539683,
+            "exactLines": 3,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "542",
+              "70",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "542",
+              "70",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "542.70\n",
+          "seconds": 0.53444999599742,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 6,
+            "actualCharacters": 6,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 1,
+            "expectedNumbers": [
+              "542",
+              "70"
+            ],
+            "actualNumbers": [
+              "542",
+              "70"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount 542.10Amount 542.70\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 126,
+            "editDistance": 63,
+            "cer": 1.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "542",
+              "70",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "542",
+              "10",
+              "542",
+              "70",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "after": {
+        "pageOcr": {
+          "text": "EDIT REVIEW2041\n\nRecord 00571\n\nAmount 542.70\n\nDate 2041-08-23\n\nControl 38.25\n",
+          "seconds": 0.6063478810028755,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 63,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "542",
+              "70",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "00571",
+              "542",
+              "70",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ]
+          }
+        },
+        "amountOcr": {
+          "text": "542.70\n",
+          "seconds": 0.357213559000229,
+          "numericLexemesExact": true,
+          "metrics": {
+            "expectedCharacters": 6,
+            "actualCharacters": 6,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 1,
+            "expectedNumbers": [
+              "542",
+              "70"
+            ],
+            "actualNumbers": [
+              "542",
+              "70"
+            ]
+          }
+        },
+        "apiText": {
+          "text": "EDIT EDIT REVIEW 2041REVIEW2041\nRecord Record 0057100571\nAmount 542.10Amount 542.70\nDate Date 2041-08-232041-08-23\nControl Control 38.2538.25\n",
+          "metrics": {
+            "expectedCharacters": 63,
+            "actualCharacters": 126,
+            "editDistance": 63,
+            "cer": 1.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 5,
+            "expectedNumbers": [
+              "2041",
+              "00571",
+              "542",
+              "70",
+              "2041",
+              "08",
+              "23",
+              "38",
+              "25"
+            ],
+            "actualNumbers": [
+              "2041",
+              "2041",
+              "0057100571",
+              "542",
+              "10",
+              "542",
+              "70",
+              "2041",
+              "08",
+              "232041",
+              "08",
+              "23",
+              "38",
+              "2538",
+              "25"
+            ]
+          },
+          "numericLexemesExact": false
+        }
+      },
+      "masks": [
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:24.055pt;width:29.890pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:58.855pt;margin-top:24.055pt;width:52.690pt;height:10.210pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:115.255pt;margin-top:23.815pt;width:29.170pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:69.175pt;width:42.130pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:69.415pt;width:37.090pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:23.575pt;margin-top:115.255pt;width:46.930pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:24.775pt;margin-top:170.455pt;width:27.490pt;height:10.450pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:56.455pt;margin-top:170.215pt;width:68.291pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:24.295pt;margin-top:222.775pt;width:42.610pt;height:10.930pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        },
+        {
+          "style": "position:absolute;margin-left:71.095pt;margin-top:223.015pt;width:33.490pt;height:10.690pt;z-index:1;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "color": "#FFFFFF"
+        }
+      ],
+      "paintOrderBefore": [
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-image",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ],
+      "paintOrderAfter": [
+        "fill-image",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "jarSha256": "c4b2f202d0dd3c8952a7a61d7b36bbcd7054702d84714d12c9be0a8a2ea3cb9d",
+      "helperSha256": "f194670627b48ae11d2f3f3766e2a7d5cf0b1cc548dcff62a69d83cca52bfb9b",
+      "runtimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+      "renderLibrary": "1.26.6",
+      "dpi": 300,
+      "httpResources": {
+        "wallSeconds": 132.22187263000524,
+        "userSeconds": 329.25462,
+        "systemSeconds": 28.545033,
+        "maxChildRssKiB": 342852
+      },
+      "httpContracts": 35,
+      "httpSuccess": 35,
+      "workersAbsent": 35,
+      "ECHILD": true
+    },
+    {
+      "jarSha256": "ca91ec75cffd892697870cb84d9b9f32cfef9570218d7d3b0843b8144493f782",
+      "helperSha256": "f194670627b48ae11d2f3f3766e2a7d5cf0b1cc548dcff62a69d83cca52bfb9b",
+      "runtimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+      "renderLibrary": "1.26.6",
+      "dpi": 300,
+      "httpResources": {
+        "wallSeconds": 97.21312064900121,
+        "userSeconds": 254.794624,
+        "systemSeconds": 19.314283,
+        "maxChildRssKiB": 345600
+      },
+      "httpContracts": 35,
+      "httpSuccess": 35,
+      "workersAbsent": 35,
+      "ECHILD": true
+    }
+  ]
+}

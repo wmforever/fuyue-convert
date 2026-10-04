@@ -46,7 +46,7 @@ class OcrWordOverlayTest {
                 Rect sourceBox = words.get(index).box();
                 assertEquals(sourceBox.x() - .15, mm(style, "margin-left"), .001);
                 assertEquals(sourceBox.width() + .3, mm(style, "width"), .001);
-                assertTrue(style.contains("z-index:-251658751"), "遮罩在扫描背景之上、原生内容之下");
+                assertTrue(style.contains("z-index:-251658751"), "混合页保留原层级，不能用前景遮罩覆盖原生正文");
                 assertEquals("#FFFFFF", masks.get(index).getAttribute("fillcolor"));
                 double maskLeft = mm(style, "margin-left"), maskRight = maskLeft + mm(style, "width");
                 assertTrue(maskRight <= 32.151 || maskLeft >= 59.849,
@@ -58,6 +58,23 @@ class OcrWordOverlayTest {
             assertEquals(List.of("Native body"), docx.getParagraphs().stream()
                     .filter(p -> !p.getCTP().xmlText().contains("txbxContent"))
                     .map(p -> p.getText()).filter(s -> !s.isBlank()).toList());
+        }
+    }
+
+    @Test void scanOnlyMasksAreInFrontOfDrawingMlBackgroundAndBelowEditableText() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        ImageBlock background = new ImageBlock("scan", 1, new Rect(0, 0, 100, 100),
+                "image/png", png(false), "OCR_SCAN_BACKGROUND", 0);
+        try (XWPFDocument docx = new XWPFDocument(Files.newInputStream(render(List.of(line), List.of(background))))) {
+            var xml = xml(docx);
+            assertEquals(1, masks(xml).size());
+            assertTrue(masks(xml).get(0).getAttribute("style").contains("z-index:1;"));
+            assertEquals(1, elements(xml,
+                    "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing", "anchor").size());
+            assertTrue(elements(xml, VML, "rect").stream()
+                    .filter(element -> element.getElementsByTagNameNS(WORD, "txbxContent").getLength() > 0)
+                    .allMatch(element -> element.getAttribute("style").contains("z-index:3;")));
+            assertArrayEquals(background.data(), docx.getAllPictures().get(0).getData());
         }
     }
 
