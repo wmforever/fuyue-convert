@@ -251,6 +251,8 @@ public final class PdfLayoutParser {
         private final Map<TextPosition, Integer> positionGroups = new IdentityHashMap<>();
         private final java.util.Deque<Integer> marked = new java.util.ArrayDeque<>();
         private int markedDepth;
+        private int artifactDepth;
+        private final java.util.Set<Integer> markedIds = new java.util.HashSet<>();
 
         private LayoutTextStripper(List<PageState> pages, int maxTextObjects, PdfTextSectionOrder sections) {
             this.pages = pages;
@@ -268,7 +270,7 @@ public final class PdfLayoutParser {
             int index = getCurrentPageNo() - 1;
             if (index < 0 || index >= pages.size()) throw new IOException("PDF 页面索引不一致");
             current = pages.get(index);
-            positionGroups.clear();marked.clear();markedDepth = 0;
+            positionGroups.clear();marked.clear();markedIds.clear();markedDepth = 0;artifactDepth = 0;
             super.startPage(page);
         }
 
@@ -276,20 +278,25 @@ public final class PdfLayoutParser {
         public void beginMarkedContentSequence(COSName tag, COSDictionary properties) {
             if (sections == null) return;
             if (++markedDepth > 64) { sections.disablePage(current.pageNumber()); return; }
+            if (artifactDepth == 0 && "Artifact".equals(tag.getName())) artifactDepth = markedDepth;
             int group;
             if (properties != null && properties.containsKey(COSName.MCID)) {
                 var id = properties.getDictionaryObject(COSName.MCID);
-                group = id instanceof COSInteger number && number.longValue() >= 0
-                        && number.longValue() <= Integer.MAX_VALUE
-                        ? sections.group(current.pageNumber(), number.intValue()) : -1;
+                if (id instanceof COSInteger number && number.longValue() >= 0
+                        && number.longValue() <= Integer.MAX_VALUE) {
+                    if (markedIds.size() >= Math.min(maxTextObjects, 100_000)
+                            || !markedIds.add(number.intValue())) sections.disablePage(current.pageNumber());
+                    group = sections.group(current.pageNumber(), number.intValue());
+                } else group = -1;
             } else group = marked.isEmpty() ? -1 : marked.peek();
-            marked.push("Artifact".equals(tag.getName()) ? -1 : group);
+            marked.push(artifactDepth > 0 ? -1 : group);
         }
 
         @Override
         public void endMarkedContentSequence() {
             if (sections == null) return;
             if (markedDepth <= 0) { sections.disablePage(current.pageNumber()); return; }
+            if (markedDepth == artifactDepth) artifactDepth = 0;
             if (markedDepth-- <= 64) marked.pop();
         }
 

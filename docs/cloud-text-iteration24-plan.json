@@ -1,0 +1,39 @@
+{
+  "parentRevision": "9f50cf63e6d971e1e31fe3c3bc502526ec39cfef",
+  "scope": "One finite adversarial test of optional PDF TXT grouping. Do not change visible text, geometry, Word/OFD/OCR paths or completed matrices.",
+  "manifestSha256": "1762d3640a7bde6dfcf3ee369f253b9347560e95bc5ea4b01dad2d1f466a3c69",
+  "frozenCases": [
+    "valid",
+    "malformed",
+    "incomplete",
+    "duplicate",
+    "out-of-order",
+    "missing-mcid",
+    "artifact",
+    "artifact-nested",
+    "cycle",
+    "deep",
+    "mixed-pages",
+    "duplicate-content-id"
+  ],
+  "truth": "Authored visible text and explicit expected legacy/valid section order frozen before HTTP. Exact character and numeric/date/decimal inventory independent of metadata. Twelve PDFs total65194 bytes; each below50000 bytes; deepest70 nested spans.",
+  "budgets": {
+    "baselineHttp": 15,
+    "afterHttpIfFix": 15,
+    "suiteSeconds": 480,
+    "contractSeconds": 120,
+    "requestSeconds": 30,
+    "teardownSeconds": 15,
+    "targetedRetainedHttp": 1
+  },
+  "acceptance": [
+    "Actual HTTP/independent Worker reproduction before production fix",
+    "All malformed cases preserve exact legacy TXT plus visible inventory",
+    "Valid grouped sections and mixed tagged/untagged pages retain exact authored order",
+    "Cycle/depth cases terminate inside existing deadlines",
+    "One valid Word/Office control remains identical",
+    "Minimal production fix only for observed defects; new regressions and fresh build if code changes",
+    "Same branch/draft PR, authenticated wmforever, source/artifact binding and exact-SHA CI"
+  ],
+  "targetedRegressionExtension": "After the minimal content-ID guard fix, add exactly one final HTTP conversion of the immutable original Office regression; compare bytes with accepted23 HTTP using the identical parent JAR. Do not repeat original matrix."
+}

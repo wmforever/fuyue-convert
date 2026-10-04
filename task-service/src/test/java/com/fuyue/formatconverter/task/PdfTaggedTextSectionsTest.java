@@ -22,6 +22,8 @@ class PdfTaggedTextSectionsTest {
         assertEquals(expected, result.replace("\r\n", "\n"));
         assertNotEquals(legacy(source), result);
     }
+    @Test void repeatedContentMcidCannotAuthorizeSectionOrdering() throws Exception { unchanged("duplicate-content"); }
+    @Test void nestedTagCannotEscapeArtifactFallback() throws Exception { unchanged("nested-artifact"); }
     @Test void overlappingDeclaredGroupsKeepExistingColumnOrder() throws Exception { unchanged("overlap"); }
     @Test void missingLastTagFallsBackWithoutDroppingAnyText() throws Exception { unchanged("partial"); }
     @Test void duplicateMcidAssignmentFallsBack() throws Exception { unchanged("duplicate"); }
@@ -73,7 +75,8 @@ class PdfTaggedTextSectionsTest {
                         boolean marked=!(mutation.equals("unmarked")&&mcid==9);
                         if(mutation.equals("deep")&&mcid==0)for(int depth=0;depth<65;depth++)stream.beginMarkedContent(COSName.getPDFName("Span"));
                         if(marked) {
-                            var props=new COSDictionary();props.setInt(COSName.MCID,mcid);
+                            var props=new COSDictionary();props.setInt(COSName.MCID,mutation.equals("duplicate-content")&&mcid==9?8:mcid);
+                            if(mutation.equals("nested-artifact")&&mcid==9)stream.beginMarkedContent(COSName.ARTIFACT);
                             // PDPageContentStream's property-list writer narrows MCID via getInt.
                             // Emit the malformed raw operand and verify saved bytes below.
                             if(mcid==0&&mutation.equals("large-content-id"))stream.appendRawCommands("/P <</MCID 4294967296>> BDC\n");
@@ -83,6 +86,7 @@ class PdfTaggedTextSectionsTest {
                         stream.beginText();stream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA),12);
                         stream.newLineAtOffset(line>0&&line%2==0?430:42,top-(line==0?0:line<=2?55:95));stream.showText(text[line]);stream.endText();
                         if(marked&&!(mutation.equals("unclosed")&&mcid==0))stream.endMarkedContent();
+                        if(mutation.equals("nested-artifact")&&mcid==9)stream.endMarkedContent();
                         if(mutation.equals("deep")&&mcid==0)for(int depth=0;depth<65;depth++)stream.endMarkedContent();
                         if(!(mutation.equals("partial")&&mcid==9))content.add(COSInteger.get(mutation.equals("large-id")&&mcid==0?1L<<32:mutation.equals("duplicate")&&mcid==9?0:mcid));
                         mcid++;
