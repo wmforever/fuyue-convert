@@ -53,6 +53,23 @@ class OcrFragmentedColumnsTest {
         assertUnchanged(correct);
     }
 
+    @Test void disjointVerticalSectionsRetainCorrectTopToBottomEngineOrder() {
+        var sections = new ArrayList<TextBlock>();
+        // Correct input order: upper section on the right, then middle on the
+        // left, then bottom in the center. Horizontal gutters alone are not columns.
+        double[] x = {700, 40, 370}, y = {100, 400, 800};
+        String[] labels = {"Upper", "Middle", "Bottom"};
+        for (int section=0;section<3;section++) for (int row=0;row<3;row++) {
+            String[] pieces = {labels[section], "section", "sentence"+row};
+            for (int part=0;part<3;part++)
+                sections.add(block(pieces[part],x[section]+part*70,y[section]+row*100,60));
+        }
+        assertEquals(27,sections.size());
+        var arranged = arrange(sections);
+        assertFalse(arranged.adjusted(), () -> String.join("\n",arranged.lines()));
+        assertEquals(sections.stream().map(TextBlock::text).toList(),arranged.lines());
+    }
+
     private static List<String> expected(String token) {
         return java.util.stream.IntStream.range(0,12).mapToObj(i -> "Column " + token + " sentence").toList();
     }

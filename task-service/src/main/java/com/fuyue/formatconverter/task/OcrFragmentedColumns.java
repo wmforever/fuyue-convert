@@ -39,6 +39,19 @@ final class OcrFragmentedColumns {
         }
         // More columns, spanning headings, short numeric cells and complete lines retain their prior fallback.
         if (columns.size() != 3) return fallback;
+        // Wide horizontal gutters also occur between successive sections of a
+        // document. Require simultaneous vertical coverage, as in the existing
+        // two-column inference, before imposing left-to-right column order.
+        double commonStart = Double.NEGATIVE_INFINITY, commonEnd = Double.POSITIVE_INFINITY;
+        double first = Double.POSITIVE_INFINITY, last = Double.NEGATIVE_INFINITY;
+        for (var column : columns) {
+            if (System.nanoTime() >= deadline) return fallback;
+            double top = column.stream().mapToDouble(b -> boxes.get(b).center().y()).min().orElse(0);
+            double bottom = column.stream().mapToDouble(b -> boxes.get(b).center().y()).max().orElse(0);
+            commonStart = Math.max(commonStart, top); commonEnd = Math.min(commonEnd, bottom);
+            first = Math.min(first, top); last = Math.max(last, bottom);
+        }
+        if (commonEnd - commonStart < (last - first) * .60 || System.nanoTime() >= deadline) return fallback;
         var output = new ArrayList<String>();
         var used = Collections.newSetFromMap(new IdentityHashMap<TextBlock, Boolean>());
         for (var column : columns) {
