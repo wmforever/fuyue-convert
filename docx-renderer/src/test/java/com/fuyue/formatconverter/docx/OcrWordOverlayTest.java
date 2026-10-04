@@ -283,6 +283,34 @@ class OcrWordOverlayTest {
         assertEquals(widths.get(1), widths.get(3), "Dense pages skip the optional reserve before neighbor scans");
     }
 
+    @Test void longNumericReserveIsBoundedAndRetainsShortReserveAroundUnknownInkOrNeighbor() throws Exception {
+        List<Double> widths = new ArrayList<>();
+        List<String> maskStyles = new ArrayList<>();
+        List<Double> lefts = new ArrayList<>();
+        for (int variant = 0; variant < 3; variant++) {
+            var pixels = ImageIO.read(new ByteArrayInputStream(png(false)));
+            if (variant == 1) pixels.setRGB(50, 30, 0xff0000); // Beyond old reserve, inside proposed extension.
+            var bytes = new ByteArrayOutputStream(); assertTrue(ImageIO.write(pixels, "png", bytes)); pixels.flush();
+            var background = new ImageBlock("scan", 1, new Rect(0, 0, 100, 100), "image/png", bytes.toByteArray(), "OCR_SCAN_BACKGROUND", 0);
+            var line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "7.50", .98)), "7.50");
+            var lines = new ArrayList<>(List.of(line));
+            if (variant == 2) lines.add(ocr(List.of(new TextBlock.OcrWord(new Rect(50, 30, 4, 4), "NOTE", .98)), "NOTE"));
+            try (var docx = new XWPFDocument(Files.newInputStream(render(lines, List.of(background))))) {
+                var xml = xml(docx);
+                var shape = elements(xml, VML, "rect").stream().filter(e -> e.getElementsByTagNameNS(WORD, "t").getLength() > 0
+                        && e.getElementsByTagNameNS(WORD, "t").item(0).getTextContent().equals("7.50")).findFirst().orElseThrow();
+                widths.add(mm(shape.getAttribute("style"), "width"));lefts.add(mm(shape.getAttribute("style"), "margin-left"));
+                maskStyles.add(masks(xml).get(0).getAttribute("style"));
+                assertTrue(lefts.get(variant) + widths.get(variant) <= 57.001, "Only the checked 25mm region may grow");
+                assertArrayEquals(background.data(), docx.getAllPictures().get(0).getData());
+            }
+        }
+        assertTrue(widths.get(0) > widths.get(1) + 8d);
+        assertEquals(widths.get(1), widths.get(2), .001, "Unknown ink and known neighbor preserve the short reserve");
+        assertEquals(lefts.get(0), lefts.get(1));assertEquals(lefts.get(0), lefts.get(2));
+        assertEquals(maskStyles.get(0), maskStyles.get(1));assertEquals(maskStyles.get(0), maskStyles.get(2));
+    }
+
     private Path render(List<TextBlock> text, List<ImageBlock> images) throws Exception {
         var paragraphs = text.stream().map(block -> new ParagraphModel(block.box(), List.of(block),
                 ParagraphModel.Alignment.LEFT, 0)).toList();

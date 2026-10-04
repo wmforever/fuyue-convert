@@ -287,7 +287,23 @@ final class FixedLayoutDocxRenderer {
                             Rect reserve = new Rect(left, top, edge - left, word.box().height() * 2.1d);
                             boolean overlaps = texts.stream().flatMap(t -> t.ocrWords().stream())
                                     .anyMatch(other -> other != word && reserve.intersectionArea(other.box()) > 0d);
-                            if (!overlaps && sampler.uniformLightPaper(reserve, fills.get(0).color())) numericRightEdges.put(word, edge);
+                            if (!overlaps && sampler.uniformLightPaper(reserve, fills.get(0).color())) {
+                                numericRightEdges.put(word, edge);
+                                // Longer edits may need more than the original short reserve.
+                                // Inspect only the additional bounded strip; if it contains
+                                // unknown ink, a neighbor, or exceeds the same pixel budget,
+                                // retain the already verified short reserve.
+                                double extendedEdge = Math.min(Math.min(background.box().right(), page.physicalBox().right()) - .5d,
+                                        word.box().right() + Math.min(25d, word.box().height() * 8d));
+                                if (extendedEdge > edge) {
+                                    Rect extension = new Rect(edge, top, extendedEdge - edge, reserve.height());
+                                    boolean neighbor = texts.stream().flatMap(t -> t.ocrWords().stream())
+                                            .anyMatch(other -> other != word && extension.intersectionArea(other.box()) > 0d);
+                                    if (!neighbor && sampler.uniformLightPaper(extension, fills.get(0).color())) {
+                                        numericRightEdges.put(word, extendedEdge);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -436,8 +452,8 @@ final class FixedLayoutDocxRenderer {
                         positioned.textOffsetXmm(), positioned.textOffsetYmm(), positioned.advancesMm(),
                         new Transform2D(fitted, 0, 0, 1, 0, 0));
             }
-            double extraWidth = Math.max(0d, Math.min(fontMm * 2d,
-                    ocrColors.numericRightEdges().getOrDefault(word, 0d) - tolerantTextBox(positioned).right()));
+            double extraWidth = Math.max(0d,
+                    ocrColors.numericRightEdges().getOrDefault(word, 0d) - tolerantTextBox(positioned).right());
             addTextBox(docx, anchor, positioned, true, extraWidth);
         }
     }

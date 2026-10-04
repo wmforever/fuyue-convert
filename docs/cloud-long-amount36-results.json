@@ -1,0 +1,427 @@
+{
+  "parentRevision": "7a3ceb25835b0fa2e032f4fe3cf158487aaafa90",
+  "jarSha256": "73b2aada867097614e5ed3bae08a840a8a232b313c8595075086c5c5254dc597",
+  "buildInputSha256": "8c0313636afba2fc18ad2db414e3952de7c5a38050aadfd83f9355faa3d7acd9",
+  "cases": [
+    {
+      "id": "en-positive",
+      "adjacent": false,
+      "old": "048.65",
+      "new": "123456789012.65",
+      "expected": "LONG EDIT REVIEW 2097\nRecord 00783\nAmount 123456789012.65\nDate 2097-11-06\nControl 21.40\n",
+      "beforeOfficeText": "LONG EDIT REVIEW 2097\nRecord 00783\nAmount 1234567890\n12.65\nDate 2097-11-06\nControl 21.40\n",
+      "afterOfficeText": "LONG EDIT REVIEW 2097\nRecord 00783\nAmount 123456789012.65\nDate 2097-11-06\nControl 21.40\n",
+      "actualVisibleCropOcrBefore": "Amount 1234567890\n12.65\n",
+      "actualVisibleCropOcrAfter": "Amount 123456789012.65\n",
+      "beforeNumericBoundariesExact": false,
+      "afterNumericBoundariesExact": true,
+      "sourceWordMediaAndMaskExact": true,
+      "normalOfficePixelsExact": true,
+      "sourceShapesOnlyWidthChanges": true,
+      "originalAmountShape": {
+        "id": "text-ocr-p1-l3-word-1-21",
+        "style": "position:absolute;margin-left:88.389pt;margin-top:159.443pt;width:77.360pt;height:17.308pt;z-index:4;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+        "texts": [
+          "048.65"
+        ]
+      },
+      "finalAmountShape": {
+        "id": "text-ocr-p1-l3-word-1-21",
+        "style": "position:absolute;margin-left:88.389pt;margin-top:159.443pt;width:111.597pt;height:17.308pt;z-index:4;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+        "texts": [
+          "048.65"
+        ]
+      },
+      "editedPixelsOutsideAmountBox": null,
+      "sourceAndEditableWordTextExact": true,
+      "rawOfficeCerBefore": 0.011363636363636364,
+      "rawOfficeCerAfter": 0.0,
+      "whitespaceNormalizedBefore": true,
+      "whitespaceNormalizedAfter": true,
+      "httpStatus": "SUCCESS",
+      "httpError": null,
+      "httpText": "LONG EDIT REVIEW 2097\nRecord 00783\nAmount 123456789012.65\nDate 2097-11-06\nControl 21.40\n",
+      "retainedNeighbor": null
+    },
+    {
+      "id": "en-negative",
+      "adjacent": false,
+      "old": "-054.80",
+      "new": "-987654321098.80",
+      "expected": "LONG EDIT REVIEW 2097\nRecord 00783\nAmount -987654321098.80\nDate 2097-11-06\nControl 21.40\n",
+      "beforeOfficeText": "LONG EDIT REVIEW 2097\nRecord 00783\nAmount -9876543210\n98.80\nDate 2097-11-06\nControl 21.40\n",
+      "afterOfficeText": "LONG EDIT REVIEW 2097\nRecord 00783\nAmount -987654321098.80\nDate 2097-11-06\nControl 21.40\n",
+      "actualVisibleCropOcrBefore": "Amount -9876543210\n98.80\n",
+      "actualVisibleCropOcrAfter": "Amount -987654321098.80\n",
+      "beforeNumericBoundariesExact": false,
+      "afterNumericBoundariesExact": true,
+      "sourceWordMediaAndMaskExact": true,
+      "normalOfficePixelsExact": true,
+      "sourceShapesOnlyWidthChanges": true,
+      "originalAmountShape": {
+        "id": "text-ocr-p1-l3-word-1-21",
+        "style": "position:absolute;margin-left:88.512pt;margin-top:159.443pt;width:81.680pt;height:17.308pt;z-index:4;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+        "texts": [
+          "-054.80"
+        ]
+      },
+      "finalAmountShape": {
+        "id": "text-ocr-p1-l3-word-1-21",
+        "style": "position:absolute;margin-left:88.512pt;margin-top:159.443pt;width:115.795pt;height:17.308pt;z-index:4;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+        "texts": [
+          "-054.80"
+        ]
+      },
+      "editedPixelsOutsideAmountBox": null,
+      "sourceAndEditableWordTextExact": true,
+      "rawOfficeCerBefore": 0.011235955056179775,
+      "rawOfficeCerAfter": 0.0,
+      "whitespaceNormalizedBefore": true,
+      "whitespaceNormalizedAfter": true,
+      "httpStatus": "SUCCESS",
+      "httpError": null,
+      "httpText": "LONG EDIT REVIEW 2097\nRecord 00783\nAmount -987654321098.80\nDate 2097-11-06\nControl 21.40\n",
+      "retainedNeighbor": null
+    },
+    {
+      "id": "en-adjacent-zero",
+      "adjacent": true,
+      "old": "00062.35",
+      "new": "000000123456789.35",
+      "expected": "LONG EDIT REVIEW 2097\nRecord 00783\nAmount 000000123456789.35  TAIL 2097\nDate 2097-11-06\nControl 21.40\n",
+      "beforeOfficeText": "LONG EDIT REVIEW 2097\nRecord 00783\nAmount 00000012\n3456789.3\n5 \nTAIL 2097\nDate 2097-11-06\nControl 21.40\n",
+      "afterOfficeText": "LONG EDIT REVIEW 2097\nRecord 00783\nAmount 00000012\n3456789.3\n5 \nTAIL 2097\nDate 2097-11-06\nControl 21.40\n",
+      "actualVisibleCropOcrBefore": "Amount 00000012 TAIL 2097\n3456789.3\n5\n",
+      "actualVisibleCropOcrAfter": "Amount 00000012 TAIL 2097\n3456789.3\n5\n",
+      "beforeNumericBoundariesExact": false,
+      "afterNumericBoundariesExact": false,
+      "sourceWordMediaAndMaskExact": true,
+      "normalOfficePixelsExact": true,
+      "sourceShapesOnlyWidthChanges": true,
+      "originalAmountShape": {
+        "id": "text-ocr-p1-l3-word-1-23",
+        "style": "position:absolute;margin-left:88.393pt;margin-top:159.443pt;width:65.611pt;height:17.308pt;z-index:4;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+        "texts": [
+          "00062.35 "
+        ]
+      },
+      "finalAmountShape": {
+        "id": "text-ocr-p1-l3-word-1-23",
+        "style": "position:absolute;margin-left:88.393pt;margin-top:159.443pt;width:65.611pt;height:17.308pt;z-index:4;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+        "texts": [
+          "00062.35 "
+        ]
+      },
+      "editedPixelsOutsideAmountBox": [
+        371,
+        740,
+        629,
+        820
+      ],
+      "sourceAndEditableWordTextExact": true,
+      "rawOfficeCerBefore": 0.029411764705882353,
+      "rawOfficeCerAfter": 0.029411764705882353,
+      "whitespaceNormalizedBefore": true,
+      "whitespaceNormalizedAfter": true,
+      "httpStatus": "SUCCESS",
+      "httpError": null,
+      "httpText": "LONG EDIT REVIEW 2097\nRecord 00783\nAmount 00000012TAIL 2097\n3456789.3\n5\nDate 2097-11-06\nControl 21.40\n",
+      "retainedNeighbor": true
+    },
+    {
+      "id": "zh-positive",
+      "adjacent": false,
+      "old": "048.65",
+      "new": "123456789012.65",
+      "expected": "长金额编辑核验 2097\n记录编号 00783\n金额 123456789012.65\n日期 2097-11-06\n保留相邻文字 21.40\n",
+      "beforeOfficeText": "长金额编辑核验 2097\n记录编号 00783\n金额 1234567890\n12.65\n日期 2097-11-06\n保留\n相邻文字 21.40\n",
+      "afterOfficeText": "长金额编辑核验 2097\n记录编号 00783\n金额 123456789012.65\n日期 2097-11-06\n保留\n相邻文字 21.40\n",
+      "actualVisibleCropOcrBefore": "金额 1234567890\n12.65\n",
+      "actualVisibleCropOcrAfter": "金额 123456789012.65\n",
+      "beforeNumericBoundariesExact": false,
+      "afterNumericBoundariesExact": true,
+      "sourceWordMediaAndMaskExact": true,
+      "normalOfficePixelsExact": true,
+      "sourceShapesOnlyWidthChanges": true,
+      "originalAmountShape": {
+        "id": "text-ocr-p1-l3-word-1-27",
+        "style": "position:absolute;margin-left:68.949pt;margin-top:159.443pt;width:77.360pt;height:17.308pt;z-index:4;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+        "texts": [
+          "048.65"
+        ]
+      },
+      "finalAmountShape": {
+        "id": "text-ocr-p1-l3-word-1-27",
+        "style": "position:absolute;margin-left:68.949pt;margin-top:159.443pt;width:111.597pt;height:17.308pt;z-index:4;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+        "texts": [
+          "048.65"
+        ]
+      },
+      "editedPixelsOutsideAmountBox": null,
+      "sourceAndEditableWordTextExact": true,
+      "rawOfficeCerBefore": 0.02857142857142857,
+      "rawOfficeCerAfter": 0.014285714285714285,
+      "whitespaceNormalizedBefore": true,
+      "whitespaceNormalizedAfter": true,
+      "httpStatus": "FAILED",
+      "httpError": "OCR_VISIBILITY_UNCERTAIN",
+      "httpText": null,
+      "retainedNeighbor": null
+    },
+    {
+      "id": "zh-negative-zero",
+      "adjacent": false,
+      "old": "-054.80",
+      "new": "-000123456789.80",
+      "expected": "长金额编辑核验 2097\n记录编号 00783\n金额 -000123456789.80\n日期 2097-11-06\n保留相邻文字 21.40\n",
+      "beforeOfficeText": "长金额编辑核验 2097\n记录编号 00783\n金额 -0001234567\n89.80\n日期 2097-11-06\n保留\n相邻文字 21.40\n",
+      "afterOfficeText": "长金额编辑核验 2097\n记录编号 00783\n金额 -000123456789.80\n日期 2097-11-06\n保留\n相邻文字 21.40\n",
+      "actualVisibleCropOcrBefore": "金额 -0001234567\n89.80\n",
+      "actualVisibleCropOcrAfter": "金额 -000123456789.80\n",
+      "beforeNumericBoundariesExact": false,
+      "afterNumericBoundariesExact": true,
+      "sourceWordMediaAndMaskExact": true,
+      "normalOfficePixelsExact": true,
+      "sourceShapesOnlyWidthChanges": true,
+      "originalAmountShape": {
+        "id": "text-ocr-p1-l3-word-1-27",
+        "style": "position:absolute;margin-left:69.072pt;margin-top:159.443pt;width:81.680pt;height:17.308pt;z-index:4;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+        "texts": [
+          "-054.80"
+        ]
+      },
+      "finalAmountShape": {
+        "id": "text-ocr-p1-l3-word-1-27",
+        "style": "position:absolute;margin-left:69.072pt;margin-top:159.443pt;width:115.795pt;height:17.308pt;z-index:4;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+        "texts": [
+          "-054.80"
+        ]
+      },
+      "editedPixelsOutsideAmountBox": null,
+      "sourceAndEditableWordTextExact": true,
+      "rawOfficeCerBefore": 0.028169014084507043,
+      "rawOfficeCerAfter": 0.014084507042253521,
+      "whitespaceNormalizedBefore": true,
+      "whitespaceNormalizedAfter": true,
+      "httpStatus": "FAILED",
+      "httpError": "OCR_VISIBILITY_UNCERTAIN",
+      "httpText": null,
+      "retainedNeighbor": null
+    },
+    {
+      "id": "zh-adjacent-zero",
+      "adjacent": true,
+      "old": "00062.35",
+      "new": "000000123456789.35",
+      "expected": "长金额编辑核验 2097\n记录编号 00783\n金额 000000123456789.35  TAIL 2097\n日期 2097-11-06\n保留相邻文字 21.40\n",
+      "beforeOfficeText": "长金额编辑核验 2097\n记录编号 00783\n449 00000012\n3456789.3\n5 \nTAIL 2097\n日期 2097-11-06\n保留\n相邻文字 21.40\n",
+      "afterOfficeText": "长金额编辑核验 2097\n记录编号 00783\n449 00000012\n3456789.3\n5 \nTAIL 2097\n日期 2097-11-06\n保留\n相邻文字 21.40\n",
+      "actualVisibleCropOcrBefore": "449 00000012 TAIL 2097\n3456789.3\n5\n",
+      "actualVisibleCropOcrAfter": "449 00000012 TAIL 2097\n3456789.3\n5\n",
+      "beforeNumericBoundariesExact": false,
+      "afterNumericBoundariesExact": false,
+      "sourceWordMediaAndMaskExact": true,
+      "normalOfficePixelsExact": true,
+      "sourceShapesOnlyWidthChanges": true,
+      "originalAmountShape": {
+        "id": "text-ocr-p1-l3-word-1-28",
+        "style": "position:absolute;margin-left:68.953pt;margin-top:159.434pt;width:65.670pt;height:17.404pt;z-index:4;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+        "texts": [
+          "00062.35 "
+        ]
+      },
+      "finalAmountShape": {
+        "id": "text-ocr-p1-l3-word-1-28",
+        "style": "position:absolute;margin-left:68.953pt;margin-top:159.434pt;width:65.670pt;height:17.404pt;z-index:4;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+        "texts": [
+          "00062.35 "
+        ]
+      },
+      "editedPixelsOutsideAmountBox": [
+        290,
+        740,
+        548,
+        821
+      ],
+      "sourceAndEditableWordTextExact": true,
+      "rawOfficeCerBefore": 0.08333333333333333,
+      "rawOfficeCerAfter": 0.08333333333333333,
+      "whitespaceNormalizedBefore": false,
+      "whitespaceNormalizedAfter": false,
+      "httpStatus": "FAILED",
+      "httpError": "OCR_VISIBILITY_UNCERTAIN",
+      "httpText": null,
+      "retainedNeighbor": true
+    }
+  ],
+  "beforeExactAmountBoundaries": 0,
+  "afterExactAmountBoundaries": 4,
+  "visibleRenderedLongAmountsExact": 4,
+  "englishHttpExact": 2,
+  "chineseHttpUnaccepted": 3,
+  "adjacentLongAmountFallbackUnresolved": 2,
+  "normalOfficePixelsExact": 6,
+  "originalMaskAndMediaExact": 6,
+  "roiOcrCalls": 12,
+  "tests": {
+    "tests": 502,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "httpInitialInvalidChineseGraph": 24,
+  "httpCorrectedChineseBefore": 15,
+  "httpFinal": 30,
+  "workerIdentitiesAbsent": 69,
+  "newZombies": [],
+  "ECHILD": true,
+  "samplerBudgetUnchanged": 250000,
+  "maximumOptionalReserveMm": 25,
+  "originalShortReserveRetainedOnExtensionFailure": true,
+  "sourcePositionsAndOcrImplementationNotChanged": true,
+  "fullRecognitionModelsCaptured": false,
+  "noOcrQualityImprovementClaim": true,
+  "changedClasses": [
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OcrMask.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OcrAppearance.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$1.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$FixedItem.class"
+  ],
+  "otherApplicationClassesAndResourcesByteExact": true,
+  "bundledTests": [
+    {
+      "className": "com.fuyue.formatconverter.task.OcrDeskewTest",
+      "name": "bundledEngineRecoversMissingLinesWithSourceGeometryAndReviewWarnings",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.PdfToImageConverterTest",
+      "name": "discoversBundledPopplerFromAppHome",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.ForkedFileConverterTest",
+      "name": "retainsAutoDiscoveredBundledOcrWhenTheWorkerChangesItsWorkingDirectory",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "discoversBundledRuntimeFromPackagedApplicationRoot",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "validBundledRuntimeAutoEnablesWithoutHostInstallation",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "explicitFalseDisablesEvenAValidBundledRuntime",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.BundledOcrRuntimeIntegrationTest",
+      "name": "bundledBinaryModelsAndLibrariesRunWithoutSystemDiscovery",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractPngInputTest",
+      "name": "bundledPngEngineRecognizesRealJpegText",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+      "name": "bundledEngineRecoversShadedLowContrastPrintedText",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+      "name": "bundledEngineRecoversChineseFaintTextWithDigitsAndPunctuation",
+      "skipped": false
+    }
+  ],
+  "runtimePayloadFilesReverified": 12,
+  "runtimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+  "versionsRetainedFromAcceptedHead35": {
+    "java": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nopenjdk version \"17.0.16\" 2025-07-15\nOpenJDK Runtime Environment Temurin-17.0.16+8 (build 17.0.16+8)\nOpenJDK 64-Bit Server VM Temurin-17.0.16+8 (build 17.0.16+8, mixed mode, sharing)",
+    "maven": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nApache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)\nMaven home: /workspace/fuyue-env/tools/apache-maven-3.9.11\nJava version: 17.0.16, vendor: Eclipse Adoptium, runtime: /workspace/fuyue-env/tools/jdk-17.0.16+8\nDefault locale: en, platform encoding: UTF-8\nOS name: \"linux\", version: \"6.18.44\", arch: \"amd64\", family: \"unix\"",
+    "node": "v22.17.0",
+    "ocr": "tesseract 5.5.2\n leptonica-1.87.0\n  libpng 1.6.57 : zlib 1.3.1\n Found AVX512BW\n Found AVX512F\n Found AVX512VNNI\n Found AVX2\n Found AVX\n Found FMA\n Found SSE4.1",
+    "office": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "pymupdf": "1.26.6",
+    "linux": "6.18.44"
+  },
+  "fonts": {
+    "source": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+      "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+      "version": "LiberationSans2.1.5",
+      "license": "SIL-OFL-1.1"
+    },
+    "bundled": [
+      {
+        "path": "task-service/src/main/resources/fonts/LiberationSans-Regular.ttf",
+        "sha256": "76d04c18ea243f426b7de1f3ad208e927008f961dc5945e5aad352d0dfde8ee8",
+        "license": "SIL-OFL-1.1",
+        "version": [
+          "Version 2.1.5"
+        ]
+      },
+      {
+        "path": "task-service/src/main/resources/fonts/DroidSansFallback.ttf",
+        "sha256": "21b96a0377f067833a93af3082eb28d4ffab7a8cd46bfd513286f1d64b7b0949",
+        "license": "Apache-2.0",
+        "version": [
+          "Version 2.55b"
+        ]
+      }
+    ]
+  },
+  "resources": [
+    {
+      "phase": "initial",
+      "resources": {
+        "wallSeconds": 76.28977212800237,
+        "userSeconds": 188.968251,
+        "systemSeconds": 13.980163,
+        "maxChildRssKiB": 378500
+      }
+    },
+    {
+      "phase": "correctedChineseBefore",
+      "resources": {
+        "wallSeconds": 52.0302995489983,
+        "userSeconds": 130.747907,
+        "systemSeconds": 10.135463,
+        "maxChildRssKiB": 378596
+      }
+    },
+    {
+      "phase": "after",
+      "resources": {
+        "wallSeconds": 94.88275591099955,
+        "userSeconds": 234.331733,
+        "systemSeconds": 19.378967,
+        "maxChildRssKiB": 379852
+      }
+    }
+  ],
+  "initialChineseFailure": "DroidFallback alone has no Latin digits;initial3sources invalid,edits unsupported;preserved;threecorrectedmixed-font scans independently frozen without rerunningEnglish",
+  "remaining": [
+    "twoadjacent longamounts still wrap;no safeblankreservation",
+    "Chinese actual Office longamounts corrected but all3HTTP strict OCR_VISIBILITY_UNCERTAIN retained",
+    "Chinese preexisting footer/native readorder linebreak remains",
+    "arbitrary textlength/sourceconflicts/sparseOFD/nativeMacWindows/MicrosoftWord acceptance unrun"
+  ],
+  "helpers": {
+    "generate_long_amount36.py": "62a0e0c79f3e2ee68bcf538d32411829db64783468492a74a06358638baf1b90",
+    "prepare_long_amount36.py": "21d14c3ed421860e0c6f3157712b656180aac4d9e27ca8afcf0e8137c3e9eae2",
+    "render_long_amount36.py": "f12c8f74f96382a3cc80aa58e53ed902f312c6ed977016e5043dd05de845b0bd",
+    "verify_long_amount36.py": "3974328d4ef19fe5ea77aa12d44f61202ff01314eab7e0c1b76b60651d9e59dd",
+    "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf",
+    "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9",
+    "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85"
+  }
+}
