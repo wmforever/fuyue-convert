@@ -45,7 +45,7 @@ public final class PdfToTextConverter implements FileConverter {
         var sections = new PdfTextSectionOrder();
         var parsed = parser.parseForTextSections(input.path(), input.displayName(), limits, ocr != null, sections);
         if (ocr != null) {
-            parsed = ocr.recognizeMissingPages(input.path(), parsed, workDir.resolve("pdf-ocr"), limits, progress);
+            parsed = ocr.recognizeMissingPagesForText(input.path(), parsed, workDir.resolve("pdf-ocr"), limits, progress);
         }
         progress.update(TaskStage.RECOGNIZING, 60);
         var pages = parsed.pages().stream().map(analyzer::analyze).toList();

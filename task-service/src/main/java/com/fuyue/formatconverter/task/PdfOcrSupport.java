@@ -40,6 +40,17 @@ final class PdfOcrSupport {
 
     DocumentModel recognizeMissingPages(Path source, DocumentModel parsed, Path workDir,
                                         ParseLimits limits, ConversionProgress progress) throws Exception {
+        return recognizeMissingPages(source, parsed, workDir, limits, progress, false);
+    }
+
+    DocumentModel recognizeMissingPagesForText(Path source, DocumentModel parsed, Path workDir,
+                                               ParseLimits limits, ConversionProgress progress) throws Exception {
+        return recognizeMissingPages(source, parsed, workDir, limits, progress, true);
+    }
+
+    private DocumentModel recognizeMissingPages(Path source, DocumentModel parsed, Path workDir,
+                                                ParseLimits limits, ConversionProgress progress,
+                                                boolean respectVisibility) throws Exception {
         Files.createDirectories(workDir);
         requireCompletePageModel(parsed);
         List<PageModel> pages = new ArrayList<>(parsed.pages().size());
@@ -67,7 +78,16 @@ final class PdfOcrSupport {
                 }
                 requireAvailable(page.pageNumber());
                 if (!page.textBlocks().isEmpty()) {
-                    pages.add(recognizeRequiredImages(page, requiredImages, workDir, limits));
+                    PdfOcrVisibility visibility = null;
+                    if (respectVisibility) {
+                        try {
+                            visibility = PdfOcrVisibility.inspect(pdf.getPage(index), page.images(), limits.maxEntries());
+                        } catch (java.io.IOException e) {
+                            throw new ConversionFailureException("OCR_VISIBILITY_UNCERTAIN",
+                                    "PDF 扫描文字可见性分析超出限制或无法完成，拒绝合并旧图像文字。");
+                        }
+                    }
+                    pages.add(recognizeRequiredImages(page, requiredImages, workDir, limits, visibility));
                     continue;
                 }
                 var pdfPage = pdf.getPage(index);
@@ -106,7 +126,7 @@ final class PdfOcrSupport {
 
     /** OCRs every image region that the parser classified as required; failure is fatal. */
     private PageModel recognizeRequiredImages(PageModel page, List<ImageBlock> requiredImages,
-                                               Path workDir, ParseLimits limits) throws Exception {
+                                               Path workDir, ParseLimits limits, PdfOcrVisibility visibility) throws Exception {
         if (requiredImages.isEmpty()) return page;
         List<TextBlock> texts = new ArrayList<>(page.textBlocks());
         List<ConversionWarning> warnings = withoutOcrRequired(page.warnings());
@@ -129,9 +149,11 @@ final class PdfOcrSupport {
                         page.pageNumber(), image.box(), limits);
                 ocr.requireUsableResult(recognized,
                         "PDF 第 " + page.pageNumber() + " 页图片 " + imageIndex);
-                List<TextBlock> beyondNative = recognized.blocks().stream()
+                var visible = visibility == null ? new PdfOcrVisibility.Filtered(recognized.blocks(), 0)
+                        : visibility.filter(recognized.blocks());
+                List<TextBlock> beyondNative = visible.blocks().stream()
                         .filter(block -> !OcrTextDeduplicator.duplicates(block, page.textBlocks())).toList();
-                if (beyondNative.isEmpty()) {
+                if (beyondNative.isEmpty() && !(visible.blocks().isEmpty() && visible.hiddenWords() > 0)) {
                     throw new ConversionFailureException("OCR_NO_NEW_TEXT",
                             "PDF 第 " + page.pageNumber() + " 页图片 " + imageIndex
                                     + " 缺少原生文字层，但 OCR 未补充出新文字");
@@ -141,6 +163,11 @@ final class PdfOcrSupport {
                 }
                 warnings.addAll(ocr.warningsFor(recognized, page.pageNumber(),
                         "PDF 第 " + page.pageNumber() + " 页图片 " + imageIndex));
+                if (visible.hiddenWords() > 0) warnings.add(new ConversionWarning(
+                        WarningCode.OCR_OCCLUDED_TEXT_IGNORED,
+                        "PDF 第 " + page.pageNumber() + " 页有 " + visible.hiddenWords()
+                                + " 个底图 OCR 词被后绘制的不透明遮罩完整覆盖，未并入可见文字；其余 OCR 仍需复核。",
+                        page.pageNumber(), image.box(), null));
             } catch (ConversionFailureException e) {
                 throw e;
             } catch (Exception e) {
