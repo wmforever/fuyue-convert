@@ -36,6 +36,11 @@ final class FixedLayoutDocxRenderer {
      */
     void renderOverlays(XWPFDocument docx, XWPFParagraph anchor, PageModel page,
                         List<TextBlock> fallbackTexts) throws Exception {
+        renderOverlays(docx, anchor, page, fallbackTexts, Map.of());
+    }
+
+    void renderOverlays(XWPFDocument docx, XWPFParagraph anchor, PageModel page,
+                        List<TextBlock> fallbackTexts, Map<TextBlock, XWPFParagraph> textAnchors) throws Exception {
         page.lines().stream().filter(line -> !insideAnyTable(line, page.tables()))
                 .sorted(Comparator.comparingInt(LineElement::zOrder))
                 .forEach(line -> unchecked(() -> addLine(anchor, line)));
@@ -44,7 +49,7 @@ final class FixedLayoutDocxRenderer {
         Map<TextBlock.OcrWord, ColorValue> ocrColors = addOcrMasks(anchor, page, fallbackTexts);
         fallbackReadingOrder(page, fallbackTexts).stream()
                 .filter(text -> !text.text().isEmpty())
-                .forEach(text -> unchecked(() -> addTextBox(docx, anchor, text, ocrColors)));
+                .forEach(text -> unchecked(() -> addTextBox(docx, textAnchors.getOrDefault(text, anchor), text, ocrColors)));
     }
 
     private List<TextBlock> fallbackReadingOrder(PageModel page, List<TextBlock> texts) {

@@ -45,9 +45,7 @@ class PdfToDocxColumnsTest {
 
         try (XWPFDocument word = new XWPFDocument(Files.newInputStream(output))) {
             assertTrue(word.getAllPictures().isEmpty(), "纯文字 PDF 不应退化为图片");
-            assertEquals(List.of("COLUMN REPORT"), word.getParagraphs().stream()
-                    .filter(paragraph -> !paragraph.getCTP().xmlText().contains("txbxContent"))
-                    .map(paragraph -> paragraph.getText()).filter(text -> !text.isBlank()).toList(),
+            assertEquals(List.of("COLUMN REPORT"), plainBodyTexts(word),
                     "跨栏标题应继续保留为普通正文段落");
         }
         try (ZipFile archive = new ZipFile(output.toFile())) {
@@ -122,9 +120,7 @@ class PdfToDocxColumnsTest {
             try (XWPFDocument word = new XWPFDocument(Files.newInputStream(output))) {
                 assertTrue(word.getAllPictures().isEmpty());
                 assertEquals(List.of("COLUMN REPORT", sectionHeading, "Ordinary body after the columns"),
-                        word.getParagraphs().stream()
-                                .filter(paragraph -> !paragraph.getCTP().xmlText().contains("txbxContent"))
-                                .map(paragraph -> paragraph.getText()).filter(text -> !text.isBlank()).toList(),
+                        plainBodyTexts(word),
                         "跨栏标题与后续普通正文不能被吸收到前面的双栏区域");
             }
             try (ZipFile archive = new ZipFile(output.toFile())) {
@@ -155,6 +151,14 @@ class PdfToDocxColumnsTest {
         new PdfToDocxConverter().convert(new ConversionInput(source.getFileName().toString(), "application/pdf",
                         Files.size(source), source), temp.resolve("work"), output, ParseLimits.defaults(), (stage, percent) -> { });
         return output;
+    }
+
+    private List<String> plainBodyTexts(XWPFDocument word) {
+        // A normal body heading may anchor floating column shapes. Its direct
+        // text runs remain ordinary editable body text, outside the textboxes.
+        return word.getParagraphs().stream().map(p -> p.getCTP().getRList().stream()
+                .flatMap(r -> r.getTList().stream()).map(t -> t.getStringValue())
+                .collect(java.util.stream.Collectors.joining())).filter(t -> !t.isBlank()).toList();
     }
 
     private void addText(PDPageContentStream content, float x, float y, String text) throws Exception {

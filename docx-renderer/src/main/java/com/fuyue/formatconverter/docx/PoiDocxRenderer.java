@@ -42,11 +42,20 @@ public final class PoiDocxRenderer implements DocxRenderer {
                         List<ParagraphModel> fixedParagraphs = semanticParagraphs.stream().filter(fixed::contains).toList();
                         List<TextBlock> fallbackTexts = fixedParagraphs.stream()
                                 .flatMap(paragraph -> paragraph.runs().stream()).toList();
-                        overlays.renderOverlays(docx, anchor, page, fallbackTexts);
+                        // Plain born-digital column frames belong after their preceding
+                        // body heading in XML/copy order. Reuse that paragraph as the
+                        // anchor without adding line boxes or changing page coordinates.
+                        // OCR, graphics, tables and transformed text retain their path.
+                        boolean interleaveColumns = !fallbackTexts.isEmpty() && page.images().isEmpty()
+                                && page.lines().isEmpty() && page.tables().isEmpty()
+                                && semanticParagraphs.stream().noneMatch(this::requiresFixedPosition);
+                        Map<TextBlock, XWPFParagraph> textAnchors = interleaveColumns ? new IdentityHashMap<>() : null;
+                        if (!interleaveColumns) overlays.renderOverlays(docx, anchor, page, fallbackTexts);
                         boolean geometryChanges = i < pages.size() - 1
                                 && !samePageGeometry(page.physicalBox(), pages.get(i + 1).physicalBox());
                         XWPFParagraph sectionCarrier = renderPage(docx, page, semanticParagraphs,
-                                fixedParagraphs, anchor, geometryChanges);
+                                fixedParagraphs, anchor, geometryChanges, textAnchors);
+                        if (interleaveColumns) overlays.renderOverlays(docx, anchor, page, fallbackTexts, textAnchors);
                         CTPPr boundaryProperties = null;
                         if (i < pages.size() - 1) {
                             boundaryProperties = sectionCarrier.getCTP().isSetPPr()
@@ -150,7 +159,8 @@ public final class PoiDocxRenderer implements DocxRenderer {
     private XWPFParagraph renderPage(XWPFDocument docx, PageModel page,
                             List<ParagraphModel> semanticParagraphs,
                             List<ParagraphModel> fixedParagraphs,
-                            XWPFParagraph anchor, boolean needsSectionCarrier) throws Exception {
+                            XWPFParagraph anchor, boolean needsSectionCarrier,
+                            Map<TextBlock, XWPFParagraph> textAnchors) throws Exception {
         List<PositionedContent> content = new ArrayList<>();
         for (ParagraphModel paragraph : semanticParagraphs) {
             if (!fixedParagraphs.contains(paragraph)) {
@@ -167,6 +177,11 @@ public final class PoiDocxRenderer implements DocxRenderer {
             if (item.paragraph() != null) {
                 lastParagraph = docx.createParagraph();
                 renderParagraph(lastParagraph, item.paragraph(), page.physicalBox(), previousBottom);
+                if (textAnchors != null) {
+                    for (ParagraphModel fixed : fixedParagraphs) for (TextBlock block : fixed.runs()) {
+                        if (item.paragraph().box().bottom() < block.box().y()) textAnchors.put(block, lastParagraph);
+                    }
+                }
                 previousBottom = item.paragraph().box().y() + paragraphHeightMm(item.paragraph());
                 tableLast = false;
             } else if (item.table() != null) {
