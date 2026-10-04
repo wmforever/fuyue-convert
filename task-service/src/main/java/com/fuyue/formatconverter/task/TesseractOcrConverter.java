@@ -213,6 +213,11 @@ public final class TesseractOcrConverter implements FileConverter {
         if (!"3".equals(pageSegmentationMode()) || sx <= 0 || sy <= 0 || Math.abs(sx / sy - 1) > .01
                 || remainingTime(started).compareTo(Duration.ofSeconds(1)) <= 0) return original;
         long deadline = started + settings.timeout().toNanos();
+        // Staggered upright columns can imitate a tilted full-page baseline.
+        // If the original already meets all strict aligned-fragment bounds,
+        // retain its words/geometry rather than rotate the whole page.
+        var columns = OcrReadingOrder.arrange(original.blocks(), physicalBox.width(), deadline);
+        if (columns.multipleColumns() && columns.adjusted()) return original;
         try (var prepared = OcrDeskew.prepare(pixels, settings.maxImagePixels(), deadline)) {
             if (prepared == null) return original;
             Path temporary = Files.createTempFile(workDir, "tesseract-deskew-%04d-".formatted(pageNumber), ".png");

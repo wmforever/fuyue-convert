@@ -1,0 +1,372 @@
+{
+  "seed": 110042026,
+  "provenance": "New public synthetic bilingual corpus; frozen before algorithm changes and not derived from OCR",
+  "license": "Apache-2.0 generated text/code; separate SIL-OFL-1.1 fonts",
+  "fonts": {
+    "mono": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+      "sha256": "5883330d94debd992952cd8f0571b225f478c2d797d3f36c7521b0a5c9bde0f2",
+      "versions": [
+        "Version 2.1.5"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/liberationfonts/liberation-fonts"
+    },
+    "serif": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
+      "sha256": "9caef765d2e891c10dd73658894f01e660fe0c1c83e0bda7d6edf561d8f623d4",
+      "versions": [
+        "Version 2.1.5"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/liberationfonts/liberation-fonts"
+    },
+    "cjk": {
+      "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+      "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+      "versions": [
+        "Version 2.004;hotconv 1.0.118;makeotfexe 2.5.65603"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/notofonts/noto-cjk"
+    },
+    "cjk-serif": {
+      "path": "/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc",
+      "sha256": "5d9c31a059600193c9d7968a998bde886ccdc77e934006ad243b41794c496a7d",
+      "versions": [
+        "Version 2.003;hotconv 1.1.1;makeotfexe 2.6.0"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/notofonts/noto-cjk"
+    }
+  },
+  "versions": {
+    "Pillow": "12.3.0",
+    "NumPy": "2.3.5"
+  },
+  "generatorSha256": "17dd74a0e1efccf606e666e0845dbeb20c7e1ebd812a7cab15759dcd1cea484d",
+  "limits": [
+    "Unruled pairs share identical pixels with different stated intents; do not count as independent trials or infer their intent."
+  ],
+  "cases": [
+    {
+      "file": "en-prose-unruled.png",
+      "sha256": "dab69730d5337bf312e8d7306ea73b91247866c52dd2f7ebf67b6bc8237a421c",
+      "expectedLines": [
+        "Harbor keeps record01",
+        "Meadow keeps record01",
+        "Copper keeps record01",
+        "Harbor keeps record02",
+        "Meadow keeps record02",
+        "Copper keeps record02",
+        "Harbor keeps record03",
+        "Meadow keeps record03",
+        "Copper keeps record03",
+        "Harbor keeps record04",
+        "Meadow keeps record04",
+        "Copper keeps record04"
+      ],
+      "font": "mono",
+      "layout": "prose-table",
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "ambiguityPair": "en-identical-unruled",
+      "readingIntent": "row-major; not inferable from pixels alone"
+    },
+    {
+      "file": "en-columns-aligned.png",
+      "sha256": "dab69730d5337bf312e8d7306ea73b91247866c52dd2f7ebf67b6bc8237a421c",
+      "expectedLines": [
+        "Harbor keeps record01",
+        "Harbor keeps record02",
+        "Harbor keeps record03",
+        "Harbor keeps record04",
+        "Meadow keeps record01",
+        "Meadow keeps record02",
+        "Meadow keeps record03",
+        "Meadow keeps record04",
+        "Copper keeps record01",
+        "Copper keeps record02",
+        "Copper keeps record03",
+        "Copper keeps record04"
+      ],
+      "font": "mono",
+      "layout": "three-columns",
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "ambiguityPair": "en-identical-unruled",
+      "readingIntent": "column-major; intentionally identical ambiguity pixels"
+    },
+    {
+      "file": "en-ruled.png",
+      "sha256": "4352638f21f449caf951ba5f6579e5a400fe4a0dcc4ee905d9d2035cc132e212",
+      "expectedLines": [
+        "Harbor keeps record01",
+        "Meadow keeps record01",
+        "Copper keeps record01",
+        "Harbor keeps record02",
+        "Meadow keeps record02",
+        "Copper keeps record02",
+        "Harbor keeps record03",
+        "Meadow keeps record03",
+        "Copper keeps record03",
+        "Harbor keeps record04",
+        "Meadow keeps record04",
+        "Copper keeps record04"
+      ],
+      "font": "mono",
+      "layout": "prose-table",
+      "sourceSkewDegrees": 0,
+      "dpi": 300
+    },
+    {
+      "file": "en-staggered-columns.png",
+      "sha256": "9460f5bfa5f401afb976717594df364481cd904641b8c3fcb89d335e4482f037",
+      "expectedLines": [
+        "Harbor keeps record01",
+        "Harbor keeps record02",
+        "Harbor keeps record03",
+        "Harbor keeps record04",
+        "Meadow keeps record01",
+        "Meadow keeps record02",
+        "Meadow keeps record03",
+        "Meadow keeps record04",
+        "Copper keeps record01",
+        "Copper keeps record02",
+        "Copper keeps record03",
+        "Copper keeps record04"
+      ],
+      "font": "mono",
+      "layout": "three-columns",
+      "sourceSkewDegrees": 0,
+      "dpi": 300
+    },
+    {
+      "file": "zh-prose-unruled.png",
+      "sha256": "dbf1b11c160b73ca21ac4baba4bb671c5d0a5ce7c95d101f84873846aad870d8",
+      "expectedLines": [
+        "Harbor保留第01条记录。",
+        "Meadow保留第01条记录。",
+        "Copper保留第01条记录。",
+        "Harbor保留第02条记录。",
+        "Meadow保留第02条记录。",
+        "Copper保留第02条记录。",
+        "Harbor保留第03条记录。",
+        "Meadow保留第03条记录。",
+        "Copper保留第03条记录。",
+        "Harbor保留第04条记录。",
+        "Meadow保留第04条记录。",
+        "Copper保留第04条记录。"
+      ],
+      "font": "cjk",
+      "layout": "prose-table",
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "ambiguityPair": "zh-identical-unruled",
+      "readingIntent": "row-major; not inferable from pixels alone"
+    },
+    {
+      "file": "zh-columns-aligned.png",
+      "sha256": "dbf1b11c160b73ca21ac4baba4bb671c5d0a5ce7c95d101f84873846aad870d8",
+      "expectedLines": [
+        "Harbor保留第01条记录。",
+        "Harbor保留第02条记录。",
+        "Harbor保留第03条记录。",
+        "Harbor保留第04条记录。",
+        "Meadow保留第01条记录。",
+        "Meadow保留第02条记录。",
+        "Meadow保留第03条记录。",
+        "Meadow保留第04条记录。",
+        "Copper保留第01条记录。",
+        "Copper保留第02条记录。",
+        "Copper保留第03条记录。",
+        "Copper保留第04条记录。"
+      ],
+      "font": "cjk",
+      "layout": "three-columns",
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "ambiguityPair": "zh-identical-unruled",
+      "readingIntent": "column-major; intentionally identical ambiguity pixels"
+    },
+    {
+      "file": "zh-ruled.png",
+      "sha256": "651580df46f9f24a156e9d02c4a617b5736e4b01c4f51f99453f1662d069701a",
+      "expectedLines": [
+        "Harbor保留第01条记录。",
+        "Meadow保留第01条记录。",
+        "Copper保留第01条记录。",
+        "Harbor保留第02条记录。",
+        "Meadow保留第02条记录。",
+        "Copper保留第02条记录。",
+        "Harbor保留第03条记录。",
+        "Meadow保留第03条记录。",
+        "Copper保留第03条记录。",
+        "Harbor保留第04条记录。",
+        "Meadow保留第04条记录。",
+        "Copper保留第04条记录。"
+      ],
+      "font": "cjk",
+      "layout": "prose-table",
+      "sourceSkewDegrees": 0,
+      "dpi": 300
+    },
+    {
+      "file": "zh-staggered-columns.png",
+      "sha256": "0417b3d793a0254fb11d5bc414c8706f8831a13e2798d61be190cb9fb7221223",
+      "expectedLines": [
+        "Harbor保留第01条记录。",
+        "Harbor保留第02条记录。",
+        "Harbor保留第03条记录。",
+        "Harbor保留第04条记录。",
+        "Meadow保留第01条记录。",
+        "Meadow保留第02条记录。",
+        "Meadow保留第03条记录。",
+        "Meadow保留第04条记录。",
+        "Copper保留第01条记录。",
+        "Copper保留第02条记录。",
+        "Copper保留第03条记录。",
+        "Copper保留第04条记录。"
+      ],
+      "font": "cjk",
+      "layout": "three-columns",
+      "sourceSkewDegrees": 0,
+      "dpi": 300
+    },
+    {
+      "file": "en-numeric-upright.png",
+      "sha256": "28bafb55138f32af77a4daf593abbb40479b7c016b700625da3f879536fc1021",
+      "expectedLines": [
+        "Dispatch record 03121 dated 2027-02-16",
+        "Account 00643 debit -417.85 USD",
+        "Unit price .85 quantity 026 credit -0.65",
+        "Net 17.40 total 029.05 discount 6.75%",
+        "Keep every original word and scan pixel",
+        "Reference CD-00817 cleared after checking",
+        "Final balance 563.27 on 2027-03-09",
+        "Separate numbers 14 28 remain separate"
+      ],
+      "font": "mono",
+      "layout": "numeric-control",
+      "sourceSkewDegrees": 0,
+      "dpi": 300
+    },
+    {
+      "file": "zh-numeric-upright.png",
+      "sha256": "187739616fd3c0dcbed7a11357a282373a74b25c120db1a06f07483490194ee5",
+      "expectedLines": [
+        "发运记录03121，日期2027年02月16日。",
+        "账户00643，借方金额-417.85元。",
+        "单价0.85，数量026，抵扣-0.65元。",
+        "净额17.40，总计029.05，折扣6.75%。",
+        "保留全部原始文字和扫描像素。",
+        "参考编号CD-00817，检查后批准。",
+        "最终余额563.27，日期2027年03月09日。",
+        "分开的数字14 28必须保持分开。"
+      ],
+      "font": "cjk",
+      "layout": "numeric-control",
+      "sourceSkewDegrees": 0,
+      "dpi": 300
+    },
+    {
+      "file": "en-mono-shadow.png",
+      "sha256": "b415c6becb461c1e146bf40a2a5943bcd600a4248b42b5429cb1fa6ed76437ef",
+      "expectedLines": [
+        "Dispatch record 03121 dated 2027-02-16",
+        "Account 00643 debit -417.85 USD",
+        "Unit price .85 quantity 026 credit -0.65",
+        "Net 17.40 total 029.05 discount 6.75%",
+        "Keep every original word and scan pixel",
+        "Reference CD-00817 cleared after checking",
+        "Final balance 563.27 on 2027-03-09",
+        "Separate numbers 14 28 remain separate"
+      ],
+      "font": "mono",
+      "layout": "shadow-x",
+      "sourceSkewDegrees": 0,
+      "dpi": 300
+    },
+    {
+      "file": "en-serif-shadow.png",
+      "sha256": "d5819696293b0917be6ba1aaa8445d3adaf5d5b665fb66681e16d05d22a16174",
+      "expectedLines": [
+        "Dispatch record 03121 dated 2027-02-16",
+        "Account 00643 debit -417.85 USD",
+        "Unit price .85 quantity 026 credit -0.65",
+        "Net 17.40 total 029.05 discount 6.75%",
+        "Keep every original word and scan pixel",
+        "Reference CD-00817 cleared after checking",
+        "Final balance 563.27 on 2027-03-09",
+        "Separate numbers 14 28 remain separate"
+      ],
+      "font": "serif",
+      "layout": "shadow-y",
+      "sourceSkewDegrees": 0,
+      "dpi": 300
+    },
+    {
+      "file": "zh-sans-shadow.png",
+      "sha256": "8eaf039128c8a62d59e72cca39684ceab5796331d860b37d3586033b4df845f0",
+      "expectedLines": [
+        "发运记录03121，日期2027年02月16日。",
+        "账户00643，借方金额-417.85元。",
+        "单价0.85，数量026，抵扣-0.65元。",
+        "净额17.40，总计029.05，折扣6.75%。",
+        "保留全部原始文字和扫描像素。",
+        "参考编号CD-00817，检查后批准。",
+        "最终余额563.27，日期2027年03月09日。",
+        "分开的数字14 28必须保持分开。"
+      ],
+      "font": "cjk",
+      "layout": "shadow-y",
+      "sourceSkewDegrees": 0,
+      "dpi": 300
+    },
+    {
+      "file": "zh-serif-shadow.png",
+      "sha256": "71d6a638fbd822f9321def637102bb0a28515ba93abf41e02b750f2a07f4d577",
+      "expectedLines": [
+        "发运记录03121，日期2027年02月16日。",
+        "账户00643，借方金额-417.85元。",
+        "单价0.85，数量026，抵扣-0.65元。",
+        "净额17.40，总计029.05，折扣6.75%。",
+        "保留全部原始文字和扫描像素。",
+        "参考编号CD-00817，检查后批准。",
+        "最终余额563.27，日期2027年03月09日。",
+        "分开的数字14 28必须保持分开。"
+      ],
+      "font": "cjk-serif",
+      "layout": "shadow-x",
+      "sourceSkewDegrees": 0,
+      "dpi": 300
+    },
+    {
+      "file": "blank-shadow.png",
+      "sha256": "f022fcb70ddfc0d447e334ed4c45c21bdb0a679ee27d0b0da1801bc8e26b5718",
+      "expectedLines": [],
+      "font": null,
+      "layout": "blank-noise",
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "expectedErrors": [
+        "OCR_NO_TEXT",
+        "OCR_LOW_CONFIDENCE"
+      ]
+    },
+    {
+      "file": "noise-shadow.png",
+      "sha256": "cdc3527e8d78b934566e66fda7c6bef705b8cd777847e1993dead64311dd3281",
+      "expectedLines": [],
+      "font": null,
+      "layout": "blank-noise",
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "expectedErrors": [
+        "OCR_NO_TEXT",
+        "OCR_LOW_CONFIDENCE"
+      ]
+    }
+  ],
+  "containerCases": []
+}

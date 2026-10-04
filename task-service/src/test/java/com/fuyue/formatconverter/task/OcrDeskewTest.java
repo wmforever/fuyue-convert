@@ -157,6 +157,48 @@ class OcrDeskewTest {
         }
     }
 
+    @Test void staggeredUprightColumnFragmentsDoNotTriggerGlobalDeskew() throws Exception {
+        assumeTrue(!System.getProperty("os.name").toLowerCase().contains("win"));
+        var image = new BufferedImage(2400,1500,BufferedImage.TYPE_INT_RGB);
+        var graphics = image.createGraphics();
+        graphics.setColor(Color.WHITE); graphics.fillRect(0,0,2400,1500);
+        graphics.setColor(Color.BLACK);
+        var tsv = new StringBuilder("level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n");
+        String[] labels = {"Harbor","Meadow","Copper"};
+        int block = 0;
+        for (int column=0;column<3;column++) for (int part=0;part<3;part++) for (int row=0;row<4;row++) {
+            int x=120+column*720+part*80, y=250+row*290+column*35;
+            String text = part==0 ? labels[column] : part==1 ? "keeps" : "record0"+(row+1);
+            graphics.fillRect(x,y,60,20);
+            tsv.append("5\t1\t").append(++block).append("\t1\t1\t1\t").append(x).append('\t')
+                .append(y).append("\t60\t20\t90\t").append(text).append('\n');
+        }
+        graphics.dispose();
+        assertNotEquals(0,OcrDeskew.detect(image,System.nanoTime()+Duration.ofSeconds(3).toNanos()),
+            "the staggered ink must reproduce the false global projection angle");
+        Path input=temp.resolve("staggered.png"); ImageIO.write(image,"png",input.toFile()); image.flush();
+        byte[] original=Files.readAllBytes(input);
+        Path raw=temp.resolve("original-columns.tsv"); Files.writeString(raw,tsv);
+        Path binary=temp.resolve("column-engine.sh");
+        Files.writeString(binary,"#!/bin/sh\ncase \"$1\" in *tesseract-deskew-*)\n"
+            +"touch \"$(dirname \"$2\")/deskew-attempted\"\nexit 23\n;; esac\n"
+            +"cp '"+raw.toString().replace("'","'\\''")+"' \"$2.tsv\"\n");
+        assertTrue(binary.toFile().setExecutable(true));
+        var converter=new TesseractOcrConverter(DocumentFormat.PNG,new TesseractOcrConverter.Settings(
+            binary,"eng","fake",Duration.ofSeconds(5),1,.35,.75,25_000_000,temp.resolve("locks")));
+        Path work=temp.resolve("column-work");
+        var result=converter.recognizeLayoutResult(input,work,1,new Rect(0,0,2400,1500),ParseLimits.defaults(),true);
+        assertFalse(Files.exists(work.resolve("deskew-attempted")),
+            "already aligned fragments must not receive a global rotation inferred from staggered columns");
+        assertEquals(0,result.deskewDegrees());
+        assertEquals(36,result.wordCount());
+        var ordered=OcrReadingOrder.arrange(result.blocks(),2400,System.nanoTime()+Duration.ofSeconds(1).toNanos());
+        var expected=new java.util.ArrayList<String>();
+        for (String label:labels) for (int row=1;row<=4;row++) expected.add(label+" keeps record0"+row);
+        assertEquals(expected,ordered.lines());
+        assertArrayEquals(original,Files.readAllBytes(input));
+    }
+
     @Test void rejectsEmptyNumericMismatchAndPreservesDecimalBoundariesWithExplicitConflict() {
         Rect box = new Rect(10, 10, 30, 10);
         try (var prepared = new OcrDeskew.Prepared(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB), 6, new AffineTransform())) {
