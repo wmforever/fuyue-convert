@@ -1,0 +1,765 @@
+{
+  "parentRevision": "9890918dd4cb87a2f52d57f47b8edd3248f82a00",
+  "beforeJarSha256": "7f5fb6f3471e9e9f8a0c5c64145fe3df0c229d7cbedb1e452c3d47c24ff6200c",
+  "afterJarSha256": "1ead3c12b621c612535ba7a9f338915484b79be3b74509cf3c3b8a304b2ce68b",
+  "buildInputSha256": "07911c45cf0a510f7fa9f8ae279e977341c795e246c19711c3dce83aee95b198",
+  "applicationClassCount": 232,
+  "frozenManifestSha256": "e24b3f3ecaf90f69699fc6b933b9b694db1c60c6ac0649f6c21f4928fbd2198a",
+  "rows": [
+    {
+      "id": "accounting",
+      "expectedConflict": true,
+      "nativeSource": "Amount 048.65",
+      "rasterSource": "Amount (048.65)",
+      "changedWordParts": [
+        "docProps/core.xml"
+      ],
+      "wordSubject": "OCR 数值冲突：需人工核对",
+      "wordDescription": "保留原始扫描及可编辑文字。扫描像素不会随文字编辑变化，同位置内容可能叠印；可编辑不等于数值可靠或文字清晰可见，请对照原图人工核对。检测到不同数值或符号，保留两层原文，未选择或规范化其中任何来源。",
+      "apiWarnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 93.9%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9394055366666668
+        },
+        {
+          "code": "OCR_RECOGNITION_CONFLICT",
+          "message": "OFD 第 1 页图片 1 与重叠原生文字包含不同数字或数值符号；保留两层内容，未选择或替换数值，请对照原图复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": null
+        }
+      ],
+      "wordBodyAllOtherPartsByteExact": true,
+      "fullOcrTsvSha256": "dc2551eedd48e39c1a25b8ee34132e200171ddd758b5c984326306c223f195a7",
+      "originalScans": [
+        {
+          "part": "word/media/image1.png",
+          "sourcePixelsExact": true,
+          "size": [
+            2550,
+            3300
+          ]
+        }
+      ],
+      "sourceStylesMasksBoxesUnchanged": true,
+      "office300DpiPixelsExact": true,
+      "officeNativeTextExact": true,
+      "normalVisibleRoiOcr": "AI和:68)\n",
+      "visibleNumericAcceptance": false,
+      "exactValueLineBoxes": {
+        "Amount 048.65": [
+          [
+            76.3499984741211,
+            226.23251342773438,
+            167.8934783935547,
+            241.2985076904297
+          ]
+        ],
+        "Amount (048.65)": [
+          [
+            72.0999984741211,
+            219.8275146484375,
+            171.93931579589844,
+            236.00950622558594
+          ]
+        ]
+      },
+      "beforePdfMetadata": {
+        "format": "PDF 1.7",
+        "title": "",
+        "author": "Apache POI",
+        "subject": "",
+        "keywords": "",
+        "creator": "Writer",
+        "producer": "LibreOfficeDev 26.8.0.0.alpha0 (X86_64)",
+        "creationDate": "D:20261004220619Z'",
+        "modDate": "",
+        "trapped": "",
+        "encryption": null
+      },
+      "afterPdfMetadata": {
+        "format": "PDF 1.7",
+        "title": "",
+        "author": "Apache POI",
+        "subject": "OCR 数值冲突：需人工核对",
+        "keywords": "",
+        "creator": "Writer",
+        "producer": "LibreOfficeDev 26.8.0.0.alpha0 (X86_64)",
+        "creationDate": "D:20261004223331Z'",
+        "modDate": "",
+        "trapped": "",
+        "encryption": null
+      },
+      "afterRenderSha256": "9e00d793d0d503f6f40efa029a528344fc9a32989f0912bf6f5d628843871f3a",
+      "edits": [
+        {
+          "id": "accounting-native-edit",
+          "layer": "native",
+          "old": "Amount 048.65",
+          "new": "Amount 061.42",
+          "exactOneNodeEdit": true,
+          "otherPartsByteExact": true,
+          "officeNativeText": "LEXICAL AUDIT 2094\nRecord 00973\nDate 2094-12-08\nAmount (048.65)\nAmount 061.42\nNOVEL FOOTER 2094\n",
+          "visibleRoiOcr": "AI人.和2)\n",
+          "visibleNumericAcceptance": false,
+          "afterMetadataEditedOfficeRerun": false
+        },
+        {
+          "id": "accounting-ocr-edit",
+          "layer": "ocr",
+          "old": "(048.65)",
+          "new": "(079.53)",
+          "exactOneNodeEdit": true,
+          "otherPartsByteExact": true,
+          "officeNativeText": "LEXICAL AUDIT 2094\nRecord 00973\nDate 2094-12-08\nAmount (079.53)\nAmount 048.65\nNOVEL FOOTER 2094\n",
+          "visibleRoiOcr": "AI和.68)\n",
+          "visibleNumericAcceptance": false,
+          "afterMetadataEditedOfficeRerun": false
+        }
+      ]
+    },
+    {
+      "id": "percent",
+      "expectedConflict": true,
+      "nativeSource": "Rate 10",
+      "rasterSource": "Rate 10%",
+      "changedWordParts": [
+        "docProps/core.xml"
+      ],
+      "wordSubject": "OCR 数值冲突：需人工核对",
+      "wordDescription": "保留原始扫描及可编辑文字。扫描像素不会随文字编辑变化，同位置内容可能叠印；可编辑不等于数值可靠或文字清晰可见，请对照原图人工核对。检测到不同数值或符号，保留两层原文，未选择或规范化其中任何来源。",
+      "apiWarnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 93.9%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9392873316666668
+        },
+        {
+          "code": "OCR_RECOGNITION_CONFLICT",
+          "message": "OFD 第 1 页图片 1 与重叠原生文字包含不同数字或数值符号；保留两层内容，未选择或替换数值，请对照原图复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": null
+        }
+      ],
+      "wordBodyAllOtherPartsByteExact": true,
+      "fullOcrTsvSha256": "f70c645278aaa72e2bfc51d4ceb1e5e67cea7c8623d7657b99ef6e3bce620838",
+      "originalScans": [
+        {
+          "part": "word/media/image1.png",
+          "sourcePixelsExact": true,
+          "size": [
+            2550,
+            3300
+          ]
+        }
+      ],
+      "sourceStylesMasksBoxesUnchanged": true,
+      "office300DpiPixelsExact": true,
+      "officeNativeTextExact": true,
+      "normalVisibleRoiOcr": "Raley\n",
+      "visibleNumericAcceptance": false,
+      "exactValueLineBoxes": {
+        "Rate 10": [
+          [
+            76.3499984741211,
+            226.23251342773438,
+            123.58650207519531,
+            241.2985076904297
+          ]
+        ],
+        "Rate 10%": [
+          [
+            72.0,
+            220.33248901367188,
+            131.8000030517578,
+            235.3984832763672
+          ]
+        ]
+      },
+      "beforePdfMetadata": {
+        "format": "PDF 1.7",
+        "title": "",
+        "author": "Apache POI",
+        "subject": "",
+        "keywords": "",
+        "creator": "Writer",
+        "producer": "LibreOfficeDev 26.8.0.0.alpha0 (X86_64)",
+        "creationDate": "D:20261004220631Z'",
+        "modDate": "",
+        "trapped": "",
+        "encryption": null
+      },
+      "afterPdfMetadata": {
+        "format": "PDF 1.7",
+        "title": "",
+        "author": "Apache POI",
+        "subject": "OCR 数值冲突：需人工核对",
+        "keywords": "",
+        "creator": "Writer",
+        "producer": "LibreOfficeDev 26.8.0.0.alpha0 (X86_64)",
+        "creationDate": "D:20261004223338Z'",
+        "modDate": "",
+        "trapped": "",
+        "encryption": null
+      },
+      "afterRenderSha256": "db2c68877c3b8207bf468c78d0a0f4c9920384406ac9269da54b1b0ba2b8e215",
+      "edits": [
+        {
+          "id": "percent-native-edit",
+          "layer": "native",
+          "old": "Rate 10",
+          "new": "Rate 12",
+          "exactOneNodeEdit": true,
+          "otherPartsByteExact": true,
+          "officeNativeText": "LEXICAL AUDIT 2094\nRecord 00973\nDate 2094-12-08\nRate 10%\nRate 12\nNOVEL FOOTER 2094\n",
+          "visibleRoiOcr": "RH\n",
+          "visibleNumericAcceptance": false,
+          "afterMetadataEditedOfficeRerun": false
+        },
+        {
+          "id": "percent-ocr-edit",
+          "layer": "ocr",
+          "old": "10%",
+          "new": "14%",
+          "exactOneNodeEdit": true,
+          "otherPartsByteExact": true,
+          "officeNativeText": "LEXICAL AUDIT 2094\nRecord 00973\nDate 2094-12-08\nRate 14%\nRate 10\nNOVEL FOOTER 2094\n",
+          "visibleRoiOcr": "alge lfy\n",
+          "visibleNumericAcceptance": false,
+          "afterMetadataEditedOfficeRerun": false
+        }
+      ]
+    },
+    {
+      "id": "post-minus",
+      "expectedConflict": true,
+      "nativeSource": "Amount 048.65-",
+      "rasterSource": "Amount 048.65",
+      "changedWordParts": [
+        "docProps/core.xml"
+      ],
+      "wordSubject": "OCR 数值冲突：需人工核对",
+      "wordDescription": "保留原始扫描及可编辑文字。扫描像素不会随文字编辑变化，同位置内容可能叠印；可编辑不等于数值可靠或文字清晰可见，请对照原图人工核对。检测到不同数值或符号，保留两层原文，未选择或规范化其中任何来源。",
+      "apiWarnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.3%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9133816516666667
+        },
+        {
+          "code": "OCR_RECOGNITION_CONFLICT",
+          "message": "OFD 第 1 页图片 1 与重叠原生文字包含不同数字或数值符号；保留两层内容，未选择或替换数值，请对照原图复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": null
+        }
+      ],
+      "wordBodyAllOtherPartsByteExact": true,
+      "fullOcrTsvSha256": "73e2dbefdfd500f69a86c69cbbec7a566f07e27c0679e31d10208661d3588087",
+      "originalScans": [
+        {
+          "part": "word/media/image1.png",
+          "sourcePixelsExact": true,
+          "size": [
+            2550,
+            3300
+          ]
+        }
+      ],
+      "sourceStylesMasksBoxesUnchanged": true,
+      "office300DpiPixelsExact": true,
+      "officeNativeTextExact": true,
+      "normalVisibleRoiOcr": "PRAT I SS-\n",
+      "visibleNumericAcceptance": false,
+      "exactValueLineBoxes": {
+        "Amount 048.65-": [
+          [
+            76.3499984741211,
+            226.23251342773438,
+            172.38897705078125,
+            241.2985076904297
+          ]
+        ],
+        "Amount 048.65": [
+          [
+            72.0999984741211,
+            220.23251342773438,
+            163.36949157714844,
+            235.2985076904297
+          ]
+        ]
+      },
+      "beforePdfMetadata": {
+        "format": "PDF 1.7",
+        "title": "",
+        "author": "Apache POI",
+        "subject": "",
+        "keywords": "",
+        "creator": "Writer",
+        "producer": "LibreOfficeDev 26.8.0.0.alpha0 (X86_64)",
+        "creationDate": "D:20261004220639Z'",
+        "modDate": "",
+        "trapped": "",
+        "encryption": null
+      },
+      "afterPdfMetadata": {
+        "format": "PDF 1.7",
+        "title": "",
+        "author": "Apache POI",
+        "subject": "OCR 数值冲突：需人工核对",
+        "keywords": "",
+        "creator": "Writer",
+        "producer": "LibreOfficeDev 26.8.0.0.alpha0 (X86_64)",
+        "creationDate": "D:20261004223345Z'",
+        "modDate": "",
+        "trapped": "",
+        "encryption": null
+      },
+      "afterRenderSha256": "55cf3277ace8ec2b9b807871b6ed4050062fb12eb1e56e758f350c86d823ad2e",
+      "edits": [
+        {
+          "id": "post-minus-native-edit",
+          "layer": "native",
+          "old": "Amount 048.65-",
+          "new": "Amount 061.42-",
+          "exactOneNodeEdit": true,
+          "otherPartsByteExact": true,
+          "officeNativeText": "POSTFIX AUDIT 2093\nRecord 00864\nDate 2093-09-17\nAmount 048.65\nAmount 061.42-\nINDEPENDENT NOVEL FOOTER 2093\n",
+          "visibleRoiOcr": "PROTO et Se2-\n",
+          "visibleNumericAcceptance": false,
+          "afterMetadataEditedOfficeRerun": false
+        },
+        {
+          "id": "post-minus-ocr-edit",
+          "layer": "ocr",
+          "old": "048.65",
+          "new": "079.53",
+          "exactOneNodeEdit": true,
+          "otherPartsByteExact": true,
+          "officeNativeText": "POSTFIX AUDIT 2093\nRecord 00864\nDate 2093-09-17\nAmount 079.53\nAmount 048.65-\nINDEPENDENT NOVEL FOOTER 2093\n",
+          "visibleRoiOcr": "PROT SSS -\n",
+          "visibleNumericAcceptance": false,
+          "afterMetadataEditedOfficeRerun": false
+        }
+      ]
+    },
+    {
+      "id": "ordinary",
+      "expectedConflict": false,
+      "nativeSource": "Invoice No 2094",
+      "rasterSource": "Invoice No. 2094",
+      "changedWordParts": [
+        "docProps/core.xml"
+      ],
+      "wordSubject": "OCR 扫描文字：需人工核对",
+      "wordDescription": "保留原始扫描及可编辑文字。扫描像素不会随文字编辑变化，同位置内容可能叠印；可编辑不等于数值可靠或文字清晰可见，请对照原图人工核对。",
+      "apiWarnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 94.1%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9406047115384617
+        }
+      ],
+      "wordBodyAllOtherPartsByteExact": true,
+      "fullOcrTsvSha256": "2ddaf020622f02faa8bd786d4e9d89c4537076332b7c9473cf1ac7cc82a09fcf",
+      "originalScans": [
+        {
+          "part": "word/media/image1.png",
+          "sourcePixelsExact": true,
+          "size": [
+            2550,
+            3300
+          ]
+        }
+      ],
+      "sourceStylesMasksBoxesUnchanged": true,
+      "office300DpiPixelsExact": true,
+      "officeNativeTextExact": true,
+      "normalVisibleRoiOcr": "Invoice NO.妈0和\n",
+      "visibleNumericAcceptance": false,
+      "exactValueLineBoxes": {
+        "Invoice No 2094": [
+          [
+            72.0999984741211,
+            221.78250122070312,
+            169.63748168945312,
+            236.84849548339844
+          ]
+        ],
+        "Invoice No. 2094": []
+      },
+      "beforePdfMetadata": {
+        "format": "PDF 1.7",
+        "title": "",
+        "author": "Apache POI",
+        "subject": "",
+        "keywords": "",
+        "creator": "Writer",
+        "producer": "LibreOfficeDev 26.8.0.0.alpha0 (X86_64)",
+        "creationDate": "D:20261004220647Z'",
+        "modDate": "",
+        "trapped": "",
+        "encryption": null
+      },
+      "afterPdfMetadata": {
+        "format": "PDF 1.7",
+        "title": "",
+        "author": "Apache POI",
+        "subject": "OCR 扫描文字：需人工核对",
+        "keywords": "",
+        "creator": "Writer",
+        "producer": "LibreOfficeDev 26.8.0.0.alpha0 (X86_64)",
+        "creationDate": "D:20261004223351Z'",
+        "modDate": "",
+        "trapped": "",
+        "encryption": null
+      },
+      "afterRenderSha256": "38b16e8526f8d16713f16cf3306df1c9634372621b5752b22955feda7b87e21b",
+      "edits": [
+        {
+          "id": "ordinary-native-edit",
+          "layer": "native",
+          "old": "Invoice No 2094",
+          "new": "Invoice No 2095",
+          "exactOneNodeEdit": true,
+          "otherPartsByteExact": true,
+          "officeNativeText": "LEXICAL AUDIT 2094\nRecord 00973\nInvoice No 2095\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+          "visibleRoiOcr": "Invoice No. Aas!\n",
+          "visibleNumericAcceptance": false,
+          "afterMetadataEditedOfficeRerun": false
+        }
+      ]
+    }
+  ],
+  "requestCounts": {
+    "beforeNormal": 8,
+    "beforeEditedOffice": 7,
+    "afterNormal": 8,
+    "total": 23,
+    "sourceOcr": 8,
+    "office": 15,
+    "diagnosticRoiOcr": 11,
+    "replayOcr": 0
+  },
+  "durableWordWarnings": {
+    "before": 0,
+    "after": 4
+  },
+  "durableOfficePdfSubjects": {
+    "before": 0,
+    "after": 4
+  },
+  "warningOnlyImprovement": true,
+  "visibleNumericAcceptance": false,
+  "editedVisibleNumericAcceptance": false,
+  "numericCerChangeClaim": false,
+  "ocrTsvExactControls": 4,
+  "bodyAndFullRenderExactControls": 4,
+  "changedClasses": [
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/PoiDocxRenderer$1.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/PoiDocxRenderer.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/PoiDocxRenderer$PositionedContent.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/PoiDocxRenderer$PositionedPage.class"
+  ],
+  "other228ClassesAndAllApplicationResourcesByteExact": true,
+  "fullSuite": {
+    "tests": 505,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "bundledTests": [
+    {
+      "className": "com.fuyue.formatconverter.task.OcrDeskewTest",
+      "name": "bundledEngineRecoversMissingLinesWithSourceGeometryAndReviewWarnings",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.PdfToImageConverterTest",
+      "name": "discoversBundledPopplerFromAppHome",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.ForkedFileConverterTest",
+      "name": "retainsAutoDiscoveredBundledOcrWhenTheWorkerChangesItsWorkingDirectory",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "discoversBundledRuntimeFromPackagedApplicationRoot",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "validBundledRuntimeAutoEnablesWithoutHostInstallation",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "explicitFalseDisablesEvenAValidBundledRuntime",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.BundledOcrRuntimeIntegrationTest",
+      "name": "bundledBinaryModelsAndLibrariesRunWithoutSystemDiscovery",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractPngInputTest",
+      "name": "bundledPngEngineRecognizesRealJpegText",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+      "name": "bundledEngineRecoversShadedLowContrastPrintedText",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+      "name": "bundledEngineRecoversChineseFaintTextWithDigitsAndPunctuation",
+      "skipped": false
+    }
+  ],
+  "skips": [
+    {
+      "className": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+      "name": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning",
+      "skipped": true
+    }
+  ],
+  "resources": {
+    "beforeNormal": {
+      "wallSeconds": 40.92924434100132,
+      "userSeconds": 98.394885,
+      "systemSeconds": 8.528328,
+      "maxChildRssKiB": 359280
+    },
+    "beforeEdits": {
+      "wallSeconds": 22.330564825999318,
+      "userSeconds": 53.474761,
+      "systemSeconds": 5.051992,
+      "maxChildRssKiB": 318524
+    },
+    "afterNormal": {
+      "wallSeconds": 32.85185080600786,
+      "userSeconds": 79.281884,
+      "systemSeconds": 7.419288,
+      "maxChildRssKiB": 357672
+    }
+  },
+  "runtime": {
+    "ocr": {
+      "enabled": true,
+      "available": true,
+      "binaryName": "tesseract",
+      "version": "tesseract 5.5.2",
+      "requestedLanguages": "chi_sim+eng",
+      "availableLanguages": [
+        "osd",
+        "chi_sim_vert",
+        "chi_sim",
+        "eng"
+      ],
+      "timeoutSeconds": 120,
+      "maxConcurrency": 1,
+      "maxImagePixels": 25000000,
+      "minimumConfidence": 0.35,
+      "bundled": true,
+      "errorCode": null,
+      "message": "内置 Tesseract OCR 可用"
+    },
+    "office": {
+      "enabled": true,
+      "available": true,
+      "binaryName": "soffice",
+      "version": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+      "message": "Office 引擎可用"
+    },
+    "pinnedEngineSha256": "90730922627269352568d54e788c7e42fd2e1783e03795d75560efa385de1489",
+    "pinnedRuntimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+    "manifest": {
+      "schemaVersion": 1,
+      "platform": "linux",
+      "arch": "x64",
+      "policySha256": "54c6ae7291fc983cb7b946bc0b90832ec4b589d493fef01b5f974a0ab26d8735",
+      "components": [
+        {
+          "id": "zlib",
+          "version": "1.3.1",
+          "source": "https://codeload.github.com/madler/zlib/tar.gz/v1.3.1",
+          "sourceSha256": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c",
+          "spdx": "Zlib"
+        },
+        {
+          "id": "libpng",
+          "version": "1.6.57",
+          "source": "https://codeload.github.com/pnggroup/libpng/tar.gz/v1.6.57",
+          "sourceSha256": "4cbb7b0746edc1683c9581b373365e955133b7f1243f171b7d1535b4415dfedb",
+          "spdx": "libpng-2.0"
+        },
+        {
+          "id": "leptonica",
+          "version": "1.87.0",
+          "source": "https://codeload.github.com/DanBloomberg/leptonica/tar.gz/1.87.0",
+          "sourceSha256": "fa2b40c5caea96d1bb93a97486262aed8731b69ce25a84a6bf5d25323e33f631",
+          "spdx": "BSD-2-Clause"
+        },
+        {
+          "id": "tesseract",
+          "version": "5.5.2",
+          "source": "https://codeload.github.com/tesseract-ocr/tesseract/tar.gz/5.5.2",
+          "sourceSha256": "6235ea0dae45ea137f59c09320406f5888383741924d98855bd2ce0d16b54f21",
+          "spdx": "Apache-2.0"
+        }
+      ],
+      "models": [
+        {
+          "name": "eng",
+          "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/eng.traineddata",
+          "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+        },
+        {
+          "name": "chi_sim",
+          "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim.traineddata",
+          "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+        },
+        {
+          "name": "chi_sim_vert",
+          "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim_vert.traineddata",
+          "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+        },
+        {
+          "name": "osd",
+          "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/osd.traineddata",
+          "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+        }
+      ],
+      "files": [
+        {
+          "path": "bin/tesseract",
+          "size": 6678328,
+          "sha256": "90730922627269352568d54e788c7e42fd2e1783e03795d75560efa385de1489"
+        },
+        {
+          "path": "licenses/OCR-SOURCE-POLICY.json",
+          "size": 4186,
+          "sha256": "1ea79f27bafb87a8692d2b37d0ab2f3cb2236f228d6e76eedf7aa6b40dacf808"
+        },
+        {
+          "path": "licenses/leptonica.txt",
+          "size": 1521,
+          "sha256": "87829abb5bbb00b55a107365da89e9a33f86c4250169e5a1e5588505be7d5806"
+        },
+        {
+          "path": "licenses/libpng.txt",
+          "size": 5345,
+          "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+        },
+        {
+          "path": "licenses/tessdata.txt",
+          "size": 11358,
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "path": "licenses/tesseract.txt",
+          "size": 11358,
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "path": "licenses/zlib.txt",
+          "size": 1002,
+          "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+        },
+        {
+          "path": "tessdata/chi_sim.traineddata",
+          "size": 2469156,
+          "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+        },
+        {
+          "path": "tessdata/chi_sim_vert.traineddata",
+          "size": 1927902,
+          "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+        },
+        {
+          "path": "tessdata/configs/tsv",
+          "size": 22,
+          "sha256": "59d079bb75d8b3d7c839a3564580cb559e362c93a9d70f234e421c0c3e767e04"
+        },
+        {
+          "path": "tessdata/eng.traineddata",
+          "size": 4113088,
+          "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+        },
+        {
+          "path": "tessdata/osd.traineddata",
+          "size": 10562727,
+          "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+        }
+      ]
+    },
+    "payloadFilesReverified": 12
+  },
+  "versions": {
+    "java": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nopenjdk version \"17.0.16\" 2025-07-15\nOpenJDK Runtime Environment Temurin-17.0.16+8 (build 17.0.16+8)\nOpenJDK 64-Bit Server VM Temurin-17.0.16+8 (build 17.0.16+8, mixed mode, sharing)",
+    "maven": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nApache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)\nMaven home: /workspace/fuyue-env/tools/apache-maven-3.9.11\nJava version: 17.0.16, vendor: Eclipse Adoptium, runtime: /workspace/fuyue-env/tools/jdk-17.0.16+8\nDefault locale: en, platform encoding: UTF-8\nOS name: \"linux\", version: \"6.18.44\", arch: \"amd64\", family: \"unix\"",
+    "node": "v22.17.0",
+    "ocr": "tesseract 5.5.2\n leptonica-1.87.0\n  libpng 1.6.57 : zlib 1.3.1\n Found AVX512BW\n Found AVX512F\n Found AVX512VNNI\n Found AVX2\n Found AVX\n Found FMA\n Found SSE4.1",
+    "office": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "pymupdf": "1.26.6",
+    "linux": "6.18.44"
+  },
+  "versionsSource": "unchanged tools from accepted39; current HTTP independently reports OCR/Office versions",
+  "fontsReverified": {
+    "source": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+      "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+      "version": "LiberationSans2.1.5",
+      "license": "SIL-OFL-1.1"
+    },
+    "bundled": [
+      {
+        "path": "task-service/src/main/resources/fonts/LiberationSans-Regular.ttf",
+        "sha256": "76d04c18ea243f426b7de1f3ad208e927008f961dc5945e5aad352d0dfde8ee8",
+        "license": "SIL-OFL-1.1",
+        "version": [
+          "Version 2.1.5"
+        ]
+      },
+      {
+        "path": "task-service/src/main/resources/fonts/DroidSansFallback.ttf",
+        "sha256": "21b96a0377f067833a93af3082eb28d4ffab7a8cd46bfd513286f1d64b7b0949",
+        "license": "Apache-2.0",
+        "version": [
+          "Version 2.55b"
+        ]
+      }
+    ]
+  },
+  "helperSha256": {
+    "prepare_conflict_word40.py": "94fc702482360eedd5faa26a734a52d6716b841a5d0059f4bf440b3f07a4d38f",
+    "render_conflict_word40.py": "81c4eb3bf570a93198c1d9be90afe33562ac513bff369a3a2efe14aef5ae8325",
+    "verify_conflict_word40.py": "92a6c245dfd5491ab11779815d0c3a55e47b0707449c3cb02f1757a5d01fc3fc"
+  },
+  "unrun": [
+    "after-metadata seven edited Office conversions (body/styles/scans unchanged; prior edits retained)",
+    "Microsoft Word and native macOS/Windows packages",
+    "optional signed OFD fixture"
+  ],
+  "limits": [
+    "metadata warning is not an in-page banner and does not repair overprinting; Office PDF retains subject but not full Word description",
+    "source images do not change when editable text changes; neither source is canonical financial truth",
+    "ROI PSM6 is diagnostic and not directly comparable with source full-page PSM3 CER",
+    "original sparse OFD, adjacent long edits, CJK/prior mixed strict API visibility and per-mille remain limited"
+  ]
+}
