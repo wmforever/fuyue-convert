@@ -1,0 +1,322 @@
+{
+  "parentRevision": "16dab17b4135a35f9120311d0ecf8dbc2ee75d41",
+  "jarSha256": "ac495004efdaba493bdd439bd815158ba5e52d7719cdead0119c8bc247748528",
+  "beforeJarSha256": "0f0182d512009114fbba0165942f63f0f14fced8c6865c2f2c7478ad01d9ae61",
+  "manifestSha256": "82652736ec6e955568d4e7ea45f3ecc17a387686b3bdf439d2815e2d9808ac3f",
+  "controls": [
+    {
+      "id": "duplicate",
+      "beforeStatus": "FAILED",
+      "beforeError": "OCR_NO_NEW_TEXT",
+      "afterStatus": "FAILED",
+      "afterError": "OCR_NO_NEW_TEXT",
+      "warnings": [],
+      "strictFailurePreserved": true
+    },
+    {
+      "id": "partial-new-digits",
+      "beforeStatus": "SUCCESS",
+      "beforeError": null,
+      "afterStatus": "SUCCESS",
+      "afterError": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.5%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.915274928888889
+        }
+      ],
+      "text": "DEDUP AUDIT 2076\nRecord 00793\nAmount 048.65\nDate 2076-10-14\n",
+      "exactSourceLayerText": true,
+      "numericLexemesExact": true,
+      "additions": 1,
+      "numericConflictWarning": false
+    },
+    {
+      "id": "same-lexeme-other-position",
+      "beforeStatus": "SUCCESS",
+      "beforeError": null,
+      "afterStatus": "SUCCESS",
+      "afterError": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.5%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.915274928888889
+        }
+      ],
+      "text": "DEDUP AUDIT 2076\nRecord 00793\nAmount 048.65\nDate 2076-10-14\nRecord 00793\n",
+      "exactSourceLayerText": true,
+      "numericLexemesExact": true,
+      "additions": 1,
+      "numericConflictWarning": false
+    },
+    {
+      "id": "digit-extension",
+      "beforeStatus": "FAILED",
+      "beforeError": "OCR_NO_NEW_TEXT",
+      "afterStatus": "SUCCESS",
+      "afterError": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.7%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9171009566666667
+        },
+        {
+          "code": "OCR_RECOGNITION_CONFLICT",
+          "message": "OFD 第 1 页图片 1 与重叠原生文字包含不同数字或数值符号；保留两层内容，未选择或替换数值，请对照原图复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": null
+        }
+      ],
+      "text": "DEDUP AUDIT 2076\nRecord 00793Record 007930\nAmount 048.65\nDate 2076-10-14\n",
+      "exactSourceLayerText": true,
+      "numericLexemesExact": true,
+      "additions": 1,
+      "numericConflictWarning": true
+    },
+    {
+      "id": "negative-sign",
+      "beforeStatus": "FAILED",
+      "beforeError": "OCR_NO_NEW_TEXT",
+      "afterStatus": "SUCCESS",
+      "afterError": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.5%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9153196633333331
+        },
+        {
+          "code": "OCR_RECOGNITION_CONFLICT",
+          "message": "OFD 第 1 页图片 1 与重叠原生文字包含不同数字或数值符号；保留两层内容，未选择或替换数值，请对照原图复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": null
+        }
+      ],
+      "text": "DEDUP AUDIT 2076\nRecord 00793\nAmount -048.65Amount 048.65\nDate 2076-10-14\n",
+      "exactSourceLayerText": true,
+      "numericLexemesExact": true,
+      "additions": 1,
+      "numericConflictWarning": true
+    },
+    {
+      "id": "decimal-conflict",
+      "beforeStatus": "FAILED",
+      "beforeError": "OCR_NO_NEW_TEXT",
+      "afterStatus": "SUCCESS",
+      "afterError": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.5%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.915274928888889
+        },
+        {
+          "code": "OCR_RECOGNITION_CONFLICT",
+          "message": "OFD 第 1 页图片 1 与重叠原生文字包含不同数字或数值符号；保留两层内容，未选择或替换数值，请对照原图复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": null
+        }
+      ],
+      "text": "DEDUP AUDIT 2076\nRecord 00793\nAmount 048.65Amount 04865\nDate 2076-10-14\n",
+      "exactSourceLayerText": true,
+      "numericLexemesExact": true,
+      "additions": 1,
+      "numericConflictWarning": true
+    },
+    {
+      "id": "one-digit-conflict",
+      "beforeStatus": "SUCCESS",
+      "beforeError": null,
+      "afterStatus": "SUCCESS",
+      "afterError": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.5%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.915274928888889
+        },
+        {
+          "code": "OCR_RECOGNITION_CONFLICT",
+          "message": "OFD 第 1 页图片 1 与重叠原生文字包含不同数字或数值符号；保留两层内容，未选择或替换数值，请对照原图复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": null
+        }
+      ],
+      "text": "DEDUP AUDIT 2076\nRecord 00793\nAmount 048.65Amount 048.66\nDate 2076-10-14\n",
+      "exactSourceLayerText": true,
+      "numericLexemesExact": true,
+      "additions": 1,
+      "numericConflictWarning": true
+    },
+    {
+      "id": "one-letter-extension",
+      "beforeStatus": "SUCCESS",
+      "beforeError": null,
+      "afterStatus": "SUCCESS",
+      "afterError": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.6%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9157033522222222
+        }
+      ],
+      "text": "DEDUP AUDIT 2076DEDUP AUDITX 2076\nRecord 00793\nAmount 048.65\nDate 2076-10-14\n",
+      "exactSourceLayerText": true,
+      "numericLexemesExact": true,
+      "additions": 1,
+      "numericConflictWarning": false
+    },
+    {
+      "id": "blank",
+      "beforeStatus": "FAILED",
+      "beforeError": "OCR_NO_TEXT",
+      "afterStatus": "FAILED",
+      "afterError": "OCR_NO_TEXT",
+      "warnings": [],
+      "strictFailurePreserved": true
+    },
+    {
+      "id": "noise",
+      "beforeStatus": "FAILED",
+      "beforeError": "OCR_NO_TEXT",
+      "afterStatus": "FAILED",
+      "afterError": "OCR_NO_TEXT",
+      "warnings": [],
+      "strictFailurePreserved": true
+    },
+    {
+      "id": "native-noop",
+      "beforeStatus": "SUCCESS",
+      "beforeError": null,
+      "afterStatus": "SUCCESS",
+      "afterError": null,
+      "warnings": [],
+      "text": "NATIVE COMPLETE RECORD LINE 0 ID00793 Amount 048.65\nNATIVE COMPLETE RECORD LINE 1 ID00793 Amount 048.65\nNATIVE COMPLETE RECORD LINE 2 ID00793 Amount 048.65\nNATIVE COMPLETE RECORD LINE 3 ID00793 Amount 048.65\n",
+      "zeroOcrNoOp": true
+    }
+  ],
+  "word": [
+    {
+      "id": "partial",
+      "originalScanPixelsExact": true,
+      "originalScanMedia": [
+        "word/media/image1.png"
+      ],
+      "editableRuns": 5,
+      "texts": [
+        "Amount ",
+        "048.65",
+        "DEDUP AUDIT 2076",
+        "Record 00793",
+        "Date 2076-10-14"
+      ]
+    },
+    {
+      "id": "conflict",
+      "originalScanPixelsExact": true,
+      "originalScanMedia": [
+        "word/media/image1.png"
+      ],
+      "editableRuns": 6,
+      "texts": [
+        "Amount ",
+        "-048.65",
+        "Amount 048.65",
+        "DEDUP AUDIT 2076",
+        "Record 00793",
+        "Date 2076-10-14"
+      ]
+    }
+  ],
+  "partialWordAllPartsExceptCoreExact": true,
+  "existingMaskingFailures": [
+    {
+      "id": "partial-office",
+      "expectedApiText": "DEDUP AUDIT 2076\nRecord 00793\nAmount 048.65\nDate 2076-10-14\n",
+      "actualApiText": "DEDUP AUDIT 2076\nRecord 00793\nAmount 048.65Amount 048.65\nDate 2076-10-14\n",
+      "baselineApiText": "DEDUP AUDIT 2076\nRecord 00793\nAmount 048.65Amount 048.65\nDate 2076-10-14\n",
+      "officeNativeText": "DEDUP AUDIT 2076\nRecord 00793\nDate 2076-10-14\nAmount 048.65\n",
+      "officeNumbersExact": true,
+      "beforeAfterPixelsExact": true,
+      "apiQualityPassed": false
+    },
+    {
+      "id": "partial-edited-office",
+      "expectedApiText": "DEDUP AUDIT 2076\nRecord 00793\nAmount 147.80\nDate 2076-10-14\n",
+      "actualApiText": "DEDUP AUDIT 2076\nRecord 00793\nAmount 048.65Amount 147.80\nDate 2076-10-14\n",
+      "baselineApiText": "DEDUP AUDIT 2076\nRecord 00793\nAmount 048.65Amount 147.80\nDate 2076-10-14\n",
+      "officeNativeText": "DEDUP AUDIT 2076\nRecord 00793\nDate 2076-10-14\nAmount 147.80\n",
+      "officeNumbersExact": true,
+      "beforeAfterPixelsExact": true,
+      "apiQualityPassed": false
+    }
+  ],
+  "httpBefore": 11,
+  "httpWordBefore": 5,
+  "httpAfter": 21,
+  "interfaceSuccessAfter": 18,
+  "strictFailuresAfter": 3,
+  "workersAbsent": 37,
+  "newZombies": [],
+  "ECHILD": true,
+  "falseNumericDuplicatesCorrected": 3,
+  "conflictWarningCases": 4,
+  "originalCachedStrictNoNewTextPreserved": true,
+  "originalOcrRerun": false,
+  "sourceConflictIsNotResolvedSingleTruth": true,
+  "recognitionReplayCalls": 0,
+  "newTraceUniqueRecognitions": 4,
+  "resources": {
+    "before": {
+      "wallSeconds": 42.64199499299866,
+      "userSeconds": 102.930565,
+      "systemSeconds": 8.684102,
+      "maxChildRssKiB": 346856
+    },
+    "wordBefore": {
+      "wallSeconds": 20.718814169995312,
+      "userSeconds": 51.821644,
+      "systemSeconds": 4.778134,
+      "maxChildRssKiB": 385644
+    },
+    "after": {
+      "wallSeconds": 81.67857883700344,
+      "userSeconds": 193.786303,
+      "systemSeconds": 17.799285,
+      "maxChildRssKiB": 392116
+    }
+  },
+  "helpers": {
+    "generate_dedup32.py": "579f20255f6ae535deb05c70cc06ce28c5aa437acb5e34fdca37f8e36af43604",
+    "generate_dedup32_final.py": "180b6445fd5d78ed3f20e4042f33129a942ce2330afa5720b534510a14cdb833",
+    "OcrDedupReplay32.java": "6c65763a4f86d2e578da72e4ea4c670b5287941cd75f369da25a59d2552b67dd",
+    "verify_dedup32.py": "6007cef79a8b52e120f6a01855ef867a2a652afa023d976baa2dc2579d90f4e1",
+    "OcrSparseTraceProbe.java": "d3916cbec68a96f3889b9fe4f4245558e0cd46fe5cd05301edf6ace712181a4a",
+    "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf",
+    "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9",
+    "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85"
+  },
+  "nextFault": "Existing mixed native/OCR Word page skips foreground masks; original scan amount remains visibly superimposed after edit, then API OCR rereads it. Source Word and actual Office pixels are identical before/after this fix."
+}

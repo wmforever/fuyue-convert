@@ -1,0 +1,277 @@
+{
+  "parentRevision": "16dab17b4135a35f9120311d0ecf8dbc2ee75d41",
+  "buildAudit": {
+    "tests": {
+      "tests": 489,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "skips": [
+      {
+        "className": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+        "name": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning"
+      }
+    ],
+    "bundledTests": [
+      {
+        "className": "com.fuyue.formatconverter.task.OcrDeskewTest",
+        "name": "bundledEngineRecoversMissingLinesWithSourceGeometryAndReviewWarnings",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.PdfToImageConverterTest",
+        "name": "discoversBundledPopplerFromAppHome",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.ForkedFileConverterTest",
+        "name": "retainsAutoDiscoveredBundledOcrWhenTheWorkerChangesItsWorkingDirectory",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "discoversBundledRuntimeFromPackagedApplicationRoot",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "validBundledRuntimeAutoEnablesWithoutHostInstallation",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "explicitFalseDisablesEvenAValidBundledRuntime",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.BundledOcrRuntimeIntegrationTest",
+        "name": "bundledBinaryModelsAndLibrariesRunWithoutSystemDiscovery",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.TesseractPngInputTest",
+        "name": "bundledPngEngineRecognizesRealJpegText",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+        "name": "bundledEngineRecoversShadedLowContrastPrintedText",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+        "name": "bundledEngineRecoversChineseFaintTextWithDigitsAndPunctuation",
+        "skipped": false
+      }
+    ],
+    "changedClasses": [
+      "BOOT-INF/lib/task-service-0.1.5.jar/com/fuyue/formatconverter/task/OcrTextDeduplicator.class",
+      "BOOT-INF/lib/task-service-0.1.5.jar/com/fuyue/formatconverter/task/OfdOcrSupport.class"
+    ],
+    "allOther230ClassesByteExact": true,
+    "buildReceipt": {
+      "path": "qa-samples/work/iteration32-build.receipt.json",
+      "sha256": "d2de66dc7aa569763c8d5287528bb8893f6a9fe10a30803b5b600708ff4b840d",
+      "rootExitCode": 0,
+      "waitpidNoChildren": true,
+      "allRegisteredIdentitiesAbsent": true,
+      "registered": 311
+    }
+  },
+  "provenance": {
+    "buildInputSha256": "faed89f5f62ba402827dee105b724633f2074a9484c406244ec330e5d4312983",
+    "parentRevision": "16dab17b4135a35f9120311d0ecf8dbc2ee75d41",
+    "workingTreeDirtyAtBuildStart": true,
+    "jarSha256": "ac495004efdaba493bdd439bd815158ba5e52d7719cdead0119c8bc247748528",
+    "applicationClassCount": 232,
+    "applicationClassSha256": "8c531fe1824eed5282c612ef08c96c1ea8f898d68a07e35586f9683f90899c50",
+    "packagedClassesMatchTargets": true
+  },
+  "versionsObservedInAcceptedParent": {
+    "java": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nopenjdk version \"17.0.16\" 2025-07-15\nOpenJDK Runtime Environment Temurin-17.0.16+8 (build 17.0.16+8)\nOpenJDK 64-Bit Server VM Temurin-17.0.16+8 (build 17.0.16+8, mixed mode, sharing)",
+    "maven": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nApache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)\nMaven home: /workspace/fuyue-env/tools/apache-maven-3.9.11\nJava version: 17.0.16, vendor: Eclipse Adoptium, runtime: /workspace/fuyue-env/tools/jdk-17.0.16+8\nDefault locale: en, platform encoding: UTF-8\nOS name: \"linux\", version: \"6.18.44\", arch: \"amd64\", family: \"unix\"",
+    "node": "v22.17.0",
+    "ocr": "tesseract 5.5.2\n leptonica-1.87.0\n  libpng 1.6.57 : zlib 1.3.1\n Found AVX512BW\n Found AVX512F\n Found AVX512VNNI\n Found AVX2\n Found AVX\n Found FMA\n Found SSE4.1",
+    "office": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "pymupdf": "1.26.6",
+    "linux": "6.18.44"
+  },
+  "pdfbox": "3.0.8",
+  "ofdrw": "2.3.9",
+  "runtimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+  "runtimeFilesReverified": 12,
+  "runtimeManifest": {
+    "schemaVersion": 1,
+    "platform": "linux",
+    "arch": "x64",
+    "policySha256": "54c6ae7291fc983cb7b946bc0b90832ec4b589d493fef01b5f974a0ab26d8735",
+    "components": [
+      {
+        "id": "zlib",
+        "version": "1.3.1",
+        "source": "https://codeload.github.com/madler/zlib/tar.gz/v1.3.1",
+        "sourceSha256": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c",
+        "spdx": "Zlib"
+      },
+      {
+        "id": "libpng",
+        "version": "1.6.57",
+        "source": "https://codeload.github.com/pnggroup/libpng/tar.gz/v1.6.57",
+        "sourceSha256": "4cbb7b0746edc1683c9581b373365e955133b7f1243f171b7d1535b4415dfedb",
+        "spdx": "libpng-2.0"
+      },
+      {
+        "id": "leptonica",
+        "version": "1.87.0",
+        "source": "https://codeload.github.com/DanBloomberg/leptonica/tar.gz/1.87.0",
+        "sourceSha256": "fa2b40c5caea96d1bb93a97486262aed8731b69ce25a84a6bf5d25323e33f631",
+        "spdx": "BSD-2-Clause"
+      },
+      {
+        "id": "tesseract",
+        "version": "5.5.2",
+        "source": "https://codeload.github.com/tesseract-ocr/tesseract/tar.gz/5.5.2",
+        "sourceSha256": "6235ea0dae45ea137f59c09320406f5888383741924d98855bd2ce0d16b54f21",
+        "spdx": "Apache-2.0"
+      }
+    ],
+    "models": [
+      {
+        "name": "eng",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/eng.traineddata",
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      {
+        "name": "chi_sim",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim.traineddata",
+        "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+      },
+      {
+        "name": "chi_sim_vert",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim_vert.traineddata",
+        "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+      },
+      {
+        "name": "osd",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/osd.traineddata",
+        "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+      }
+    ],
+    "files": [
+      {
+        "path": "bin/tesseract",
+        "size": 6678328,
+        "sha256": "90730922627269352568d54e788c7e42fd2e1783e03795d75560efa385de1489"
+      },
+      {
+        "path": "licenses/OCR-SOURCE-POLICY.json",
+        "size": 4186,
+        "sha256": "1ea79f27bafb87a8692d2b37d0ab2f3cb2236f228d6e76eedf7aa6b40dacf808"
+      },
+      {
+        "path": "licenses/leptonica.txt",
+        "size": 1521,
+        "sha256": "87829abb5bbb00b55a107365da89e9a33f86c4250169e5a1e5588505be7d5806"
+      },
+      {
+        "path": "licenses/libpng.txt",
+        "size": 5345,
+        "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+      },
+      {
+        "path": "licenses/tessdata.txt",
+        "size": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      {
+        "path": "licenses/tesseract.txt",
+        "size": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      {
+        "path": "licenses/zlib.txt",
+        "size": 1002,
+        "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+      },
+      {
+        "path": "tessdata/chi_sim.traineddata",
+        "size": 2469156,
+        "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+      },
+      {
+        "path": "tessdata/chi_sim_vert.traineddata",
+        "size": 1927902,
+        "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+      },
+      {
+        "path": "tessdata/configs/tsv",
+        "size": 22,
+        "sha256": "59d079bb75d8b3d7c839a3564580cb559e362c93a9d70f234e421c0c3e767e04"
+      },
+      {
+        "path": "tessdata/eng.traineddata",
+        "size": 4113088,
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      {
+        "path": "tessdata/osd.traineddata",
+        "size": 10562727,
+        "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+      }
+    ]
+  },
+  "sourceFont": {
+    "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+    "version": "LiberationSans2.1.5",
+    "license": "SIL-OFL-1.1"
+  },
+  "bundledFontsReverified": [
+    {
+      "path": "task-service/src/main/resources/fonts/LiberationSans-Regular.ttf",
+      "sha256": "76d04c18ea243f426b7de1f3ad208e927008f961dc5945e5aad352d0dfde8ee8",
+      "license": "SIL-OFL-1.1",
+      "version": [
+        "Version 2.1.5"
+      ]
+    },
+    {
+      "path": "task-service/src/main/resources/fonts/DroidSansFallback.ttf",
+      "sha256": "21b96a0377f067833a93af3082eb28d4ffab7a8cd46bfd513286f1d64b7b0949",
+      "license": "Apache-2.0",
+      "version": [
+        "Version 2.55b"
+      ]
+    }
+  ],
+  "frontendResourcesByteExact": 7,
+  "focusedTests": 28,
+  "recognition": {
+    "newIndependentUniqueRasters": 4,
+    "existingOriginalSparseRecognitionRerun": false,
+    "cachedModelReplayRecognitionInvocations": 0
+  },
+  "acceptance": {
+    "beforeHttp": 11,
+    "wordBeforeHttp": 5,
+    "afterHttp": 21,
+    "interfaceSuccessAfter": 18,
+    "expectedStrictFailuresAfter": 3,
+    "falseNumericDuplicatesFixed": 3,
+    "numericConflictWarnings": 4,
+    "originalCachedNoveltyFailurePreserved": true,
+    "nativeNoOpAndOverlapOcrNoOpPassed": true,
+    "WordOriginalScanPixelsExact": true,
+    "unconflictedWordPartsAndOfficePixelsBeforeAfterExact": true,
+    "existingMixedWordMaskingQualityFailures": 2,
+    "acceptedMaskedEditAndExactWhitespaceRegressionsPassed": true,
+    "macWindowsMicrosoftWordUnrun": true,
+    "optionalSignedOfdFixtureSkipped": true
+  },
+  "helperHistory": {
+    "verificationFileMapping": "initial verifier assumed partial-edited-office-text filename; corrected to actual partial-edited-text. No API matrix rerun."
+  },
+  "nextFault": "FixedLayoutDocxRenderer foregroundMask scanOnly guard intentionally excludes mixed native/OCR pages. New actual case visibly superimposes old scan amount after Word edit; parent JAR reproduces exactly. Nominate bounded word-level/native-collision-safe mask investigation, not a confidence or novelty bypass."
+}

@@ -94,6 +94,13 @@ final class OfdOcrSupport {
                         ocr.requireUsableResult(result,
                                 "OFD 第 " + page.pageNumber() + " 页图片 " + currentImage);
                     }
+                    if (result.blocks().stream().anyMatch(block ->
+                            OcrTextDeduplicator.numericConflict(block, page.textBlocks()))) {
+                        imageWarnings.add(ConversionWarning.of(WarningCode.OCR_RECOGNITION_CONFLICT,
+                                "OFD 第 " + page.pageNumber() + " 页图片 " + currentImage
+                                        + " 与重叠原生文字包含不同数字或数值符号；保留两层内容，未选择或替换数值，请对照原图复核。",
+                                page.pageNumber()));
+                    }
                     List<TextBlock> beyondNative = result.blocks().stream()
                             .filter(block -> !OcrTextDeduplicator.duplicates(block, page.textBlocks()))
                             .toList();
