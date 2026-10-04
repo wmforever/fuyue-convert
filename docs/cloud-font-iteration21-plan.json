@@ -1,0 +1,12 @@
+{
+  "parentRevision": "bc34be353aba56eb99db15ea9f72a5405b7c3932",
+  "scope": "One finite PDF text/font metadata investigation. Rejected narrow-column inference remains removed.",
+  "baselineLead": "Real PyMuPDF embedded font BaseFont/descriptor full face names such as Liberation Serif Regular are used as DOCX families; fc-match chooses OpenAI Sans although Liberation Serif is installed. Confirm actual Office font selection before production edits.",
+  "corpus": ["Liberation Serif regular/bold/italic/bolditalic", "Liberation Mono regular/bold/italic", "Mixed Noto CJK and Latin punctuation/numeric text", "DejaVu Sans symbols/Greek/currency/ligatures", "Independent line breaks with dates/zero-padded IDs/signed decimal values", "Explicit unavailable-family metadata control"],
+  "truth": "Freeze independent source Unicode, runs, positions, font metadata and file hashes before HTTP. Do not change source truth to match output. Separate logical characters from selected/installed font family and visual geometry.",
+  "licenses": "Use installed Liberation/Noto SIL-OFL1.1 and DejaVu Bitstream-Vera/public-domain-changes fonts; retain installed copyright notices with locally distributed embedded samples. No new production font redistribution.",
+  "adoption": "Require baseline actual artifact failure. Prefer existing embedded-font metadata, preserve explicit family/unknown-name boundaries and original content/geometry. No arbitrary suffix stripping, rasterization, global fallback changes, or new narrow-column attempt.",
+  "budget": {"sources":6,"beforeContracts":18,"afterContracts":18,"finalEditContracts":2,"maximumPrimaryContracts":38,"suiteWorkSeconds":480,"startupHttpSeconds":36,"contractIncludingDownloadSeconds":120,"requestAbsoluteSeconds":30,"teardownSeconds":15},
+  "acceptance": ["Logical Unicode and numeric surfaces", "DOCX run font/style selection versus embedded source metadata", "Actual installed font matches and Office PDF font spans", "Source-to-Office visual measurements, page/line boundaries", "Editable Word change and actual Office/API reopening", "Existing heading/order/coordinate guards and related regressions", "All owned process identities reaped, no new zombies"],
+  "fallback": "If no safe actionable fix is demonstrated, consolidate finite evidence and next priority without a manufactured production change. Native Word and platform installers remain unrun."
+}

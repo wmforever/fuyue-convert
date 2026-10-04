@@ -10,7 +10,10 @@ def edited(data,kind):
     with zipfile.ZipFile(io.BytesIO(data)) as z:
         entries={n:z.read(n) for n in z.namelist()}
     root=ET.fromstring(entries['word/document.xml'])
-    if kind=='region':
+    if kind=='font':
+        found=[n for n in root.iter(W+'t') if 'Font row 1: ID 00731' in (n.text or '')];assert len(found)==1
+        found[0].text=found[0].text.replace('00731','00739');change={'replace':['00731','00739'],'runOnly':True,'occurrences':1}
+    elif kind=='region':
         found=[n for n in root.iter(W+'t') if 'Left 1-1 record 00731' in (n.text or '')];assert len(found)==1
         found[0].text=found[0].text.replace('00731','00739');change={'replace':['00731','00739'],'textFrameOnly':True,'occurrences':1}
     elif kind=='column':
@@ -87,8 +90,8 @@ def main():
                 word=convert(source.name,source.read_bytes(),'docx',name,'word')
                 pdf=convert(word.name,word.read_bytes(),'pdf',name,'office')
                 convert(pdf.name,pdf.read_bytes(),'txt',name,'text')
-                if a.edits and name in ['continuous-en','numeric-table','narrow-balanced','shifted-exact-regions']:
-                    data,change=edited(word.read_bytes(),'continuous' if name=='continuous-en' else 'column' if name=='narrow-balanced' else 'region' if name=='shifted-exact-regions' else 'table')
+                if a.edits and name in ['continuous-en','numeric-table','narrow-balanced','shifted-exact-regions','serif-faces']:
+                    data,change=edited(word.read_bytes(),'continuous' if name=='continuous-en' else 'column' if name=='narrow-balanced' else 'region' if name=='shifted-exact-regions' else 'font' if name=='serif-faces' else 'table')
                     edit=out/(name+'-edited.docx');edit.write_bytes(data)
                     report.setdefault('edits',[]).append({'case':name,'artifact':edit.name,'sha256':sha(edit),'change':change})
                     pdf=convert(edit.name,data,'pdf',name,'edited-office');convert(pdf.name,pdf.read_bytes(),'txt',name,'edited-text')
