@@ -119,6 +119,28 @@ class OcrBackgroundMaskSamplerTest {
         return image;
     }
 
+    @Test void editReserveChecksEveryPixelIncludingSingleDarkOrColoredMarks() throws Exception {
+        for (int mark : List.of(0xffffff, 0xeeeeee, 0xff0000)) {
+            BufferedImage pixels = image(Color.WHITE);
+            pixels.setRGB(157, 147, mark);
+            try (var sampler = OcrBackgroundMaskSampler.open(source(pixels))) {
+                assertEquals(mark == 0xffffff, sampler.uniformLightPaper(WORD, "FFFFFF"));
+            }
+        }
+    }
+
+    @Test void editReserveRejectsDarkPaperOutOfBoundsAndExhaustedPixelBudget() throws Exception {
+        try (var sampler = OcrBackgroundMaskSampler.open(source(image(Color.WHITE)))) {
+            assertFalse(sampler.uniformLightPaper(WORD, "404040"));
+            assertFalse(sampler.uniformLightPaper(new Rect(0, 0, 10, 10), "FFFFFF"));
+            assertTrue(sampler.uniformLightPaper(PAGE, "FFFFFF"));
+            assertFalse(sampler.uniformLightPaper(PAGE, "FFFFFF"), "250000 pixel budget is cumulative per decoded image");
+        }
+        try (var sampler = OcrBackgroundMaskSampler.open(source(image(new Color(226, 226, 226))))) {
+            assertTrue(sampler.uniformLightPaper(WORD, "E2E2E2"));
+        }
+    }
+
     private ImageBlock source(BufferedImage pixels) throws Exception {
         try {
             ByteArrayOutputStream data = new ByteArrayOutputStream(); assertTrue(ImageIO.write(pixels, "png", data));

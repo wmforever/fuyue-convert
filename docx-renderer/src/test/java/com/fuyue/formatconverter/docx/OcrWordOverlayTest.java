@@ -162,6 +162,30 @@ class OcrWordOverlayTest {
                 0, 0, List.of(), Transform2D.IDENTITY, words);
     }
 
+    @Test void numericEditReserveKeepsMasksAndPositionButRejectsUnknownInkAndLowConfidence() throws Exception {
+        List<Double> widths = new ArrayList<>();
+        for (int variant = 0; variant < 4; variant++) {
+            TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "7.50", variant == 2 ? .45 : .98)), "7.50");
+            ImageBlock background = new ImageBlock("scan", 1, new Rect(0, 0, 100, 100),
+                    "image/png", png(variant == 1), "OCR_SCAN_BACKGROUND", 0);
+            List<TextBlock> lines = new ArrayList<>(List.of(line));
+            if (variant == 3) lines.add(ocr(java.util.stream.IntStream.range(0, 512)
+                    .mapToObj(i -> new TextBlock.OcrWord(new Rect(70, 70, 2, 2), "X", .98)).toList(), "X ".repeat(512)));
+            try (XWPFDocument docx = new XWPFDocument(Files.newInputStream(render(lines, List.of(background))))) {
+                var xml = xml(docx);
+                var shape = elements(xml, VML, "rect").stream().filter(e -> e.getElementsByTagNameNS(WORD, "txbxContent").getLength() > 0).findFirst().orElseThrow();
+                widths.add(mm(shape.getAttribute("style"), "width"));
+                assertEquals(19.85, mm(masks(xml).get(0).getAttribute("style"), "margin-left"), .001);
+                assertEquals(12.3, mm(masks(xml).get(0).getAttribute("style"), "width"), .001);
+                assertEquals("7.50", elements(xml, WORD, "t").get(0).getTextContent());
+                assertArrayEquals(background.data(), docx.getAllPictures().get(0).getData());
+            }
+        }
+        assertTrue(widths.get(0) > widths.get(1) + 2d, widths.toString());
+        assertEquals(widths.get(1), widths.get(2));
+        assertEquals(widths.get(1), widths.get(3), "Dense pages skip the optional reserve before neighbor scans");
+    }
+
     private Path render(List<TextBlock> text, List<ImageBlock> images) throws Exception {
         var paragraphs = text.stream().map(block -> new ParagraphModel(block.box(), List.of(block),
                 ParagraphModel.Alignment.LEFT, 0)).toList();
