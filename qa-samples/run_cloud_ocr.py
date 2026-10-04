@@ -31,6 +31,8 @@ def main():
     parser.add_argument('--provenance', type=Path, help='Verified build provenance; its JAR hash must match')
     parser.add_argument('--text-only', action='store_true', help='Run only TXT; separate from full Word/Office acceptance')
     parser.add_argument('--containers', action='store_true', help='Run frozen PDF/OFD wrapper cases instead of images')
+    parser.add_argument('--scan-edit-source', type=Path,
+                        help='Instead of the matrix, edit an accepted bilingual scan DOCX and reopen it through HTTP Office')
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -93,10 +95,15 @@ def main():
                     time.sleep(.25)
             else:
                 raise TimeoutError('Backend startup timed out')
-            subprocess.run([sys.executable, str(ROOT / 'qa-samples/verify_cloud_ocr.py'),
-                            '--base-url', base, '--samples', str(args.samples.resolve()), '--out', str(out),
-                            *(['--containers'] if args.containers else []),
-                            *(['--text-only'] if args.text_only else [])], env=env, check=True)
+            if args.scan_edit_source:
+                subprocess.run([sys.executable, str(ROOT / 'qa-samples/verify_cloud_scan_edit.py'),
+                                '--base-url', base, '--source', str(args.scan_edit_source.resolve()),
+                                '--out', str(out)], env=env, check=True)
+            else:
+                subprocess.run([sys.executable, str(ROOT / 'qa-samples/verify_cloud_ocr.py'),
+                                '--base-url', base, '--samples', str(args.samples.resolve()), '--out', str(out),
+                                *(['--containers'] if args.containers else []),
+                                *(['--text-only'] if args.text_only else [])], env=env, check=True)
             if not worker_pids:
                 raise RuntimeError('No independent JVM worker observed; isolation acceptance is unverified')
         finally:

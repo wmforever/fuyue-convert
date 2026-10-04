@@ -70,6 +70,46 @@ class OcrFragmentedColumnsTest {
         assertEquals(sections.stream().map(TextBlock::text).toList(),arranged.lines());
     }
 
+    @Test void reconstructsDistinctColumnTextInLeftToRightThenTopToBottomOrder() {
+        var blocks = distinctColumns(0);
+        var snapshot = List.copyOf(blocks);
+        var result = arrange(blocks);
+        assertTrue(result.adjusted());
+        assertEquals(distinctExpected(), result.lines());
+        assertEquals(snapshot, blocks);
+        for (int i=0;i<blocks.size();i++) assertSame(snapshot.get(i),blocks.get(i));
+    }
+
+    @Test void commonVerticalCoverageRequiresAtLeastSixtyPercent() {
+        // Each column spans 200. With first-to-last offsets of 50, the
+        // common span is 150 and the combined span is 250: exactly 60%.
+        for (double offset : new double[]{49.9, 50.0}) {
+            var result = arrange(distinctColumns(offset));
+            assertTrue(result.adjusted(), "accepted coverage at offset " + offset);
+            assertEquals(distinctExpected(),result.lines());
+        }
+        // Just below 60%, and more strongly staggered short columns, retain
+        // engine order even when horizontal gutters and fragments qualify.
+        for (double offset : new double[]{50.1, 125.0}) assertUnchanged(distinctColumns(offset));
+    }
+
+    private static ArrayList<TextBlock> distinctColumns(double firstToLastOffset) {
+        var blocks = new ArrayList<TextBlock>();
+        String[] labels = {"Alpha", "Bravo", "Cedar"};
+        for (int side=0;side<3;side++) for (int part=0;part<3;part++) for (int row=0;row<3;row++) {
+            String text = part==0 ? labels[side] : part==1 ? "keeps" : "sentence"+row;
+            blocks.add(block(text,40+side*330+part*70,100+row*100+side*firstToLastOffset/2,60));
+        }
+        return blocks;
+    }
+
+    private static List<String> distinctExpected() {
+        var lines = new ArrayList<String>();
+        for (String label : List.of("Alpha", "Bravo", "Cedar"))
+            for (int row=0;row<3;row++) lines.add(label+" keeps sentence"+row);
+        return lines;
+    }
+
     private static List<String> expected(String token) {
         return java.util.stream.IntStream.range(0,12).mapToObj(i -> "Column " + token + " sentence").toList();
     }
