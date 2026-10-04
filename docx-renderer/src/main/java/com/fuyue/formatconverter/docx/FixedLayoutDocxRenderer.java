@@ -223,6 +223,7 @@ final class FixedLayoutDocxRenderer {
 
     private Map<TextBlock.OcrWord, ColorValue> addOcrMasks(XWPFParagraph anchor, PageModel page, List<TextBlock> texts) {
         Map<TextBlock.OcrWord, ColorValue> colors = new IdentityHashMap<>();
+        List<OcrMask> masks = new ArrayList<>();
         if (texts.stream().allMatch(block -> block.ocrWords().isEmpty())) return colors;
         // LibreOffice paints negative VML shapes before a DrawingML scan anchor,
         // regardless of XML order. On a scan-only page, put sampled word masks
@@ -250,11 +251,7 @@ final class FixedLayoutDocxRenderer {
                     List<OcrBackgroundMaskSampler.Fill> fills = sampler.fills(new Rect(x, y, right - x, bottom - y));
                     if (fills.isEmpty()) continue;
                     for (OcrBackgroundMaskSampler.Fill fill : fills) {
-                        String xml = "<v:rect xmlns:v=\"urn:schemas-microsoft-com:vml\" id=\""
-                                + attr(shapeId("ocr-mask", block.id())) + "\" style=\""
-                                + attr(positionStyle(fill.box(), scanOnly ? 1 : BEHIND_TEXT_Z_INDEX + 1, 0, true))
-                                + "\" filled=\"t\" fillcolor=\"#" + fill.color() + "\" stroked=\"f\"/>";
-                        unchecked(() -> appendShape(anchor, xml));
+                        masks.add(new OcrMask(block.id(), fill));
                     }
                     colors.put(word, ocrForeground(fills, block.style().color()));
                 }
@@ -262,8 +259,24 @@ final class FixedLayoutDocxRenderer {
                 // Optional background estimation cannot justify an uninformed white cover.
             }
         }
+        // LibreOffice 24.2's dark-paper regression fails with foreground masks
+        // even though 26.8 renders the same white OCR letters. Keep the entire
+        // page on its validated old layering if any sampled word needs white
+        // foreground; do not mix the two policies within one scan page.
+        boolean foregroundMasks = scanOnly && colors.values().stream()
+                .noneMatch(color -> ColorValue.WHITE.equals(color));
+        for (OcrMask mask : masks) {
+            var fill = mask.fill();
+            String xml = "<v:rect xmlns:v=\"urn:schemas-microsoft-com:vml\" id=\""
+                    + attr(shapeId("ocr-mask", mask.blockId())) + "\" style=\""
+                    + attr(positionStyle(fill.box(), foregroundMasks ? 1 : BEHIND_TEXT_Z_INDEX + 1, 0, true))
+                    + "\" filled=\"t\" fillcolor=\"#" + fill.color() + "\" stroked=\"f\"/>";
+            unchecked(() -> appendShape(anchor, xml));
+        }
         return colors;
     }
+
+    private record OcrMask(String blockId, OcrBackgroundMaskSampler.Fill fill) { }
 
     private ColorValue ocrForeground(List<OcrBackgroundMaskSampler.Fill> fills, ColorValue original) {
         double brightness = 0, area = 0;

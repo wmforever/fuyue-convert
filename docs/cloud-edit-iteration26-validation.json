@@ -64,11 +64,6 @@
         "skipped": false
       }
     ],
-    "changedApplicationClasses": [
-      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer.class",
-      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$1.class",
-      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$FixedItem.class"
-    ],
     "frontendRebuiltFilesMatchPackaged": {
       "app-icon.svg": "5bf05198f99e53b7fabf0fbfd25577c9aca004a6b1ea6f7e901457fe89db2568",
       "index.html": "a9767e4111073749ff7c178800d9c7c3786b05ea9094c8b37334a3a696097a24",
@@ -79,12 +74,12 @@
       "assets/index-BiUc2Ubb.js": "4d62648a0d61aabdbd47f5a66c6df465acfef075355f3eb0d2e5fc142a6b61b1"
     },
     "provenance": {
-      "buildInputSha256": "de9b7e4c8cfefb4ba38051f3b93ef3477bea60553fb37387674dd06ac315effd",
-      "parentRevision": "ea5467d5f11748c6a4246abaeba5fa04ed62dbab",
+      "buildInputSha256": "208fc9c414e4dc2be5b268c97d53c6a99d3884b47199641d6ca66a50c72e148f",
+      "parentRevision": "096f0eda722c626e9680268846979c19c9ee054f",
       "workingTreeDirtyAtBuildStart": true,
-      "jarSha256": "ca91ec75cffd892697870cb84d9b9f32cfef9570218d7d3b0843b8144493f782",
-      "applicationClassCount": 225,
-      "applicationClassSha256": "2ab85c1d752fd2e9a1cd4e799749529511e61c2e6e165f474b1efe93f579976a",
+      "jarSha256": "f4960b0dc8789f3865101bdbb86a4c797bd1e4bd016b91f373db916db61c9871",
+      "applicationClassCount": 226,
+      "applicationClassSha256": "d18798b4af93668a44463fe1e8aecf752d35f5bf4ff05293e552436576968371",
       "packagedClassesMatchTargets": true
     }
   },
@@ -271,7 +266,9 @@
     "verify_edit_original26.py": "3bf40794c0459922d4a518d1fcb534adc58f4b58521f472ab7093317df3bc061",
     "PdfReviewRasterProbe.java": "6e9ec0592b258fddd372c40cc90ae95d55990a3dabcac5db89c40244536037de",
     "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9",
-    "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85"
+    "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85",
+    "generate_edit_final26.py": "5724c8e241cc190d0528c227febe54531c7f779fe023414102e370ce3ef3ae41",
+    "verify_edit_final26.py": "dd5425d4e7e264139177d8c8d7df60bff81479785be6300cf00d770e44200169"
   },
   "frozenManifest": {
     "generatorSha256": "5b654b81bc7095b7c15040abd4a8f527aa8c355769956163c21c17d82d8a3982",
@@ -690,6 +687,105 @@
     "Longer fixed-box edit 7.50 -> 187.50 wraps and fails numeric lexical boundaries",
     "Uncertain paper/color and mixed native/vector/table pages have no general edit guarantee",
     "Queued sparse digital OFD OCR_NO_NEW_TEXT remains unchanged",
-    "Native Microsoft Word, macOS and Windows package acceptance unrun"
-  ]
+    "Native Microsoft Word, macOS and Windows package acceptance unrun",
+    "Dark-paper/white-foreground pages deliberately retain old layering; visible edit guarantee excluded"
+  ],
+  "candidateBuildAudit": {
+    "tests": {
+      "tests": 453,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "skips": [
+      {
+        "class": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+        "name": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning"
+      }
+    ],
+    "bundledTests": [
+      {
+        "class": "com.fuyue.formatconverter.task.OcrDeskewTest",
+        "name": "bundledEngineRecoversMissingLinesWithSourceGeometryAndReviewWarnings",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.PdfToImageConverterTest",
+        "name": "discoversBundledPopplerFromAppHome",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.ForkedFileConverterTest",
+        "name": "retainsAutoDiscoveredBundledOcrWhenTheWorkerChangesItsWorkingDirectory",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "discoversBundledRuntimeFromPackagedApplicationRoot",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "validBundledRuntimeAutoEnablesWithoutHostInstallation",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "explicitFalseDisablesEvenAValidBundledRuntime",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.BundledOcrRuntimeIntegrationTest",
+        "name": "bundledBinaryModelsAndLibrariesRunWithoutSystemDiscovery",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.TesseractPngInputTest",
+        "name": "bundledPngEngineRecognizesRealJpegText",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+        "name": "bundledEngineRecoversShadedLowContrastPrintedText",
+        "skipped": false
+      },
+      {
+        "class": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+        "name": "bundledEngineRecoversChineseFaintTextWithDigitsAndPunctuation",
+        "skipped": false
+      }
+    ],
+    "changedApplicationClasses": [
+      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer.class",
+      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$1.class",
+      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$FixedItem.class"
+    ],
+    "frontendRebuiltFilesMatchPackaged": {
+      "app-icon.svg": "5bf05198f99e53b7fabf0fbfd25577c9aca004a6b1ea6f7e901457fe89db2568",
+      "index.html": "a9767e4111073749ff7c178800d9c7c3786b05ea9094c8b37334a3a696097a24",
+      "assets/pdf-CPbOiMa_.js": "fa75f2d6b363ee4a3386e4bf1d3f104c8dce5eef2be79159be1d253e1f4e323a",
+      "assets/pdf.worker.min-CMqTMPr3.js": "73568c62796be3043a57aad8bb5027f9602bae4b54bbea029b0a3af80c5b7166",
+      "assets/pdf.worker.min-r-TJsTTt.mjs": "c964e291707ad492e6e90ff7f4f352b75e05ea2734c3dd3a80b94983b1b7ce3d",
+      "assets/index-J-Vb5Aua.css": "084b610dc78c0213ec817bcb26aeff3dccd2c4d7fce88514a85ab56395e43366",
+      "assets/index-BiUc2Ubb.js": "4d62648a0d61aabdbd47f5a66c6df465acfef075355f3eb0d2e5fc142a6b61b1"
+    },
+    "provenance": {
+      "buildInputSha256": "de9b7e4c8cfefb4ba38051f3b93ef3477bea60553fb37387674dd06ac315effd",
+      "parentRevision": "ea5467d5f11748c6a4246abaeba5fa04ed62dbab",
+      "workingTreeDirtyAtBuildStart": true,
+      "jarSha256": "ca91ec75cffd892697870cb84d9b9f32cfef9570218d7d3b0843b8144493f782",
+      "applicationClassCount": 225,
+      "applicationClassSha256": "2ab85c1d752fd2e9a1cd4e799749529511e61c2e6e165f474b1efe93f579976a",
+      "packagedClassesMatchTargets": true
+    }
+  },
+  "ciCompatibilityFailure": {
+    "revision": "096f0eda722c626e9680268846979c19c9ee054f",
+    "run": 37207251967,
+    "officeJob": 111450914787,
+    "officeVersion": "24.2.7-0ubuntu0.24.04.6",
+    "failedExistingTest": "preservesVisibleScanBackgroundAndUnrecognizedInkBehindEditableWords",
+    "failedAssertion": "editable white letters must remain visibly readable on dark paper",
+    "action": "retain old mask layering for the entire page if any sampled word uses white foreground; no assertion relaxed"
+  }
 }

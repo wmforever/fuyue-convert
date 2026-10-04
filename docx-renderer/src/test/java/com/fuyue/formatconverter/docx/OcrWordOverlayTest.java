@@ -130,6 +130,9 @@ class OcrWordOverlayTest {
                 var masks = masks(xml);
                 assertEquals(1, masks.size());
                 assertEquals("#%02X%02X%02X".formatted(gray, gray, gray), masks.get(0).getAttribute("fillcolor"));
+                assertTrue(masks.get(0).getAttribute("style").contains(gray < 110
+                        ? "z-index:-251658751;" : "z-index:1;"),
+                        "需要白字的暗纸页必须保留跨Office版本已验证的旧层级");
                 assertEquals("GRAY PAPER", elements(xml, WORD, "t").stream().map(Element::getTextContent).reduce("", String::concat));
                 assertTrue(elements(xml, WORD, "color").stream().anyMatch(color ->
                         (gray < 110 ? "FFFFFF" : "000000").equals(color.getAttributeNS(WORD, "val"))));
