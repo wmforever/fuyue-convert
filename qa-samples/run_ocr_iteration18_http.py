@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
-"""Bounded OFD per-image warning contracts; controlled engine != native OCR quality."""
+"""Fresh-export controlled OFD partial/conflict HTTP acceptance; pinned existing JAR."""
 import argparse,hashlib,json,os,pathlib,resource,secrets,signal,socket,subprocess,sys,threading,time,urllib.request,zipfile
 from verify_cloud_ocr import metrics
-from qa_process_guard import ManagedProcess,install_shutdown_handlers
+from qa_process_guard import ManagedProcess,install_shutdown_handlers,snapshot,matches
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 
 def main():
     install_shutdown_handlers()
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--jar',type=pathlib.Path,required=True)
-    parser.add_argument('--out',type=pathlib.Path,required=True);parser.add_argument('--scope',choices=['ofd'],required=True)
+    parser.add_argument('--out',type=pathlib.Path,required=True);parser.add_argument('--scope',choices=['ofd18'],required=True)
     args=parser.parse_args();out=args.out.resolve();assert not out.exists();out.mkdir(parents=True)
-    manifest=json.loads((ROOT/'qa-samples/generated/cloud-iteration15/expected.json').read_text())
-    frozen=json.loads((ROOT/'qa-samples/generated/cloud-iteration17/expected.json').read_text())
-    frozen_hashes={c['file']:c['sha256'] for c in frozen['cases']}
+    manifest=json.loads((ROOT/'qa-samples/generated/cloud-iteration18/expected.json').read_text())
+    frozen=json.loads((ROOT/'qa-samples/generated/cloud-iteration18/expected.json').read_text())
+    frozen_hashes=frozen['files']
+    baseline=snapshot()
     start=time.monotonic();report={'jarSha256':sha(args.jar),'scope':args.scope,'cases':[],'observedWorkerPids':[],
-        'planSha256':sha(ROOT/'docs/cloud-ocr-iteration17-plan.json'),
-        'fixtureManifestSha256':sha(ROOT/'qa-samples/generated/cloud-iteration17/expected.json'),
+        'planSha256':sha(ROOT/'docs/cloud-ocr-iteration18-ofd-plan.json'),
+        'productionSourceRevision':'b14f792b6b4624d8ff7e8b0c154e8becff8ba323',
+        'qaSupervisorSourceSha256':sha(ROOT/'qa-samples/qa_process_guard.py'),
+        'fixtureManifestSha256':sha(ROOT/'qa-samples/generated/cloud-iteration18/expected.json'),
         'status':'running','failures':[]}
     def save(): (out/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     def server(engine,cases,label):
@@ -25,7 +28,7 @@ def main():
         env={**os.environ,'SERVER_ADDRESS':'127.0.0.1','SERVER_PORT':str(port),'FORMAT_CONVERTER_API_TOKEN':token,
             'FORMAT_CONVERTER_DATA_ROOT':str(folder/'data'),'FORMAT_CONVERTER_OCR_ENABLED':'true',
             'FORMAT_CONVERTER_OCR_MAX_CONCURRENCY':'1','FORMAT_CONVERTER_APP_HOME':str(ROOT/'desktop/.runtime'),
-            'FORMAT_CONVERTER_OCR_LANGUAGES':'eng' if engine else 'chi_sim+eng'}
+            'FORMAT_CONVERTER_OCR_LANGUAGES':'eng' if engine else 'chi_sim+eng','QA_CALL_ROOT':str(folder)}
         if engine:env['FORMAT_CONVERTER_TESSERACT_BINARY']=str(engine)
         else:env.pop('FORMAT_CONVERTER_TESSERACT_BINARY',None)
         cmd=['java','-jar',str(args.jar.resolve())]
@@ -82,6 +85,7 @@ def main():
                         time.sleep(.2)
                 else:raise TimeoutError('Startup36s')
                 report.setdefault('health',{})[label]=health
+                assert health['ocr']['available'] and not health['ocr']['bundled']
                 for case in cases:
                     if time.monotonic()-start>480:raise TimeoutError('Declared whole HTTP suite480s')
                     source=pathlib.Path(case['source']);assert sha(source)==case['sha256']
@@ -109,16 +113,19 @@ def main():
                 assert worker_pids,'No independent production worker observed'
                 report['observedWorkerPids']+=sorted(worker_pids)
                 report.setdefault('serverExitCodes',{})[label]=supervision['rootExitCode']
-                report.setdefault('supervision',{})[label]=supervision;save()
+                report.setdefault('supervision',{})[label]=supervision
+                current=snapshot()
+                new_z=[r for pid,r in current.items() if r['state']=='Z' and (pid not in baseline or baseline[pid]['startTicks']!=r['startTicks'])]
+                assert not new_z,new_z
+                report.setdefault('newZombieIdentities',{})[label]=new_z;save()
     try:
-        fixtures=ROOT/'qa-samples/generated/cloud-iteration17'
-        for name,engine,targets in [('incomplete','accepted-incomplete-engine.py',['txt','docx']),
-                ('complete','accepted-complete-engine.py',['txt']),('mixed','mixed-engine.py',['txt','docx']),
-                ('bilingual',None,['txt','docx'])]:
-            source=fixtures/(name+'.ofd')
-            cases=[{'file':source.name,'source':str(source),'sha256':frozen_hashes[source.name],
-                    'target':target,'contract':'ofd-'+name} for target in targets]
-            server(fixtures/engine if engine else None,cases,name)
+        fixtures=ROOT/'qa-samples/generated/cloud-iteration18'
+        for layout in ['same','multi']:
+            for mode in ['control','treatment']:
+                source=fixtures/(layout+'.ofd');label=layout+'-'+mode
+                cases=[{'file':source.name,'source':str(source),'sha256':frozen_hashes[source.name],
+                    'target':target,'contract':'ofd18-'+label} for target in ['txt','docx']]
+                server(fixtures/(label+'-engine.py'),cases,label)
         report['status']='completed'
     except Exception as error:
         report['status']='failed-stopped';report['failures'].append({'type':type(error).__name__,'message':str(error)});raise

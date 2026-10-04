@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Bounded Linux HTTP process/permit lifecycle audit; foreground controlled engine."""
 import argparse,fcntl,hashlib,json,os,pathlib,secrets,signal,socket,subprocess,sys,threading,time,urllib.request,urllib.error
+from qa_process_guard import ManagedProcess,matches,install_shutdown_handlers
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 OUT=ROOT/'qa-samples/work/iteration16-cleanup'
 def write(p,v):p.write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n')
@@ -14,6 +15,7 @@ def live(record):
 
 def main():
     global OUT
+    install_shutdown_handlers()
     parser=argparse.ArgumentParser();parser.add_argument('--out',type=pathlib.Path,default=OUT);parser.add_argument('--remaining-only',action='store_true')
     args=parser.parse_args();OUT=args.out.resolve()
     assert not OUT.exists();OUT.mkdir(parents=True)
@@ -102,7 +104,8 @@ child.wait()
             assert all(value in text for value in ['03121','00643','-417.85','2027-02-16','14 28']),text
             request('/api/tasks/'+tid,method='DELETE');return {'snapshot':snapshot,'text':text,'numericRecoveryVerified':True}
         with (folder/'server.stdout').open('x') as stdout,(folder/'server.stderr').open('x') as stderr:
-            process=subprocess.Popen([sys.executable,'/workspace/fuyue-env/reap-run.py','java','-jar',str(ROOT/'web-api/target/web-api-0.1.5.jar')],env=env,stdout=stdout,stderr=stderr,start_new_session=True)
+            process=ManagedProcess(['java','-jar',str(ROOT/'web-api/target/web-api-0.1.5.jar')],
+                receipt=folder/'supervision.json',env=env,stdout=stdout,stderr=stderr)
             observer=threading.Thread(target=observe,daemon=True);observer.start()
             try:
                 def health():
@@ -143,16 +146,11 @@ child.wait()
                     rec['terminal']=terminal;rec['cleanup']=cleanup(tid,registered);rec['recovery']=recovery(name+'-recovery');save()
                     print(kind,'cleanup passed, recovery passed',flush=True)
             finally:
-                # Terminate the backend child first; keep its subreaper alive until all descendants are reaped.
-                for item in list(owned.values()):
-                    if item['parent']==process.pid and live(item):os.kill(item['pid'],signal.SIGTERM)
-                try:process.wait(timeout=10)
-                except subprocess.TimeoutExpired:
-                    for item in list(owned.values()):
-                        if live(item):os.kill(item['pid'],signal.SIGKILL)
-                    process.kill();process.wait(timeout=5)
-                stopped.set();observer.join(timeout=1)
-                report.setdefault('servers',[]).append({'label':label,'ownedProcessIdentities':list(owned.values()),'allOwnedGone':all(not live(x) for x in owned.values())});save()
+                try:supervision=process.shutdown()
+                finally:stopped.set();observer.join(timeout=1)
+                report.setdefault('servers',[]).append({'label':label,'ownedProcessIdentities':list(owned.values()),
+                    'allOwnedGone':all(not live(x) for x in owned.values()),
+                    'allOwnedPidRecordsAbsent':all(not matches(x) for x in owned.values()),'supervision':supervision});save()
     try:
         if not args.remaining_only:
             run_group('enhanced',1,30,20,['enhanced-cancel']*3)

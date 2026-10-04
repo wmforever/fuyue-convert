@@ -1,0 +1,13 @@
+{
+  "sourceRevision": "b14f792b6b4624d8ff7e8b0c154e8becff8ba323",
+  "acceptedJarSha256": "70cb1d5ab5bda5756116a61cfc14480e6aa2c98a9bc33fca744028af05468b0e",
+  "harnessGate": {
+    "cases": ["one successful authenticated HTTP independent-worker OCR with registered foreground child", "one harness exception while independent worker/engine/foreground child are live"],
+    "baseline": "Record all PID identities and existing zombie identities; the ten old audit PID1 zombies must remain unchanged",
+    "acceptance": "After supervisor waitpid ECHILD and parent wait, every registered new PID identity is absent (including Z), no new global zombie identity, no new live owned descendant; unrelated sidecar remains alive until explicitly waited by owner",
+    "timeoutSeconds": {"rootRegistration":5,"startup":40,"conversion":15,"teardown":15,"wholeGate":100},
+    "stop": "Never SIGKILL the owning reaper. If teardown cannot prove ECHILD/absence, retain reaper, stop process-heavy work and report precise receipt; do not touch PID1 or existing zombies"
+  },
+  "ofdNext": "Only after harness gate passes: freeze controlled full enhancement, partial new-line/conflict and rejected reliable-numeric candidate responses in multi-image/multipage OFDs. Real authenticated HTTP to independent workers, original digit/coordinate/mask preservation and page summary versus per-image warning assertions. No parameter/angle sweep.",
+  "exclusions": ["Native macOS/Windows package and Microsoft Word acceptance", "External SIGKILL/OOM of harness or reaper", "All detached-child and scheduler interleavings"]
+}

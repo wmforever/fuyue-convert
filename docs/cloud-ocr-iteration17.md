@@ -85,6 +85,10 @@ Iteration11/15 manifests were independently reconstructed byte-for-byte from a
 fresh source export with pinned fonts and explicitly cached native TSVs. Reports
 alone are not self-contained. The OFD fixture generator wraps frozen original
 PNGs; regenerated OFD ZIP metadata can differ. Compare pixels, geometry and truth.
+The current runner imports checked-in `qa-samples/qa_process_guard.py`; Linux
+subreaper and Python pidfd support are required. No private workspace helper is
+needed. Its teardown correction and fresh-export execution are validated in
+[iteration18](cloud-ocr-iteration18.md); the old iteration17 matrix was not rerun.
 Run `run_ocr_iteration17_http.py --jar <artifact> --out <fresh-directory> --scope
 ofd` with bundled app-home/explicit Office path, then
 `summarize_ocr_iteration17.py` for the fixed before/after paths. Separate raw logs
@@ -104,8 +108,10 @@ No PSM/angle/threshold sweep or completed cleanup case was repeated. The bounded
 the harness failure and ten residual PID1 zombies explicitly retained. Iteration17
 servers exit via their live subreaper and add no residual processes.
 
-End-to-end OFD partial/conflict injection, arbitrary signed/vendor OFDs, native
-desktop packages/Microsoft Word and detached-child cleanup races are unrun.
+End-to-end OFD partial/conflict injection was unrun in this iteration and is
+subsequently covered by [iteration18](cloud-ocr-iteration18.md). Arbitrary
+signed/vendor OFDs, native desktop packages/Microsoft Word and detached-child
+cleanup races remain unrun.
 Coverage false positives/negatives, deadline skips, low-confidence rejected,
 deskew/vertical coverage gaps, EN−6° accuracy and true-tilted suppression risk
 remain. Existing installers are stale; Linux JAR acceptance is distinct from

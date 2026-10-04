@@ -1,0 +1,14 @@
+{
+  "productionSourceRevision": "b14f792b6b4624d8ff7e8b0c154e8becff8ba323",
+  "jarSha256": "70cb1d5ab5bda5756116a61cfc14480e6aa2c98a9bc33fca744028af05468b0e",
+  "prerequisite": "Two minimal success/exception harness cases plus one resistant exception case passed ECHILD and zero-new-PID/zombie checks; old ten unchanged",
+  "fixedCorpus": {
+    "images": ["full: original FULL03121; full enhanced candidate retains it and adds independent line00643", "partial: reliable .95 and low-confidence faint; candidate changes .95 to0.95 but adds separate prose00817; original whole line must survive", "reject: reliable ID00424 plus faint; candidate ID80424 has no independent new line and must be rejected", "low: LOW00424 at.60, candidate.62 rejected by unchanged gain gate"],
+    "layouts": ["one page with all four images in separate quadrants", "two pages: full/partial on first, reject/low on second"],
+    "truth": "Freeze source rendered labels, TSV pixel boxes/confidences and expected selected surfaces/flags before Java/HTTP measurement; injected confidence is not native accuracy"
+  },
+  "http": {"contracts": "Both layouts, control-original-only and treatment engine: TXT and DOCX, each DOCX actual Office PDF to TXT; total16 contracts/independent workers", "ocrConcurrency":1,"pageTimeoutSeconds":120,"wholeSeconds":480},
+  "assertions": ["Every original numeric surface, separator, token confidence and source-coordinate box preserved in partial/reject/low results", "Full enhancement retains FULL03121 and adds only declared line; partial adds only disjoint new line", "One weighted page OCR_APPLIED, correct image-scoped partial/conflict/omission and low-confidence warnings; complete neighbor never receives partial message", "Original Word frames/mask coordinates/fills and scan RGB/media exact; added masks disjoint from protected source frames; relative original reading order retained; absolute z-index may shift with new preceding frames", "Worker and supervisor PID records absent and zero new global zombies after every server; old ten unchanged"],
+  "stop": "If safety or original text/geometry/mask invariant fails, stop next cases and retain raw failure; fix only independently confirmed minimal product/harness fault. No parameter/angle sweep.",
+  "unrun": ["Native installers/Microsoft Word", "Arbitrary real signed/vendor OFDs", "All detached-child/externally killed supervisor/scheduler races", "New bundled accuracy sweep; this is controlled route acceptance"]
+}
