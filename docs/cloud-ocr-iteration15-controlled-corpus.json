@@ -1,0 +1,56 @@
+{
+  "license": "Apache-2.0 synthetic text/controlled responses; original fonts SIL-OFL-1.1",
+  "scope": "Fault-injection engine contract; no claimed native OCR accuracy/confidence",
+  "sourceManifestSha256": "cac258df4f6f80046529d25c85cf039605cab55d89f039f670944e07f6dc1ab1",
+  "sourceImageSha256": "d5819696293b0917be6ba1aaa8445d3adaf5d5b665fb66681e16d05d22a16174",
+  "nativeTsvSourceSha256": "a31bb61a391c6105978de4ab53c1d2aaa6015189ddfed09f615c3939ea97cf31",
+  "expectedLines": [
+    "Dispatch record 03121 dated 2027-02-16",
+    "Account 00643 debit -417.85 USD",
+    "Unit price .85 quantity 026 credit -0.65",
+    "Net 17.40 total 029.05 discount 6.75%",
+    "Keep every original word and scan pixel",
+    "Reference CD-00817 cleared after checking",
+    "Final balance 563.27 on 2027-03-09",
+    "Separate numbers 14 28 remain separate"
+  ],
+  "generatorSha256": "291cc87389a173397d9dec0b338df258764d39775ed7fab929dce4cb11650360",
+  "files": {
+    "accepted-complete-engine.py": "92db5a26dbe528b885500baf4470d4eccf37107b6c5bee1c6321c236246f2f4a",
+    "accepted-complete.png": "d5819696293b0917be6ba1aaa8445d3adaf5d5b665fb66681e16d05d22a16174",
+    "accepted-incomplete-engine.py": "8460309b9bfbc60df5568c9dffa4b7e0b305a34b79f8f6cb5dd9c3b37d7ab045",
+    "accepted-incomplete.png": "d5819696293b0917be6ba1aaa8445d3adaf5d5b665fb66681e16d05d22a16174",
+    "complete.tsv": "90f430b324de21154562aaf2ab24c5fbb9e36e0ebb5c9fa3b8bac95f8fd1f855",
+    "incomplete.tsv": "a91f582ddfa7b149968760bacaf352dcd7d3627c1dc419e2a8fd5bd97ded6fc4",
+    "original.tsv": "371879b8d4b165ded588c5743d9e2d5f6bb6676bfe0660bee965d073a06fcb38",
+    "rejected-engine.py": "31049f6f60895ccbeee0aea72eb66c08841ed06e12ef45a77863b8b7f3b0a1d6",
+    "rejected.png": "d5819696293b0917be6ba1aaa8445d3adaf5d5b665fb66681e16d05d22a16174",
+    "rejected.tsv": "4b773819ff14b2f1d2944f66cd4a39f21d4d6e698eecca7945d05186153a4669"
+  },
+  "cases": [
+    {
+      "file": "accepted-incomplete.png",
+      "sha256": "d5819696293b0917be6ba1aaa8445d3adaf5d5b665fb66681e16d05d22a16174",
+      "engine": "accepted-incomplete-engine.py",
+      "enhancedResponse": "incomplete.tsv",
+      "expectedEnhanced": true,
+      "expectedFinalCoverageProbe": true
+    },
+    {
+      "file": "accepted-complete.png",
+      "sha256": "d5819696293b0917be6ba1aaa8445d3adaf5d5b665fb66681e16d05d22a16174",
+      "engine": "accepted-complete-engine.py",
+      "enhancedResponse": "complete.tsv",
+      "expectedEnhanced": true,
+      "expectedFinalCoverageProbe": false
+    },
+    {
+      "file": "rejected.png",
+      "sha256": "d5819696293b0917be6ba1aaa8445d3adaf5d5b665fb66681e16d05d22a16174",
+      "engine": "rejected-engine.py",
+      "enhancedResponse": "rejected.tsv",
+      "expectedEnhanced": false,
+      "expectedFinalCoverageProbe": true
+    }
+  ]
+}

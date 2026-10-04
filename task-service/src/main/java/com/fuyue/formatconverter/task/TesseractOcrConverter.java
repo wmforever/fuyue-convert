@@ -145,10 +145,19 @@ public final class TesseractOcrConverter implements FileConverter {
                 if (allowDeskew) result = retryDeskew(result, pixels, workDir, pageNumber, physicalBox, dimensions, limits, started);
                 if (result.deskewDegrees() != 0 || result.partialRecovery()) return result;
                 // The original pixels, rather than enhanced pixels, remain the geometry authority.
-                return new RecognitionResult(result.blocks().stream()
-                        .map(block -> OcrWordGeometryRefiner.refine(block, pixels, physicalBox)).toList(),
+                var refined = result.blocks().stream()
+                        .map(block -> OcrWordGeometryRefiner.refine(block, pixels, physicalBox)).toList();
+                boolean possibleTextOmission = uncoveredShadedInk && !result.imageEnhanced();
+                // Adopting a better candidate is not evidence that all shaded ink is covered.
+                // Recheck its final source-space boxes without adding a retry or a new deadline.
+                if (result.imageEnhanced() && "3".equals(pageSegmentationMode())
+                        && remainingTime(started).compareTo(Duration.ofSeconds(1)) > 0) {
+                    possibleTextOmission = OcrCoverageProbe.hasUncoveredShadedInk(pixels, refined, physicalBox,
+                            started + settings.timeout().toNanos());
+                }
+                return new RecognitionResult(refined,
                         result.confidence(), result.wordCount(), result.imageEnhanced(), result.deskewDegrees(),
-                        result.conflicts(), uncoveredShadedInk && !result.imageEnhanced());
+                        result.conflicts(), possibleTextOmission);
             } finally { pixels.flush(); }
         } finally {
             if (!engineImage.equals(image)) {
@@ -508,6 +517,9 @@ public final class TesseractOcrConverter implements FileConverter {
             warnings.add(ConversionWarning.of(WarningCode.OCR_POSSIBLE_TEXT_OMISSION,
                     scope + (result.partialRecovery()
                             ? "原识别区域保留，未采用其替换候选，仅补充了严格分离的新行；仍可能漏字或保留原误识别，混合置信度不能证明内容完整，请对照原图复核。"
+                            : result.imageEnhanced()
+                            ? "采用增强候选后，原图阴影字迹覆盖探测仍发现多个未覆盖区域，可能漏识别或包含非文字图形；"
+                            + "平均置信度不能证明内容完整，请对照原图复核。"
                             : "阴影字迹覆盖探测仍发现多个未覆盖区域，可能漏识别或包含非文字图形；"
                             + "未采用不满足保守条件的候选，平均置信度不能证明内容完整，请对照原图复核。"), pageNumber));
         }

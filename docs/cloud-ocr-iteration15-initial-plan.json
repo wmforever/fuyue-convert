@@ -1,0 +1,14 @@
+{
+  "sourceRevision": "038f1f163aa8bef0913db3581d844e5056f67131",
+  "hypothesis": "Accepted full contrast enhancement clears omission evidence solely because imageEnhanced=true, even if the selected words still leave shaded ink uncovered",
+  "scope": "Warnings after accepted full enhancement only; no new OCR candidate, retry eligibility, gain/minimum/numeric/coordinate or deadline policy",
+  "fixedControlledCases": ["Accepted incomplete: original bottom2 lines at.60, enhanced bottom4 at.90 of frozen8-line shadow", "Accepted complete: same original, enhanced all8 at.90", "Rejected: same original, enhanced bottom4 at.62"],
+  "controlledEvidence": "Deterministic engine-contract responses derived from frozen native TSVs; confidence fields explicitly controlled, never presented as bundled OCR quality",
+  "baselineRequired": "Actual converter adopts incomplete full candidate, actual coverage probe returns true for selected words, warning flag/code absent; independent full HTTP/Worker baseline reproduces",
+  "fixCriteria": ["Incomplete accepted result gains OCR_POSSIBLE_TEXT_OMISSION with wording that does not say its adopted candidate was rejected", "Complete accepted result has no omission warning", "Rejected result stays unchanged", "All selected text/digits/confidence/bboxes/source bytes/overlay masks identical before/after", "Coverage check uses original pixels/final source coordinates and existing original deadline; partial/deskew/vertical/budget behavior preserved"],
+  "limits": {"controlledJavaCasesPerRevision": 3, "controlledHttpCasesPerRevision": 3, "nativeHttpCasesPerRevision": 10, "serialOcrConcurrency": 1, "pageTimeoutSeconds": 120, "wholeHttpSuiteSeconds": 900},
+  "nativeControls": ["6 frozen bilingual handoff inputs TXT", "EN-serif shadow TXT", "EN-mono shadow DOCX", "blank-shadow TXT", "noise-shadow TXT"],
+  "controlledHttpTargets": {"accepted-incomplete": ["txt", "docx"], "accepted-complete": ["txt"], "rejected": ["txt"]},
+  "unaffectedRoutes": ["TXT->DOCX->PDF->TXT through HTTP with actual Office reopen"],
+  "stop": "No confirmed baseline fault means negative report and stop. Confirmed fault permits smallest warning-only fix and meaningful focused/clean build/actual before-after HTTP evidence; no angle/threshold/PSM sweep"
+}

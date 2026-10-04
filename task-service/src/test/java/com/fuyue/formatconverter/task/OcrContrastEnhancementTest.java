@@ -209,14 +209,59 @@ class OcrContrastEnhancementTest {
     }
 
     @Test
-    void rejectedCoverageCandidateKeepsOriginalNumbersAndWarnsWhileAcceptedCandidateDoesNot() throws Exception {
+    void acceptedEnhancementStillWarnsWhenFinalWordsLeaveShadedInkUncovered() throws Exception {
+        Path source = uncoveredShadedImage();
+        byte[] original = Files.readAllBytes(source);
+        var converter = fake("60", "original 2026", "90", "original 2026 more lines", "");
+        var result = converter.recognizeLayoutResult(source, temp.resolve("accepted-incomplete"), 1,
+                new Rect(0, 0, 600, 400), ParseLimits.defaults());
+        assertTrue(result.imageEnhanced());
+        assertEquals("original 2026 more lines", result.blocks().get(0).text());
+        var pixels = ImageIO.read(source.toFile());
+        assertTrue(OcrCoverageProbe.hasUncoveredShadedInk(pixels, result.blocks(),
+                new Rect(0, 0, 600, 400), System.nanoTime() + 1_000_000_000L));
+        pixels.flush();
+        assertTrue(result.possibleTextOmission(), "adoption cannot certify coverage of the selected words");
+        var warning = converter.warningsFor(result, 1, "第1页").stream()
+                .filter(w -> w.code() == WarningCode.OCR_POSSIBLE_TEXT_OMISSION).findFirst().orElseThrow();
+        assertFalse(warning.message().contains("未采用"), "the full enhanced candidate was actually adopted");
+        assertArrayEquals(original, Files.readAllBytes(source));
+    }
+
+    @Test
+    void acceptedEnhancementWithCompleteCoverageDoesNotWarn() throws Exception {
+        Path source = uncoveredShadedImage();
+        var converter = fake("60", "original 2026", "90", "original 2026 more lines", "", "",
+                "0\\t0\\t600\\t400");
+        var result = converter.recognizeLayoutResult(source, temp.resolve("accepted-covered"), 1,
+                new Rect(0, 0, 600, 400), ParseLimits.defaults());
+        assertTrue(result.imageEnhanced());
+        assertFalse(result.possibleTextOmission());
+        assertTrue(converter.warningsFor(result, 1, "第1页").stream()
+                .noneMatch(w -> w.code() == WarningCode.OCR_POSSIBLE_TEXT_OMISSION));
+    }
+
+    @Test
+    void acceptedEnhancementDoesNotExtendPageBudgetForFinalCoverageCheck() throws Exception {
+        Path source = uncoveredShadedImage();
+        var converter = fake("60", "original 2026", "90", "original 2026 more lines", "sleep 4.2");
+        long started = System.nanoTime();
+        var result = converter.recognizeLayoutResult(source, temp.resolve("accepted-budget"), 1,
+                new Rect(0, 0, 600, 400), ParseLimits.defaults());
+        assertTrue(Duration.ofNanos(System.nanoTime() - started).toMillis() < 6500);
+        assertTrue(result.imageEnhanced());
+        assertFalse(result.possibleTextOmission(), "optional probe is skipped with less than one second remaining");
+    }
+
+    @Test
+    void coverageWarningDependsOnRemainingInkInsteadOfCandidateAdoption() throws Exception {
         Path source = uncoveredShadedImage();
         for (boolean accepted : new boolean[]{false,true}) {
             var converter=fake("88","original 2026","97",accepted?"original 2026 more lines":"original 20260 more lines","");
             var result=converter.recognizeLayoutResult(source,temp.resolve("uncovered-"+accepted),1,
                     new Rect(0,0,600,400),ParseLimits.defaults());
             assertEquals(accepted,result.imageEnhanced());
-            assertEquals(!accepted,result.possibleTextOmission());
+            assertTrue(result.possibleTextOmission(), "both selected word sets leave the lower ink bands uncovered");
             if(!accepted) assertEquals("original 2026",result.blocks().get(0).text());
         }
     }
@@ -493,6 +538,13 @@ class OcrContrastEnhancementTest {
 
     private TesseractOcrConverter fake(String confidence, String text, String enhancedConfidence,
                                       String enhancedText, String behavior, String originalBehavior) throws Exception {
+        return fake(confidence, text, enhancedConfidence, enhancedText, behavior, originalBehavior,
+                "50\\t50\\t400\\t100");
+    }
+
+    private TesseractOcrConverter fake(String confidence, String text, String enhancedConfidence,
+                                      String enhancedText, String behavior, String originalBehavior,
+                                      String coordinates) throws Exception {
         assumeTrue(!System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win"));
         Path binary = temp.resolve("fake-" + System.nanoTime());
         String script = "#!/bin/sh\nbase=\"$2\"\nconfidence=" + confidence + "\ntext='" + text + "'\n"
@@ -501,7 +553,7 @@ class OcrContrastEnhancementTest {
                 + "cp \"$1\" \"$(dirname \"$2\")/enhanced-received.png\"\n"
                 + behavior + "\nconfidence=" + enhancedConfidence + "\ntext='" + enhancedText + "'\n;; *) " + originalBehavior + "\n;; esac\n"
                 + "printf 'level\\tpage_num\\tblock_num\\tpar_num\\tline_num\\tword_num\\tleft\\ttop\\twidth\\theight\\tconf\\ttext\\n' > \"${base}.tsv\"\n"
-                + "printf '5\\t1\\t1\\t1\\t1\\t1\\t50\\t50\\t400\\t100\\t%s\\t%s\\n' \"$confidence\" \"$text\" >> \"${base}.tsv\"\n";
+                + "printf '5\\t1\\t1\\t1\\t1\\t1\\t" + coordinates + "\\t%s\\t%s\\n' \"$confidence\" \"$text\" >> \"${base}.tsv\"\n";
         Files.writeString(binary, script); assertTrue(binary.toFile().setExecutable(true));
         return new TesseractOcrConverter(DocumentFormat.PNG, new TesseractOcrConverter.Settings(binary, "eng", "fake",
                 Duration.ofSeconds(5), 1, 0.35, 0.75, 25_000_000L, temp.resolve("locks")));
