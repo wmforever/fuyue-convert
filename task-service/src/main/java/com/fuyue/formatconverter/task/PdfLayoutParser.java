@@ -104,7 +104,8 @@ public final class PdfLayoutParser {
             }
 
             if (sections != null) sections.initialize(document, limits.maxEntries());
-            LayoutTextStripper stripper = new LayoutTextStripper(states, limits.maxEntries(), sections);
+            LayoutTextStripper stripper = new LayoutTextStripper(states, limits.maxEntries(), sections,
+                    mode == ParseMode.TEXT_EXTRACTION || mode == ParseMode.TEXT_EXTRACTION_OCR);
             stripper.setSortByPosition(true);
             stripper.setShouldSeparateByBeads(false);
             stripper.setSuppressDuplicateOverlappingText(true);
@@ -253,11 +254,14 @@ public final class PdfLayoutParser {
         private int markedDepth;
         private int artifactDepth;
         private final java.util.Set<Integer> markedIds = new java.util.HashSet<>();
+        private final PdfExplicitSpaces explicitSpaces;
 
-        private LayoutTextStripper(List<PageState> pages, int maxTextObjects, PdfTextSectionOrder sections) {
+        private LayoutTextStripper(List<PageState> pages, int maxTextObjects, PdfTextSectionOrder sections,
+                                   boolean preserveExplicitSpaces) {
             this.pages = pages;
             this.maxTextObjects = Math.max(1, maxTextObjects);
             this.sections = sections != null && sections.enabled() ? sections : null;
+            this.explicitSpaces = preserveExplicitSpaces ? new PdfExplicitSpaces(maxTextObjects) : null;
             if (this.sections != null) {
                 addOperator(new BeginMarkedContentSequence(this));
                 addOperator(new BeginMarkedContentSequenceWithProperties(this));
@@ -270,6 +274,7 @@ public final class PdfLayoutParser {
             int index = getCurrentPageNo() - 1;
             if (index < 0 || index >= pages.size()) throw new IOException("PDF 页面索引不一致");
             current = pages.get(index);
+            if (explicitSpaces != null) explicitSpaces.reset(current.rotation() != 0 || current.userUnit() != 1d);
             positionGroups.clear();marked.clear();markedIds.clear();markedDepth = 0;artifactDepth = 0;
             super.startPage(page);
         }
@@ -311,11 +316,13 @@ public final class PdfLayoutParser {
             // Form MCIDs use another content namespace; retain the legacy path
             // until stream-scoped structure references are supported.
             if (sections != null) sections.disablePage(current.pageNumber());
+            if (explicitSpaces != null) explicitSpaces.disable();
             super.showForm(form);
         }
 
         @Override
         protected void processTextPosition(TextPosition text) {
+            if (explicitSpaces != null) explicitSpaces.record(text);
             if (sections != null) positionGroups.put(text,
                     markedDepth > 64 || marked.isEmpty() ? -1 : marked.peek());
             try {
@@ -331,6 +338,8 @@ public final class PdfLayoutParser {
         protected void writeString(String ignored, List<TextPosition> positions) throws IOException {
             if (current == null || positions == null || positions.isEmpty()) return;
             List<TextPosition> run = new ArrayList<>();
+            PdfExplicitSpaces.Text nativeSpaces = explicitSpaces == null
+                    ? PdfExplicitSpaces.Text.EMPTY : explicitSpaces.restore(positions);
             RunKey key = null;
             for (TextPosition position : positions) {
                 if (position == null) continue;
@@ -339,16 +348,16 @@ public final class PdfLayoutParser {
                 PdfFontNames.Face face = fontFaces.computeIfAbsent(position.getFont(), PdfFontNames::from);
                 RunKey next = RunKey.from(position, color == null ? ColorValue.BLACK : color, face);
                 if (key != null && !key.compatible(next)) {
-                    addRun(run, key);
+                    addRun(run, key, nativeSpaces);
                     run.clear();
                 }
                 key = next;
                 run.add(position);
             }
-            if (key != null && !run.isEmpty()) addRun(run, key);
+            if (key != null && !run.isEmpty()) addRun(run, key, nativeSpaces);
         }
 
-        private void addRun(List<TextPosition> positions, RunKey key) throws IOException {
+        private void addRun(List<TextPosition> positions, RunKey key, PdfExplicitSpaces.Text nativeSpaces) throws IOException {
             if (++textObjects > maxTextObjects) {
                 throw new IOException("PDF 文字对象数量超过限制：" + textObjects + " > " + maxTextObjects);
             }
@@ -360,7 +369,7 @@ public final class PdfLayoutParser {
                 for (TextPosition position : positions) positionGroups.remove(position);
                 sections.record("pdf-p" + current.pageNumber() + "-t" + textObjects, group);
             }
-            String text = positions.stream().map(TextPosition::getUnicode).reduce("", String::concat);
+            String text = nativeSpaces.value(positions);
             if (text.isEmpty()) return;
 
             double unit = current.userUnit();

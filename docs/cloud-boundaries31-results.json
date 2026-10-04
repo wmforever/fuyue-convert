@@ -1,0 +1,740 @@
+{
+  "parentRevision": "fed6b476476ef0b4dfc65d7b6f32f50877b77540",
+  "beforeJarSha256": "de05c153351caf48a41ed5522fb9b591756f2e8d178301e3a7aa7619d9630b18",
+  "jarSha256": "0f0182d512009114fbba0165942f63f0f14fced8c6865c2f2c7478ad01d9ae61",
+  "manifestSha256": "267618fb1145036f7b4a5b876d7e0fdb44a3843cfc51f0f7a042554a52fa9590",
+  "rows": [
+    {
+      "id": "latin-year",
+      "expected": "AUDIT 2071\n",
+      "before": {
+        "actual": "AUDIT2071\n",
+        "exact": false,
+        "rawEditDistance": 1,
+        "rawCer": 0.09090909090909091,
+        "whitespaceNormalized": {
+          "expectedCharacters": 9,
+          "actualCharacters": 9,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "2071"
+          ],
+          "actualNumbers": [
+            "2071"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "after": {
+        "actual": "AUDIT 2071\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 9,
+          "actualCharacters": 9,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "2071"
+          ],
+          "actualNumbers": [
+            "2071"
+          ]
+        },
+        "numericLexemesExact": true
+      }
+    },
+    {
+      "id": "literal-id",
+      "expected": "CODE00793\n",
+      "before": {
+        "actual": "CODE00793\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 9,
+          "actualCharacters": 9,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00793"
+          ],
+          "actualNumbers": [
+            "00793"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "after": {
+        "actual": "CODE00793\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 9,
+          "actualCharacters": 9,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00793"
+          ],
+          "actualNumbers": [
+            "00793"
+          ]
+        },
+        "numericLexemesExact": true
+      }
+    },
+    {
+      "id": "numeric-spaces",
+      "expected": "12 34\n12.30\n",
+      "before": {
+        "actual": "1234\n12.30\n",
+        "exact": false,
+        "rawEditDistance": 1,
+        "rawCer": 0.08333333333333333,
+        "whitespaceNormalized": {
+          "expectedCharacters": 9,
+          "actualCharacters": 9,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 2,
+          "expectedNumbers": [
+            "12",
+            "34",
+            "12",
+            "30"
+          ],
+          "actualNumbers": [
+            "1234",
+            "12",
+            "30"
+          ]
+        },
+        "numericLexemesExact": false
+      },
+      "after": {
+        "actual": "12 34\n12.30\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 9,
+          "actualCharacters": 9,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 2,
+          "expectedNumbers": [
+            "12",
+            "34",
+            "12",
+            "30"
+          ],
+          "actualNumbers": [
+            "12",
+            "34",
+            "12",
+            "30"
+          ]
+        },
+        "numericLexemesExact": true
+      }
+    },
+    {
+      "id": "surface",
+      "expected": "Amount -054.80 +0.47\nDate 2071-11-23 ID00793\n",
+      "before": {
+        "actual": "Amount -054.80 +0.47\nDate 2071-11-23 ID00793\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 39,
+          "actualCharacters": 39,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 2,
+          "expectedNumbers": [
+            "054",
+            "80",
+            "0",
+            "47",
+            "2071",
+            "11",
+            "23",
+            "00793"
+          ],
+          "actualNumbers": [
+            "054",
+            "80",
+            "0",
+            "47",
+            "2071",
+            "11",
+            "23",
+            "00793"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "after": {
+        "actual": "Amount -054.80 +0.47\nDate 2071-11-23 ID00793\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 39,
+          "actualCharacters": 39,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 2,
+          "expectedNumbers": [
+            "054",
+            "80",
+            "0",
+            "47",
+            "2071",
+            "11",
+            "23",
+            "00793"
+          ],
+          "actualNumbers": [
+            "054",
+            "80",
+            "0",
+            "47",
+            "2071",
+            "11",
+            "23",
+            "00793"
+          ]
+        },
+        "numericLexemesExact": true
+      }
+    },
+    {
+      "id": "double-space",
+      "expected": "AUDIT  2074\n",
+      "before": {
+        "actual": "AUDIT2 074\n",
+        "exact": false,
+        "rawEditDistance": 2,
+        "rawCer": 0.16666666666666666,
+        "whitespaceNormalized": {
+          "expectedCharacters": 9,
+          "actualCharacters": 9,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "2074"
+          ],
+          "actualNumbers": [
+            "2",
+            "074"
+          ]
+        },
+        "numericLexemesExact": false
+      },
+      "after": {
+        "actual": "AUDIT  2074\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 9,
+          "actualCharacters": 9,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "2074"
+          ],
+          "actualNumbers": [
+            "2074"
+          ]
+        },
+        "numericLexemesExact": true
+      }
+    },
+    {
+      "id": "mixed-cjk",
+      "expected": "审核 REVIEW 2073\n编号，ID00793\n",
+      "before": {
+        "actual": "审核 REVIEW 2073\n编号，ID00793\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 22,
+          "actualCharacters": 22,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 2,
+          "expectedNumbers": [
+            "2073",
+            "00793"
+          ],
+          "actualNumbers": [
+            "2073",
+            "00793"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "after": {
+        "actual": "审核 REVIEW 2073\n编号，ID00793\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 22,
+          "actualCharacters": 22,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 2,
+          "expectedNumbers": [
+            "2073",
+            "00793"
+          ],
+          "actualNumbers": [
+            "2073",
+            "00793"
+          ]
+        },
+        "numericLexemesExact": true
+      }
+    },
+    {
+      "id": "font-color-id",
+      "expected": "ID00864\n",
+      "before": {
+        "actual": "ID00864\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 7,
+          "actualCharacters": 7,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00864"
+          ],
+          "actualNumbers": [
+            "00864"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "after": {
+        "actual": "ID00864\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 7,
+          "actualCharacters": 7,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00864"
+          ],
+          "actualNumbers": [
+            "00864"
+          ]
+        },
+        "numericLexemesExact": true
+      }
+    },
+    {
+      "id": "wide-gap-id",
+      "expected": "CODE00796\n",
+      "before": {
+        "actual": "CODE00796\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 9,
+          "actualCharacters": 9,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00796"
+          ],
+          "actualNumbers": [
+            "00796"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "after": {
+        "actual": "CODE00796\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 9,
+          "actualCharacters": 9,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00796"
+          ],
+          "actualNumbers": [
+            "00796"
+          ]
+        },
+        "numericLexemesExact": true
+      }
+    },
+    {
+      "id": "original-reserve",
+      "expected": "RESERVE REVIEW 2068\nRecord 00916\nAmount 00062.35\nDate 2067-11-23\nControl 45.70\n",
+      "before": {
+        "actual": "RESERVE REVIEW2068\nRecord 00916\nAmount 00062.35\nDate 2067-11-23\nControl 45.70\n",
+        "exact": false,
+        "rawEditDistance": 1,
+        "rawCer": 0.012658227848101266,
+        "whitespaceNormalized": {
+          "expectedCharacters": 68,
+          "actualCharacters": 68,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 5,
+          "expectedNumbers": [
+            "2068",
+            "00916",
+            "00062",
+            "35",
+            "2067",
+            "11",
+            "23",
+            "45",
+            "70"
+          ],
+          "actualNumbers": [
+            "2068",
+            "00916",
+            "00062",
+            "35",
+            "2067",
+            "11",
+            "23",
+            "45",
+            "70"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "after": {
+        "actual": "RESERVE REVIEW 2068\nRecord 00916\nAmount 00062.35\nDate 2067-11-23\nControl 45.70\n",
+        "exact": true,
+        "rawEditDistance": 0,
+        "rawCer": 0.0,
+        "whitespaceNormalized": {
+          "expectedCharacters": 68,
+          "actualCharacters": 68,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 5,
+          "expectedNumbers": [
+            "2068",
+            "00916",
+            "00062",
+            "35",
+            "2067",
+            "11",
+            "23",
+            "45",
+            "70"
+          ],
+          "actualNumbers": [
+            "2068",
+            "00916",
+            "00062",
+            "35",
+            "2067",
+            "11",
+            "23",
+            "45",
+            "70"
+          ]
+        },
+        "numericLexemesExact": true
+      }
+    }
+  ],
+  "exactBefore": 5,
+  "exactAfter": 9,
+  "office": [
+    {
+      "id": "reserve",
+      "allWordPartsExceptCoreExact": true,
+      "editableTextRuns": 11,
+      "shapes": 22,
+      "mediaSha256": {
+        "word/media/image1.png": "1d5cedfa466684f45562270c0142ee3ab5f637428ca1e4975a6186d2039a4dfd"
+      },
+      "officePixelsExactAt300Dpi": true,
+      "pixelSha256": "eff9d8a86c536d5c8f5a06df5556404deb47122f9badb61c9a937c2d545b2e7e",
+      "officeNativeTextExact": true
+    },
+    {
+      "id": "dark",
+      "allWordPartsExceptCoreExact": true,
+      "editableTextRuns": 11,
+      "shapes": 22,
+      "mediaSha256": {
+        "word/media/image1.png": "ce0ef9a69d8cfe6429d5908eef814f59d6edf67c0f48e185a492090f406c49ed"
+      }
+    }
+  ],
+  "editedAmountExact": true,
+  "blankPageExact": true,
+  "whitespaceNormalizedCerIsNotCompleteness": true,
+  "httpBefore": 8,
+  "httpAfter": 16,
+  "workersAbsent": 24,
+  "newZombies": [],
+  "ECHILD": true,
+  "beforeResources": {
+    "wallSeconds": 26.01230594500521,
+    "userSeconds": 72.741813,
+    "systemSeconds": 6.362188,
+    "maxChildRssKiB": 307780
+  },
+  "afterResources": {
+    "wallSeconds": 41.58419986199442,
+    "userSeconds": 114.03984100000001,
+    "systemSeconds": 9.05686,
+    "maxChildRssKiB": 344404
+  },
+  "finalRequests": [
+    {
+      "id": "latin-year-text",
+      "seconds": 1.3571733889984898,
+      "warnings": []
+    },
+    {
+      "id": "literal-id-text",
+      "seconds": 3.093014869002218,
+      "warnings": []
+    },
+    {
+      "id": "numeric-spaces-text",
+      "seconds": 1.2205395359997055,
+      "warnings": []
+    },
+    {
+      "id": "surface-text",
+      "seconds": 1.6885548599966569,
+      "warnings": []
+    },
+    {
+      "id": "double-space-text",
+      "seconds": 1.7698912400010158,
+      "warnings": []
+    },
+    {
+      "id": "mixed-cjk-text",
+      "seconds": 1.2380494239987456,
+      "warnings": []
+    },
+    {
+      "id": "font-color-id-text",
+      "seconds": 1.5343431630026316,
+      "warnings": []
+    },
+    {
+      "id": "wide-gap-id-text",
+      "seconds": 1.5232683549984358,
+      "warnings": []
+    },
+    {
+      "id": "reserve-artifact-text",
+      "seconds": 2.705783978002728,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页图片 1已使用本地 Tesseract OCR，平均置信度 93.4%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9342971581818184
+        },
+        {
+          "code": "OCR_OCCLUDED_TEXT_IGNORED",
+          "message": "PDF 第 1 页有 11 个底图 OCR 词被后绘制的不透明遮罩完整覆盖，未并入可见文字；其余 OCR 仍需复核。",
+          "pageNumber": 1,
+          "region": {
+            "x": 0.0,
+            "y": -0.017476452762881914,
+            "width": 126.99999999999999,
+            "height": 97.36666666666666
+          },
+          "confidence": null
+        }
+      ]
+    },
+    {
+      "id": "reserve-word",
+      "seconds": 4.209715630000574,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页已使用本地 Tesseract OCR，平均置信度 93.5%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9353154218181818
+        }
+      ]
+    },
+    {
+      "id": "reserve-office",
+      "seconds": 1.7298717980011133,
+      "warnings": []
+    },
+    {
+      "id": "reserve-text",
+      "seconds": 2.171756978998019,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页图片 1已使用本地 Tesseract OCR，平均置信度 93.4%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9342971581818184
+        },
+        {
+          "code": "OCR_OCCLUDED_TEXT_IGNORED",
+          "message": "PDF 第 1 页有 11 个底图 OCR 词被后绘制的不透明遮罩完整覆盖，未并入可见文字；其余 OCR 仍需复核。",
+          "pageNumber": 1,
+          "region": {
+            "x": 0.0,
+            "y": -0.017476452762881914,
+            "width": 126.99999999999999,
+            "height": 97.36666666666666
+          },
+          "confidence": null
+        }
+      ]
+    },
+    {
+      "id": "reserve-edited-office",
+      "seconds": 2.2662237170006847,
+      "warnings": []
+    },
+    {
+      "id": "reserve-edited-text",
+      "seconds": 2.221266922002542,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页图片 1已使用本地 Tesseract OCR，平均置信度 93.4%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9342971581818184
+        },
+        {
+          "code": "OCR_OCCLUDED_TEXT_IGNORED",
+          "message": "PDF 第 1 页有 11 个底图 OCR 词被后绘制的不透明遮罩完整覆盖，未并入可见文字；其余 OCR 仍需复核。",
+          "pageNumber": 1,
+          "region": {
+            "x": 0.0,
+            "y": -0.017476452762881914,
+            "width": 126.99999999999999,
+            "height": 97.36666666666666
+          },
+          "confidence": null
+        }
+      ]
+    },
+    {
+      "id": "dark-word",
+      "seconds": 4.056312868997338,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页已使用本地 Tesseract OCR，平均置信度 91.0%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9102928218181817
+        }
+      ]
+    },
+    {
+      "id": "blank-text",
+      "seconds": 1.3067939050015411,
+      "warnings": []
+    }
+  ],
+  "helperSha256": {
+    "GeneratePdfBoundaries31.java": "94fe3b2cfd5e5999f33715b9abed8e6d3652a991c5bbebbb24fa46df109c0ca0",
+    "PdfExplicitSpaceProbe.java": "fbb512f6df27122c43e6e2ba028986ed48265d1525c4d77011c0341bfcd3d263",
+    "verify_boundaries31.py": "402228eab67c5fddbdc52c13adccac1096b3c3f53faa9702081815ad61c4bf67",
+    "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf",
+    "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9",
+    "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85"
+  },
+  "originalSparseOfd": "Unresolved strict OCR_NO_NEW_TEXT; iteration30 pixels/matrix not rerun",
+  "originalTrace": {
+    "rawAndPdfBoxEmittedPositionsExact": true,
+    "allNativeGeometryStyleWarningsExact": true,
+    "changedNativeTexts": [
+      {
+        "id": "pdf-p1-t2",
+        "before": "REVIEW",
+        "after": "REVIEW "
+      }
+    ],
+    "beforeAssembled": "RESERVE REVIEW2068\nRecord 00916\nAmount 00062.35\nDate 2067-11-23\nControl 45.70\n",
+    "afterAssembled": "RESERVE REVIEW 2068\nRecord 00916\nAmount 00062.35\nDate 2067-11-23\nControl 45.70\n",
+    "sourceSpace": {
+      "x": 150.5,
+      "y": 33.30046,
+      "width": 4.141144
+    },
+    "digit2": {
+      "x": 148.75,
+      "width": 7.255798
+    },
+    "unsupportedScope": "rotated, non-unit, Form, non-adjacent/ambiguous source content and over-budget pages retain legacy fallback"
+  },
+  "pairedNativeSeconds": {
+    "beforeMedian": 2.5703386290006165,
+    "afterMedian": 1.5288057590005337,
+    "beforeTotal": 20.85656164901593,
+    "afterTotal": 13.424834835997899,
+    "note": "one run per request; warmup/process scheduling differ; no general speedup claim"
+  }
+}
