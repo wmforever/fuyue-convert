@@ -1,0 +1,1416 @@
+{
+  "parentRevision": "da34d5cbb18e14d8b6c21858c540500908e1431a",
+  "manifestSha256": "35636dc45d0412d67a97d40b9ee36db3fac2138b7b11551ab704a68960e6d106",
+  "manifest": {
+    "parentRevision": "da34d5cbb18e14d8b6c21858c540500908e1431a",
+    "provenance": "Original synthetic numeric bilingual text and clean English scan; no private inputs",
+    "generatorSha256": "7ae369c0aaada88f64990bb1783ad510eda50f8d9a2dde2c959383600f43a499",
+    "font": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+      "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+      "license": "SIL-OFL-1.1",
+      "version": "LiberationSans2.1.5"
+    },
+    "sources": {
+      "record.txt": "e808dbcb83beba82c8d476dcdf087d5e50c46e3aed3b7f35793ef1e997fe9be5",
+      "record-scan.png": "aab2c106becccd379ef7a44e633bef3fc3cd1e526c8b1967e1becd2ca2bef76e"
+    },
+    "truth": {
+      "digital": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 127.50\n日期 Date 2036-04-19\n",
+      "scan": "REVIEW RECORD 2036\nRecord 00842\nAmount 127.50\nDate 2036-04-19\n",
+      "digital-edited": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 128.75\n日期 Date 2036-04-19\n",
+      "scan-edited": "REVIEW RECORD 2036\nRecord 00842\nAmount 128.75\nDate 2036-04-19\n"
+    },
+    "actions": [
+      {
+        "id": "digital-word",
+        "input": "record.txt",
+        "target": "docx",
+        "truth": "digital",
+        "edit": null
+      },
+      {
+        "id": "digital-word-text",
+        "input": "@digital-word",
+        "target": "txt",
+        "truth": "digital",
+        "edit": null
+      },
+      {
+        "id": "digital-office",
+        "input": "@digital-word",
+        "target": "pdf",
+        "truth": "digital",
+        "edit": null
+      },
+      {
+        "id": "digital-pdf-text",
+        "input": "@digital-office",
+        "target": "txt",
+        "truth": "digital",
+        "edit": null
+      },
+      {
+        "id": "digital-pdf-word",
+        "input": "@digital-office",
+        "target": "docx",
+        "truth": "digital",
+        "edit": null
+      },
+      {
+        "id": "digital-edited-office",
+        "input": "@digital-pdf-word",
+        "target": "pdf",
+        "truth": "digital-edited",
+        "edit": {
+          "old": "127.50",
+          "new": "128.75"
+        }
+      },
+      {
+        "id": "digital-edited-text",
+        "input": "@digital-edited-office",
+        "target": "txt",
+        "truth": "digital-edited",
+        "edit": null
+      },
+      {
+        "id": "digital-ofd",
+        "input": "@digital-office",
+        "target": "ofd",
+        "truth": "digital",
+        "edit": null
+      },
+      {
+        "id": "digital-ofd-text",
+        "input": "@digital-ofd",
+        "target": "txt",
+        "truth": "digital",
+        "edit": null
+      },
+      {
+        "id": "digital-ofd-word",
+        "input": "@digital-ofd",
+        "target": "docx",
+        "truth": "digital",
+        "edit": null
+      },
+      {
+        "id": "digital-ofd-pdf",
+        "input": "@digital-ofd",
+        "target": "pdf",
+        "truth": "digital",
+        "edit": null
+      },
+      {
+        "id": "scan-text",
+        "input": "record-scan.png",
+        "target": "txt",
+        "truth": "scan",
+        "edit": null
+      },
+      {
+        "id": "scan-pdf",
+        "input": "record-scan.png",
+        "target": "pdf",
+        "truth": "scan",
+        "edit": null
+      },
+      {
+        "id": "scan-word",
+        "input": "@scan-pdf",
+        "target": "docx",
+        "truth": "scan",
+        "edit": null
+      },
+      {
+        "id": "scan-office",
+        "input": "@scan-word",
+        "target": "pdf",
+        "truth": "scan",
+        "edit": null
+      },
+      {
+        "id": "scan-ofd",
+        "input": "@scan-pdf",
+        "target": "ofd",
+        "truth": "scan",
+        "edit": null
+      },
+      {
+        "id": "scan-ofd-text",
+        "input": "@scan-ofd",
+        "target": "txt",
+        "truth": "scan",
+        "edit": null
+      },
+      {
+        "id": "scan-ofd-word",
+        "input": "@scan-ofd",
+        "target": "docx",
+        "truth": "scan",
+        "edit": null
+      },
+      {
+        "id": "scan-edited-office",
+        "input": "@scan-word",
+        "target": "pdf",
+        "truth": "scan-edited",
+        "edit": {
+          "old": "127.50",
+          "new": "128.75"
+        }
+      },
+      {
+        "id": "scan-edited-text",
+        "input": "@scan-edited-office",
+        "target": "txt",
+        "truth": "scan-edited",
+        "edit": null
+      }
+    ]
+  },
+  "httpAttempts": 20,
+  "httpSuccess": 18,
+  "httpFailures": 2,
+  "cases": [
+    {
+      "action": "digital-word",
+      "target": "docx",
+      "status": "SUCCESS",
+      "seconds": 2.8169517120004457,
+      "errorCode": null,
+      "warnings": [],
+      "sha256": "0795fb959d422e0745a4b8e3409edcba009db10cf60bfcda47d075f1c374bf76",
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 127.50\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": true,
+      "numericLexemesExact": true,
+      "orderExactIgnoringWhitespace": true
+    },
+    {
+      "action": "digital-word-text",
+      "target": "txt",
+      "status": "SUCCESS",
+      "seconds": 3.8653677260008408,
+      "errorCode": null,
+      "warnings": [],
+      "sha256": "e808dbcb83beba82c8d476dcdf087d5e50c46e3aed3b7f35793ef1e997fe9be5",
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 127.50\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": true,
+      "numericLexemesExact": true,
+      "orderExactIgnoringWhitespace": true
+    },
+    {
+      "action": "digital-office",
+      "target": "pdf",
+      "status": "SUCCESS",
+      "seconds": 4.6620106200025475,
+      "errorCode": null,
+      "warnings": [],
+      "sha256": "9c57e1b4d00fafe6fd724b173922e247af0537c93d67e8f519297a43f5f88317",
+      "pages": 1,
+      "rawPdfTextMetrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 127.50\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": true,
+      "numericLexemesExact": true,
+      "orderExactIgnoringWhitespace": true
+    },
+    {
+      "action": "digital-pdf-text",
+      "target": "txt",
+      "status": "SUCCESS",
+      "seconds": 1.293175529997825,
+      "errorCode": null,
+      "warnings": [],
+      "sha256": "e808dbcb83beba82c8d476dcdf087d5e50c46e3aed3b7f35793ef1e997fe9be5",
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 127.50\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": true,
+      "numericLexemesExact": true,
+      "orderExactIgnoringWhitespace": true
+    },
+    {
+      "action": "digital-pdf-word",
+      "target": "docx",
+      "status": "SUCCESS",
+      "seconds": 4.097655651999958,
+      "errorCode": null,
+      "warnings": [],
+      "sha256": "b68fa1f66f47e62b8189bbca1d814c1dbc859780b9fbf2968671a174a2b49b47",
+      "text": "审核记录 \nREVIEW RECORD 2036\n编号 \nRecord 00842\n金额 \nAmount 127.50\n日期 \nDate 2036-04-19",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": true,
+      "numericLexemesExact": true,
+      "orderExactIgnoringWhitespace": true
+    },
+    {
+      "action": "digital-edited-office",
+      "target": "pdf",
+      "status": "SUCCESS",
+      "seconds": 2.549196642001334,
+      "errorCode": null,
+      "warnings": [],
+      "sha256": "b633dd5ecf08afd97f377300581a03b4f6989536b7021ceae118a0a3f88240b2",
+      "pages": 1,
+      "rawPdfTextMetrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 128.75\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": true,
+      "numericLexemesExact": true,
+      "orderExactIgnoringWhitespace": true
+    },
+    {
+      "action": "digital-edited-text",
+      "target": "txt",
+      "status": "SUCCESS",
+      "seconds": 2.159444896999048,
+      "errorCode": null,
+      "warnings": [],
+      "sha256": "88c6d502347b2e98c216a179efff978600e5f24044022949ce6f0769d7c7fb63",
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 128.75\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": true,
+      "numericLexemesExact": true,
+      "orderExactIgnoringWhitespace": true
+    },
+    {
+      "action": "digital-ofd",
+      "target": "ofd",
+      "status": "SUCCESS",
+      "seconds": 4.211062169997604,
+      "errorCode": null,
+      "warnings": [
+        {
+          "code": "FIDELITY_IMAGE_LAYER",
+          "message": "PDF 页面使用整页图像层保证固定版式；文字型页面同时包含真实 OFD 文字对象层",
+          "pageNumber": null,
+          "region": null,
+          "confidence": null
+        }
+      ],
+      "sha256": "d10ea3329fab62a3af1c58da09750fac259c19d5bb5fb355c1d17ed1f66a932a"
+    },
+    {
+      "action": "digital-ofd-text",
+      "target": "txt",
+      "status": "FAILED",
+      "seconds": 3.1411912930016115,
+      "errorCode": "OCR_NO_NEW_TEXT",
+      "warnings": []
+    },
+    {
+      "action": "digital-ofd-word",
+      "target": "docx",
+      "status": "FAILED",
+      "seconds": 2.2643089669982146,
+      "errorCode": "OCR_NO_NEW_TEXT",
+      "warnings": []
+    },
+    {
+      "action": "digital-ofd-pdf",
+      "target": "pdf",
+      "status": "SUCCESS",
+      "seconds": 1.4368281080023735,
+      "errorCode": null,
+      "warnings": [
+        {
+          "code": "FONT_SUBSTITUTED",
+          "message": "OFD 字体已使用内置 PDF 字体替代；字形宽度和少数字符可能与原文件不同。",
+          "pageNumber": null,
+          "region": null,
+          "confidence": null
+        }
+      ],
+      "sha256": "6586c81d36a0f18cf9d3a1525bfe9ec3e21516d46299e2720038828796ac544e",
+      "pages": 1,
+      "rawPdfTextMetrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      }
+    },
+    {
+      "action": "scan-text",
+      "target": "txt",
+      "status": "SUCCESS",
+      "seconds": 2.285702006000065,
+      "errorCode": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "图片已使用本地 Tesseract OCR，平均置信度 91.1%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9112956911111112
+        }
+      ],
+      "sha256": "c276ad68f7697afe33a8b69d09c1b39032be55d7060c5152f90973d76315ecdc",
+      "text": "REVIEW RECORD 2036\nRecord 00842\nAmount 127.50\nDate 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 53,
+        "actualCharacters": 53,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": true,
+      "numericLexemesExact": true,
+      "orderExactIgnoringWhitespace": true
+    },
+    {
+      "action": "scan-pdf",
+      "target": "pdf",
+      "status": "SUCCESS",
+      "seconds": 1.7345274899998913,
+      "errorCode": null,
+      "warnings": [],
+      "sha256": "d8fe5f8e0a29fd4b57386ad20f6b9eb1a8c6c90bcdfccf0b2b7552e8ea8aa3f9",
+      "pages": 1,
+      "rawPdfTextMetrics": {
+        "expectedCharacters": 53,
+        "actualCharacters": 0,
+        "editDistance": 53,
+        "cer": 1.0,
+        "alignedCharacterRecall": 0.0,
+        "exactLines": 0,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": []
+      }
+    },
+    {
+      "action": "scan-word",
+      "target": "docx",
+      "status": "SUCCESS",
+      "seconds": 3.7961503520018596,
+      "errorCode": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页已使用本地 Tesseract OCR，平均置信度 91.1%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9112956911111112
+        }
+      ],
+      "sha256": "571f4f3931dedace7f0efbdcac8771b2f5df6f8cbdde92f4f0390384bd7c81d0",
+      "text": "REVIEW \nRECORD \n2036\nRecord \n00842\nAmount \n127.50\nDate \n2036-04-19",
+      "metrics": {
+        "expectedCharacters": 53,
+        "actualCharacters": 53,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": true,
+      "numericLexemesExact": true,
+      "orderExactIgnoringWhitespace": true
+    },
+    {
+      "action": "scan-office",
+      "target": "pdf",
+      "status": "SUCCESS",
+      "seconds": 2.2690529329993296,
+      "errorCode": null,
+      "warnings": [],
+      "sha256": "659b0f9d35d4eaf6e4a674851bf9752e7f5cdd4ba9b761de9e8ee09eb7de42e7",
+      "pages": 1,
+      "rawPdfTextMetrics": {
+        "expectedCharacters": 53,
+        "actualCharacters": 53,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "text": "REVIEW RECORD 2036\nRecord 00842\nAmount 127.50\nDate 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 53,
+        "actualCharacters": 53,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": true,
+      "numericLexemesExact": true,
+      "orderExactIgnoringWhitespace": true
+    },
+    {
+      "action": "scan-ofd",
+      "target": "ofd",
+      "status": "SUCCESS",
+      "seconds": 2.6414921670002514,
+      "errorCode": null,
+      "warnings": [
+        {
+          "code": "FIDELITY_IMAGE_LAYER",
+          "message": "PDF 页面使用整页图像层保证固定版式；文字型页面同时包含真实 OFD 文字对象层",
+          "pageNumber": null,
+          "region": null,
+          "confidence": null
+        }
+      ],
+      "sha256": "07ed74e9cda893071d8feeb43c2fd1910da881b1cd4ceb0ae7f2c50075b54016"
+    },
+    {
+      "action": "scan-ofd-text",
+      "target": "txt",
+      "status": "SUCCESS",
+      "seconds": 1.9278335290000541,
+      "errorCode": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.3%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9132476744444445
+        }
+      ],
+      "sha256": "c276ad68f7697afe33a8b69d09c1b39032be55d7060c5152f90973d76315ecdc",
+      "text": "REVIEW RECORD 2036\nRecord 00842\nAmount 127.50\nDate 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 53,
+        "actualCharacters": 53,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": true,
+      "numericLexemesExact": true,
+      "orderExactIgnoringWhitespace": true
+    },
+    {
+      "action": "scan-ofd-word",
+      "target": "docx",
+      "status": "SUCCESS",
+      "seconds": 4.183511112998531,
+      "errorCode": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.3%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9132476744444445
+        }
+      ],
+      "sha256": "8c44f3920a7b1922ffeb0087ee85642c99c49519b84695ebda6a769361e2ba77",
+      "text": "REVIEW \nRECORD \n2036\nRecord \n00842\nAmount \n127.50\nDate \n2036-04-19",
+      "metrics": {
+        "expectedCharacters": 53,
+        "actualCharacters": 53,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": true,
+      "numericLexemesExact": true,
+      "orderExactIgnoringWhitespace": true
+    },
+    {
+      "action": "scan-edited-office",
+      "target": "pdf",
+      "status": "SUCCESS",
+      "seconds": 6.6545693980006035,
+      "errorCode": null,
+      "warnings": [],
+      "sha256": "aa59b4d6f4fc87c676f85f57a3e9e965155eea3c345aac9f8f3af50b18589287",
+      "pages": 1,
+      "rawPdfTextMetrics": {
+        "expectedCharacters": 53,
+        "actualCharacters": 53,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "text": "REVIEW RECORD 2036\nRecord 00842\nAmount 128.75\nDate 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 53,
+        "actualCharacters": 53,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": true,
+      "numericLexemesExact": true,
+      "orderExactIgnoringWhitespace": true
+    },
+    {
+      "action": "scan-edited-text",
+      "target": "txt",
+      "status": "SUCCESS",
+      "seconds": 3.8428424410012667,
+      "errorCode": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页图片 1已使用本地 Tesseract OCR，平均置信度 91.1%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9111931777777778
+        }
+      ],
+      "sha256": "a62d5bc990507ca0782830068119130bbf25722720635c852ba3cf3ab326da67",
+      "text": "REVIEWRECORDREVIEW RECORD 20362036\nRecord 00842\nAmount 127.50Amount 128.75\nDate 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 53,
+        "actualCharacters": 81,
+        "editDistance": 28,
+        "cer": 0.5283018867924528,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "20362036",
+          "00842",
+          "127",
+          "50",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "characterInventoryExact": false,
+      "numericLexemesExact": false,
+      "orderExactIgnoringWhitespace": false
+    }
+  ],
+  "edits": [
+    {
+      "action": "digital-edited-office",
+      "onlyIntendedTextChanged": true,
+      "allGeometryStylesAndMediaUnchanged": true
+    },
+    {
+      "action": "scan-edited-office",
+      "onlyIntendedTextChanged": true,
+      "allGeometryStylesAndMediaUnchanged": true
+    }
+  ],
+  "numericNegativeControls": {
+    "rejectedNumericBoundaryOrSurfaceChanges": [
+      [
+        "12 34",
+        "1234"
+      ],
+      [
+        "ID000571",
+        "ID571"
+      ],
+      [
+        "-742.63",
+        "742.63"
+      ],
+      [
+        "+0.47",
+        "0.47"
+      ],
+      [
+        "2035-09-17",
+        "20350917"
+      ],
+      [
+        "1,308.56",
+        "1308.56"
+      ],
+      [
+        ".47",
+        "47"
+      ],
+      [
+        "12.30",
+        "12 .30"
+      ]
+    ],
+    "acceptedNumericWhitespaceOnly": [
+      "12 34",
+      "12\n34"
+    ],
+    "exactOutputComparisonAlsoRequired": true
+  },
+  "pixelChecks": {
+    "originalPngPixelsInInputPdf": true,
+    "unchangedPdfBox300DpiBackgroundInScanWord": true,
+    "originalOfdRasterPixelsInScanOfdWord": true
+  },
+  "health": {
+    "status": "UP",
+    "version": "0.1.4",
+    "parser": "OFDRW 2.3.9",
+    "javaVersion": "17.0.16",
+    "os": "Linux",
+    "arch": "amd64",
+    "office": {
+      "enabled": true,
+      "available": true,
+      "binaryName": "soffice",
+      "version": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+      "message": "Office 引擎可用"
+    },
+    "ocr": {
+      "enabled": true,
+      "available": true,
+      "binaryName": "tesseract",
+      "version": "tesseract 5.5.2",
+      "requestedLanguages": "chi_sim+eng",
+      "availableLanguages": [
+        "eng",
+        "chi_sim",
+        "chi_sim_vert",
+        "osd"
+      ],
+      "timeoutSeconds": 120,
+      "maxConcurrency": 1,
+      "maxImagePixels": 25000000,
+      "minimumConfidence": 0.35,
+      "bundled": true,
+      "errorCode": null,
+      "message": "内置 Tesseract OCR 可用"
+    },
+    "time": "2026-10-04T13:01:42.757220496Z"
+  },
+  "resources": [
+    {
+      "wallSeconds": 41.62926764200165,
+      "userSeconds": 105.054733,
+      "systemSeconds": 8.292698,
+      "maxChildRssKiB": 321664
+    },
+    {
+      "wallSeconds": 40.3889661180001,
+      "userSeconds": 103.700299,
+      "systemSeconds": 8.23922,
+      "maxChildRssKiB": 339252
+    }
+  ],
+  "cleanup": [
+    {
+      "workersAbsent": 9,
+      "ECHILD": true,
+      "newZombies": []
+    },
+    {
+      "workersAbsent": 11,
+      "ECHILD": true,
+      "newZombies": []
+    }
+  ],
+  "historicalZombiesUnchanged": 17,
+  "runnerHistory": {
+    "initial": {
+      "run_cloud_smoke25.py": "0166aef3e8aea5e96aa8dff4f84f01e4a10183245154e7439142175829b0ff96",
+      "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85",
+      "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9"
+    },
+    "remaining": {
+      "run_cloud_smoke25.py": "e58f487b89cac2561ca25c2dd15ac6a00062394df8c8af81d3e362e3e09f1ae3",
+      "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85",
+      "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9"
+    },
+    "resumedFrom": {
+      "reportSha256": "aed2360d2a2e4db938371afa0415c1d52dd00e6101b76383d7c60d1fd2cf340b",
+      "attemptedActions": 9,
+      "source": "qa-samples/report/iteration25-smoke"
+    }
+  },
+  "buildAudit": {
+    "tests": {
+      "tests": 451,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "skips": [
+      {
+        "class": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+        "name": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning"
+      }
+    ],
+    "flattenedParentAndFinalEntriesIdentical": 433,
+    "applicationClassesIdentical": 225,
+    "frontendRebuiltFilesMatchPackaged": {
+      "app-icon.svg": "5bf05198f99e53b7fabf0fbfd25577c9aca004a6b1ea6f7e901457fe89db2568",
+      "index.html": "a9767e4111073749ff7c178800d9c7c3786b05ea9094c8b37334a3a696097a24",
+      "assets/pdf-CPbOiMa_.js": "fa75f2d6b363ee4a3386e4bf1d3f104c8dce5eef2be79159be1d253e1f4e323a",
+      "assets/pdf.worker.min-CMqTMPr3.js": "73568c62796be3043a57aad8bb5027f9602bae4b54bbea029b0a3af80c5b7166",
+      "assets/pdf.worker.min-r-TJsTTt.mjs": "c964e291707ad492e6e90ff7f4f352b75e05ea2734c3dd3a80b94983b1b7ce3d",
+      "assets/index-J-Vb5Aua.css": "084b610dc78c0213ec817bcb26aeff3dccd2c4d7fce88514a85ab56395e43366",
+      "assets/index-BiUc2Ubb.js": "4d62648a0d61aabdbd47f5a66c6df465acfef075355f3eb0d2e5fc142a6b61b1"
+    },
+    "ocrRuntimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+    "runtimeFiles": {
+      "bin/tesseract": {
+        "path": "bin/tesseract",
+        "size": 6678328,
+        "sha256": "90730922627269352568d54e788c7e42fd2e1783e03795d75560efa385de1489"
+      },
+      "licenses/OCR-SOURCE-POLICY.json": {
+        "path": "licenses/OCR-SOURCE-POLICY.json",
+        "size": 4186,
+        "sha256": "1ea79f27bafb87a8692d2b37d0ab2f3cb2236f228d6e76eedf7aa6b40dacf808"
+      },
+      "licenses/leptonica.txt": {
+        "path": "licenses/leptonica.txt",
+        "size": 1521,
+        "sha256": "87829abb5bbb00b55a107365da89e9a33f86c4250169e5a1e5588505be7d5806"
+      },
+      "licenses/libpng.txt": {
+        "path": "licenses/libpng.txt",
+        "size": 5345,
+        "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+      },
+      "licenses/tessdata.txt": {
+        "path": "licenses/tessdata.txt",
+        "size": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      "licenses/tesseract.txt": {
+        "path": "licenses/tesseract.txt",
+        "size": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      "licenses/zlib.txt": {
+        "path": "licenses/zlib.txt",
+        "size": 1002,
+        "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+      },
+      "tessdata/chi_sim.traineddata": {
+        "path": "tessdata/chi_sim.traineddata",
+        "size": 2469156,
+        "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+      },
+      "tessdata/chi_sim_vert.traineddata": {
+        "path": "tessdata/chi_sim_vert.traineddata",
+        "size": 1927902,
+        "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+      },
+      "tessdata/configs/tsv": {
+        "path": "tessdata/configs/tsv",
+        "size": 22,
+        "sha256": "59d079bb75d8b3d7c839a3564580cb559e362c93a9d70f234e421c0c3e767e04"
+      },
+      "tessdata/eng.traineddata": {
+        "path": "tessdata/eng.traineddata",
+        "size": 4113088,
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      "tessdata/osd.traineddata": {
+        "path": "tessdata/osd.traineddata",
+        "size": 10562727,
+        "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+      }
+    },
+    "runtimeManifest": {
+      "schemaVersion": 1,
+      "platform": "linux",
+      "arch": "x64",
+      "policySha256": "54c6ae7291fc983cb7b946bc0b90832ec4b589d493fef01b5f974a0ab26d8735",
+      "components": [
+        {
+          "id": "zlib",
+          "version": "1.3.1",
+          "source": "https://codeload.github.com/madler/zlib/tar.gz/v1.3.1",
+          "sourceSha256": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c",
+          "spdx": "Zlib"
+        },
+        {
+          "id": "libpng",
+          "version": "1.6.57",
+          "source": "https://codeload.github.com/pnggroup/libpng/tar.gz/v1.6.57",
+          "sourceSha256": "4cbb7b0746edc1683c9581b373365e955133b7f1243f171b7d1535b4415dfedb",
+          "spdx": "libpng-2.0"
+        },
+        {
+          "id": "leptonica",
+          "version": "1.87.0",
+          "source": "https://codeload.github.com/DanBloomberg/leptonica/tar.gz/1.87.0",
+          "sourceSha256": "fa2b40c5caea96d1bb93a97486262aed8731b69ce25a84a6bf5d25323e33f631",
+          "spdx": "BSD-2-Clause"
+        },
+        {
+          "id": "tesseract",
+          "version": "5.5.2",
+          "source": "https://codeload.github.com/tesseract-ocr/tesseract/tar.gz/5.5.2",
+          "sourceSha256": "6235ea0dae45ea137f59c09320406f5888383741924d98855bd2ce0d16b54f21",
+          "spdx": "Apache-2.0"
+        }
+      ],
+      "models": [
+        {
+          "name": "eng",
+          "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/eng.traineddata",
+          "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+        },
+        {
+          "name": "chi_sim",
+          "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim.traineddata",
+          "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+        },
+        {
+          "name": "chi_sim_vert",
+          "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim_vert.traineddata",
+          "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+        },
+        {
+          "name": "osd",
+          "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/osd.traineddata",
+          "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+        }
+      ],
+      "files": [
+        {
+          "path": "bin/tesseract",
+          "size": 6678328,
+          "sha256": "90730922627269352568d54e788c7e42fd2e1783e03795d75560efa385de1489"
+        },
+        {
+          "path": "licenses/OCR-SOURCE-POLICY.json",
+          "size": 4186,
+          "sha256": "1ea79f27bafb87a8692d2b37d0ab2f3cb2236f228d6e76eedf7aa6b40dacf808"
+        },
+        {
+          "path": "licenses/leptonica.txt",
+          "size": 1521,
+          "sha256": "87829abb5bbb00b55a107365da89e9a33f86c4250169e5a1e5588505be7d5806"
+        },
+        {
+          "path": "licenses/libpng.txt",
+          "size": 5345,
+          "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+        },
+        {
+          "path": "licenses/tessdata.txt",
+          "size": 11358,
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "path": "licenses/tesseract.txt",
+          "size": 11358,
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "path": "licenses/zlib.txt",
+          "size": 1002,
+          "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+        },
+        {
+          "path": "tessdata/chi_sim.traineddata",
+          "size": 2469156,
+          "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+        },
+        {
+          "path": "tessdata/chi_sim_vert.traineddata",
+          "size": 1927902,
+          "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+        },
+        {
+          "path": "tessdata/configs/tsv",
+          "size": 22,
+          "sha256": "59d079bb75d8b3d7c839a3564580cb559e362c93a9d70f234e421c0c3e767e04"
+        },
+        {
+          "path": "tessdata/eng.traineddata",
+          "size": 4113088,
+          "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+        },
+        {
+          "path": "tessdata/osd.traineddata",
+          "size": 10562727,
+          "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+        }
+      ]
+    },
+    "stagedJarMatchesBuild": true,
+    "scope": "ZIP metadata may differ; every nested application entry/resource/dependency payload matches accepted da34d5c. Java17/Office/system fonts external; bundled OCR complete."
+  },
+  "buildProvenance": {
+    "buildInputSha256": "d857185cf27698da794d1fd7e70bb1d9c182706ae44e31043340a4cff36eea88",
+    "parentRevision": "da34d5cbb18e14d8b6c21858c540500908e1431a",
+    "workingTreeDirtyAtBuildStart": false,
+    "jarSha256": "c4b2f202d0dd3c8952a7a61d7b36bbcd7054702d84714d12c9be0a8a2ea3cb9d",
+    "applicationClassCount": 225,
+    "applicationClassSha256": "b037fedce23ad5f24e7387c8f1b46bf70fb0df91d2117a514b53a04a0afaafba",
+    "packagedClassesMatchTargets": true
+  },
+  "qualityMismatches": [
+    "scan-edited-text"
+  ],
+  "visualReview": {
+    "inspected": [
+      "scan-office.png",
+      "scan-edited-office.png"
+    ],
+    "finding": "Both Office renders show ghosted original/overlay text. Edited native PDF text is correct but visible amount is not clean. Pixel preservation is not visual edit correctness.",
+    "nativeTextMustNotBeEquatedWithVisualFidelity": true
+  },
+  "runtimePins": {
+    "runtimePins": "Temurin17.0.16+8 Maven3.9.11 Node22.17.0 Python3.12.14 PyMuPDF1.26.6 Linux6.18.44; LibreOfficeDev26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5; Tesseract5.5.2 Leptonica1.87.0 libpng1.6.57 zlib1.3.1; tessdata_fast87416418657359cb625c412a48b6e1d6d41c29bd",
+    "python": "3.12.14",
+    "fontTools": "4.61.1",
+    "sourceFontsRehashed": {
+      "en": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+        "family": "Liberation Sans",
+        "subfamily": "Regular",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "bold": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+        "sha256": "1b5f2da6f4cadce4c05b9ecebe3a6fcd374eb95ae443605e799f4c3287978939",
+        "family": "Liberation Sans",
+        "subfamily": "Bold",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "zh": {
+        "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+        "family": "Noto Sans CJK JP",
+        "subfamily": "Regular",
+        "version": "Version 2.004;hotconv 1.0.118;makeotfexe 2.5.65603",
+        "license": "SIL-OFL-1.1"
+      }
+    },
+    "bundledOcrFilesRehashed": {
+      "desktop/.runtime/ocr/tessdata/eng.traineddata": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+      "desktop/.runtime/ocr/tessdata/osd.traineddata": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff",
+      "desktop/.runtime/ocr/tessdata/chi_sim.traineddata": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730",
+      "desktop/.runtime/ocr/tessdata/chi_sim_vert.traineddata": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da",
+      "desktop/.runtime/ocr/bin/tesseract": "90730922627269352568d54e788c7e42fd2e1783e03795d75560efa385de1489"
+    },
+    "iteration24SourceFont": "PDF standard14 Helvetica; runtime maps through existing font code. No font installation or mapping change."
+  },
+  "buildSetup": {
+    "JAVA_HOME": "/workspace/fuyue-env/tools/jdk-17.0.16+8",
+    "FORMAT_CONVERTER_APP_HOME": "/workspace/fuyue-convert/desktop/.runtime",
+    "FORMAT_CONVERTER_OFFICE_BINARY": "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice",
+    "FORMAT_CONVERTER_OCR_ENABLED": "true",
+    "FORMAT_CONVERTER_OCR_LANGUAGES": "chi_sim+eng",
+    "FORMAT_CONVERTER_OCR_MAX_CONCURRENCY": "1",
+    "smokeAppHome": "/workspace/fuyue-convert/qa-samples/work/iteration25-review-app"
+  },
+  "packagingScope": {
+    "included": "Application JAR, all pinned OCR files/models/licenses, source, project/Java dependency/font notices, bounded raw evidence",
+    "external": "Java17, tested external LibreOffice, system fonts, Linux ELF system dependencies. Not a portable native installer."
+  }
+}
