@@ -5,6 +5,7 @@ import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDTrueTypeFont;
 import org.apache.pdfbox.pdmodel.font.PDCIDFontType2;
+import org.apache.pdfbox.pdmodel.font.PDCIDFontType0;
 import org.apache.fontbox.ttf.TrueTypeFont;
 
 import java.io.IOException;
@@ -51,6 +52,18 @@ final class PdfFontNames {
         // substitute. Reuse its already parsed metadata; do not reopen streams,
         // strip arbitrary suffixes, or copy font programs into the output.
         if (font == null || !font.isEmbedded()) return null;
+        if (font instanceof PDType0Font composite
+                && composite.getDescendantFont() instanceof PDCIDFontType0 cid
+                && cid.getCFFFont() != null) {
+            var metadata = cid.getCFFFont().getTopDict();
+            String family = metadata.get("FamilyName") instanceof String value ? value : null;
+            String weight = metadata.get("Weight") instanceof String value ? value : "";
+            String styles = style("embedded-" + weight.replaceAll("[-\\s]", ""));
+            boolean bold = styles.contains("bold") || styles.contains("black") || styles.contains("heavy");
+            boolean italic = metadata.get("ItalicAngle") instanceof Number angle
+                    && Math.abs(angle.doubleValue()) > 0.1;
+            return new Face(family, bold, italic);
+        }
         TrueTypeFont ttf = font instanceof PDTrueTypeFont simple ? simple.getTrueTypeFont()
                 : font instanceof PDType0Font composite
                 && composite.getDescendantFont() instanceof PDCIDFontType2 cid ? cid.getTrueTypeFont() : null;

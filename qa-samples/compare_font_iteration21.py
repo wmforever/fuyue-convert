@@ -1,8 +1,9 @@
 """Separate native Unicode, Word font requests, installed fonts and Office output."""
-import collections,hashlib,json,pathlib,re,statistics,xml.etree.ElementTree as ET,zipfile
+import argparse,collections,hashlib,json,pathlib,re,statistics,xml.etree.ElementTree as ET,zipfile
 import fitz
 from fontTools.ttLib import TTFont
 from summarize_word_iteration19 import W,compact
+from qa_evidence_guards import align_cases,require_native_geometry
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 def load(p):return json.loads(p.read_text())
 def root_xml(p):
@@ -26,11 +27,14 @@ def office_span_fonts(path):
 def office_fonts(path):
     with fitz.open(path) as doc:
         return sorted({re.sub(r'^[A-Z]{6}\+','',font[3]) for page in doc for font in page.get_fonts()})
-def main():
+def main(output=None):
     corpus=ROOT/'qa-samples/generated/font-iteration21';truth=load(corpus/'expected.json')
     folders=[ROOT/'qa-samples/report/iteration21-before',ROOT/'qa-samples/report/iteration21-after']
     quality=[load(folder/'quality.json') for folder in folders];results=[]
-    for case,before,after in zip(truth['cases'],quality[0]['cases'],quality[1]['cases']):
+    names=[c['file'] for c in truth['cases']]
+    before_cases=align_cases(names,quality[0]['cases'],'quality before')
+    after_cases=align_cases(names,quality[1]['cases'],'quality after')
+    for case,before,after in zip(truth['cases'],before_cases,after_cases,strict=True):
         name=pathlib.Path(case['file']).stem;records=[runs(f/(name+'-word.docx')) for f in folders]
         checks=[]
         for item in case['items']:
@@ -75,14 +79,7 @@ def main():
                         'medianMaxBoxShiftPtAfter':statistics.median(g['maxShiftPt'] for g in after['geometry'])})
     # Compare original parser blocks, allowing only font family/style changes.
     native=[load(ROOT/('qa-samples/work/iteration21-native-'+label+'.json')) for label in ['before','after']]
-    for a,b in zip(*native):
-        assert a['file']==b['file']
-        for x,y in zip(a['parsed']['pages'],b['parsed']['pages']):
-            assert len(x['textBlocks'])==len(y['textBlocks'])
-            for one,two in zip(x['textBlocks'],y['textBlocks']):
-                assert {k:v for k,v in one['style'].items() if k not in ['family','bold','italic']}=={k:v for k,v in two['style'].items() if k not in ['family','bold','italic']}
-                one={k:v for k,v in one.items() if k!='style'};two={k:v for k,v in two.items() if k!='style'}
-                assert one==two,(a['file'],'native geometry/content changed')
+    require_native_geometry(truth['cases'],native[0],native[1])
     expected=truth['cases'][0]['expectedText'].replace('00731','00739',1);out=folders[1]
     edited=root_xml(out/'serif-faces-edited.docx');assert compact(''.join(t.text or '' for t in edited.iter(W+'t')))==compact(expected)
     with fitz.open(out/'serif-faces-edited-office.pdf') as d:
@@ -95,6 +92,7 @@ def main():
                       'Bundled Droid CJK fallback remains intentional and unchanged; no source-perfect CJK font claim',
                       'No new font programs redistributed in production; corpus license notices retained',
                       'Native Microsoft Word/platform installers unrun']}
-    (ROOT/'docs/cloud-font-iteration21-results.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+    (output or ROOT/'docs/cloud-font-iteration21-results.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps([{k:v for k,v in c.items() if k not in ['wordRunsBefore','wordRunsAfter','fontChecks','geometryBefore','geometryAfter']} for c in results],ensure_ascii=False,indent=2))
-if __name__=='__main__':main()
+if __name__=='__main__':
+    parser=argparse.ArgumentParser();parser.add_argument('--out',type=pathlib.Path);args=parser.parse_args();main(args.out)

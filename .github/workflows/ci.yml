@@ -34,6 +34,9 @@ jobs:
       - name: QA HTTP deadline regressions
         run: python3 -m unittest discover -s qa-samples -p test_qa_http_deadline.py -v
 
+      - name: QA evidence completeness regressions
+        run: python3 -m unittest discover -s qa-samples -p test_qa_evidence_guards.py -v
+
       - name: Set up Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
