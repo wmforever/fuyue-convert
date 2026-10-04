@@ -27,6 +27,7 @@ final class FixedLayoutDocxRenderer {
     private static final java.awt.font.FontRenderContext OCR_FONT_CONTEXT =
             new java.awt.font.FontRenderContext(null, true, true);
     private static final java.awt.Font OCR_CJK_FONT = loadOcrCjkFont();
+    private static final java.awt.Font OCR_LATIN_COMPATIBLE_FONT = loadOcrLatinCompatibleFont();
     private int shapeSequence = 1;
 
     /**
@@ -355,6 +356,14 @@ final class FixedLayoutDocxRenderer {
             TextBlock positioned = new TextBlock(line.id() + "-word-" + index, line.pageNumber(), box,
                     value, line.baselineY(), new FontStyle("Arial", sizePt, false, false, ocrColors.colors().getOrDefault(word, line.style().color())),
                     Math.max(1, line.zOrder()), 0, 0, List.of(), new Transform2D(ratio, 0, 0, 1, 0, 0));
+            if (Math.abs(line.transform().rotationDegrees()) < .01d && !line.transform().hasSkew(.001d)) {
+                double fitted = latinWordScale(word, font, OCR_LATIN_COMPATIBLE_FONT, sizePt, ratio,
+                        tolerantTextBox(positioned).width());
+                if (fitted != ratio) positioned = new TextBlock(positioned.id(), positioned.pageNumber(),
+                        positioned.box(), positioned.text(), positioned.baselineY(), positioned.style(), positioned.zOrder(),
+                        positioned.textOffsetXmm(), positioned.textOffsetYmm(), positioned.advancesMm(),
+                        new Transform2D(fitted, 0, 0, 1, 0, 0));
+            }
             double extraWidth = Math.max(0d, Math.min(fontMm * 2d,
                     ocrColors.numericRightEdges().getOrDefault(word, 0d) - tolerantTextBox(positioned).right()));
             addTextBox(docx, anchor, positioned, true, extraWidth);
@@ -364,6 +373,36 @@ final class FixedLayoutDocxRenderer {
     private java.awt.Font ocrFont(String text) {
         return DocxFontSupport.containsCjkText(text) && OCR_CJK_FONT != null
                 ? OCR_CJK_FONT : new java.awt.Font("Arial", java.awt.Font.PLAIN, 100);
+    }
+
+    /** Correct only a proven width overflow when Java silently substitutes Dialog for Arial. */
+    static double latinWordScale(TextBlock.OcrWord word, java.awt.Font measuredFont,
+                                 java.awt.Font compatibleFont, double sizePt, double original, double boxWidthMm) {
+        if (compatibleFont == null || !"Dialog".equals(measuredFont.getFamily())
+                || word.confidence() < .85d || !word.text().matches("[A-Za-z]{3,32}")) return original;
+        // Match the actual half-point font size and integer OOXML percentage.
+        float emittedSize = (float) (Math.max(2, Math.round(sizePt * 2d)) / 2d);
+        var glyphs = compatibleFont.deriveFont(emittedSize).createGlyphVector(OCR_FONT_CONTEXT, word.text());
+        double advance = glyphs.getGlyphPosition(glyphs.getNumGlyphs()).getX();
+        double availablePt = boxWidthMm * 72d / 25.4d;
+        if (advance * Math.round(original * 100d) / 100d <= availablePt) return original;
+        var actualInk = compatibleFont.deriveFont(100f).createGlyphVector(OCR_FONT_CONTEXT, word.text()).getVisualBounds();
+        var measuredInk = measuredFont.deriveFont(100f).createGlyphVector(OCR_FONT_CONTEXT, word.text()).getVisualBounds();
+        if (actualInk.getWidth() <= 1d || measuredInk.getWidth() <= 1d) return original;
+        double fitted = original * measuredInk.getWidth() / actualInk.getWidth();
+        // Only contract the wrongly overestimated Latin scale. Source box,
+        // bearing, masks, line size, numeric words and edit reserves stay intact.
+        if (!Double.isFinite(fitted) || fitted < .6d || fitted >= original
+                || advance * Math.round(fitted * 100d) / 100d > availablePt) return original;
+        return fitted;
+    }
+
+    private static java.awt.Font loadOcrLatinCompatibleFont() {
+        java.awt.Font system = new java.awt.Font("Liberation Sans", java.awt.Font.PLAIN, 100);
+        if ("Liberation Sans".equals(system.getFamily())) return system;
+        try (var input = FixedLayoutDocxRenderer.class.getResourceAsStream("/fonts/LiberationSans-Regular.ttf")) {
+            return input == null ? null : java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, input).deriveFont(100f);
+        } catch (Exception ignored) { return null; }
     }
 
     private static java.awt.Font loadOcrCjkFont() {

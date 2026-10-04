@@ -1,0 +1,181 @@
+{
+  "parentRevision": "c97de2a2fc05b177b2d34fef525d3637b3d96667",
+  "buildAudit": {
+    "tests": {
+      "tests": 473,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "skips": [
+      {
+        "className": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+        "name": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning"
+      }
+    ],
+    "bundledTests": [
+      {
+        "className": "com.fuyue.formatconverter.task.OcrDeskewTest",
+        "name": "bundledEngineRecoversMissingLinesWithSourceGeometryAndReviewWarnings",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.PdfToImageConverterTest",
+        "name": "discoversBundledPopplerFromAppHome",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.ForkedFileConverterTest",
+        "name": "retainsAutoDiscoveredBundledOcrWhenTheWorkerChangesItsWorkingDirectory",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "discoversBundledRuntimeFromPackagedApplicationRoot",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "validBundledRuntimeAutoEnablesWithoutHostInstallation",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+        "name": "explicitFalseDisablesEvenAValidBundledRuntime",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.BundledOcrRuntimeIntegrationTest",
+        "name": "bundledBinaryModelsAndLibrariesRunWithoutSystemDiscovery",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.TesseractPngInputTest",
+        "name": "bundledPngEngineRecognizesRealJpegText",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+        "name": "bundledEngineRecoversShadedLowContrastPrintedText",
+        "skipped": false
+      },
+      {
+        "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+        "name": "bundledEngineRecoversChineseFaintTextWithDigitsAndPunctuation",
+        "skipped": false
+      }
+    ],
+    "changedClasses": [
+      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OcrMask.class",
+      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer.class",
+      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OcrAppearance.class",
+      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$1.class",
+      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OverlayRenderException.class",
+      "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$FixedItem.class"
+    ],
+    "allOtherApplicationClassesByteExact": true,
+    "frontendFilesExact": 7,
+    "buildReceipt": {
+      "status": "reaped",
+      "rootExitCode": 0,
+      "waitpidNoChildren": true
+    }
+  },
+  "provenance": {
+    "buildInputSha256": "4ea22a954172673bf16834fe40fa6cc9dc37b9971af766de1e9fcf8dff6dbc85",
+    "parentRevision": "c97de2a2fc05b177b2d34fef525d3637b3d96667",
+    "workingTreeDirtyAtBuildStart": true,
+    "jarSha256": "de05c153351caf48a41ed5522fb9b591756f2e8d178301e3a7aa7619d9630b18",
+    "applicationClassCount": 229,
+    "applicationClassSha256": "144a2173a5eb61973b6f7693e3b4a6adbac5e0a94c8d91b7755ab79820d25dd5",
+    "packagedClassesMatchTargets": true
+  },
+  "pins": {
+    "java": "Temurin 17.0.16+8",
+    "maven": "3.9.11",
+    "node": "22.17.0",
+    "python": "3.12.14",
+    "pymupdf": "1.26.6",
+    "liberationSans": "2.1.5",
+    "notoCjk": "2.004",
+    "linux": "6.18.44",
+    "office": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5"
+  },
+  "font": {
+    "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+    "version": "LiberationSans2.1.5",
+    "license": "SIL-OFL-1.1"
+  },
+  "runtimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+  "runtimeFilesExact": 12,
+  "health": {
+    "status": "UP",
+    "version": "0.1.4",
+    "parser": "OFDRW 2.3.9",
+    "javaVersion": "17.0.16",
+    "os": "Linux",
+    "arch": "amd64",
+    "office": {
+      "enabled": true,
+      "available": true,
+      "binaryName": "soffice",
+      "version": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+      "message": "Office 引擎可用"
+    },
+    "ocr": {
+      "enabled": true,
+      "available": true,
+      "binaryName": "tesseract",
+      "version": "tesseract 5.5.2",
+      "requestedLanguages": "chi_sim+eng",
+      "availableLanguages": [
+        "eng",
+        "chi_sim",
+        "chi_sim_vert",
+        "osd"
+      ],
+      "timeoutSeconds": 120,
+      "maxConcurrency": 1,
+      "maxImagePixels": 25000000,
+      "minimumConfidence": 0.35,
+      "bundled": true,
+      "errorCode": null,
+      "message": "内置 Tesseract OCR 可用"
+    },
+    "time": "2026-10-04T15:43:58.110863675Z"
+  },
+  "helperSha256": {
+    "OcrSparseTraceProbe.java": "d3916cbec68a96f3889b9fe4f4245558e0cd46fe5cd05301edf6ace712181a4a",
+    "OcrHeadingMetricsProbe.java": "11019bde3c4f64d575663ad0172156b8cbb407fb79f06741d46d9ab3ff4182b7",
+    "generate_sparse_trace30.py": "6fbdef2e278784dbe2ec55edef1c0a32dd5419de34ce374408b900bc7f4e895b",
+    "verify_sparse_trace30.py": "6ae238c1edc8b2330e957903186934b63121224ab5ddbf02389e65a05fa6b7a6",
+    "generate_heading30.py": "6b3edb720e1699783b7527a1d98d5e48a6a3dbc128406983a779858c64af2df1",
+    "verify_heading30.py": "96ec75e6541b80b6e29bba303a8573fbf5fe93791e55ff520f2bd2be8a2c3a8e",
+    "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf",
+    "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9"
+  },
+  "preservedInitialHelperSha256": {
+    "iteration30-visible-helper-corrected-before-api-boundary.py": "5c586d0c6f6aa154ea457a9089a6985f4fa89533941b8dda5122e425f3f09cc2",
+    "iteration30-visible-helper-initial.py": "f07b3a8400f42da9048a5d5465a9fe86cb379ae94ec9554937abcb376cd235fc"
+  },
+  "frozenManifests": {
+    "qa-samples/generated/heading30-existing-before/expected.json": "5392786e33ff237615fe3a42a8e7e8e72bff692999a8d51968adbc6f320ec66e",
+    "qa-samples/generated/sparse-trace30/expected.json": "cbd3582270af633ee1685a5e3005327487ed24de66c92fea9d2cfe2053bb593b",
+    "qa-samples/generated/heading30/before/expected.json": "e19970c2802c9abce677a6f49fe79914b48d325006280e46cdca4b9393ed7637",
+    "qa-samples/generated/heading30/after/expected.json": "b01d3ff3bdc49be9cebe79e67b6d235bbd4ca2ccde2e6686dcc33d0989c907cf",
+    "qa-samples/generated/heading30-scale-proof/expected.json": "f9d4a9b80b251311021021d278ff3f04415ecf39ff414af22fac3bb30cb61d7f"
+  },
+  "acceptance": {
+    "sparseHttp": 10,
+    "headingBeforeHttp": 8,
+    "existingUneditedApiBefore": 3,
+    "scaleProofHttp": 1,
+    "headingAfterHttp": 22,
+    "completedVisibleOcr": 10,
+    "rawApiExact": 4,
+    "remainingSeparatorFailures": 1,
+    "originalSparseGateRetained": true,
+    "nativeMacWindowsUnrun": true
+  }
+}
