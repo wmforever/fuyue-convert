@@ -234,9 +234,9 @@ final class FixedLayoutDocxRenderer {
         if (texts.stream().allMatch(block -> block.ocrWords().isEmpty())) return new OcrAppearance(colors, numericRightEdges);
         // LibreOffice paints negative VML shapes before a DrawingML scan anchor,
         // regardless of XML order. On a scan-only page, put sampled word masks
-        // in front of that image and below the editable OCR boxes. Mixed pages
-        // retain their old layering: foreground masks could cover native body
-        // text, tables, vectors or other images whose ordering is independent.
+        // in front of that image and below the editable OCR boxes. A mixed page
+        // needs a separate, conservative collision check against native body
+        // text, including paragraphs absent from the fixed overlay list.
         boolean scanOnly = page.images().size() == 1 && page.lines().isEmpty() && page.tables().isEmpty()
                 && texts.stream().allMatch(block -> !block.ocrWords().isEmpty())
                 && page.textBlocks().stream().allMatch(block -> !block.ocrWords().isEmpty())
@@ -245,6 +245,7 @@ final class FixedLayoutDocxRenderer {
         // Neighbor checks are quadratic in the word count; this optional edit
         // reserve is deliberately limited to sparse pages (at most 512² checks).
         boolean reserveEligible = scanOnly && texts.stream().mapToLong(block -> block.ocrWords().size()).sum() <= 512;
+        List<Rect> nativeProtection = scanOnly ? null : mixedNativeProtection(page, texts);
         for (ImageBlock background : page.images()) {
             if (!isOcrBackground(background)) continue;
             // Decode one background at a time, rather than retaining all scan images on a page.
@@ -258,10 +259,17 @@ final class FixedLayoutDocxRenderer {
                     double right = Math.min(word.box().right() + 0.15d, background.box().right());
                     double bottom = Math.min(word.box().bottom() + 0.15d, background.box().bottom());
                     if (right <= x || bottom <= y) continue;
-                    List<OcrBackgroundMaskSampler.Fill> fills = sampler.fills(new Rect(x, y, right - x, bottom - y));
+                    Rect maskBox = new Rect(x, y, right - x, bottom - y);
+                    List<OcrBackgroundMaskSampler.Fill> fills = sampler.fills(maskBox);
                     if (fills.isEmpty()) continue;
+                    boolean mixedForeground = nativeProtection != null && word.confidence() >= .85d
+                            && block.zOrder() >= 1 && Transform2D.IDENTITY.equals(block.transform())
+                            && word.box().x() >= background.box().x() && word.box().right() <= background.box().right()
+                            && word.box().y() >= background.box().y() && word.box().bottom() <= background.box().bottom()
+                            && lightNeutralPaper(fills)
+                            && nativeProtection.stream().noneMatch(box -> box.intersectionArea(maskBox) > 0d);
                     for (OcrBackgroundMaskSampler.Fill fill : fills) {
-                        masks.add(new OcrMask(block.id(), fill));
+                        masks.add(new OcrMask(block.id(), fill, mixedForeground));
                     }
                     colors.put(word, ocrForeground(fills, block.style().color()));
                     // Reserve only a bounded, pixel-checked blank region for a
@@ -298,14 +306,78 @@ final class FixedLayoutDocxRenderer {
             var fill = mask.fill();
             String xml = "<v:rect xmlns:v=\"urn:schemas-microsoft-com:vml\" id=\""
                     + attr(shapeId("ocr-mask", mask.blockId())) + "\" style=\""
-                    + attr(positionStyle(fill.box(), foregroundMasks ? 1 : BEHIND_TEXT_Z_INDEX + 1, 0, true))
+                    + attr(positionStyle(fill.box(), foregroundMasks || mask.mixedForeground()
+                            ? 1 : BEHIND_TEXT_Z_INDEX + 1, 0, true))
                     + "\" filled=\"t\" fillcolor=\"#" + fill.color() + "\" stroked=\"f\"/>";
             unchecked(() -> appendShape(anchor, xml));
         }
         return new OcrAppearance(colors, numericRightEdges);
     }
 
-    private record OcrMask(String blockId, OcrBackgroundMaskSampler.Fill fill) { }
+    /** Bounded support for sparse, disjoint native/OCR pages; ambiguous layouts retain their scan. */
+    private List<Rect> mixedNativeProtection(PageModel page, List<TextBlock> texts) {
+        if (page.images().size() != 1 || !isOcrBackground(page.images().get(0))
+                || !page.lines().isEmpty() || !page.tables().isEmpty()
+                || page.textBlocks().size() > 512 || page.paragraphs().size() > 512 || texts.size() > 512
+                || texts.stream().mapToLong(block -> block.ocrWords().size()).sum() > 512) return null;
+        Map<TextBlock, Boolean> blocks = new IdentityHashMap<>();
+        page.textBlocks().forEach(block -> blocks.put(block, true));
+        texts.forEach(block -> blocks.put(block, true));
+        List<Rect> protectedBoxes = new ArrayList<>();
+        int references = page.textBlocks().size() + texts.size();
+        try {
+            for (ParagraphModel paragraph : page.paragraphs()) {
+                if (paragraph.flow() != null || (references += paragraph.runs().size()) > 1536) return null;
+                double padding = 0d;
+                for (TextBlock block : paragraph.runs()) {
+                    blocks.put(block, true);
+                    if (!block.text().isEmpty() && block.ocrWords().isEmpty()) {
+                        padding = Math.max(padding, nativePadding(block));
+                    }
+                }
+                if (padding > 0d) protectedBoxes.add(expandNativeBox(paragraph.box(), padding));
+            }
+            for (TextBlock block : blocks.keySet()) {
+                if (!block.text().isEmpty() && block.ocrWords().isEmpty()) {
+                    protectedBoxes.add(expandNativeBox(block.box(), nativePadding(block)));
+                }
+            }
+        } catch (IllegalArgumentException exception) {
+            return null;
+        }
+        // At most 512 words × 512 protected regions. Do not promote any mask on
+        // a dense page or a page whose native geometry cannot be trusted.
+        return protectedBoxes.isEmpty() || protectedBoxes.size() > 512 ? null : protectedBoxes;
+    }
+
+    private double nativePadding(TextBlock block) {
+        if (!Transform2D.IDENTITY.equals(block.transform()) || !Double.isFinite(block.style().sizePt())
+                || !Double.isFinite(block.textOffsetXmm()) || !Double.isFinite(block.textOffsetYmm())
+                || block.textOffsetXmm() > block.box().width() || block.textOffsetYmm() > block.box().height()
+                || !Double.isFinite(block.baselineY()) || block.baselineY() < block.box().y()
+                || block.baselineY() > block.box().bottom()) {
+            throw new IllegalArgumentException("Uncertain native text geometry");
+        }
+        // Body text may move within its paragraph; protect two font heights
+        // around both source runs and their containing native paragraphs.
+        return block.style().sizePt() * 25.4d / 72d * 2d;
+    }
+
+    private Rect expandNativeBox(Rect box, double padding) {
+        return new Rect(box.x() - padding, box.y() - padding,
+                box.width() + padding * 2d, box.height() + padding * 2d);
+    }
+
+    private boolean lightNeutralPaper(List<OcrBackgroundMaskSampler.Fill> fills) {
+        return fills.stream().allMatch(fill -> {
+            int rgb = Integer.parseInt(fill.color(), 16);
+            int r = (rgb >>> 16) & 255, g = (rgb >>> 8) & 255, b = rgb & 255;
+            int minimum = Math.min(r, Math.min(g, b)), maximum = Math.max(r, Math.max(g, b));
+            return minimum >= 180 && maximum - minimum <= 8;
+        });
+    }
+
+    private record OcrMask(String blockId, OcrBackgroundMaskSampler.Fill fill, boolean mixedForeground) { }
     private record OcrAppearance(Map<TextBlock.OcrWord, ColorValue> colors,
                                  Map<TextBlock.OcrWord, Double> numericRightEdges) { }
 

@@ -46,7 +46,8 @@ class OcrWordOverlayTest {
                 Rect sourceBox = words.get(index).box();
                 assertEquals(sourceBox.x() - .15, mm(style, "margin-left"), .001);
                 assertEquals(sourceBox.width() + .3, mm(style, "width"), .001);
-                assertTrue(style.contains("z-index:-251658751"), "混合页保留原层级，不能用前景遮罩覆盖原生正文");
+                assertTrue(style.contains(index == 0 ? "z-index:1;" : "z-index:-251658751;"),
+                        "与原生正文分离的可靠词可覆盖扫描；低置信度词保留原层级");
                 assertEquals("#FFFFFF", masks.get(index).getAttribute("fillcolor"));
                 double maskLeft = mm(style, "margin-left"), maskRight = maskLeft + mm(style, "width");
                 assertTrue(maskRight <= 32.151 || maskLeft >= 59.849,
@@ -152,6 +153,102 @@ class OcrWordOverlayTest {
             assertTrue(masks(xml).isEmpty());
             assertEquals("STAMP", elements(xml, WORD, "t").stream().map(Element::getTextContent).reduce("", String::concat));
             assertArrayEquals(source, docx.getAllPictures().get(0).getData());
+        }
+    }
+
+    @Test void preservesConflictingNativeValueEvenWhenItOnlyExistsInBodyParagraphs() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        TextBlock nativeText = new TextBlock("native", 1, line.box(), "127.51", 34, FontStyle.defaults(), 4);
+        var paragraph = new ParagraphModel(nativeText.box(), List.of(nativeText), ParagraphModel.Alignment.LEFT, 0);
+        // The native run is absent from both textBlocks and the overlay list.
+        assertMixedLayer(line, List.of(), List.of(paragraph), List.of(), List.of(mixedBackground(255, 255, 255)), false);
+    }
+
+    @Test void protectsNativeParagraphExtentAndFontHeightMargin() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        for (double y : new double[]{37, 70}) {
+            TextBlock nativeText = new TextBlock("native", 1, new Rect(20, y, 30, 4), "Native", y + 4,
+                    new FontStyle("Arial", 12, false, false, null), 4);
+            // Neither run touches the word; the near run's body margin and the
+            // far run's declared paragraph extent must independently protect it.
+            Rect paragraphBox = y == 70 ? new Rect(20, 30, 30, 44) : nativeText.box();
+            assertMixedLayer(line, List.of(nativeText), List.of(new ParagraphModel(paragraphBox,
+                    List.of(nativeText), ParagraphModel.Alignment.LEFT, 0)), List.of(),
+                    List.of(mixedBackground(255, 255, 255)), false);
+        }
+    }
+
+    @Test void retainsLayeringForReflowAndTransformedNativeOcrCombinations() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        for (int variant = 0; variant < 3; variant++) {
+            TextBlock nativeText = new TextBlock("native", 1, new Rect(20, 70, 30, 4), "Native", 74,
+                    FontStyle.defaults(), 4, 0, 0, List.of(), variant == 1
+                    ? new Transform2D(1, 0, 0, 1, 0, 3) : Transform2D.IDENTITY);
+            TextBlock overlay = variant != 2 ? line : new TextBlock(line.id(), 1, line.box(), line.text(),
+                    line.baselineY(), line.style(), 1, 0, 0, List.of(), new Transform2D(1, 0, 0, 1, 0, 3), line.ocrWords());
+            var paragraph = new ParagraphModel(nativeText.box(), List.of(nativeText), ParagraphModel.Alignment.LEFT, 0,
+                    variant == 0 ? new ParagraphModel.Flow(2, 0) : null);
+            assertMixedLayer(overlay, List.of(nativeText), List.of(paragraph), List.of(),
+                    List.of(mixedBackground(255, 255, 255)), false);
+        }
+    }
+
+    @Test void mixedMasksRequireNeutralLightPaperAndNoIndependentGraphics() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        TextBlock nativeText = new TextBlock("native", 1, new Rect(20, 70, 30, 4), "Native", 74, FontStyle.defaults(), 4);
+        for (int[] rgb : new int[][]{{225,225,225}, {65,65,65}, {255,225,190}}) {
+            assertMixedLayer(line, List.of(nativeText), List.of(), List.of(),
+                    List.of(mixedBackground(rgb[0], rgb[1], rgb[2])), rgb[0] == 225);
+        }
+        ImageBlock background = mixedBackground(255, 255, 255);
+        assertMixedLayer(line, List.of(nativeText), List.of(), List.of(new LineElement("line", 1,
+                new Point(70, 80), new Point(80, 80), .2, ColorValue.BLACK, 3)), List.of(background), false);
+        assertMixedLayer(line, List.of(nativeText), List.of(), List.of(), List.of(background,
+                new ImageBlock("photo", 1, new Rect(70, 80, 10, 10), "image/png", png(), "PDF_IMAGE", 3)), false);
+    }
+
+    @Test void denseMixedPageSkipsOptionalPromotion() throws Exception {
+        TextBlock line = ocr(java.util.stream.IntStream.range(0, 513)
+                .mapToObj(i -> new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "X", .98)).toList(), "X ".repeat(513));
+        TextBlock nativeText = new TextBlock("native", 1, new Rect(20, 70, 30, 4), "Native", 74, FontStyle.defaults(), 4);
+        assertMixedLayer(line, List.of(nativeText), List.of(), List.of(), List.of(mixedBackground(255, 255, 255)), false);
+    }
+
+    @Test void supportsFirstOfdAdditionAndBaselineOffsetInsideNativeBoundary() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        line = new TextBlock(line.id(), 1, line.box(), line.text(), line.baselineY(), line.style(), 1,
+                0, 0, List.of(), Transform2D.IDENTITY, line.ocrWords());
+        TextBlock nativeText = new TextBlock("native", 1, new Rect(20, 70, 30, 4), "Native", 74,
+                FontStyle.defaults(), 4, 0, 4, List.of(), Transform2D.IDENTITY);
+        assertMixedLayer(line, List.of(nativeText), List.of(), List.of(), List.of(mixedBackground(255, 255, 255)), true);
+    }
+
+    @Test void uncertainNativeOffsetOutsideBoundaryRetainsScanLayer() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        TextBlock nativeText = new TextBlock("native", 1, new Rect(20, 70, 30, 4), "Native", 82,
+                FontStyle.defaults(), 4, 0, 12, List.of(), Transform2D.IDENTITY);
+        assertMixedLayer(line, List.of(nativeText), List.of(), List.of(), List.of(mixedBackground(255, 255, 255)), false);
+    }
+
+    private ImageBlock mixedBackground(int r, int g, int b) throws Exception {
+        BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        var graphics = image.createGraphics(); graphics.setColor(new java.awt.Color(r, g, b));
+        graphics.fillRect(0, 0, 100, 100); graphics.dispose();
+        var data = new ByteArrayOutputStream(); ImageIO.write(image, "png", data); image.flush();
+        return new ImageBlock("scan", 1, new Rect(0, 0, 100, 100), "image/png", data.toByteArray(), "OCR_SCAN_BACKGROUND", 0);
+    }
+
+    private void assertMixedLayer(TextBlock line, List<TextBlock> nativeText, List<ParagraphModel> paragraphs,
+                                  List<LineElement> lines, List<ImageBlock> images, boolean promoted) throws Exception {
+        List<TextBlock> all = new ArrayList<>(nativeText); all.add(line);
+        var page = new PageModel(1, new Rect(0, 0, 100, 100), all, lines, images, paragraphs, List.of(), List.of());
+        try (var docx = new XWPFDocument()) {
+            new FixedLayoutDocxRenderer().renderOverlays(docx, docx.createParagraph(), page, List.of(line));
+            var masks = masks(xml(docx)); assertFalse(masks.isEmpty());
+            assertTrue(masks.stream().allMatch(mask -> mask.getAttribute("style").contains(
+                    promoted ? "z-index:1;" : "z-index:-251658751;")));
+            assertEquals(line.text(), elements(xml(docx), WORD, "t").stream().map(Element::getTextContent).reduce("", String::concat));
+            assertArrayEquals(images.get(0).data(), docx.getAllPictures().get(0).getData());
         }
     }
 
