@@ -31,6 +31,18 @@ class OfdNumericDedupTest {
         assertEquals(1,page.warnings().stream().filter(w->w.code()==WarningCode.OCR_APPLIED).count());
         assertTrue(page.warnings().stream().noneMatch(w->w.code()==WarningCode.OCR_REQUIRED));
     }
+    @Test void retainsLiteralAccountingPercentCurrencyAndSpacedSignWithConflictWarning() throws Exception {
+        for (String[] values : new String[][] {{"Amount 048.65","Amount (048.65)"}, {"Rate 10","Rate 10%"},
+                {"Rate 10","Rate 10‰"},{"Rate 10","Rate 10%o"},{"Amount 048.65","Amount $048.65"},
+                {"Amount 048.65","Amount - 048.65"}}) {
+            var input=source(values[0],true);var page=recognize(input,values[1]).pages().get(0);
+            assertEquals(List.of(values[0],values[1]),page.textBlocks().stream().map(TextBlock::text).toList());
+            assertEquals(input.pages().get(0).textBlocks().get(0),page.textBlocks().get(0));
+            assertEquals(new Rect(50,50,100,30),page.textBlocks().get(1).box());
+            assertArrayEquals(input.pages().get(0).images().get(0).data(),page.images().get(0).data());
+            assertEquals(1,page.warnings().stream().filter(w->w.code()==WarningCode.OCR_RECOGNITION_CONFLICT).count());
+        }
+    }
     @Test void exactDuplicateStillFailsStrictNoveltyGateInsteadOfReturningAnEmptySuccess() throws Exception {
         var source=source("Amount 048.65",true);
         assertEquals(1,ScannedContentDetector.imagesRequiringOcr(source.pages().get(0).textBlocks(),source.pages().get(0).images(),source.pages().get(0).physicalBox()).size());
@@ -60,7 +72,7 @@ class OfdNumericDedupTest {
                 touch "$(dirname "$0")/invoked"
                 printf 'level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n' > "$2.tsv"
                 printf '5\t1\t1\t1\t1\t1\t50\t50\t100\t30\t99\tVALUE\n' >> "$2.tsv"
-                """.replace("VALUE",value));assertTrue(engine.toFile().setExecutable(true));
+                """.replace("VALUE",value.replace("%", "%%")));assertTrue(engine.toFile().setExecutable(true));
         var settings=new TesseractOcrConverter.Settings(engine,"eng","controlled",Duration.ofSeconds(10),1,.35,.75,25_000_000,temp.resolve("locks"));
         return new OfdOcrSupport(settings).recognizeRequiredPages(source,temp.resolve("work"),ParseLimits.defaults(),(s,p)->{});
     }

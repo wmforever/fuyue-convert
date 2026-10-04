@@ -3,6 +3,7 @@ package com.fuyue.formatconverter.task;
 import com.fuyue.formatconverter.model.TextBlock;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -26,13 +27,54 @@ final class OcrTextDeduplicator {
     static boolean numericConflict(TextBlock candidate, List<TextBlock> existing) {
         List<String> numbers = numbers(candidate.text());
         String context = letters(candidate.text());
+        String candidateText = normalize(candidate.text());
         return existing.stream().anyMatch(text -> overlaps(candidate, text)
-                && context.equals(letters(text.text()))
+                && (context.equals(letters(text.text())) || similar(candidateText, normalize(text.text())))
                 && !numbers.equals(numbers(text.text())));
     }
 
     private static List<String> numbers(String text) {
-        return NUMBER.matcher(text == null ? "" : text).results().map(java.util.regex.MatchResult::group).toList();
+        String value = text == null ? "" : text;
+        var matcher = NUMBER.matcher(value);
+        List<String> result = new ArrayList<>();
+        while (matcher.find()) {
+            int left = matcher.start(), right = matcher.end();
+            // Keep literal accounting/currency/unit markers, including a sign
+            // separated from its digits. Whitespace alone never joins numbers.
+            while (left > 0) {
+                int marker = left;
+                while (marker > 0 && numericSpace(value.codePointBefore(marker))) {
+                    marker -= Character.charCount(value.codePointBefore(marker));
+                }
+                if (marker == 0 || !numericPrefix(value.codePointBefore(marker))) break;
+                left = marker - Character.charCount(value.codePointBefore(marker));
+            }
+            while (right < value.length()) {
+                int marker = right;
+                while (marker < value.length() && numericSpace(value.codePointAt(marker))) {
+                    marker += Character.charCount(value.codePointAt(marker));
+                }
+                if (marker == value.length() || !numericSuffix(value.codePointAt(marker))) break;
+                right = marker + Character.charCount(value.codePointAt(marker));
+            }
+            result.add(value.substring(left, right).codePoints().filter(c -> !numericSpace(c))
+                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString());
+        }
+        return result;
+    }
+
+    private static boolean numericPrefix(int c) {
+        return Character.getType(c) == Character.CURRENCY_SYMBOL || c == '(' || c == '（'
+                || c == '+' || c == '-' || c == '−' || c == '－' || c == '＋';
+    }
+
+    private static boolean numericSuffix(int c) {
+        return Character.getType(c) == Character.CURRENCY_SYMBOL || c == ')' || c == '）'
+                || c == '%' || c == '％' || c == '‰' || c == '‱' || c == '٪' || c == '﹪';
+    }
+
+    private static boolean numericSpace(int c) {
+        return Character.isWhitespace(c) || Character.isSpaceChar(c);
     }
 
     private static String letters(String text) {

@@ -1,0 +1,569 @@
+{
+  "parentRevision": "16af17f93a968b65ccd3196b80705c1e7420232f",
+  "jarSha256": "cadfb90be18b024874dd8f6a8d85e5dc326dc6237e87ed15a80dcbf8102acad6",
+  "beforeJarSha256": "6e0f7d94a2e0804074cc535c04a859e7f6c5fd8171cf94a21f9ba4b4a2434c6c",
+  "buildInputSha256": "a84f63b1e09a89c80f3f5154af58a57b038710ae77a391293f903a48003e2175",
+  "productionFix": "retain literal accounting,currency,percent/per-mille and separated sign in numeric comparisons;warn about retained mismatches",
+  "cases": [
+    {
+      "id": "accounting",
+      "sourceNative": "Amount 048.65",
+      "sourceRaster": "Amount (048.65)",
+      "actualRecognizedRaster": "Amount (048.65)",
+      "beforeText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount 048.65\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "afterText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount 048.65Amount (048.65)\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "expectedSourceUnionText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount 048.65Amount (048.65)\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "rawCerBefore": 0.15789473684210525,
+      "rawCerAfter": 0.0,
+      "contentCerBefore": 0.17073170731707318,
+      "contentCerAfter": 0.0,
+      "contentEditsBefore": 14,
+      "contentEditsAfter": 0,
+      "contentTruthCharacters": 82,
+      "observedLayerRetentionBefore": 1,
+      "observedLayerRetentionAfter": 2,
+      "observedLayersExact": true,
+      "sourceTruthExact": true,
+      "sourceUnionOrder": "existing geometric order from frozen before models;no canonical value selected",
+      "recognitionAndOriginalCoordinatesExact": true,
+      "nativeLayerExact": true,
+      "numericConflictWarning": true,
+      "secondsBefore": 3.997565774996474,
+      "secondsAfter": 3.4514552390028257
+    },
+    {
+      "id": "percent",
+      "sourceNative": "Rate 10",
+      "sourceRaster": "Rate 10%",
+      "actualRecognizedRaster": "Rate 10%",
+      "beforeText": "LEXICAL AUDIT 2094\nRecord 00973\nRate 10\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "afterText": "LEXICAL AUDIT 2094\nRecord 00973\nRate 10Rate 10%\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "expectedSourceUnionText": "LEXICAL AUDIT 2094\nRecord 00973\nRate 10Rate 10%\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "rawCerBefore": 0.0975609756097561,
+      "rawCerAfter": 0.0,
+      "contentCerBefore": 0.10144927536231885,
+      "contentCerAfter": 0.0,
+      "contentEditsBefore": 7,
+      "contentEditsAfter": 0,
+      "contentTruthCharacters": 69,
+      "observedLayerRetentionBefore": 1,
+      "observedLayerRetentionAfter": 2,
+      "observedLayersExact": true,
+      "sourceTruthExact": true,
+      "sourceUnionOrder": "existing geometric order from frozen before models;no canonical value selected",
+      "recognitionAndOriginalCoordinatesExact": true,
+      "nativeLayerExact": true,
+      "numericConflictWarning": true,
+      "secondsBefore": 3.4577912489985465,
+      "secondsAfter": 2.8334551179941627
+    },
+    {
+      "id": "per-mille",
+      "sourceNative": "Rate 10",
+      "sourceRaster": "Rate 10‰",
+      "actualRecognizedRaster": "Rate 10%o",
+      "beforeText": "LEXICAL AUDIT 2094\nRecord 00973\nRate 10\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "afterText": "LEXICAL AUDIT 2094\nRecord 00973\nRate 10Rate 10%o\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "expectedSourceUnionText": "LEXICAL AUDIT 2094\nRecord 00973\nRate 10Rate 10‰\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "rawCerBefore": 0.0975609756097561,
+      "rawCerAfter": 0.024390243902439025,
+      "contentCerBefore": 0.10144927536231885,
+      "contentCerAfter": 0.028985507246376812,
+      "contentEditsBefore": 7,
+      "contentEditsAfter": 2,
+      "contentTruthCharacters": 69,
+      "observedLayerRetentionBefore": 1,
+      "observedLayerRetentionAfter": 2,
+      "observedLayersExact": true,
+      "sourceTruthExact": false,
+      "sourceUnionOrder": "existing geometric order from frozen before models;no canonical value selected",
+      "recognitionAndOriginalCoordinatesExact": true,
+      "nativeLayerExact": true,
+      "numericConflictWarning": true,
+      "secondsBefore": 3.3633706190012163,
+      "secondsAfter": 3.4260471730012796
+    },
+    {
+      "id": "dollar",
+      "sourceNative": "Amount 048.65",
+      "sourceRaster": "Amount $048.65",
+      "actualRecognizedRaster": "Amount $048.65",
+      "beforeText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount 048.65\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "afterText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount $048.65Amount 048.65\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "expectedSourceUnionText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount $048.65Amount 048.65\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "rawCerBefore": 0.14893617021276595,
+      "rawCerAfter": 0.0,
+      "contentCerBefore": 0.16049382716049382,
+      "contentCerAfter": 0.0,
+      "contentEditsBefore": 13,
+      "contentEditsAfter": 0,
+      "contentTruthCharacters": 81,
+      "observedLayerRetentionBefore": 1,
+      "observedLayerRetentionAfter": 2,
+      "observedLayersExact": true,
+      "sourceTruthExact": true,
+      "sourceUnionOrder": "existing geometric order from frozen before models;no canonical value selected",
+      "recognitionAndOriginalCoordinatesExact": true,
+      "nativeLayerExact": true,
+      "numericConflictWarning": true,
+      "secondsBefore": 3.3732158569982857,
+      "secondsAfter": 3.0606798350054305
+    },
+    {
+      "id": "euro",
+      "sourceNative": "Amount 048.65",
+      "sourceRaster": "Amount 048.65€",
+      "actualRecognizedRaster": "Amount 048.65€",
+      "beforeText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount 048.65\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "afterText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount 048.65€Amount 048.65\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "expectedSourceUnionText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount 048.65€Amount 048.65\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "rawCerBefore": 0.14893617021276595,
+      "rawCerAfter": 0.0,
+      "contentCerBefore": 0.16049382716049382,
+      "contentCerAfter": 0.0,
+      "contentEditsBefore": 13,
+      "contentEditsAfter": 0,
+      "contentTruthCharacters": 81,
+      "observedLayerRetentionBefore": 1,
+      "observedLayerRetentionAfter": 2,
+      "observedLayersExact": true,
+      "sourceTruthExact": true,
+      "sourceUnionOrder": "existing geometric order from frozen before models;no canonical value selected",
+      "recognitionAndOriginalCoordinatesExact": true,
+      "nativeLayerExact": true,
+      "numericConflictWarning": true,
+      "secondsBefore": 3.204309454005852,
+      "secondsAfter": 3.5887958690000232
+    },
+    {
+      "id": "currency-accounting",
+      "sourceNative": "Amount (048.65)",
+      "sourceRaster": "Amount $(048.65)",
+      "actualRecognizedRaster": "Amount $(048.65)",
+      "beforeText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount (048.65)\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "afterText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount $(048.65)Amount (048.65)\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "expectedSourceUnionText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount $(048.65)Amount (048.65)\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "rawCerBefore": 0.16326530612244897,
+      "rawCerAfter": 0.0,
+      "contentCerBefore": 0.17647058823529413,
+      "contentCerAfter": 0.0,
+      "contentEditsBefore": 15,
+      "contentEditsAfter": 0,
+      "contentTruthCharacters": 85,
+      "observedLayerRetentionBefore": 1,
+      "observedLayerRetentionAfter": 2,
+      "observedLayersExact": true,
+      "sourceTruthExact": true,
+      "sourceUnionOrder": "existing geometric order from frozen before models;no canonical value selected",
+      "recognitionAndOriginalCoordinatesExact": true,
+      "nativeLayerExact": true,
+      "numericConflictWarning": true,
+      "secondsBefore": 3.194846760998189,
+      "secondsAfter": 3.917851193000388
+    },
+    {
+      "id": "space-after-sign",
+      "sourceNative": "Amount 048.65",
+      "sourceRaster": "Amount - 048.65",
+      "actualRecognizedRaster": "Amount - 048.65",
+      "beforeText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount 048.65\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "afterText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount - 048.65Amount 048.65\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "expectedSourceUnionText": "LEXICAL AUDIT 2094\nRecord 00973\nAmount - 048.65Amount 048.65\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "rawCerBefore": 0.15789473684210525,
+      "rawCerAfter": 0.0,
+      "contentCerBefore": 0.16049382716049382,
+      "contentCerAfter": 0.0,
+      "contentEditsBefore": 13,
+      "contentEditsAfter": 0,
+      "contentTruthCharacters": 81,
+      "observedLayerRetentionBefore": 1,
+      "observedLayerRetentionAfter": 2,
+      "observedLayersExact": true,
+      "sourceTruthExact": true,
+      "sourceUnionOrder": "existing geometric order from frozen before models;no canonical value selected",
+      "recognitionAndOriginalCoordinatesExact": true,
+      "nativeLayerExact": true,
+      "numericConflictWarning": true,
+      "secondsBefore": 3.101414836004551,
+      "secondsAfter": 4.1531845740028075
+    },
+    {
+      "id": "ordinary-punctuation",
+      "sourceNative": "Invoice No 2094",
+      "sourceRaster": "Invoice No. 2094",
+      "actualRecognizedRaster": "Invoice No. 2094",
+      "beforeText": "LEXICAL AUDIT 2094\nRecord 00973\nInvoice No 2094\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "afterText": "LEXICAL AUDIT 2094\nRecord 00973\nInvoice No 2094\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "expectedSourceUnionText": "LEXICAL AUDIT 2094\nRecord 00973\nInvoice No 2094\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "rawCerBefore": 0.0,
+      "rawCerAfter": 0.0,
+      "contentCerBefore": 0.0,
+      "contentCerAfter": 0.0,
+      "contentEditsBefore": 0,
+      "contentEditsAfter": 0,
+      "contentTruthCharacters": 69,
+      "observedLayerRetentionBefore": 1,
+      "observedLayerRetentionAfter": 1,
+      "observedLayersExact": true,
+      "sourceTruthExact": true,
+      "sourceUnionOrder": "existing geometric order from frozen before models;no canonical value selected",
+      "recognitionAndOriginalCoordinatesExact": true,
+      "nativeLayerExact": true,
+      "numericConflictWarning": false,
+      "secondsBefore": 2.983579995998298,
+      "secondsAfter": 3.2062320340046426
+    },
+    {
+      "id": "id-extension",
+      "sourceNative": "Record 00793",
+      "sourceRaster": "Record 007930",
+      "actualRecognizedRaster": "Record 007930",
+      "beforeText": "LEXICAL AUDIT 2094\nRecord 00973\nRecord 00793Record 007930\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "afterText": "LEXICAL AUDIT 2094\nRecord 00973\nRecord 00793Record 007930\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "expectedSourceUnionText": "LEXICAL AUDIT 2094\nRecord 00973\nRecord 00793Record 007930\nDate 2094-12-08\nNOVEL FOOTER 2094\n",
+      "rawCerBefore": 0.0,
+      "rawCerAfter": 0.0,
+      "contentCerBefore": 0.0,
+      "contentCerAfter": 0.0,
+      "contentEditsBefore": 0,
+      "contentEditsAfter": 0,
+      "contentTruthCharacters": 79,
+      "observedLayerRetentionBefore": 2,
+      "observedLayerRetentionAfter": 2,
+      "observedLayersExact": true,
+      "sourceTruthExact": true,
+      "sourceUnionOrder": "existing geometric order from frozen before models;no canonical value selected",
+      "recognitionAndOriginalCoordinatesExact": true,
+      "nativeLayerExact": true,
+      "numericConflictWarning": true,
+      "secondsBefore": 3.59918252100033,
+      "secondsAfter": 3.2049324850013363
+    }
+  ],
+  "regressions": [
+    {
+      "id": "digit-extension",
+      "acceptedOutputByteExact": true,
+      "sha256": "3c06d710399f8a5191c4579e10bd5ee74cb7679a56d8f82305549fabed11af15"
+    },
+    {
+      "id": "negative-sign",
+      "acceptedOutputByteExact": true,
+      "sha256": "80fac634301b383534c9c37c28c5b654c9423e0268ef35a61a10b7501c49e68d"
+    },
+    {
+      "id": "decimal-conflict",
+      "acceptedOutputByteExact": true,
+      "sha256": "eb8aaf8a8c050ee763492c38df5d2c1a8367d0dccffec7b39f2f3738fad2b6f9"
+    },
+    {
+      "id": "one-digit-conflict",
+      "acceptedOutputByteExact": true,
+      "sha256": "4eeb65ba0f92eab9213eb20f6fe78083bf9727bfa90399f8c61af2ebf29391ab"
+    },
+    {
+      "id": "masked-edited",
+      "acceptedOutputByteExact": true,
+      "sha256": "b5dcfb3261569803219b830b9fcc6c6519de747b6d4600fe3c4824cd8bae5ef5"
+    },
+    {
+      "id": "boundary-reserve",
+      "acceptedOutputByteExact": true,
+      "sha256": "5cfcedea55a106f625c85e825db2df44f61a5ff485dd661c2bd06abb612188e4"
+    }
+  ],
+  "falseFinancialDuplicatesCorrected": 7,
+  "observedLayersExact": 9,
+  "sourceUnionExact": 8,
+  "sourceUnionResidual": "per-mille OCR recognises10‰ as10%o;both native and observed layers retained with warning;not resolved canonical truth",
+  "contentCerDefinition": "case and punctuation preserved;only whitespace removed;edit distance divided by source-layer union characters",
+  "aggregateContentCerBefore": 0.11781609195402298,
+  "aggregateContentCerAfter": 0.0028735632183908046,
+  "aggregateContentEditsBefore": 82,
+  "aggregateContentEditsAfter": 2,
+  "aggregateContentTruthCharacters": 696,
+  "httpBefore": 9,
+  "httpAfter": 15,
+  "successBefore": 9,
+  "successAfter": 15,
+  "workerIdentitiesAbsent": 24,
+  "newZombies": [],
+  "ECHILD": true,
+  "extraOcrForReplay": 0,
+  "capturedRecognitionByteExactForNine": true,
+  "javaProductionProbeCallsAfter": 39,
+  "tests": {
+    "tests": 501,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "skips": [
+    {
+      "className": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+      "name": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning",
+      "skipped": true
+    }
+  ],
+  "bundledTests": [
+    {
+      "className": "com.fuyue.formatconverter.task.OcrDeskewTest",
+      "name": "bundledEngineRecoversMissingLinesWithSourceGeometryAndReviewWarnings",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.PdfToImageConverterTest",
+      "name": "discoversBundledPopplerFromAppHome",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.ForkedFileConverterTest",
+      "name": "retainsAutoDiscoveredBundledOcrWhenTheWorkerChangesItsWorkingDirectory",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "discoversBundledRuntimeFromPackagedApplicationRoot",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "validBundledRuntimeAutoEnablesWithoutHostInstallation",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "explicitFalseDisablesEvenAValidBundledRuntime",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.BundledOcrRuntimeIntegrationTest",
+      "name": "bundledBinaryModelsAndLibrariesRunWithoutSystemDiscovery",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractPngInputTest",
+      "name": "bundledPngEngineRecognizesRealJpegText",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+      "name": "bundledEngineRecoversShadedLowContrastPrintedText",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+      "name": "bundledEngineRecoversChineseFaintTextWithDigitsAndPunctuation",
+      "skipped": false
+    }
+  ],
+  "changedClasses": [
+    "BOOT-INF/lib/task-service-0.1.5.jar/com/fuyue/formatconverter/task/OcrTextDeduplicator.class"
+  ],
+  "other231ClassesAndAllApplicationResourcesByteExact": true,
+  "frontendRebuiltFilesMatchPackaged": {
+    "app-icon.svg": "5bf05198f99e53b7fabf0fbfd25577c9aca004a6b1ea6f7e901457fe89db2568",
+    "index.html": "a9767e4111073749ff7c178800d9c7c3786b05ea9094c8b37334a3a696097a24",
+    "assets/pdf-CPbOiMa_.js": "fa75f2d6b363ee4a3386e4bf1d3f104c8dce5eef2be79159be1d253e1f4e323a",
+    "assets/pdf.worker.min-CMqTMPr3.js": "73568c62796be3043a57aad8bb5027f9602bae4b54bbea029b0a3af80c5b7166",
+    "assets/pdf.worker.min-r-TJsTTt.mjs": "c964e291707ad492e6e90ff7f4f352b75e05ea2734c3dd3a80b94983b1b7ce3d",
+    "assets/index-J-Vb5Aua.css": "084b610dc78c0213ec817bcb26aeff3dccd2c4d7fce88514a85ab56395e43366",
+    "assets/index-BiUc2Ubb.js": "4d62648a0d61aabdbd47f5a66c6df465acfef075355f3eb0d2e5fc142a6b61b1"
+  },
+  "buildReceiptSha256": "270c106152953b582fee094f47ed9fc0414030acbe88b593a75e83079a026a14",
+  "runtimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+  "runtimePayloadFilesReverified": 12,
+  "runtimeManifest": {
+    "schemaVersion": 1,
+    "platform": "linux",
+    "arch": "x64",
+    "policySha256": "54c6ae7291fc983cb7b946bc0b90832ec4b589d493fef01b5f974a0ab26d8735",
+    "components": [
+      {
+        "id": "zlib",
+        "version": "1.3.1",
+        "source": "https://codeload.github.com/madler/zlib/tar.gz/v1.3.1",
+        "sourceSha256": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c",
+        "spdx": "Zlib"
+      },
+      {
+        "id": "libpng",
+        "version": "1.6.57",
+        "source": "https://codeload.github.com/pnggroup/libpng/tar.gz/v1.6.57",
+        "sourceSha256": "4cbb7b0746edc1683c9581b373365e955133b7f1243f171b7d1535b4415dfedb",
+        "spdx": "libpng-2.0"
+      },
+      {
+        "id": "leptonica",
+        "version": "1.87.0",
+        "source": "https://codeload.github.com/DanBloomberg/leptonica/tar.gz/1.87.0",
+        "sourceSha256": "fa2b40c5caea96d1bb93a97486262aed8731b69ce25a84a6bf5d25323e33f631",
+        "spdx": "BSD-2-Clause"
+      },
+      {
+        "id": "tesseract",
+        "version": "5.5.2",
+        "source": "https://codeload.github.com/tesseract-ocr/tesseract/tar.gz/5.5.2",
+        "sourceSha256": "6235ea0dae45ea137f59c09320406f5888383741924d98855bd2ce0d16b54f21",
+        "spdx": "Apache-2.0"
+      }
+    ],
+    "models": [
+      {
+        "name": "eng",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/eng.traineddata",
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      {
+        "name": "chi_sim",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim.traineddata",
+        "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+      },
+      {
+        "name": "chi_sim_vert",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim_vert.traineddata",
+        "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+      },
+      {
+        "name": "osd",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/osd.traineddata",
+        "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+      }
+    ],
+    "files": [
+      {
+        "path": "bin/tesseract",
+        "size": 6678328,
+        "sha256": "90730922627269352568d54e788c7e42fd2e1783e03795d75560efa385de1489"
+      },
+      {
+        "path": "licenses/OCR-SOURCE-POLICY.json",
+        "size": 4186,
+        "sha256": "1ea79f27bafb87a8692d2b37d0ab2f3cb2236f228d6e76eedf7aa6b40dacf808"
+      },
+      {
+        "path": "licenses/leptonica.txt",
+        "size": 1521,
+        "sha256": "87829abb5bbb00b55a107365da89e9a33f86c4250169e5a1e5588505be7d5806"
+      },
+      {
+        "path": "licenses/libpng.txt",
+        "size": 5345,
+        "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+      },
+      {
+        "path": "licenses/tessdata.txt",
+        "size": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      {
+        "path": "licenses/tesseract.txt",
+        "size": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      {
+        "path": "licenses/zlib.txt",
+        "size": 1002,
+        "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+      },
+      {
+        "path": "tessdata/chi_sim.traineddata",
+        "size": 2469156,
+        "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+      },
+      {
+        "path": "tessdata/chi_sim_vert.traineddata",
+        "size": 1927902,
+        "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+      },
+      {
+        "path": "tessdata/configs/tsv",
+        "size": 22,
+        "sha256": "59d079bb75d8b3d7c839a3564580cb559e362c93a9d70f234e421c0c3e767e04"
+      },
+      {
+        "path": "tessdata/eng.traineddata",
+        "size": 4113088,
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      {
+        "path": "tessdata/osd.traineddata",
+        "size": 10562727,
+        "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+      }
+    ]
+  },
+  "versions": {
+    "java": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nopenjdk version \"17.0.16\" 2025-07-15\nOpenJDK Runtime Environment Temurin-17.0.16+8 (build 17.0.16+8)\nOpenJDK 64-Bit Server VM Temurin-17.0.16+8 (build 17.0.16+8, mixed mode, sharing)",
+    "maven": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nApache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)\nMaven home: /workspace/fuyue-env/tools/apache-maven-3.9.11\nJava version: 17.0.16, vendor: Eclipse Adoptium, runtime: /workspace/fuyue-env/tools/jdk-17.0.16+8\nDefault locale: en, platform encoding: UTF-8\nOS name: \"linux\", version: \"6.18.44\", arch: \"amd64\", family: \"unix\"",
+    "node": "v22.17.0",
+    "ocr": "tesseract 5.5.2\n leptonica-1.87.0\n  libpng 1.6.57 : zlib 1.3.1\n Found AVX512BW\n Found AVX512F\n Found AVX512VNNI\n Found AVX2\n Found AVX\n Found FMA\n Found SSE4.1",
+    "office": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "pymupdf": "1.26.6",
+    "linux": "6.18.44"
+  },
+  "fontHashesReverified": true,
+  "pdfbox": "3.0.8",
+  "ofdrw": "2.3.9",
+  "fonts": {
+    "source": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+      "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+      "version": "LiberationSans2.1.5",
+      "license": "SIL-OFL-1.1"
+    },
+    "bundled": [
+      {
+        "path": "task-service/src/main/resources/fonts/LiberationSans-Regular.ttf",
+        "sha256": "76d04c18ea243f426b7de1f3ad208e927008f961dc5945e5aad352d0dfde8ee8",
+        "license": "SIL-OFL-1.1",
+        "version": [
+          "Version 2.1.5"
+        ]
+      },
+      {
+        "path": "task-service/src/main/resources/fonts/DroidSansFallback.ttf",
+        "sha256": "21b96a0377f067833a93af3082eb28d4ffab7a8cd46bfd513286f1d64b7b0949",
+        "license": "Apache-2.0",
+        "version": [
+          "Version 2.55b"
+        ]
+      }
+    ]
+  },
+  "resources": {
+    "before": {
+      "wallSeconds": 35.687503944995115,
+      "userSeconds": 81.701012,
+      "systemSeconds": 8.518056,
+      "maxChildRssKiB": 348664
+    },
+    "after": {
+      "wallSeconds": 53.907452095001645,
+      "userSeconds": 123.563733,
+      "systemSeconds": 11.902741,
+      "maxChildRssKiB": 348680
+    }
+  },
+  "noPerformanceSpeedupClaim": true,
+  "firstFocusedFailure": "test-engine printf interpreted literal%;escaped%% then all12focusedpassed;failure receipt retained",
+  "unrun": [
+    "native macOS/Windows package acceptance",
+    "Microsoft Word",
+    "optional signed-OFD fixture",
+    "prior33/34negativeAPI matrices and original sparseOFD diagnostics not repeated",
+    "fullWordmatrix not repeated;renderer byteexact and relevant fullsuitepassed"
+  ],
+  "helpers": {
+    "generate_numeric35.py": "bb61c623c901e80165e0ff67e69131e2ba471c2651175b7e5e5ec95a6121e44c",
+    "generate_numeric35_final.py": "1e02c980817e6a7283f528b9c65b29992b6160a90ae1105b6624411c5d3f23fc",
+    "OcrNumericLexemeProbe35.java": "a674cfc25cc858b7a563942518283bfaaddbeebf9fbc778d689fd939fb03c741",
+    "OcrCapturedLexemeReplay35.java": "3dc7da00183d7a2719242dff43545a4bad6b4a262c67ff5a34f488b23f2e8a26",
+    "capture_numeric_http35.py": "6bfce56a96fff01ea419f7e4ac16b66b16630d7ca014fcad0766d7ab2d5c90a9",
+    "verify_numeric35.py": "3cec993aead43ce0b2d7053f50cba44524932d1d6baeb29f21e3191068956b8c",
+    "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf",
+    "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9",
+    "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85"
+  }
+}

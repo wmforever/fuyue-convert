@@ -53,6 +53,45 @@ class OcrTextDeduplicatorTest {
         assertFalse(OcrTextDeduplicator.duplicates(text("AUDITX 2076",10,10),List.of(text("AUDIT 2076",10,10))));
     }
 
+    @Test void preservesAccountingUnitsCurrenciesAndSignsSeparatedFromDigits() {
+        for (String[] pair : new String[][] {
+                {"Amount 048.65", "Amount (048.65)"}, {"Amount 048.65", "Amount （048.65）"},
+                {"Rate 10", "Rate 10%"}, {"Rate 10", "Rate 10‰"}, {"Rate 10", "Rate 10‱"},
+                {"Amount 048.65", "Amount $048.65"}, {"Amount 048.65", "Amount 048.65€"},
+                {"Amount (048.65)", "Amount $(048.65)"}, {"Amount 048.65", "Amount - 048.65"},
+                {"Amount 048.65", "Amount −\u00a0048.65"}, {"Rate 10%", "Rate 10％"}}) {
+            var a=text(pair[0],10,10);var b=text(pair[1],10,10);
+            assertFalse(OcrTextDeduplicator.duplicates(a,List.of(b)),java.util.Arrays.toString(pair));
+            assertFalse(OcrTextDeduplicator.duplicates(b,List.of(a)),"reverse literal marker mismatch");
+            assertTrue(OcrTextDeduplicator.numericConflict(a,List.of(b)),"retain a reviewable conflict;do not choose a value");
+        }
+    }
+
+    @Test void spacingAroundAnUnchangedMarkerNeverJoinsSeparateNumericTokens() {
+        for (String[] pair : new String[][] {{"Amount -048.65","Amount - 048.65"},
+                {"Amount $048.65","Amount $ 048.65"},{"Amount (048.65)","Amount ( 048.65 )"},
+                {"Rate 10%","Rate 10 %"},{"Values 12 34","Values 12\n34"}}) {
+            var a=text(pair[0],10,10);var b=text(pair[1],10,10);
+            assertTrue(OcrTextDeduplicator.duplicates(a,List.of(b)),java.util.Arrays.toString(pair));
+            assertFalse(OcrTextDeduplicator.numericConflict(a,List.of(b)));
+        }
+        assertFalse(OcrTextDeduplicator.duplicates(text("Values 12 34",10,10),List.of(text("Values 1234",10,10))));
+    }
+
+    @Test void retainsOrdinaryPunctuationToleranceAndExactMarkedDuplicates() {
+        assertTrue(OcrTextDeduplicator.duplicates(text("Invoice No. 2094",10,10),List.of(text("Invoice No 2094",10,10))));
+        assertTrue(OcrTextDeduplicator.duplicates(text("Rate 10%",10,10),List.of(text("Rate 10%",10,10))));
+        assertFalse(OcrTextDeduplicator.numericConflict(text("Rate 10%",10,10),List.of(text("Rate 10%",10,10))));
+    }
+
+    @Test void warnsForMarkerAdjacentOcrFragmentsOnlyWhenExistingTextMatcherWouldEquateThem() {
+        var nativeText=text("Rate 10",10,10);var ocr=text("Rate 10%o",10,10);
+        assertFalse(OcrTextDeduplicator.duplicates(ocr,List.of(nativeText)));
+        assertTrue(OcrTextDeduplicator.numericConflict(ocr,List.of(nativeText)),"literal mismatch previously discarded as duplicate must remain reviewable");
+        assertFalse(OcrTextDeduplicator.numericConflict(text("Rate 10%o",10,60),List.of(nativeText)));
+        assertFalse(OcrTextDeduplicator.numericConflict(text("Price 10%",10,10),List.of(nativeText)),"unrelated label alone is not a conflict");
+    }
+
     private TextBlock text(String value, double x, double y) {
         return new TextBlock(value + x + y, 1, new Rect(x, y, 40, 8), value, y + 7,
                 new FontStyle("Sans", 10, false, false, ColorValue.BLACK), 0);
