@@ -42,6 +42,8 @@ class WindowsOfficeLaunchProbeTest {
             var results = new ObjectMapper().readTree(content);
             assertTrue(results.path("pinned-direct").path("success").asBoolean(), content);
             assertTrue(results.path("installed-direct").path("success").asBoolean(), content);
+            assertTrue(results.path("pinned-worker").path("success").asBoolean(), content);
+            assertTrue(results.path("installed-worker").path("success").asBoolean(), content);
             assertTrue(results.path("installed-worker-javaw").path("success").asBoolean(), content);
         } finally {
             process.descendants().forEach(ProcessHandle::destroyForcibly);
