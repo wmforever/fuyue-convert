@@ -39,6 +39,8 @@ jobs:
       - name: Reproduce installed path and release DOCX fixture
         shell: pwsh
         run: |
+          $PinnedRuntime = Join-Path $PWD "desktop\.runtime\libreoffice"
+          "FORMAT_CONVERTER_WINDOWS_PINNED_OFFICE_HOME=$PinnedRuntime" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
           $Runtime = Join-Path $env:LOCALAPPDATA "Programs\Fuyue Convert\resources\backend\app\libreoffice"
           New-Item (Split-Path $Runtime) -ItemType Directory -Force | Out-Null
           Copy-Item desktop\.runtime\libreoffice $Runtime -Recurse

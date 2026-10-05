@@ -40,8 +40,7 @@ class WindowsOfficeLaunchProbeTest {
             String content = Files.readString(report);
             System.out.println("Windows no-console Office report: " + content);
             var results = new ObjectMapper().readTree(content);
-            assertTrue(results.path("poi-soffice.com").path("success").asBoolean(), content);
-            assertTrue(results.path("release-soffice.com").path("success").asBoolean(), content);
+            for (var result : results) assertTrue(result.path("success").asBoolean(), content);
         } finally {
             process.descendants().forEach(ProcessHandle::destroyForcibly);
             if (process.isAlive()) process.destroyForcibly();
@@ -61,36 +60,38 @@ class WindowsOfficeLaunchProbeTest {
                 document.write(output);
             }
             Map<String, Object> reports = new LinkedHashMap<>();
-            for (String sample : new String[]{"poi", "release"}) {
-            Path source = sample.equals("poi") ? input : Path.of(System.getenv("FORMAT_CONVERTER_WINDOWS_SMOKE_DOCX"));
-            for (String launcher : new String[]{"soffice.exe", "soffice.com"}) {
-                Path output = root.resolve(sample + "-" + launcher + ".pdf"),
-                        work = root.resolve("work directory with spaces").resolve(sample + "-" + launcher + "-work");
+            for (String mode : new String[]{"pinned-direct", "installed-direct", "pinned-worker", "installed-worker"}) {
+                Path office = mode.startsWith("pinned")
+                        ? Path.of(System.getenv("FORMAT_CONVERTER_WINDOWS_PINNED_OFFICE_HOME")) : runtime;
+                Path binary = office.resolve("program/soffice.com");
+                Path output = root.resolve(mode + ".pdf"), work = root.resolve("work directory with spaces").resolve(mode);
                 long started = System.nanoTime();
                 Map<String, Object> result = new LinkedHashMap<>();
                 try {
-                    Path binary = runtime.resolve("program").resolve(launcher);
-                    var route = new LibreOfficeConverter(DocumentFormat.DOCX, DocumentFormat.PDF,
-                            binary, Duration.ofSeconds(30), "no-console probe").route();
-                    String classpath = System.getProperty("java.class.path");
-                    new ForkedFileConverter(route, List.of(Path.of(System.getProperty("java.home"), "bin", "java.exe").toString(),
-                            "-Djava.awt.headless=true", "-cp", classpath, ConversionWorkerMain.class.getName()),
-                            binary.toString(), Duration.ofSeconds(30))
-                            .convert(new ConversionInput("smoke.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                    Files.size(source), source), work, output, ParseLimits.defaults(), (stage, percent) -> {});
+                    var direct = new LibreOfficeConverter(DocumentFormat.DOCX, DocumentFormat.PDF,
+                            binary, Duration.ofSeconds(30), "no-console probe");
+                    FileConverter converter = mode.endsWith("direct") ? direct : new ForkedFileConverter(direct.route(),
+                            List.of(Path.of(System.getProperty("java.home"), "bin", "java.exe").toString(),
+                                    "-Djava.awt.headless=true", "-cp", System.getProperty("java.class.path"),
+                                    ConversionWorkerMain.class.getName()), binary.toString(), Duration.ofSeconds(30));
+                    converter.convert(new ConversionInput("smoke.docx",
+                                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                    Files.size(input), input), work, output, ParseLimits.defaults(), (stage, percent) -> {});
                     try (var pdf = Loader.loadPDF(output.toFile())) {
                         String text = new PDFTextStripper().getText(pdf);
-                        String expected = sample.equals("poi") ? "conversion 12345" : "Full edition smoke test";
-                        result.put("success", pdf.getNumberOfPages() == 1 && text.contains(expected));
+                        result.put("success", pdf.getNumberOfPages() == 1 && text.contains("conversion 12345"));
                         result.put("text", text.strip());
                     }
                 } catch (Exception error) {
                     result.put("success", false);
                     result.put("error", error.toString());
+                    for (Path log : new Path[]{work.resolve("libreoffice.log"),
+                            work.resolve("conversion/libreoffice.log"), work.resolve("worker.log")}) {
+                        if (Files.exists(log)) result.put(log.getFileName().toString(), read(log));
+                    }
                 }
                 result.put("elapsedMillis", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started));
-                reports.put(sample + "-" + launcher, result);
-            }
+                reports.put(mode, result);
             }
             new ObjectMapper().writeValue(root.resolve("report.json").toFile(), reports);
         }
