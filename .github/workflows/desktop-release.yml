@@ -559,12 +559,30 @@ jobs:
             echo "Refusing to publish anything except the three approved installers" >&2
             exit 1
           fi
-          gh release create "$GITHUB_REF_NAME" "${installers[@]}" \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "$GITHUB_REF_NAME" \
-            --verify-tag \
-            --generate-notes \
-            --notes "$(cat release-checksums.md)"
+          tag_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$GITHUB_REF_NAME" --jq '.object.sha')"
+          if [ "$tag_sha" != "$GITHUB_SHA" ]; then
+            echo "Release tag no longer matches the approved source" >&2
+            exit 1
+          fi
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            # A same-version rebuild may only replace the three audited Lite
+            # assets. Refuse to mix a rebuild with existing Full binaries.
+            mapfile -t existing < <(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+              --json assets,isDraft,isPrerelease \
+              --jq 'if .isDraft or .isPrerelease then error("release is not final") else .assets[].name end' | LC_ALL=C sort)
+            mapfile -t expected < <(find release-assets -maxdepth 1 -type f -printf '%f\n' | LC_ALL=C sort)
+            diff -u <(printf '%s\n' "${expected[@]}") <(printf '%s\n' "${existing[@]}")
+            gh release upload "$GITHUB_REF_NAME" "${installers[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+              --title "$GITHUB_REF_NAME" --notes-file release-checksums.md
+          else
+            gh release create "$GITHUB_REF_NAME" "${installers[@]}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$GITHUB_REF_NAME" \
+              --verify-tag \
+              --generate-notes \
+              --notes "$(cat release-checksums.md)"
+          fi
 
       - name: Verify published asset allowlist
         env:

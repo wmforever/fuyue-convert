@@ -65,8 +65,8 @@ public final class LibreOfficeConverter implements FileConverter {
         long deadline = System.nanoTime() + timeout.toNanos();
         String processOutput;
         try {
-            processOutput = ConversionGuards.runProcess(command, java.util.Map.of(),
-                    workDir.resolve("libreoffice.log"), timeout, "LibreOffice 转换", binary.getParent());
+            processOutput = ConversionGuards.runProcess(command, workDir.resolve("libreoffice.log"), timeout,
+                    "LibreOffice 转换");
         } catch (ExternalProcessException error) {
             log.warn("LibreOffice route={} failed reason={} exit={} detail={}", route.id(), error.reason(),
                     error.exitCode(), ErrorMessageSanitizer.from(error));

@@ -40,7 +40,9 @@ class WindowsOfficeLaunchProbeTest {
             String content = Files.readString(report);
             System.out.println("Windows no-console Office report: " + content);
             var results = new ObjectMapper().readTree(content);
-            for (var result : results) assertTrue(result.path("success").asBoolean(), content);
+            assertTrue(results.path("pinned-direct").path("success").asBoolean(), content);
+            assertTrue(results.path("installed-direct").path("success").asBoolean(), content);
+            assertTrue(results.path("installed-worker-javaw").path("success").asBoolean(), content);
         } finally {
             process.descendants().forEach(ProcessHandle::destroyForcibly);
             if (process.isAlive()) process.destroyForcibly();
@@ -60,18 +62,20 @@ class WindowsOfficeLaunchProbeTest {
                 document.write(output);
             }
             Map<String, Object> reports = new LinkedHashMap<>();
-            for (String mode : new String[]{"pinned-direct", "installed-direct", "pinned-worker", "installed-worker"}) {
+            for (String mode : new String[]{"pinned-direct", "installed-direct", "pinned-worker", "installed-worker", "installed-worker-javaw"}) {
                 Path office = mode.startsWith("pinned")
                         ? Path.of(System.getenv("FORMAT_CONVERTER_WINDOWS_PINNED_OFFICE_HOME")) : runtime;
-                Path binary = office.resolve("program/soffice.com");
+                Path binary = office.resolve(mode.contains("worker") ? "program/soffice.exe" : "program/soffice.com");
                 Path output = root.resolve(mode + ".pdf"), work = root.resolve("work directory with spaces").resolve(mode);
+                Path recording = root.resolve(mode + ".jfr");
                 long started = System.nanoTime();
                 Map<String, Object> result = new LinkedHashMap<>();
                 try {
                     var direct = new LibreOfficeConverter(DocumentFormat.DOCX, DocumentFormat.PDF,
                             binary, Duration.ofSeconds(30), "no-console probe");
                     FileConverter converter = mode.endsWith("direct") ? direct : new ForkedFileConverter(direct.route(),
-                            List.of(Path.of(System.getProperty("java.home"), "bin", "java.exe").toString(),
+                            List.of(Path.of(System.getProperty("java.home"), "bin", mode.endsWith("javaw") ? "javaw.exe" : "java.exe").toString(),
+                                    "-XX:StartFlightRecording=filename=" + recording + ",settings=profile,dumponexit=true",
                                     "-Djava.awt.headless=true", "-cp", System.getProperty("java.class.path"),
                                     ConversionWorkerMain.class.getName()), binary.toString(), Duration.ofSeconds(30));
                     converter.convert(new ConversionInput("smoke.docx",
@@ -88,6 +92,15 @@ class WindowsOfficeLaunchProbeTest {
                     for (Path log : new Path[]{work.resolve("libreoffice.log"),
                             work.resolve("conversion/libreoffice.log"), work.resolve("worker.log")}) {
                         if (Files.exists(log)) result.put(log.getFileName().toString(), read(log));
+                    }
+                    if (Files.exists(work.resolve("worker-request.json"))) {
+                        result.put("request", new ObjectMapper().readTree(work.resolve("worker-request.json").toFile()));
+                    }
+                    if (Files.exists(recording)) {
+                        Process trace = new ProcessBuilder(Path.of(System.getProperty("java.home"), "bin", "jfr.exe").toString(),
+                                "print", "--events", "jdk.ProcessStart", recording.toString()).redirectErrorStream(true).start();
+                        result.put("processStarts", new String(trace.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
+                        trace.waitFor(10, TimeUnit.SECONDS);
                     }
                 }
                 result.put("elapsedMillis", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started));
