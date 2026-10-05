@@ -360,6 +360,47 @@ class OcrWordOverlayTest {
         }
     }
 
+    @Test void separatesScanColumnsWhenIndependentOcrImagesRestartLineOrder() throws Exception {
+        for (boolean localOrdinals : List.of(true, false)) {
+            multiSourceColumnOrder(localOrdinals);
+        }
+    }
+
+    private void multiSourceColumnOrder(boolean localOrdinals) throws Exception {
+        var nativeHeader = new TextBlock("native-header", 1, new Rect(5, 5, 90, 5),
+                "NATIVE HEADER 00573", 10, new FontStyle("Arial", 12, false, false, null), 0);
+        List<TextBlock> blocks = new ArrayList<>(List.of(nativeHeader));
+        for (String side : List.of("LEFT", "RIGHT")) {
+            for (int row = 0; row < 2; row++) {
+                var box = new Rect(side.equals("LEFT") ? 10 : 60, 30 + row * 15, 20, 4);
+                String text = side + " " + (row + 1);
+                // Even unique ordinals assigned in right-image-first append
+                // order cannot establish the author's left-to-right intent.
+                int order = row + 1 + (!localOrdinals && side.equals("LEFT") ? 2 : 0);
+                blocks.add(new TextBlock("ocr-" + side + "-" + row, 1, box, text, box.bottom(),
+                        new FontStyle("Arial", 10, false, false, null), order,
+                        0, 0, List.of(), Transform2D.IDENTITY,
+                        List.of(new TextBlock.OcrWord(box, text, .98))));
+            }
+        }
+        byte[] pixels = png(false);
+        var backgrounds = List.of(new ImageBlock("left-scan", 1, new Rect(5, 20, 30, 60),
+                        "image/png", pixels, "OCR_SCAN_BACKGROUND", 0),
+                new ImageBlock("right-scan", 1, new Rect(55, 20, 35, 60),
+                        "image/png", png(true), "OCR_SCAN_BACKGROUND", 0));
+        try (XWPFDocument docx = new XWPFDocument(Files.newInputStream(render(blocks, backgrounds)))) {
+            var document = xml(docx);
+            var actual = elements(document, VML, "rect").stream()
+                    .filter(e -> e.getElementsByTagNameNS(WORD, "t").getLength() > 0)
+                    .map(e -> e.getElementsByTagNameNS(WORD, "t").item(0).getTextContent()).toList();
+            assertEquals(List.of("LEFT 1", "LEFT 2", "RIGHT 1", "RIGHT 2"), actual,
+                    "Per-image local line ordinals must not be interpreted as one page reading sequence");
+            assertEquals(1, elements(document, WORD, "t").stream()
+                    .filter(e -> e.getTextContent().equals("NATIVE HEADER 00573")).count());
+            assertEquals(2, docx.getAllPictures().size());
+        }
+    }
+
     private byte[] png() throws Exception { return png(true); }
 
     private byte[] png(boolean stamp) throws Exception {

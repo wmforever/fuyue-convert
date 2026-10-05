@@ -67,7 +67,15 @@ final class FixedLayoutDocxRenderer {
         // can interleave recognized columns when a heading bridges them.
         // Preserve that sequence, including uncertain words, without changing
         // their positions, layering, masks, or source scans.
-        if (sourceOrder.stream().allMatch(block -> !block.ocrWords().isEmpty())) return sourceOrder;
+        // Independent scan regions can each restart their local line ordinals.
+        // Multiple backgrounds or duplicate ordinals are not one recognized
+        // page sequence; retain the existing geometry policy instead of weaving
+        // local sequences together or assuming image append order is intent.
+        if (sourceOrder.stream().allMatch(block -> !block.ocrWords().isEmpty())
+                && page.images().stream().filter(this::isOcrBackground).limit(2).count() <= 1
+                && sourceOrder.stream().mapToInt(TextBlock::zOrder).distinct().count() == sourceOrder.size()) {
+            return sourceOrder;
+        }
         // Keep uncertain combinations in their existing order. Coordinates and
         // z-index remain unchanged even when plain, disjoint columns are ordered
         // for reading and copying the text from Word.
