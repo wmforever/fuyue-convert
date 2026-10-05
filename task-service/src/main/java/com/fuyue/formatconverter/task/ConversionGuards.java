@@ -53,8 +53,15 @@ final class ConversionGuards {
     static String runProcess(List<String> command, Map<String, String> environment,
                              Path logFile, Duration timeout, String label)
             throws IOException, InterruptedException {
+        return runProcess(command, environment, logFile, timeout, label, null);
+    }
+
+    static String runProcess(List<String> command, Map<String, String> environment,
+                             Path logFile, Duration timeout, String label, Path workingDirectory)
+            throws IOException, InterruptedException {
         Files.createDirectories(logFile.getParent());
         ProcessBuilder builder = new ProcessBuilder(command);
+        if (workingDirectory != null) builder.directory(workingDirectory.toFile());
         if (environment != null) builder.environment().putAll(environment);
         builder.redirectErrorStream(true);
         Process process;
