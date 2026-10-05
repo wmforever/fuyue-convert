@@ -40,4 +40,4 @@ jobs:
         shell: pwsh
         run: |
           $env:FORMAT_CONVERTER_WINDOWS_OFFICE_HOME = Join-Path $PWD "desktop\.runtime\libreoffice"
-          mvn -B -ntp -pl task-service -am -Dskip.frontend=true -Dtest=WindowsOfficeLaunchProbeTest -Dsurefire.failIfNoSpecifiedTests=false test
+          mvn -B -ntp -pl task-service -am "-Dskip.frontend=true" "-Dtest=WindowsOfficeLaunchProbeTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
