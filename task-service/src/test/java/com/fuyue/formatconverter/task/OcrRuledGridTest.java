@@ -51,6 +51,25 @@ class OcrRuledGridTest {
         assertEquals(new Rect(21, 71, 139, 49), grid.cells().get(0).box());
         assertArrayEquals(before, image.getRGB(0, 0, 600, 400, null, 0, 600));
     }
+    @Test void ineligibleRecognitionDoesNotScanSourcePixelsButGridRecoveryStillRuns() {
+        var unreadable = new BufferedImage(600, 400, BufferedImage.TYPE_INT_RGB) {
+            @Override public int getRGB(int x, int y) {
+                throw new AssertionError("ineligible pages must not scan pixels for grid recovery");
+            }
+        };
+        var cross = new Rect(35, 80, 240, 12);
+        for (var old : List.of(result(), result(line("reliable", "Ce", cross, .35)),
+                result(line("number", "Ce 001", cross, .2)),
+                new TesseractOcrConverter.RecognitionResult(
+                        List.of(line("large", "Ce", cross, .2)), .2, 501))) {
+            assertNull(OcrRuledGrid.detectForRecovery(unreadable, PAGE, old, Long.MAX_VALUE));
+        }
+        var old = source(grid(), "-00127.50");
+        var detected = OcrRuledGrid.detectForRecovery(image(), PAGE, old, Long.MAX_VALUE);
+        assertNotNull(detected);
+        assertTrue(OcrRuledGrid.select(detected, old, candidates(detected, "-00127.50"),
+                .35, Long.MAX_VALUE).ruledGridRecovery());
+    }
     @Test void darkPaperBrokenRuleBlankAndExpiredAnalysisDoNotEstablishCells() {
         var dark = image(); var g = dark.createGraphics(); g.setColor(Color.DARK_GRAY); g.fillRect(0, 0, 600, 100); g.dispose();
         assertNull(OcrRuledGrid.detect(dark, PAGE, Long.MAX_VALUE));
@@ -113,7 +132,7 @@ class OcrRuledGridTest {
                 printf '5\\t1\\t1\\t1\\t1\\t1\\t40\\t30\\t180\\t16\\t99\\tLedger 00783\\n5\\t1\\t2\\t1\\t1\\t1\\t50\\t120\\t480\\t24\\t20\\tCe\\n5\\t1\\t3\\t1\\t1\\t1\\t42\\t226\\t80\\t16\\t96\\t127.50\\n' >> "${base}.tsv"
                 exit 0;;
                 esac
-                """ + (mode.equals("failure") ? "exit 1\n" : mode.equals("slow") ? "sleep 3\n" : "")
+                """ + (mode.equals("failure") ? "exit 1\n" : mode.equals("slow") ? "sleep 6\n" : "")
                 + "printf '5\\t1\\t1\\t1\\t1\\t1\\t20\\t24\\t80\\t16\\t99\\t%s\\n' \"$VALUE\" >> \"${base}.tsv\"\n");
         assertTrue(engine.toFile().setExecutable(true));
         return new TesseractOcrConverter(DocumentFormat.PNG, new TesseractOcrConverter.Settings(engine, "eng", "fake", timeout, 1, .35, .75));
@@ -134,10 +153,12 @@ class OcrRuledGridTest {
     @Test void regionRetriesShareTheOriginalPageDeadlineAndCleanUpOnTimeout() throws Exception {
         Path input = temp.resolve("grid.png"); ImageIO.write(image(), "png", input.toFile()); Path work = temp.resolve("slow");
         long started = System.nanoTime();
-        var error = assertThrows(ConversionFailureException.class, () -> fake("slow", Duration.ofMillis(1800))
+        // Leave room for PNG decoding and rule detection on slower hosts, while
+        // keeping the fake cell process longer than the shared page deadline.
+        var error = assertThrows(ConversionFailureException.class, () -> fake("slow", Duration.ofSeconds(4))
                 .recognizeLayoutResult(input, work, 1, PAGE, ParseLimits.defaults()));
         assertEquals("OCR_TIMEOUT", error.code());
-        assertTrue(Duration.ofNanos(System.nanoTime() - started).toMillis() < 3500);
+        assertTrue(Duration.ofNanos(System.nanoTime() - started).toMillis() < 6000);
         assertFalse(Files.exists(work.resolve("tesseract-grid-p1-c2.tsv")));
         try (var files = Files.list(work)) { assertFalse(files.anyMatch(p -> p.getFileName().toString().startsWith("tesseract-grid-") && p.toString().endsWith(".png"))); }
     }

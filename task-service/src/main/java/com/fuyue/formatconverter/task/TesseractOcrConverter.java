@@ -194,7 +194,8 @@ public final class TesseractOcrConverter implements FileConverter {
             int pageNumber, Rect physical, ParseLimits limits, long started) throws Exception {
         if (!"3".equals(pageSegmentationMode()) || remainingTime(started).compareTo(Duration.ofSeconds(1)) <= 0) return original;
         long deadline = started + settings.timeout().toNanos();
-        var grid = OcrRuledGrid.detect(pixels, physical, Math.min(deadline, System.nanoTime() + 500_000_000L));
+        var grid = OcrRuledGrid.detectForRecovery(pixels, physical, original,
+                Math.min(deadline, System.nanoTime() + 500_000_000L));
         if (!OcrRuledGrid.eligible(grid, original) || !originalGeometryStable(original, pixels, physical, deadline)) return original;
         List<RecognitionResult> cells = new ArrayList<>();
         int index = 0;

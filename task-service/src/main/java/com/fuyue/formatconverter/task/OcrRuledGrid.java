@@ -11,6 +11,16 @@ final class OcrRuledGrid {
     record Grid(Rect box, List<Cell> cells, List<Rect> rules) { }
     private OcrRuledGrid() { }
 
+    static Grid detectForRecovery(BufferedImage image, Rect physical,
+            TesseractOcrConverter.RecognitionResult original, long deadline) {
+        // Grid recovery can only replace a low-confidence, nonnumeric word.
+        // Avoid scanning every source pixel when the recognition already rules it out.
+        if (original.blocks().isEmpty() || original.wordCount() > 500
+                || original.blocks().stream().flatMap(b -> b.ocrWords().stream())
+                    .noneMatch(OcrRuledGrid::unreliableNonnumeric)) return null;
+        return detect(image, physical, deadline);
+    }
+
     static Grid detect(BufferedImage image, Rect physical, long deadline) {
         int width = image.getWidth(), height = image.getHeight();
         if (width < 300 || height < 200 || (long) width * height > 25_000_000) return null;
@@ -129,8 +139,11 @@ final class OcrRuledGrid {
         return -1;
     }
     private static boolean anomaly(Grid grid, TextBlock.OcrWord word) {
-        return word.confidence() < .35 && !word.text().codePoints().anyMatch(Character::isDigit)
+        return unreliableNonnumeric(word)
                 && contains(grid.box(), word.box()) && cell(grid, word.box()) < 0;
+    }
+    private static boolean unreliableNonnumeric(TextBlock.OcrWord word) {
+        return word.confidence() < .35 && !word.text().codePoints().anyMatch(Character::isDigit);
     }
     static boolean eligible(Grid grid, TesseractOcrConverter.RecognitionResult original) {
         return grid != null && !original.blocks().isEmpty() && original.wordCount() <= 500

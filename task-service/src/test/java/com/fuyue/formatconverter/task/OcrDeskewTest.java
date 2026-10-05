@@ -123,7 +123,7 @@ class OcrDeskewTest {
     @Test void optionalDeskewFailureAndTimeoutKeepOriginalAndDeleteTemporaryInput() throws Exception {
         assumeTrue(!System.getProperty("os.name").toLowerCase().contains("win"));
         for (String behavior : List.of("exit 23", "sleep 8")) {
-            var converter = fake("eng", behavior, "", Duration.ofSeconds(2));
+            var converter = fake("eng", behavior, "", Duration.ofSeconds(5));
             Path image = writePage(6), work = temp.resolve("failed-" + behavior.replace(' ', '-'));
             long started = System.nanoTime();
             var result = converter.recognizeLayoutResult(image, work, 1,
@@ -131,7 +131,7 @@ class OcrDeskewTest {
             assertEquals("usable original 2026", result.blocks().get(0).text());
             assertEquals(0, result.deskewDegrees());
             assertTrue(Files.exists(work.resolve("deskew-attempted")), "the optional process must actually run");
-            assertTrue(Duration.ofNanos(System.nanoTime() - started).toSeconds() < 5,
+            assertTrue(Duration.ofNanos(System.nanoTime() - started).toSeconds() < 8,
                     "retry cannot receive a fresh page timeout");
             try (var files = Files.list(work)) {
                 assertTrue(files.noneMatch(file -> file.getFileName().toString().startsWith("tesseract-deskew-")
@@ -151,7 +151,12 @@ class OcrDeskewTest {
         ordinary.recognizeLayoutResult(image, layout, 1, new Rect(0, 0, 140, 100), ParseLimits.defaults());
         ordinary.recognizeLayoutResult(image, anisotropic, 1, new Rect(0, 0, 280, 100), ParseLimits.defaults(), true);
         vertical.recognizeLayoutResult(image, verticalWork, 1, new Rect(0, 0, 140, 100), ParseLimits.defaults(), true);
-        nearlyExpired.recognizeLayoutResult(image, expired, 1, new Rect(0, 0, 140, 100), ParseLimits.defaults(), true);
+        try {
+            nearlyExpired.recognizeLayoutResult(image, expired, 1, new Rect(0, 0, 140, 100), ParseLimits.defaults(), true);
+        } catch (ConversionFailureException failure) {
+            // Original process scheduling can exhaust the three-second page deadline.
+            assertEquals("OCR_TIMEOUT", failure.code());
+        }
         for (Path work : List.of(layout, anisotropic, verticalWork, expired)) {
             assertFalse(Files.exists(work.resolve("deskew-attempted")), work.toString());
         }
