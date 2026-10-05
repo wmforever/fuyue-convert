@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { conversionSmokeSucceeded } from './lib/conversion-smoke-state.mjs'
 
 const debugPort = Number(process.argv[2] || 9227)
 const inputPath = path.resolve(process.argv[3] || 'test/fixtures/smoke.txt')
@@ -160,14 +161,15 @@ try {
       status: document.querySelector('.task-panel .status-row strong')?.textContent,
       progress: document.querySelector('.task-panel .status-row b')?.textContent,
       download: document.querySelector('.actions .primary')?.textContent.replace(/\\s+/g, ' ').trim(),
+      downloadEnabled: Boolean(document.querySelector('.actions .primary') && !document.querySelector('.actions .primary').disabled),
       failed: Boolean(document.querySelector('.task-panel.failed')),
       error: document.querySelector('.task-panel .task-error')?.textContent.replace(/\\s+/g, ' ').trim(),
       fileResults: [...document.querySelectorAll('.task-panel .file-panel li')]
         .map(item => item.textContent.replace(/\\s+/g, ' ').trim())
     }))()`)
-    if (result.download?.startsWith('下载 ') || result.failed) break
+    if (conversionSmokeSucceeded(result) || result.failed) break
   }
-  if (!result?.download?.startsWith('下载 ')) throw new Error(`转换未成功：${JSON.stringify(result)}`)
+  if (!conversionSmokeSucceeded(result)) throw new Error(`转换未成功：${JSON.stringify(result)}`)
   console.log(JSON.stringify({ ...ready, ...result }, null, 2))
 } finally {
   if (closeApplication) {

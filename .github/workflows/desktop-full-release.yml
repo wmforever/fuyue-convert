@@ -6,7 +6,7 @@ on:
       release_tag:
         description: Existing release tag to receive the three Full installers
         required: true
-        default: v0.1.6
+        default: v0.1.7
         type: string
 
 permissions:
