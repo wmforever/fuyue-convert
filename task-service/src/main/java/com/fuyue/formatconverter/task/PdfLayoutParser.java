@@ -157,6 +157,8 @@ public final class PdfLayoutParser {
                 }
                 pages.add(new PageModel(state.pageNumber(), state.pageBox(), state.texts(), pageGraphics.lines(), pageGraphics.images(),
                         List.of(), List.of(), warnings));
+                if (sections != null && !requiresOcr) sections.recordRasterGrid(document.getPage(state.pageNumber() - 1),
+                        pages.get(pages.size() - 1), limits.maxEntries());
             }
             return new DocumentModel(displayName, "PDFBox 3.0.8", pageCount, pages, List.of());
         } catch (InvalidPasswordException e) {

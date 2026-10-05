@@ -16,6 +16,36 @@ final class PdfTextSectionOrder {
     private final Set<COSDictionary> visited = Collections.newSetFromMap(new IdentityHashMap<>());
     private COSDictionary roles;
     private int remaining;
+    private record RasterOrder(List<TextBlock> original, String text) { }
+    private final Map<Integer, RasterOrder> rasterOrders = new HashMap<>();
+
+    void recordRasterGrid(org.apache.pdfbox.pdmodel.PDPage pdfPage, PageModel page, int maximumEntries) {
+        if (page.images().size() != 1 || page.textBlocks().isEmpty() || page.textBlocks().size() > 500) return;
+        try {
+            var proof = PdfOcrVisibility.inspect(pdfPage, page.images(), maximumEntries);
+            if (proof == null) return;
+            var image = page.images().get(0);
+            try (var input = javax.imageio.ImageIO.createImageInputStream(new java.io.ByteArrayInputStream(image.data()))) {
+                if (input == null) return;
+                var readers = javax.imageio.ImageIO.getImageReaders(input);
+                if (!readers.hasNext()) return;
+                var reader = readers.next();
+                try {
+                    reader.setInput(input, true, true);
+                    if ((long) reader.getWidth(0) * reader.getHeight(0) > 25_000_000) return;
+                    var pixels = reader.read(0);
+                    try {
+                        var grid = OcrRuledGrid.detect(pixels, image.box(), System.nanoTime() + 500_000_000L);
+                        if (grid == null || !proof.unobscuredRules(grid)) return;
+                        String ordered = OcrRuledGrid.nativeText(grid, page);
+                        if (ordered != null) rasterOrders.put(page.pageNumber(), new RasterOrder(page.textBlocks(), ordered));
+                    } finally { pixels.flush(); }
+                } finally { reader.dispose(); }
+            }
+        } catch (java.io.IOException ignored) {
+            // Optional layout evidence cannot bypass OCR/visibility failures or discard native text.
+        }
+    }
 
     void initialize(PDDocument document, int maximumEntries) {
         remaining = Math.min(maximumEntries, 100_000);
@@ -47,6 +77,11 @@ final class PdfTextSectionOrder {
         for (int i = 0; i < source.size(); i++) {
             if (i > 0) result.append(System.lineSeparator()).append('\f').append(System.lineSeparator());
             PageModel page = source.get(i);
+            var raster = rasterOrders.get(page.pageNumber());
+            if (raster != null && raster.original().equals(page.textBlocks())) {
+                result.append(raster.text());
+                continue;
+            }
             if (disabledPages.contains(page.pageNumber()) || !page.tables().isEmpty() || !page.images().isEmpty()
                     || page.textBlocks().stream().anyMatch(block -> !blockGroups.containsKey(block.id())
                     || !block.ocrWords().isEmpty() || Math.abs(block.transform().rotationDegrees()) > 0.5

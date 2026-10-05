@@ -128,6 +128,8 @@ public final class TesseractOcrConverter implements FileConverter {
             BufferedImage pixels = ImageIO.read(engineImage.toFile());
             if (pixels == null) return result;
             try {
+                result = retryRuledGrid(result, pixels, workDir, pageNumber, physicalBox, limits, started);
+                if (result.ruledGridRecovery()) return result;
                 boolean recoveryEligible = result.blocks().isEmpty() || result.confidence() < settings.warningConfidence();
                 boolean uncoveredShadedInk = false;
                 if (!recoveryEligible && "3".equals(pageSegmentationMode())
@@ -169,17 +171,52 @@ public final class TesseractOcrConverter implements FileConverter {
     private RecognitionResult recognizeOnce(Path image, Path workDir, int pageNumber, Rect physicalBox,
                                              ImageDimensions dimensions, ParseLimits limits, String name,
                                              Duration timeout) throws Exception {
+        return recognizeOnce(image, workDir, pageNumber, physicalBox, dimensions, limits, name, timeout, pageSegmentationMode());
+    }
+
+    private RecognitionResult recognizeOnce(Path image, Path workDir, int pageNumber, Rect physicalBox,
+                                             ImageDimensions dimensions, ParseLimits limits, String name,
+                                             Duration timeout, String segmentation) throws Exception {
         Path base = workDir.resolve(name);
         List<String> command = new ArrayList<>(List.of(settings.binary().toString(), image.toString(), base.toString()));
         if (settings.tessdataDirectory() != null) {
             command.add("--tessdata-dir");
             command.add(settings.tessdataDirectory().toString());
         }
-        command.addAll(List.of("-l", settings.languages(), "--psm", pageSegmentationMode(), "tsv"));
+        command.addAll(List.of("-l", settings.languages(), "--psm", segmentation, "tsv"));
         runTesseract(command, workDir.resolve(name + ".log"), "Tesseract OCR 第 " + pageNumber + " 页", timeout);
         Path tsv = Path.of(base + ".tsv");
         ConversionGuards.requireOutputFile(tsv, limits, "Tesseract OCR TSV");
         return parseTsv(tsv, pageNumber, physicalBox, dimensions, limits);
+    }
+
+    private RecognitionResult retryRuledGrid(RecognitionResult original, BufferedImage pixels, Path workDir,
+            int pageNumber, Rect physical, ParseLimits limits, long started) throws Exception {
+        if (!"3".equals(pageSegmentationMode()) || remainingTime(started).compareTo(Duration.ofSeconds(1)) <= 0) return original;
+        long deadline = started + settings.timeout().toNanos();
+        var grid = OcrRuledGrid.detect(pixels, physical, Math.min(deadline, System.nanoTime() + 500_000_000L));
+        if (!OcrRuledGrid.eligible(grid, original) || !originalGeometryStable(original, pixels, physical, deadline)) return original;
+        List<RecognitionResult> cells = new ArrayList<>();
+        int index = 0;
+        for (var cell : grid.cells()) {
+            if (remainingTime(started).compareTo(Duration.ofSeconds(1)) <= 0) return original;
+            Path crop = Files.createTempFile(workDir, "tesseract-grid-", ".png");
+            try {
+                // Only crop inside proven continuous rules; no resampling, ink removal or source mutation.
+                if (!ImageIO.write(pixels.getSubimage(cell.x(), cell.y(), cell.width(), cell.height()), "png", crop.toFile())) return original;
+                Duration remaining = remainingTime(started);
+                if (remaining.compareTo(Duration.ofSeconds(1)) <= 0) return original;
+                cells.add(recognizeOnce(crop, workDir, pageNumber, cell.box(), new ImageDimensions(cell.width(), cell.height()),
+                        limits, "tesseract-grid-p%d-c%d".formatted(pageNumber, ++index), remaining, "6"));
+            } catch (ConversionFailureException failure) {
+                if ("OCR_TIMEOUT".equals(failure.code())) throw failure;
+                return original;
+            } catch (IOException ignored) {
+                return original;
+            } finally { Files.deleteIfExists(crop); }
+        }
+        var selected = OcrRuledGrid.select(grid, original, cells, settings.minimumConfidence(), deadline);
+        return selected.wordCount() <= limits.maxEntries() ? selected : original;
     }
 
     private RecognitionResult retryEnhanced(RecognitionResult original, BufferedImage pixels, Path workDir,
@@ -515,7 +552,9 @@ public final class TesseractOcrConverter implements FileConverter {
         }
         if (result.possibleTextOmission()) {
             warnings.add(ConversionWarning.of(WarningCode.OCR_POSSIBLE_TEXT_OMISSION,
-                    scope + (result.partialRecovery()
+                    scope + (result.ruledGridRecovery()
+                            ? "框线内分格识别已恢复部分文字，原跨框低置信候选另有记录；原数字逐字核对，仍可能存在漏字或新误识别，请对照保留的原扫描复核。"
+                            : result.partialRecovery()
                             ? "原识别区域保留，未采用其替换候选，仅补充了严格分离的新行；仍可能漏字或保留原误识别，混合置信度不能证明内容完整，请对照原图复核。"
                             : result.imageEnhanced()
                             ? "采用增强候选后，原图阴影字迹覆盖探测仍发现多个未覆盖区域，可能漏识别或包含非文字图形；"
@@ -928,7 +967,12 @@ public final class TesseractOcrConverter implements FileConverter {
     }
 
     record RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
-                             double deskewDegrees, List<String> conflicts, boolean possibleTextOmission, boolean partialRecovery) {
+                             double deskewDegrees, List<String> conflicts, boolean possibleTextOmission, boolean partialRecovery,
+                             boolean ruledGridRecovery) {
+        RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
+                          double deskewDegrees, List<String> conflicts, boolean possibleTextOmission, boolean partialRecovery) {
+            this(blocks, confidence, wordCount, imageEnhanced, deskewDegrees, conflicts, possibleTextOmission, partialRecovery, false);
+        }
         RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
                           double deskewDegrees, List<String> conflicts, boolean possibleTextOmission) {
             this(blocks, confidence, wordCount, imageEnhanced, deskewDegrees, conflicts, possibleTextOmission, false);

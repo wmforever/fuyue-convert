@@ -61,6 +61,11 @@ final class PdfOcrVisibility extends PDFGraphicsStreamEngine {
 
     record Filtered(List<TextBlock> blocks, int hiddenWords) { }
 
+    boolean unobscuredRules(OcrRuledGrid.Grid grid) {
+        return !unsupported && uncertain.isEmpty() && grid.rules().stream()
+                .allMatch(rule -> imageClip.contains(pdfBox(rule)) && !touches(rule));
+    }
+
     Filtered filter(List<TextBlock> blocks) throws ConversionFailureException {
         if (opaque.isEmpty() && uncertain.isEmpty()) return new Filtered(blocks, 0);
         List<TextBlock> visible = new ArrayList<>();

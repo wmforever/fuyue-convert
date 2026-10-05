@@ -66,6 +66,12 @@ class PdfOcrVisibilityTest {
         var blocks = List.of(line("-00085.20", 40), line("26.85", 100));
         assertEquals(blocks, inspect(s -> {}).filter(blocks).blocks());
     }
+    @Test void nativeGridOrderRequiresActuallyUncoveredRules() throws Exception {
+        var grid = new OcrRuledGrid.Grid(box(0, 0, 200, 200), List.of(), List.of(box(30, 40, 60, 1)));
+        assertTrue(inspect(s -> {}).unobscuredRules(grid));
+        assertFalse(inspect(PdfOcrVisibilityTest::cover).unobscuredRules(grid));
+        assertFalse(inspect(s -> { var state = new PDExtendedGraphicsState(); state.setNonStrokingAlphaConstant(.5f); s.setGraphicsStateParameters(state); cover(s); }).unobscuredRules(grid));
+    }
     @Test void adjacentGrayStripsTogetherProveFullCover() throws Exception {
         var result = inspect(s -> { s.setNonStrokingColor(.7f); s.addRect(29, 39, 31, 12); s.fill(); s.setNonStrokingColor(.8f); s.addRect(60, 39, 31, 12); s.fill(); });
         assertTrue(result.filter(List.of(line("127.50", 40))).blocks().isEmpty());
