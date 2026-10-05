@@ -1,0 +1,43 @@
+name: Windows Office no-console integration
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - task-service/src/main/java/com/fuyue/formatconverter/task/LibreOfficeConverter.java
+      - task-service/src/main/java/com/fuyue/formatconverter/task/ConversionGuards.java
+      - task-service/src/test/java/com/fuyue/formatconverter/task/WindowsOfficeLaunchProbeTest.java
+      - .github/workflows/windows-office-integration.yml
+
+permissions:
+  contents: read
+
+jobs:
+  office-windows:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Set up pinned JDK
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: "17.0.20+101"
+          cache: maven
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - name: Prepare pinned Office runtime
+        working-directory: desktop
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          node scripts/prepare-libreoffice-runtime.mjs
+      - name: Exercise real conversion from Java without a Windows console
+        shell: pwsh
+        run: |
+          $env:FORMAT_CONVERTER_WINDOWS_OFFICE_HOME = Join-Path $PWD "desktop\.runtime\libreoffice"
+          mvn -B -ntp -pl task-service -am -Dskip.frontend=true -Dtest=WindowsOfficeLaunchProbeTest -Dsurefire.failIfNoSpecifiedTests=false test
