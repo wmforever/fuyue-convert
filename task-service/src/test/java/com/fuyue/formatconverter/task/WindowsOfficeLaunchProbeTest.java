@@ -65,7 +65,7 @@ class WindowsOfficeLaunchProbeTest {
             Path source = sample.equals("poi") ? input : Path.of(System.getenv("FORMAT_CONVERTER_WINDOWS_SMOKE_DOCX"));
             for (String launcher : new String[]{"soffice.exe", "soffice.com"}) {
                 Path output = root.resolve(sample + "-" + launcher + ".pdf"),
-                        work = root.resolve("工作目录 with spaces").resolve(sample + "-" + launcher + "-work");
+                        work = root.resolve("work directory with spaces").resolve(sample + "-" + launcher + "-work");
                 long started = System.nanoTime();
                 Map<String, Object> result = new LinkedHashMap<>();
                 try {
