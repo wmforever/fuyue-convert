@@ -321,6 +321,45 @@ class OcrWordOverlayTest {
         return result;
     }
 
+    @Test void preservesRecognizedColumnOrderWhenHeadingBridgesTwoGutters() throws Exception {
+        List<String> expected = List.of("Scan heading", "LEFT 00619", "LEFT -053.25",
+                "MIDDLE 01238", "MIDDLE +0106.50", "RIGHT 02476", "RIGHT 0213.00");
+        for (boolean recognized : List.of(true, false)) {
+            List<TextBlock> blocks = new ArrayList<>();
+            for (int index = 0; index < expected.size(); index++) {
+                double x = index == 0 ? 5 : List.of(5d, 35d, 75d).get((index - 1) / 2);
+                double y = index == 0 ? 10 : 30 + ((index - 1) % 2) * 15;
+                Rect box = new Rect(x, y, index == 0 ? 55 : 16, 4);
+                String text = expected.get(index);
+                blocks.add(new TextBlock("line-" + index, 1, box, text, y + 4,
+                        new FontStyle("Arial", 10, false, false, null), index + 1,
+                        0, 0, List.of(), Transform2D.IDENTITY,
+                        recognized ? List.of(new TextBlock.OcrWord(box, text, .98)) : List.of()));
+            }
+            // Analyzer/body lists may be spatially sorted; recognition order is
+            // carried by zOrder, not the incidental order of these inputs.
+            java.util.Collections.reverse(blocks);
+            List<String> actual;
+            if (recognized) {
+                try (XWPFDocument docx = new XWPFDocument(Files.newInputStream(render(blocks, List.of())))) {
+                    actual = elements(xml(docx), WORD, "t").stream().map(Element::getTextContent).toList();
+                }
+            } else {
+                try (XWPFDocument docx = new XWPFDocument()) {
+                    var page = new PageModel(1, new Rect(0, 0, 100, 100), blocks, List.of(),
+                            List.of(), List.of(), List.of(), List.of());
+                    new FixedLayoutDocxRenderer().renderOverlays(docx, docx.createParagraph(), page, blocks);
+                    actual = elements(xml(docx), WORD, "t").stream().map(Element::getTextContent).toList();
+                }
+            }
+            if (recognized) assertEquals(expected, actual,
+                    "A bridging heading must not cause a second column heuristic to interleave recognized columns");
+            else assertEquals(List.of("Scan heading", "LEFT 00619", "MIDDLE 01238", "LEFT -053.25",
+                    "MIDDLE +0106.50", "RIGHT 02476", "RIGHT 0213.00"), actual,
+                    "Born-digital column inference retains its existing policy");
+        }
+    }
+
     private byte[] png() throws Exception { return png(true); }
 
     private byte[] png(boolean stamp) throws Exception {

@@ -63,6 +63,11 @@ final class FixedLayoutDocxRenderer {
     private List<TextBlock> fallbackReadingOrder(PageModel page, List<TextBlock> texts) {
         List<TextBlock> sourceOrder = texts.stream()
                 .sorted(Comparator.comparingInt(TextBlock::zOrder)).toList();
+        // OCR has already supplied a reading sequence. A second gutter split
+        // can interleave recognized columns when a heading bridges them.
+        // Preserve that sequence, including uncertain words, without changing
+        // their positions, layering, masks, or source scans.
+        if (sourceOrder.stream().allMatch(block -> !block.ocrWords().isEmpty())) return sourceOrder;
         // Keep uncertain combinations in their existing order. Coordinates and
         // z-index remain unchanged even when plain, disjoint columns are ordered
         // for reading and copying the text from Word.
