@@ -283,6 +283,41 @@ class OcrWordOverlayTest {
         assertEquals(widths.get(1), widths.get(3), "Dense pages skip the optional reserve before neighbor scans");
     }
 
+    @Test void anomalousDarkWordPromotesOnlyReliableSmallLightPaperDecimals() throws Exception {
+        for (int variant = 0; variant < 8; variant++) {
+            var pixels = new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_RGB);
+            var g = pixels.createGraphics(); g.setColor(java.awt.Color.WHITE); g.fillRect(0, 0, 1000, 1000);
+            g.setColor(java.awt.Color.BLACK); g.fillRect(40, 90, 720, 220);
+            if (variant == 2) { g.setColor(java.awt.Color.DARK_GRAY); g.fillRect(190, 590, 140, 60); }
+            if (variant == 3) { g.setColor(java.awt.Color.RED); g.fillRect(240, 610, 20, 20); }
+            g.dispose(); var bytes = new ByteArrayOutputStream(); ImageIO.write(pixels, "png", bytes); pixels.flush();
+            var background = new ImageBlock("scan", 1, new Rect(0, 0, 100, 100), "image/png", bytes.toByteArray(), "OCR_SCAN_BACKGROUND", 0);
+            var huge = new TextBlock("huge", 1, new Rect(5, 10, 70, 20), "Ce", 27, FontStyle.defaults(), 1,
+                    0, 0, List.of(), Transform2D.IDENTITY, List.of(new TextBlock.OcrWord(new Rect(5, 10, 70, 20), "Ce", variant == 5 ? .98 : .2)));
+            String value = variant == 7 ? "170" : "0170.80";
+            var number = new TextBlock("amount", 1, new Rect(20, 60, 12, 4), value, 63, FontStyle.defaults(), 2,
+                    0, 0, List.of(), variant == 6 ? new Transform2D(1, .1, 0, 1, 0, 0) : Transform2D.IDENTITY,
+                    List.of(new TextBlock.OcrWord(new Rect(20, 60, 12, 4), value, variant == 1 ? .6 : .98)));
+            var images = variant == 4 ? List.of(background, new ImageBlock("other", 1, new Rect(80, 80, 5, 5), "image/png", png(), "PDF_IMAGE", 3)) : List.of(background);
+            var page = new PageModel(1, new Rect(0, 0, 100, 100), List.of(huge, number), List.of(), images, List.of(), List.of(), List.of());
+            try (var docx = new XWPFDocument()) {
+                new FixedLayoutDocxRenderer().renderOverlays(docx, docx.createParagraph(), page, List.of(huge, number));
+                var xml = xml(docx); var all = masks(xml);
+                var hugeMasks = all.stream().filter(e -> e.getAttribute("id").startsWith("ocr-mask-huge-")).toList();
+                assertFalse(hugeMasks.isEmpty()); assertTrue(hugeMasks.stream().allMatch(e -> e.getAttribute("style").contains("z-index:-251658751;")));
+                var amounts = all.stream().filter(e -> e.getAttribute("id").startsWith("ocr-mask-amount-")).toList();
+                if (variant == 3) assertTrue(amounts.isEmpty(), "Colored unknown ink must remain exposed");
+                else {
+                    assertFalse(amounts.isEmpty());
+                    String layer = variant == 0 ? "z-index:1;" : "z-index:-251658751;";
+                    assertTrue(amounts.stream().allMatch(e -> e.getAttribute("style").contains(layer)), "variant " + variant);
+                }
+                assertEquals("Ce" + value, elements(xml, WORD, "t").stream().map(Element::getTextContent).reduce("", String::concat));
+                assertArrayEquals(background.data(), docx.getAllPictures().get(0).getData());
+            }
+        }
+    }
+
     @Test void longNumericReserveIsBoundedAndRetainsShortReserveAroundUnknownInkOrNeighbor() throws Exception {
         List<Double> widths = new ArrayList<>();
         List<String> maskStyles = new ArrayList<>();

@@ -157,6 +157,64 @@ class LibreOfficePdfConverterTest {
     }
 
     @Test
+    void editsLightPaperAmountBesideBroadUncertainWhiteWordWithoutOldInk() throws Exception {
+        var discovered = LibreOfficeConverter.discover("");
+        assumeTrue(discovered.isPresent(), "LibreOffice is not installed");
+        var scan = new java.awt.image.BufferedImage(1000, 1000, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        var g = scan.createGraphics(); g.setColor(java.awt.Color.WHITE); g.fillRect(0, 0, 1000, 1000);
+        g.setColor(java.awt.Color.BLACK); g.fillRect(40, 90, 720, 220);
+        g.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 60)); g.drawString("127.50", 200, 550);
+        g.setColor(java.awt.Color.RED); g.fillRect(700, 700, 40, 40); g.dispose();
+        var bytes = new java.io.ByteArrayOutputStream(); javax.imageio.ImageIO.write(scan, "png", bytes); scan.flush();
+        var pageBox = new com.fuyue.formatconverter.model.Rect(0, 0, 100, 100);
+        var hugeBox = new com.fuyue.formatconverter.model.Rect(5, 10, 70, 20);
+        var huge = new com.fuyue.formatconverter.model.TextBlock("uncertain", 1, hugeBox, "Ce", 27,
+                com.fuyue.formatconverter.model.FontStyle.defaults(), 1, 0, 0, java.util.List.of(),
+                com.fuyue.formatconverter.model.Transform2D.IDENTITY,
+                java.util.List.of(new com.fuyue.formatconverter.model.TextBlock.OcrWord(hugeBox, "Ce", .2)));
+        var wordBox = new com.fuyue.formatconverter.model.Rect(19, 48, 24, 8);
+        var amount = new com.fuyue.formatconverter.model.TextBlock("amount", 1, wordBox, "127.50", 56,
+                new com.fuyue.formatconverter.model.FontStyle("Arial", 18, false, false, null), 2, 0, 0,
+                java.util.List.of(), com.fuyue.formatconverter.model.Transform2D.IDENTITY,
+                java.util.List.of(new com.fuyue.formatconverter.model.TextBlock.OcrWord(wordBox, "127.50", .99)));
+        var background = new com.fuyue.formatconverter.model.ImageBlock("scan", 1, pageBox, "image/png", bytes.toByteArray(), "OCR_SCAN_BACKGROUND", 0);
+        var page = new com.fuyue.formatconverter.model.PageModel(1, pageBox, java.util.List.of(huge, amount),
+                java.util.List.of(), java.util.List.of(background), java.util.List.of(), java.util.List.of(), java.util.List.of());
+        Path source = temp.resolve("uncertain-amount.docx"), edited = temp.resolve("uncertain-edit.docx"), output = temp.resolve("uncertain-edit.pdf");
+        new com.fuyue.formatconverter.docx.PoiDocxRenderer().render(new com.fuyue.formatconverter.model.DocumentModel(
+                "scan", "test", 1, java.util.List.of(page), java.util.List.of()), source);
+        try (var input = new java.util.zip.ZipFile(source.toFile()); var zip = new java.util.zip.ZipOutputStream(Files.newOutputStream(edited))) {
+            for (var entry : java.util.Collections.list(input.entries())) {
+                byte[] data = input.getInputStream(entry).readAllBytes();
+                if (entry.getName().equals("word/document.xml")) {
+                    String xml = new String(data, java.nio.charset.StandardCharsets.UTF_8);
+                    assertEquals(1, xml.split("127\\.50", -1).length - 1);
+                    data = xml.replace("127.50", "1").getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                }
+                zip.putNextEntry(new java.util.zip.ZipEntry(entry.getName())); zip.write(data); zip.closeEntry();
+            }
+        }
+        try (var docx = new XWPFDocument(Files.newInputStream(edited))) {
+            assertArrayEquals(bytes.toByteArray(), docx.getAllPictures().get(0).getData());
+        }
+        new LibreOfficeConverter(DocumentFormat.DOCX, DocumentFormat.PDF, discovered.orElseThrow(), Duration.ofSeconds(45),
+                "uncertain dark word amount regression").convert(input(edited, DocumentFormat.DOCX),
+                temp.resolve("uncertain-amount-work"), output, ParseLimits.defaults(), (stage, percent) -> { });
+        try (var pdf = Loader.loadPDF(output.toFile())) {
+            assertEquals(1, pdf.getNumberOfPages()); String text = new PDFTextStripper().getText(pdf);
+            assertTrue(text.contains("Ce")); assertTrue(text.contains("1")); assertFalse(text.contains("127.50"));
+            var rendered = new org.apache.pdfbox.rendering.PDFRenderer(pdf).renderImageWithDPI(0, 254);
+            try {
+                for (int y = 485; y < 560; y++) for (int x = 320; x < 425; x++)
+                    assertEquals(0xffffff, rendered.getRGB(x, y) & 0xffffff,
+                            "reliable decimal mask must erase old trailing ink while white-word policy stays unchanged");
+                int stamp = rendered.getRGB(720, 720);
+                assertTrue(((stamp >>> 16) & 255) >= 250 && ((stamp >>> 8) & 255) <= 5 && (stamp & 255) <= 5);
+            } finally { rendered.flush(); }
+        }
+    }
+
+    @Test
     void convertsDocxXlsxAndPptxToPdfWithReadableCjkAndPageCounts() throws Exception {
         var discovered = LibreOfficeConverter.discover("");
         assumeTrue(discovered.isPresent(), "LibreOffice is not installed");
