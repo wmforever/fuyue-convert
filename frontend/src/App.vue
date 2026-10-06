@@ -330,7 +330,7 @@ const sourceOptions = computed(() => {
   return [
     { id: 'popular', label: '常用转换', count: popular.length, availableCount: popular.filter(route => route.status === 'available').length },
     { id: 'pdf-tools', label: 'PDF 工具', count: pdfTools.length, availableCount: pdfTools.filter(route => route.status === 'available').length },
-    { id: 'beta', label: 'Beta 路线', count: beta.length, availableCount: beta.filter(route => route.status === 'available').length },
+    { id: 'beta', label: '测试中的转换', count: beta.length, availableCount: beta.filter(route => route.status === 'available').length },
     ...options
   ]
 })
@@ -381,22 +381,22 @@ const pickerTitle = computed(() => {
   if (routeSearch.value.trim()) return `搜索结果 · ${pickerRoutes.value.length}`
   if (pickerSource.value === 'popular') return '常用转换'
   if (pickerSource.value === 'pdf-tools') return 'PDF 实用工具'
-  if (pickerSource.value === 'beta') return `Beta 路线 · ${pickerRoutes.value.length}`
+  if (pickerSource.value === 'beta') return `测试中的转换 · ${pickerRoutes.value.length}`
   const source = sourceOptions.value.find(option => option.id === pickerSource.value)
   return `${source?.label || '当前格式'} 可以转换为`
 })
 const pickerHint = computed(() => pickerRoutes.value.some(route => route.status === 'available')
   ? (pickerSource.value === 'beta' && !routeSearch.value.trim()
-      ? '建议选择后先查看适用边界，再用代表性文件验证'
+      ? '这些转换仍在测试中，请核对转换后的内容和排版'
       : '选择一个目标格式即可')
   : '当前结果均不可执行，请检查运行依赖')
 
 const viewTitle = computed(() => ({
-  overview: ['概览', '掌握本地转换服务和最近任务'],
-  convert: ['转换工作台', '选择路线并处理你的文件'],
+  overview: ['概览', '查看服务状态和最近任务'],
+  convert: ['转换工作台', '选择格式并添加文件'],
   pdf: ['PDF 工具', '合并、拆分、压缩与文字水印'],
-  history: ['任务记录', '恢复、重下或重试转换服务中的任务'],
-  settings: ['运行设置', '调整使用偏好并查看引擎诊断状态']
+  history: ['任务记录', '查看任务、下载结果或重试'],
+  settings: ['运行设置', '调整转换设置，检查 OCR 和 Office 是否可用']
 })[activeView.value] || ['概览', '本地文档转换工作台'])
 
 const navItems = [
@@ -1056,7 +1056,7 @@ async function loadCapabilities() {
     if (!response.ok) {
       capabilityMessage.value = response.status === 401
         ? '转换能力接口需要访问令牌，请从桌面应用或正确配置的本地入口打开。'
-        : `转换能力加载失败（${response.status}），已保留上次成功加载的路线。`
+        : `转换格式加载失败（${response.status}），已保留上次加载的列表。`
       return
     }
     const routes = await response.json()
@@ -1068,7 +1068,7 @@ async function loadCapabilities() {
         ? [...routes, {
             ...previousRoute,
             status: 'unavailable',
-            limitations: [...(previousRoute.limitations || []), '当前转换服务刷新后不再提供这条路线']
+            limitations: [...(previousRoute.limitations || []), '当前服务不再支持这项转换']
           }]
         : routes
       capabilityMessage.value = ''
@@ -1089,7 +1089,7 @@ async function loadCapabilities() {
     }
   } catch (_) {
     conversions.value = fallbackConversions
-    capabilityMessage.value = '暂时无法连接转换服务，当前仅显示基础路线。'
+    capabilityMessage.value = '暂时无法连接转换服务，当前显示默认格式列表。'
   }
 }
 
@@ -1220,7 +1220,7 @@ function recentStatusLabel(status) {
 
 async function submit() {
   if (selectedRoute.value?.status !== 'available') {
-    message.value = '这条转换路线还在规划中，暂未开放执行'
+    message.value = '暂不支持这项转换'
     return
   }
   busy.value = true
@@ -1608,7 +1608,7 @@ onBeforeUnmount(() => {
             <div>
               <p><span></span> FORMAT WORKSPACE / {{ diagnostics?.version || appVersion }}</p>
               <h1>欢迎回来，开始处理文档。</h1>
-              <small>{{ desktopRuntime ? '转换、整理和导出都在本机完成。' : '文件只发送到当前转换服务，不会转交第三方云端。' }}你可以从常用路线开始，也可以进入完整工作台。</small>
+              <small>{{ desktopRuntime ? '转换在本机完成。' : '文件只发送到当前转换服务，不会转交第三方云端。' }}选择常用转换，或查看全部格式。</small>
               <button type="button" @click.stop="startNewConversion">开始新任务 <span>→</span></button>
             </div>
             <div class="banner-visual" aria-hidden="true">
@@ -1618,8 +1618,8 @@ onBeforeUnmount(() => {
           </article>
 
           <div class="metric-grid" aria-label="运行概览">
-            <article><span class="metric-icon blue">↗</span><div><small>可用路线</small><strong>{{ availableRoutes.length }}</strong><em>覆盖 {{ availableSourceCount }} 种可用输入格式</em></div></article>
-            <article><span class="metric-icon violet">✓</span><div><small>稳定路线</small><strong>{{ stableRoutes.length }}</strong><em>{{ betaRoutes.length }} 条 Beta · {{ experimentalRoutes.length }} 条实验路线</em></div></article>
+            <article><span class="metric-icon blue">↗</span><div><small>可用转换</small><strong>{{ availableRoutes.length }}</strong><em>支持 {{ availableSourceCount }} 种输入格式</em></div></article>
+            <article><span class="metric-icon violet">✓</span><div><small>稳定转换</small><strong>{{ stableRoutes.length }}</strong><em>{{ betaRoutes.length }} 项测试中 · {{ experimentalRoutes.length }} 项实验功能</em></div></article>
             <article><span class="metric-icon cyan">▣</span><div><small>已完成任务</small><strong>{{ successfulTasks }}</strong><em>结果在到期前可重新下载</em></div></article>
             <article><span class="metric-icon green">●</span><div><small>服务状态</small><strong>{{ serviceHealthy ? '正常' : '连接中' }}</strong><em>独立 Worker {{ diagnostics?.limits?.workerEnabled ? '已启用' : '检测中' }}</em></div></article>
           </div>
@@ -1662,14 +1662,14 @@ onBeforeUnmount(() => {
         </section>
 
         <section v-show="activeView === 'pdf'" class="content-page pdf-page">
-          <div class="section-intro"><span>PDF LAB</span><h2>一组专注、可靠的 PDF 工具。</h2><p>{{ desktopRuntime ? '所有修改在本机完成。' : '文件仅由当前转换服务处理。' }}选择一个工具即可进入工作台。</p></div>
+          <div class="section-intro"><span>PDF 工具</span><h2>合并、拆分、压缩和添加水印</h2><p>{{ desktopRuntime ? '文件在本机处理。' : '文件由当前转换服务处理。' }}选择工具后添加文件。</p></div>
           <div class="tool-card-grid">
             <button v-for="(route, index) in pdfToolRoutes" :key="route.id" type="button" :disabled="route.status !== 'available'" @click="openRoute(route)">
               <span class="tool-number">0{{ index + 1 }}</span><span class="tool-symbol">{{ ['↘', '⊕', '✂', 'W'][index] }}</span>
               <div><small>{{ routeBadge(route) }} · {{ strategyLabel(route) }}</small><h3>{{ route.targetLabel }}</h3><p>{{ route.description }}</p></div><i>进入工具 →</i>
             </button>
           </div>
-          <aside class="privacy-banner"><span>◆</span><div><strong>保护原始文档</strong><small>压缩与水印会拒绝修改数字签名 PDF；其他工具会明确展示适用边界。</small></div></aside>
+          <aside class="privacy-banner"><span>◆</span><div><strong>数字签名文档</strong><small>压缩和水印不支持已签名的 PDF；使用其他工具前请查看转换限制。</small></div></aside>
         </section>
 
         <section v-show="activeView === 'history'" class="content-page history-page">
@@ -1791,7 +1791,7 @@ onBeforeUnmount(() => {
                     <button v-if="routeSearch" type="button" @click="routeSearch = ''">清除搜索</button>
                   </div>
                   <div class="route-list" role="listbox" aria-labelledby="route-label">
-                    <p v-if="!pickerRoutes.length" class="route-empty"><b>没有找到匹配路线</b><span>试试搜索格式名或“合并”“压缩”等功能</span></p>
+                    <p v-if="!pickerRoutes.length" class="route-empty"><b>没有找到匹配的转换</b><span>搜索格式名或“合并”“压缩”等功能</span></p>
                     <button
                       v-for="route in pickerRoutes"
                       :key="route.id"
@@ -1822,7 +1822,7 @@ onBeforeUnmount(() => {
             <span v-if="routeMeta(selectedRoute)" class="route-meta">{{ routeMeta(selectedRoute) }}</span>
             <span v-if="routeRuntimeWarning" class="field-warning route-runtime-warning" role="status">{{ routeRuntimeWarning }}</span>
             <details v-if="selectedRoute.limitations?.length" class="route-limitations" :open="selectedRoute.qualityLevel === 'beta'">
-              <summary>{{ selectedRoute.qualityLevel === 'beta' ? 'Beta 适用边界' : '查看适用边界' }} · {{ selectedRoute.limitations.length }} 项</summary>
+              <summary>{{ selectedRoute.qualityLevel === 'beta' ? '测试中的功能：请查看限制' : '查看转换限制' }} · {{ selectedRoute.limitations.length }} 项</summary>
               <ul><li v-for="item in selectedRoute.limitations" :key="item">{{ item }}</li></ul>
             </details>
           </div>
