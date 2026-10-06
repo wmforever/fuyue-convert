@@ -340,5 +340,20 @@
     "copiedCode": false,
     "addedRuntimeDependency": false
   },
-  "ci": "See exact current-head run on draft PR #9; prior eb0c578 green CI is not acceptance for this change."
+  "ci": "See exact current-head run on draft PR #9; prior eb0c578 green CI is not acceptance for this change.",
+  "ciHistory": [
+    {
+      "run": 37496863898,
+      "number": 108,
+      "head": "eddbafcbcc951fb435fa44d6bb3f5e55372a5042",
+      "main": "failure",
+      "failure": "New regression fixed-mm geometry did not create the intended compatible-font overflow on GitHub runner; keep overflow/fitting/numeric assertions and construct distances from measured advance",
+      "office": "success",
+      "officeTests": 6,
+      "systemOcr": "success",
+      "systemOcrTests": 24,
+      "frontendDesktopSteps": "skipped after Java failure",
+      "productionUnchangedByFixtureFix": true
+    }
+  ]
 }

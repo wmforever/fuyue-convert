@@ -44,13 +44,24 @@ class OcrLatinWordFitTest {
         var source = word("REVIEW", .98);
         var next = new TextBlock.OcrWord(new Rect(43, 30, 20, 4), "2036", .98);
         double size = 13.4, original = 1.19;
-        var positioned = new Rect(19.5, 29, 20, 6);
-        double wide = 40;
+        // Dialog's physical fallback differs between cloud/CI hosts. Construct
+        // a real neighbor interval between the accepted and overflowing advances
+        // instead of assuming a fixed mm box will reproduce the collision.
+        double available = advance(source.text(), 13.5) * 1.1 * 25.4 / 72;
+        var glyphs = measured.createGlyphVector(context, next.text()).getVisualBounds();
+        double nextRatio = Math.max(.6, Math.min(1.4,
+                next.box().width() * 72 / 25.4 / Math.max(1, glyphs.getWidth() * size / 100)));
+        double nextBearing = glyphs.getX() * size / 100 * 25.4 / 72 * nextRatio;
+        double gap = next.box().x() - source.box().right();
+        var positioned = new Rect(next.box().x() - nextBearing - gap * .5 - available, 29, 20, 6);
+        double wide = available * 2;
         assertEquals(original, FixedLayoutDocxRenderer.latinWordScale(source, measured, compatible,
                 size, original, wide), "the old wrapping-only check misses the neighbor collision");
         double bounded = FixedLayoutDocxRenderer.latinWordWidthBeforeNext(source, next, measured,
                 size, positioned, wide);
         assertTrue(bounded < wide);
+        assertTrue(advance(source.text(), 13.5) * Math.round(original * 100d) / 100d > bounded * 72d / 25.4d,
+                "the uncorrected emitted word must actually overlap this neighbor interval");
         double fitted = FixedLayoutDocxRenderer.latinWordScale(source, measured, compatible,
                 size, original, wide, bounded);
         assertTrue(fitted < original && fitted >= .6);
