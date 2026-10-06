@@ -924,7 +924,7 @@ public final class ConversionTaskService implements AutoCloseable {
             case DOCX, XLSX, PPTX, OFD -> isZip(header);
             case UOF -> isZip(header) || looksLikeXml(file);
             case WPS, ET, DPS -> isOle(header) || isZip(header);
-            case TXT, CSV, HTML -> looksLikeText(file);
+            case TXT, CSV, HTML -> looksLikeText(file, sourceFormat);
             case PDF_MERGED, PDF_SPLIT, PDF_WATERMARKED, PDF_COMPRESSED -> false;
         };
         if (!ok) throw new IllegalArgumentException(sourceFormat.label() + " 文件头校验失败，请确认文件未损坏且格式真实");
@@ -943,8 +943,20 @@ public final class ConversionTaskService implements AutoCloseable {
     }
     private boolean isZip(byte[] header) { return startsWith(header, new byte[] {0x50, 0x4B, 0x03, 0x04}) || startsWith(header, new byte[] {0x50, 0x4B, 0x05, 0x06}) || startsWith(header, new byte[] {0x50, 0x4B, 0x07, 0x08}); }
     private boolean isOle(byte[] header) { return startsWith(header, new byte[] {(byte) 0xD0, (byte) 0xCF, 0x11, (byte) 0xE0, (byte) 0xA1, (byte) 0xB1, 0x1A, (byte) 0xE1}); }
-    private boolean looksLikeText(Path file) throws IOException {
+    private boolean looksLikeText(Path file, DocumentFormat sourceFormat) throws IOException {
         byte[] data = readHeader(file, 4096);
+        boolean utf16Bom = startsWith(data, new byte[] {(byte) 0xFF, (byte) 0xFE})
+                || startsWith(data, new byte[] {(byte) 0xFE, (byte) 0xFF});
+        if (utf16Bom && (sourceFormat == DocumentFormat.TXT || sourceFormat == DocumentFormat.CSV)) {
+            // Zero bytes encode ordinary UTF-16 characters. Validate decoded text
+            // with the converter's strict decoder instead of treating them as NUL.
+            try {
+                TextInputReader.readContent(file, config.parseLimits());
+                return true;
+            } catch (ConversionFailureException error) {
+                throw new IllegalArgumentException(error.getMessage(), error);
+            }
+        }
         for (byte datum : data) if (datum == 0) return false;
         return true;
     }

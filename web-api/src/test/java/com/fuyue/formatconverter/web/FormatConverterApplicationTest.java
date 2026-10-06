@@ -26,6 +26,7 @@ class FormatConverterApplicationTest {
         mvc.perform(get("/api/health"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.version").value(System.getProperty("expected.build.version")))
                 .andExpect(jsonPath("$.parser").value("OFDRW 2.3.9"))
                 .andExpect(jsonPath("$.arch").isNotEmpty())
                 .andExpect(jsonPath("$.office.available").isBoolean())
@@ -90,7 +91,7 @@ class FormatConverterApplicationTest {
     @Test void diagnosticsEndpointReturnsRedactedEnvironment() throws Exception {
         mvc.perform(get("/api/diagnostics"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.version").value("0.1.4"))
+                .andExpect(jsonPath("$.version").value(System.getProperty("expected.build.version")))
                 .andExpect(jsonPath("$.runtime.javaVersion").isNotEmpty())
                 .andExpect(jsonPath("$.office.available").isBoolean())
                 .andExpect(jsonPath("$.ocr.enabled").isBoolean())

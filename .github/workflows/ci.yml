@@ -48,7 +48,15 @@ jobs:
         working-directory: frontend
         run: |
           npm ci --no-audit --no-fund
+          npm test
           npm run build
+
+      - name: Desktop script and unit checks
+        working-directory: desktop
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run check
+          npm test
 
       - name: Generate and validate release SBOMs
         run: |

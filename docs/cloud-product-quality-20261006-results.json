@@ -1,0 +1,414 @@
+{
+  "scope": "Linux cloud source/build acceptance; synthetic documents only in this report; no native installer acceptance",
+  "parentRevision": "6cdbda921c702d5be76c06a99e0109ba256dc343",
+  "tests": {
+    "javaBeforeVersionMetadataFix": {
+      "counts": {
+        "tests": 527,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 2
+      },
+      "skips": [
+        {
+          "class": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+          "name": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning",
+          "reason": {
+            "type": "org.opentest4j.TestAbortedException"
+          }
+        },
+        {
+          "class": "com.fuyue.formatconverter.task.WindowsOfficeLaunchProbeTest",
+          "name": "convertsFromJavawWithoutAnAttachedConsole",
+          "reason": {
+            "type": "org.opentest4j.TestAbortedException"
+          }
+        }
+      ]
+    },
+    "affectedWebAfterVersionMetadataFix": {
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "frontend": {
+      "tests": 22,
+      "failures": 0
+    },
+    "desktop": {
+      "tests": 71,
+      "failures": 0,
+      "scriptsChecked": true
+    }
+  },
+  "build": {
+    "buildInputSha256": "bfadee40136537f7534d093e99396844fba964d0cf0fa96bcca3de208f6a615f",
+    "parentRevision": "6cdbda921c702d5be76c06a99e0109ba256dc343",
+    "workingTreeDirtyAtBuildStart": true,
+    "jarSha256": "8dd0894fd8592dde5adae5501f63ba18fb9ea33bfd9f92f7a1a1a02500c6230b",
+    "applicationClassCount": 237,
+    "applicationClassSha256": "21f193aaa82b7167cd4c81ff91bf440d527a394a28624c7b5a1becc479a388c5",
+    "packagedClassesMatchTargets": true,
+    "exercisedBeforeStaleAssetCleanupJarSha256": "8f4f05b91ccd1d67015d8a1e7f270368260dee6bab45c25f40a54763282ea0e2",
+    "sameApplicationClassesAndUsedFrontendAssets": true,
+    "frontendAssetsExact": {
+      "app-icon.svg": "5bf05198f99e53b7fabf0fbfd25577c9aca004a6b1ea6f7e901457fe89db2568",
+      "index.html": "7dc29edb22d632b79d9f260a79b613d4c51b84b0ba22dd1da387b1e693bbc310",
+      "assets/pdf-CPbOiMa_.js": "fa75f2d6b363ee4a3386e4bf1d3f104c8dce5eef2be79159be1d253e1f4e323a",
+      "assets/index-BqcSAJVT.js": "cba5b1632b12169253fa32ac2f2f8cc1ec98e82fead6cad64a9ef371513f1caf",
+      "assets/pdf.worker.min-CMqTMPr3.js": "73568c62796be3043a57aad8bb5027f9602bae4b54bbea029b0a3af80c5b7166",
+      "assets/pdf.worker.min-r-TJsTTt.mjs": "c964e291707ad492e6e90ff7f4f352b75e05ea2734c3dd3a80b94983b1b7ce3d",
+      "assets/index-J-Vb5Aua.css": "084b610dc78c0213ec817bcb26aeff3dccd2c4d7fce88514a85ab56395e43366"
+    }
+  },
+  "nativeTables": [
+    {
+      "case": "en",
+      "realTables": 2,
+      "grid": "5x4 each",
+      "cells": 32,
+      "allCellTextExact": true,
+      "noImageSubstitute": true,
+      "officePages": 2
+    },
+    {
+      "case": "zh",
+      "realTables": 2,
+      "grid": "5x4 each",
+      "cells": 32,
+      "allCellTextExact": true,
+      "noImageSubstitute": true,
+      "officePages": 2
+    },
+    {
+      "case": "csv",
+      "rows": 3,
+      "columns": 4,
+      "exactRoundtrip": true,
+      "formulaInjectionStoredAsText": true,
+      "leadingZeroAndSignedNumbersPreserved": true
+    }
+  ],
+  "textAndBlank": {
+    "UTF16UploadRecovered": true,
+    "originalLiteralNumbersExactAcrossWordOfficeAndTxt": true,
+    "textOfficePages": 2,
+    "blankOfficePages": 2,
+    "blankTextNoInventedContent": true,
+    "corruptPdfFailedWithoutArtifact": true,
+    "ECHILD": true
+  },
+  "excelBrowser": [
+    {
+      "case": "selected-fit",
+      "fields": {
+        "spreadsheetSheets": "3",
+        "spreadsheetFitWidth": true
+      },
+      "pages": 1,
+      "seconds": 32.934676279000996
+    },
+    {
+      "case": "selected-original",
+      "fields": {
+        "spreadsheetSheets": "3",
+        "spreadsheetFitWidth": false
+      },
+      "pages": 4,
+      "seconds": 28.28926648599736
+    },
+    {
+      "case": "all-visible",
+      "fields": {
+        "spreadsheetSheets": "all",
+        "spreadsheetFitWidth": false
+      },
+      "pages": 5,
+      "seconds": 26.82702695199987
+    }
+  ],
+  "versionBrowser": {
+    "healthVersion": "0.1.7",
+    "footerVersion": "0.1.7",
+    "settingsVersion": "0.1.7",
+    "pageErrors": [],
+    "browserVersion": "151.0.7922.173"
+  },
+  "chain": {
+    "attempts": 20,
+    "success": 18,
+    "failures": [
+      {
+        "case": "digital-ofd-text",
+        "errorCode": "OCR_NO_NEW_TEXT"
+      },
+      {
+        "case": "digital-ofd-word",
+        "errorCode": "OCR_NO_NEW_TEXT"
+      }
+    ],
+    "successfulTextChecks": true,
+    "visualCaveat": "English scan heading words have inadequate visual separation despite compact text CER 0",
+    "resources": {
+      "wallSeconds": 89.82934160200239,
+      "userSeconds": 219.533874,
+      "systemSeconds": 20.910125999999998,
+      "maxChildRssKiB": 330868
+    },
+    "workers": 20,
+    "ECHILD": true
+  },
+  "ocr": {
+    "rows": [
+      {
+        "file": "english-tilt-+0.png",
+        "language": "english",
+        "degrees": 0,
+        "status": "SUCCESS",
+        "metrics": {
+          "expectedCharacters": 293,
+          "actualCharacters": 293,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 8,
+          "expectedNumbers": [
+            "2026",
+            "12345",
+            "80421",
+            "9876",
+            "2026"
+          ],
+          "actualNumbers": [
+            "2026",
+            "12345",
+            "80421",
+            "9876",
+            "2026"
+          ]
+        },
+        "literalDigitGroupsExact": true,
+        "seconds": 2.591826520001632,
+        "wordMetrics": {
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "expectedCharacters": 293,
+          "actualCharacters": 293
+        },
+        "officePages": 1,
+        "officeNativeMetrics": {
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "expectedCharacters": 293,
+          "actualCharacters": 293
+        },
+        "warningCounts": {
+          "OCR_APPLIED": 1
+        }
+      },
+      {
+        "file": "english-tilt--6.png",
+        "language": "english",
+        "degrees": -6,
+        "status": "SUCCESS",
+        "metrics": {
+          "expectedCharacters": 293,
+          "actualCharacters": 294,
+          "editDistance": 82,
+          "cer": 0.27986348122866894,
+          "alignedCharacterRecall": 0.8600682593856656,
+          "exactLines": 5,
+          "expectedNumbers": [
+            "2026",
+            "12345",
+            "80421",
+            "9876",
+            "2026"
+          ],
+          "actualNumbers": [
+            "26",
+            "12345",
+            "20",
+            "80421",
+            "9876",
+            "2026"
+          ]
+        },
+        "literalDigitGroupsExact": false,
+        "seconds": 4.131961758001125,
+        "warningCounts": {
+          "OCR_APPLIED": 1
+        }
+      },
+      {
+        "file": "english-tilt-+6.png",
+        "language": "english",
+        "degrees": 6,
+        "status": "SUCCESS",
+        "metrics": {
+          "expectedCharacters": 293,
+          "actualCharacters": 293,
+          "editDistance": 1,
+          "cer": 0.0034129692832764505,
+          "alignedCharacterRecall": 0.9965870307167235,
+          "exactLines": 7,
+          "expectedNumbers": [
+            "2026",
+            "12345",
+            "80421",
+            "9876",
+            "2026"
+          ],
+          "actualNumbers": [
+            "2026",
+            "12345",
+            "80424",
+            "9876",
+            "2026"
+          ]
+        },
+        "literalDigitGroupsExact": false,
+        "seconds": 3.7778582609971636,
+        "warningCounts": {
+          "OCR_APPLIED": 1,
+          "OCR_DESKEW_APPLIED": 1,
+          "OCR_RECOGNITION_CONFLICT": 1
+        }
+      },
+      {
+        "file": "chinese-tilt-+0.png",
+        "language": "chinese",
+        "degrees": 0,
+        "status": "SUCCESS",
+        "metrics": {
+          "expectedCharacters": 98,
+          "actualCharacters": 97,
+          "editDistance": 3,
+          "cer": 0.030612244897959183,
+          "alignedCharacterRecall": 0.9693877551020408,
+          "exactLines": 6,
+          "expectedNumbers": [
+            "12345"
+          ],
+          "actualNumbers": [
+            "12345"
+          ]
+        },
+        "literalDigitGroupsExact": true,
+        "seconds": 2.7264209860004485,
+        "wordMetrics": {
+          "cer": 0.030612244897959183,
+          "alignedCharacterRecall": 0.9693877551020408,
+          "expectedCharacters": 98,
+          "actualCharacters": 97
+        },
+        "officePages": 1,
+        "officeNativeMetrics": {
+          "cer": 0.030612244897959183,
+          "alignedCharacterRecall": 0.9693877551020408,
+          "expectedCharacters": 98,
+          "actualCharacters": 97
+        },
+        "warningCounts": {
+          "OCR_APPLIED": 1
+        }
+      },
+      {
+        "file": "chinese-tilt--6.png",
+        "language": "chinese",
+        "degrees": -6,
+        "status": "SUCCESS",
+        "metrics": {
+          "expectedCharacters": 98,
+          "actualCharacters": 98,
+          "editDistance": 1,
+          "cer": 0.01020408163265306,
+          "alignedCharacterRecall": 0.9897959183673469,
+          "exactLines": 7,
+          "expectedNumbers": [
+            "12345"
+          ],
+          "actualNumbers": [
+            "12345"
+          ]
+        },
+        "literalDigitGroupsExact": true,
+        "seconds": 4.207987119996687,
+        "warningCounts": {
+          "OCR_APPLIED": 1,
+          "OCR_DESKEW_APPLIED": 1,
+          "OCR_RECOGNITION_CONFLICT": 5
+        }
+      },
+      {
+        "file": "chinese-tilt-+6.png",
+        "language": "chinese",
+        "degrees": 6,
+        "status": "SUCCESS",
+        "metrics": {
+          "expectedCharacters": 98,
+          "actualCharacters": 98,
+          "editDistance": 1,
+          "cer": 0.01020408163265306,
+          "alignedCharacterRecall": 0.9897959183673469,
+          "exactLines": 7,
+          "expectedNumbers": [
+            "12345"
+          ],
+          "actualNumbers": [
+            "12345"
+          ]
+        },
+        "literalDigitGroupsExact": true,
+        "seconds": 3.5855868960061343,
+        "warningCounts": {
+          "OCR_APPLIED": 1,
+          "OCR_DESKEW_APPLIED": 1,
+          "OCR_RECOGNITION_CONFLICT": 4
+        }
+      }
+    ],
+    "status": "completed",
+    "resources": {
+      "wallSeconds": 44.286511211998004,
+      "userSeconds": 113.391413,
+      "systemSeconds": 9.771308,
+      "maxChildRssKiB": 329832
+    },
+    "workerCount": 10,
+    "ECHILD": true,
+    "newZombies": []
+  },
+  "runtime": {
+    "java": "Temurin 17.0.16+8",
+    "maven": "3.9.11",
+    "node": "22.17.0",
+    "office": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "tesseract": "5.5.2",
+    "tessdataFastRevision": "87416418657359cb625c412a48b6e1d6d41c29bd",
+    "languages": "chi_sim+eng",
+    "wholePagePSM": 3,
+    "NotoSansCJK": "2.004",
+    "LiberationSans": "2.1.5",
+    "PyMuPDF": "1.26.6"
+  },
+  "workflowControls": {
+    "badTokenHTTP": 401,
+    "missingTaskHTTP": 404,
+    "decodedNulHTTP": 400,
+    "truncatedUTF16HTTP": 400,
+    "partialBatchSuccess": true,
+    "failedFileIncludedInReport": true,
+    "downloadHEAD": 200
+  },
+  "remaining": [
+    "Private complex scans: giant table pseudo-words, short heading ghosts and missing fields remain; see cloud-scan-layout-20261006.md",
+    "English -6 degree OCR: CER 27.99%; English +6 degree OCR retains conflicting 80424 instead of 80421",
+    "Chinese normal OCR CER 3.06%, despite correct 12345",
+    "Native text plus full-page fidelity-image OFD roundtrip still rejects TXT/Word with OCR_NO_NEW_TEXT",
+    "Wide Excel fit-width output is very small; cloud Office cold runs take 26.8-32.9 seconds",
+    "Initial CSV/Office audit recorded max single-child RSS 3380004 KiB; no OS total-memory limit acceptance",
+    "Microsoft Word, Windows/macOS installed packages, UOF/WPS real files and sustained concurrent load not newly accepted"
+  ]
+}
