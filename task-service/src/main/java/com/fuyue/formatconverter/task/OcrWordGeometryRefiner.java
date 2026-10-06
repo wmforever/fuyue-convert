@@ -12,6 +12,40 @@ final class OcrWordGeometryRefiner {
     private OcrWordGeometryRefiner() { }
 
     static TextBlock refine(TextBlock line, BufferedImage image, Rect page) {
+        TextBlock regular = refineChinese(line, image, page);
+        if (regular != line || line.ocrWords().size() < 3
+                || !com.fuyue.formatconverter.model.Transform2D.IDENTITY.equals(line.transform())) return regular;
+        // Section numbers are immutable anchors. Apply the existing separated-
+        // ink proof only to a complete Chinese suffix, never to numeric boxes.
+        var number = line.ocrWords().get(0);
+        if (!number.text().matches("[0-9]{1,3}(?:\\.[0-9]{1,3}){0,2}")) return line;
+        var originalWords = line.ocrWords().subList(1, line.ocrWords().size());
+        var words = new ArrayList<>(originalWords);
+        // A low-confidence leading quote can share an oversized Han word box.
+        // Count only its Han ink cells, but retain the quote in editable text:
+        // this is geometry evidence, not permission to correct recognized text.
+        boolean quoted = words.get(0).confidence() < .6d && words.get(0).text().matches("”\\p{IsHan}+");
+        if (quoted) {
+            var word = words.get(0);
+            words.set(0, new TextBlock.OcrWord(word.box(), word.text().substring(1), word.confidence()));
+        }
+        String value = words.stream().map(TextBlock.OcrWord::text).reduce("", String::concat);
+        if (value.codePointCount(0, value.length()) < 6 || !value.codePoints().allMatch(OcrWordGeometryRefiner::han)) return line;
+        Rect box = words.stream().map(TextBlock.OcrWord::box).reduce(Rect::union).orElseThrow();
+        if (number.box().right() + .25d >= box.x()) return line;
+        TextBlock suffix = new TextBlock(line.id(), line.pageNumber(), box, value, line.baselineY(), line.style(),
+                line.zOrder(), line.textOffsetXmm(), line.textOffsetYmm(), line.advancesMm(), line.transform(), words);
+        TextBlock refined = refineChinese(suffix, image, page);
+        if (refined == suffix) return line;
+        List<TextBlock.OcrWord> retained = new ArrayList<>(); retained.add(number); retained.addAll(refined.ocrWords());
+        if (quoted) retained.set(1, new TextBlock.OcrWord(retained.get(1).box(),
+                originalWords.get(0).text(), originalWords.get(0).confidence()));
+        return new TextBlock(line.id(), line.pageNumber(), number.box().union(refined.box()), line.text(),
+                line.baselineY(), line.style(), line.zOrder(), line.textOffsetXmm(), line.textOffsetYmm(),
+                line.advancesMm(), line.transform(), retained);
+    }
+
+    private static TextBlock refineChinese(TextBlock line, BufferedImage image, Rect page) {
         int[] characters = line.text().codePoints().toArray();
         if (characters.length < 6 || line.ocrWords().isEmpty() || !han(characters[0])) return line;
         for (int character : characters) if (!han(character)

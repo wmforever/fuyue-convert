@@ -290,7 +290,18 @@ final class FixedLayoutDocxRenderer {
                             && word.box().y() >= background.box().y() && word.box().bottom() <= background.box().bottom()
                             && lightNeutralPaper(fills);
                     for (OcrBackgroundMaskSampler.Fill fill : fills) {
-                        masks.add(new OcrMask(block.id(), fill, mixedForeground, lightDecimal));
+                        // White screenshot letters must not move independently
+                        // sampled, reliable light-paper prose behind the scan.
+                        // Numeric and dark-paper words retain their existing policy.
+                        boolean boundedLightWord = scanOnly && word.confidence() >= .85d
+                                && word.text().codePoints().noneMatch(Character::isDigit)
+                                && Transform2D.IDENTITY.equals(block.transform())
+                                && word.box().width() < page.physicalBox().width() / 4d
+                                && word.box().height() < page.physicalBox().height() / 12d
+                                && word.box().x() >= background.box().x() && word.box().right() <= background.box().right()
+                                && word.box().y() >= background.box().y() && word.box().bottom() <= background.box().bottom()
+                                && lightNeutralPaper(fills);
+                        masks.add(new OcrMask(block.id(), fill, mixedForeground, lightDecimal, boundedLightWord));
                     }
                     colors.put(word, ocrForeground(fills, block.style().color()));
                     // Reserve only a bounded, pixel-checked blank region for a
@@ -353,7 +364,7 @@ final class FixedLayoutDocxRenderer {
             String xml = "<v:rect xmlns:v=\"urn:schemas-microsoft-com:vml\" id=\""
                     + attr(shapeId("ocr-mask", mask.blockId())) + "\" style=\""
                     + attr(positionStyle(fill.box(), foregroundMasks || mask.mixedForeground()
-                            || anomalousDarkWord && mask.lightDecimal()
+                            || anomalousDarkWord && mask.lightDecimal() || mask.boundedLightWord()
                             ? 1 : BEHIND_TEXT_Z_INDEX + 1, 0, true))
                     + "\" filled=\"t\" fillcolor=\"#" + fill.color() + "\" stroked=\"f\"/>";
             unchecked(() -> appendShape(anchor, xml));
@@ -425,7 +436,7 @@ final class FixedLayoutDocxRenderer {
     }
 
     private record OcrMask(String blockId, OcrBackgroundMaskSampler.Fill fill,
-                           boolean mixedForeground, boolean lightDecimal) { }
+                           boolean mixedForeground, boolean lightDecimal, boolean boundedLightWord) { }
     private record OcrAppearance(Map<TextBlock.OcrWord, ColorValue> colors,
                                  Map<TextBlock.OcrWord, Double> numericRightEdges) { }
 

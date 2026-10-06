@@ -318,6 +318,43 @@ class OcrWordOverlayTest {
         }
     }
 
+    @Test void screenshotWhiteWordsDoNotDemoteReliableLightPaperProse() throws Exception {
+        for (int variant = 0; variant < 4; variant++) {
+            BufferedImage pixels = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+            var graphics = pixels.createGraphics();
+            graphics.setColor(java.awt.Color.WHITE); graphics.fillRect(0, 0, 200, 200);
+            graphics.setColor(java.awt.Color.BLACK); graphics.fillRect(0, 0, 200, 100);
+            if (variant == 3) { graphics.setColor(java.awt.Color.RED); graphics.fillRect(45, 142, 6, 12); }
+            graphics.dispose();
+            var bytes = new ByteArrayOutputStream(); ImageIO.write(pixels, "png", bytes); pixels.flush();
+            ImageBlock scan = new ImageBlock("scan", 1, new Rect(0, 0, 100, 100),
+                    "image/png", bytes.toByteArray(), "OCR_SCAN_BACKGROUND", 0);
+            TextBlock dark = new TextBlock("dark", 1, new Rect(20, 20, 10, 4), "TERMINAL", 24,
+                    FontStyle.defaults(), 2, 0, 0, List.of(), Transform2D.IDENTITY,
+                    List.of(new TextBlock.OcrWord(new Rect(20, 20, 10, 4), "TERMINAL", .96)));
+            String value = variant == 2 ? "00127" : "正文";
+            TextBlock light = new TextBlock("light", 1, new Rect(20, 70, 10, 4), value, 74,
+                    FontStyle.defaults(), 3, 0, 0, List.of(), Transform2D.IDENTITY,
+                    List.of(new TextBlock.OcrWord(new Rect(20, 70, 10, 4), value, variant == 1 ? .45 : .96)));
+            try (XWPFDocument docx = new XWPFDocument(Files.newInputStream(render(List.of(dark, light), List.of(scan))))) {
+                var xml = xml(docx); var all = masks(xml);
+                var darkMasks = all.stream().filter(e -> e.getAttribute("id").startsWith("ocr-mask-dark-")).toList();
+                assertFalse(darkMasks.isEmpty());
+                assertTrue(darkMasks.stream().allMatch(e -> e.getAttribute("style").contains("z-index:-251658751;")));
+                var lightMasks = all.stream().filter(e -> e.getAttribute("id").startsWith("ocr-mask-light-")).toList();
+                if (variant == 3) assertTrue(lightMasks.isEmpty(), "未知彩色印记不能覆盖");
+                else {
+                    assertFalse(lightMasks.isEmpty());
+                    String expectedLayer = variant == 0 ? "z-index:1;" : "z-index:-251658751;";
+                    assertTrue(lightMasks.stream().allMatch(e -> e.getAttribute("style").contains(
+                            expectedLayer)));
+                }
+                assertEquals("TERMINAL" + value, elements(xml, WORD, "t").stream().map(Element::getTextContent).reduce("", String::concat));
+                assertArrayEquals(scan.data(), docx.getAllPictures().get(0).getData());
+            }
+        }
+    }
+
     @Test void longNumericReserveIsBoundedAndRetainsShortReserveAroundUnknownInkOrNeighbor() throws Exception {
         List<Double> widths = new ArrayList<>();
         List<String> maskStyles = new ArrayList<>();
