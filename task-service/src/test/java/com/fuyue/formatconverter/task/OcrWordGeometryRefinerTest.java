@@ -81,6 +81,48 @@ class OcrWordGeometryRefinerTest {
         pixels.flush();
     }
 
+    @Test void restoresConnectedClippedHeadingInkButKeepsIndependentMarksAndNumericAnchors() {
+        BufferedImage pixels = new BufferedImage(360, 60, BufferedImage.TYPE_INT_RGB);
+        var g = pixels.createGraphics(); g.setColor(Color.WHITE); g.fillRect(0, 0, 360, 60);
+        BufferedImage chinese = source(); g.drawImage(chinese, 20, 0, 320, 60, null); chinese.flush();
+        g.setColor(Color.BLACK); g.fillRect(2, 18, 12, 20); g.dispose();
+        var source = line("本合同服务须履行", List.of("本合同", "服务", "须履行"));
+        var number = new TextBlock.OcrWord(new Rect(2, 18, 12, 20), "04.01", .97);
+        var words = new java.util.ArrayList<TextBlock.OcrWord>(); words.add(number);
+        for (int i = 0; i < source.ocrWords().size(); i++) {
+            var word = source.ocrWords().get(i); double clipped = i == 0 ? 4 : 0;
+            words.add(new TextBlock.OcrWord(new Rect(20 + word.box().x() * 2 + clipped,
+                    word.box().y() * 2, word.box().width() * 2 - clipped, word.box().height() * 2),
+                    word.text(), word.confidence()));
+        }
+        Rect box = words.stream().map(TextBlock.OcrWord::box).reduce(Rect::union).orElseThrow();
+        TextBlock original = new TextBlock("heading", 1, box, "04.01 本合同服务须履行", 46,
+                source.style(), 1, 0, 0, List.of(), Transform2D.IDENTITY, words);
+        Rect page = new Rect(0, 0, 360, 60);
+        int[] before = pixels.getRGB(0, 0, 360, 60, null, 0, 360);
+        TextBlock refined = OcrWordGeometryRefiner.refine(original, pixels, page);
+        assertEquals(new Rect(24, 10, 112, 36), refined.ocrWords().get(1).box());
+        assertSame(number, refined.ocrWords().get(0)); assertEquals(original.text(), refined.text());
+        assertEquals(source.ocrWords().get(0).confidence(), refined.ocrWords().get(1).confidence());
+        assertArrayEquals(before, pixels.getRGB(0, 0, 360, 60, null, 0, 360));
+        // An isolated dot inside the proposed extension must remain outside every revised word.
+        pixels.setRGB(22, 12, Color.BLACK.getRGB());
+        assertTrue(OcrWordGeometryRefiner.refine(original, pixels, page).ocrWords().get(1).box().x() >= 28);
+        pixels.setRGB(22, 12, new Color(255, 180, 180).getRGB());
+        assertTrue(OcrWordGeometryRefiner.refine(original, pixels, page).ocrWords().get(1).box().x() >= 28,
+                "Bright coloured ink outside the old box must not be covered");
+        pixels.setRGB(22, 12, Color.WHITE.getRGB());
+        var near = new java.util.ArrayList<>(words);
+        var crowdedNumber = new TextBlock.OcrWord(new Rect(2, 18, 25, 20), "04.01", .97);
+        near.set(0, crowdedNumber);
+        TextBlock crowded = new TextBlock(original.id(), 1, box, original.text(), 46,
+                source.style(), 1, 0, 0, List.of(), Transform2D.IDENTITY, near);
+        TextBlock guarded = OcrWordGeometryRefiner.refine(crowded, pixels, page);
+        assertSame(crowdedNumber, guarded.ocrWords().get(0));
+        assertTrue(guarded.ocrWords().get(1).box().x() >= 28);
+        pixels.flush();
+    }
+
     private TextBlock line(String text, List<String> words) {
         List<TextBlock.OcrWord> geometry = List.of(
                 new TextBlock.OcrWord(new Rect(2, 5, 36, 18), words.get(0), .95),
