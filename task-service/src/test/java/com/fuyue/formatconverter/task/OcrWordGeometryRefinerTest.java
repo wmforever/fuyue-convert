@@ -45,6 +45,42 @@ class OcrWordGeometryRefinerTest {
         opaque.flush(); pixels.flush();
     }
 
+    @Test void refinesNumberedChineseHeadingButPreservesNumberObjectAndUnknownInk() {
+        BufferedImage pixels = new BufferedImage(180, 30, BufferedImage.TYPE_INT_RGB);
+        var g = pixels.createGraphics(); g.setColor(Color.WHITE); g.fillRect(0, 0, 180, 30);
+        BufferedImage chinese = source(); g.drawImage(chinese, 20, 0, null); chinese.flush();
+        g.setColor(Color.BLACK); g.fillRect(2, 9, 6, 10); g.dispose();
+        TextBlock source = line("本合同服务须履行", List.of("本合同", "服务", "须履行"));
+        var number = new TextBlock.OcrWord(new Rect(2, 9, 6, 10), "04.01", .97);
+        var words = new java.util.ArrayList<TextBlock.OcrWord>(); words.add(number);
+        for (var word : source.ocrWords()) words.add(new TextBlock.OcrWord(
+                new Rect(word.box().x() + 20, word.box().y(), word.box().width(), word.box().height()),
+                word.text(), word.confidence()));
+        Rect box = words.stream().map(TextBlock.OcrWord::box).reduce(Rect::union).orElseThrow();
+        TextBlock original = new TextBlock("heading", 1, box, "04.01 本合同服务须履行", 23,
+                source.style(), 1, 0, 0, List.of(), Transform2D.IDENTITY, words);
+        int[] before = pixels.getRGB(0, 0, 180, 30, null, 0, 180);
+        TextBlock refined = OcrWordGeometryRefiner.refine(original, pixels, new Rect(0, 0, 180, 30));
+        assertNotSame(original, refined); assertSame(number, refined.ocrWords().get(0));
+        assertEquals(original.text(), refined.text());
+        assertEquals(new Rect(22, 5, 56, 18), refined.ocrWords().get(1).box());
+        assertArrayEquals(before, pixels.getRGB(0, 0, 180, 30, null, 0, 180));
+        var quotedWords = new java.util.ArrayList<>(words);
+        var first = words.get(1);
+        quotedWords.set(1, new TextBlock.OcrWord(first.box(), "”" + first.text(), .45));
+        TextBlock quoted = new TextBlock(original.id(), 1, box, "04.01 ”本合同服务须履行", 23,
+                source.style(), 1, 0, 0, List.of(), Transform2D.IDENTITY, quotedWords);
+        TextBlock fitted = OcrWordGeometryRefiner.refine(quoted, pixels, new Rect(0, 0, 180, 30));
+        assertNotSame(quoted, fitted); assertSame(number, fitted.ocrWords().get(0));
+        assertEquals(quoted.text(), fitted.text()); assertEquals("”本合同", fitted.ocrWords().get(1).text());
+        assertEquals(.45, fitted.ocrWords().get(1).confidence());
+        assertEquals(new Rect(22, 5, 56, 18), fitted.ocrWords().get(1).box());
+        for (int y = 5; y < 23; y++) pixels.setRGB(80, y, Color.BLACK.getRGB());
+        assertSame(original, OcrWordGeometryRefiner.refine(original, pixels, new Rect(0, 0, 180, 30)),
+                "不能用标题前缀绕过未知印记和字间隔断的保护");
+        pixels.flush();
+    }
+
     private TextBlock line(String text, List<String> words) {
         List<TextBlock.OcrWord> geometry = List.of(
                 new TextBlock.OcrWord(new Rect(2, 5, 36, 18), words.get(0), .95),
