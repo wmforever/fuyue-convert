@@ -1,0 +1,344 @@
+{
+  "parentRevision": "eb0c5780309300ad5c69dd9bc8055bd95dab5fec",
+  "productionChange": "Bound proven Latin fallback width by the next reliable original-coordinate word, retain established fit if tighter proof fails",
+  "provenance": {
+    "buildInputSha256": "4f854297b1dcc77c245604be408b5b3994ac9ef7eba28ac4581c08e0a6a7a278",
+    "parentRevision": "eb0c5780309300ad5c69dd9bc8055bd95dab5fec",
+    "workingTreeDirtyAtBuildStart": true,
+    "jarSha256": "226af9e5a4a8e1e275238c2cd50b42948c8b97e2005e2977962f884e18d34312",
+    "applicationClassCount": 237,
+    "applicationClassSha256": "2da28378dcc3cb99170b08b50b34d80389b5d8821cda1bfa210801244827c040",
+    "packagedClassesMatchTargets": true
+  },
+  "finalJavaTests": {
+    "unique": 530,
+    "pass": 528,
+    "skip": 2,
+    "fail": 0,
+    "error": 0,
+    "firstAttemptOfficeTimeout": 1,
+    "retrySame45SecondLimitPassed": true,
+    "webTests": 28,
+    "notSinglePassFullReactor": true
+  },
+  "synthetic": {
+    "actions": 22,
+    "success": 22,
+    "words": 140,
+    "geometryAudit": {
+      "status": "passed",
+      "cases": [
+        {
+          "case": "chinese",
+          "pages": 1,
+          "words": 67,
+          "changed": [],
+          "originalScansMasksNumbersAndPositionPreserved": true,
+          "pixelChangesPerPage": [
+            0
+          ],
+          "titleGaps": null
+        },
+        {
+          "case": "review",
+          "pages": 1,
+          "words": 9,
+          "changed": [
+            {
+              "id": "text-ocr-p1-l1-word-0-11",
+              "text": "REVIEW ",
+              "oldScale": 112,
+              "newScale": 101
+            },
+            {
+              "id": "text-ocr-p1-l1-word-1-12",
+              "text": "RECORD ",
+              "oldScale": 112,
+              "newScale": 101
+            }
+          ],
+          "originalScansMasksNumbersAndPositionPreserved": true,
+          "pixelChangesPerPage": [
+            2869
+          ],
+          "titleGaps": {
+            "before": [
+              {
+                "left": "REVIEW",
+                "right": "RECORD",
+                "gapPt": -0.7741928100585938
+              },
+              {
+                "left": "RECORD",
+                "right": "2036",
+                "gapPt": -0.9481048583984375
+              }
+            ],
+            "after": [
+              {
+                "left": "REVIEW",
+                "right": "RECORD",
+                "gapPt": 5.152397155761719
+              },
+              {
+                "left": "RECORD",
+                "right": "2036",
+                "gapPt": 5.56201171875
+              }
+            ]
+          }
+        },
+        {
+          "case": "revenue",
+          "pages": 1,
+          "words": 9,
+          "changed": [
+            {
+              "id": "text-ocr-p1-l1-word-1-12",
+              "text": "REVIEW ",
+              "oldScale": 112,
+              "newScale": 101
+            }
+          ],
+          "originalScansMasksNumbersAndPositionPreserved": true,
+          "pixelChangesPerPage": [
+            1301
+          ],
+          "titleGaps": {
+            "before": [
+              {
+                "left": "REVENUE",
+                "right": "REVIEW",
+                "gapPt": 2.9755935668945312
+              },
+              {
+                "left": "REVIEW",
+                "right": "2071",
+                "gapPt": -2.37420654296875
+              }
+            ],
+            "after": [
+              {
+                "left": "REVENUE",
+                "right": "REVIEW",
+                "gapPt": 2.9755935668945312
+              },
+              {
+                "left": "REVIEW",
+                "right": "2071",
+                "gapPt": 3.552398681640625
+              }
+            ]
+          }
+        },
+        {
+          "case": "project",
+          "pages": 1,
+          "words": 11,
+          "changed": [
+            {
+              "id": "text-ocr-p1-l1-word-1-14",
+              "text": "SUMMARY ",
+              "oldScale": 103,
+              "newScale": 100
+            }
+          ],
+          "originalScansMasksNumbersAndPositionPreserved": true,
+          "pixelChangesPerPage": [
+            1740
+          ],
+          "titleGaps": null
+        },
+        {
+          "case": "reserve",
+          "pages": 1,
+          "words": 11,
+          "changed": [
+            {
+              "id": "text-ocr-p1-l1-word-1-14",
+              "text": "REVIEW ",
+              "oldScale": 111,
+              "newScale": 100
+            }
+          ],
+          "originalScansMasksNumbersAndPositionPreserved": true,
+          "pixelChangesPerPage": [
+            1286
+          ],
+          "titleGaps": null
+        },
+        {
+          "case": "dark",
+          "pages": 1,
+          "words": 11,
+          "changed": [
+            {
+              "id": "text-ocr-p1-l1-word-1-14",
+              "text": "REVIEW ",
+              "oldScale": 113,
+              "newScale": 102
+            }
+          ],
+          "originalScansMasksNumbersAndPositionPreserved": true,
+          "pixelChangesPerPage": [
+            1121
+          ],
+          "titleGaps": null
+        },
+        {
+          "case": "negative",
+          "pages": 1,
+          "words": 11,
+          "changed": [
+            {
+              "id": "text-ocr-p1-l1-word-0-13",
+              "text": "EDIT ",
+              "oldScale": 105,
+              "newScale": 100
+            }
+          ],
+          "originalScansMasksNumbersAndPositionPreserved": true,
+          "pixelChangesPerPage": [
+            511
+          ],
+          "titleGaps": null
+        },
+        {
+          "case": "zeros",
+          "pages": 1,
+          "words": 11,
+          "changed": [
+            {
+              "id": "text-ocr-p1-l1-word-0-13",
+              "text": "EDIT ",
+              "oldScale": 105,
+              "newScale": 100
+            }
+          ],
+          "originalScansMasksNumbersAndPositionPreserved": true,
+          "pixelChangesPerPage": [
+            511
+          ],
+          "titleGaps": null
+        }
+      ]
+    },
+    "amountAudit": {
+      "status": "passed",
+      "cases": [
+        {
+          "sample": "review",
+          "edited": false,
+          "amount": "127.50",
+          "pageCount": 1,
+          "exactFourLines": true,
+          "oldAmountAbsentAfterEdit": false,
+          "compactCer": 0,
+          "alignedCharacterRecall": 1
+        },
+        {
+          "sample": "review",
+          "edited": true,
+          "amount": "128.75",
+          "pageCount": 1,
+          "exactFourLines": true,
+          "oldAmountAbsentAfterEdit": true,
+          "compactCer": 0,
+          "alignedCharacterRecall": 1
+        },
+        {
+          "sample": "revenue",
+          "edited": false,
+          "amount": "-0054.80",
+          "pageCount": 1,
+          "exactFourLines": true,
+          "oldAmountAbsentAfterEdit": false,
+          "compactCer": 0,
+          "alignedCharacterRecall": 1
+        },
+        {
+          "sample": "revenue",
+          "edited": true,
+          "amount": "-0068.95",
+          "pageCount": 1,
+          "exactFourLines": true,
+          "oldAmountAbsentAfterEdit": true,
+          "compactCer": 0,
+          "alignedCharacterRecall": 1
+        }
+      ]
+    },
+    "resources": {
+      "wallSeconds": 91.91792303799593,
+      "userSeconds": 244.268063,
+      "systemSeconds": 20.287209,
+      "maxChildRssKiB": 344864
+    },
+    "bundledOcr": true,
+    "workerCount": 22,
+    "newZombies": 0
+  },
+  "privateAnonymous": {
+    "pages": 11,
+    "words": 2102,
+    "changedLatinWords": 1,
+    "pixelChangesPerPage": [
+      0,
+      0,
+      0,
+      0,
+      452,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "originalScansMasksNumbersAndPositionsPreserved": true,
+    "wordTxtOrderUnderExistingPoiParenthesisContract": true,
+    "officePdfToTextError": "OCR_VISIBILITY_UNCERTAIN",
+    "complexLayoutQualityAccepted": false,
+    "resources": {
+      "wallSeconds": 133.63432101600483,
+      "userSeconds": 219.486514,
+      "systemSeconds": 16.779412,
+      "maxChildRssKiB": 972852
+    },
+    "workerCount": 4,
+    "newZombies": 0
+  },
+  "rejectedCandidate": {
+    "independentRevenueRegressionCaught": true,
+    "initialWrappingFitCouldBeUndone": true,
+    "failedArtifactRetainedLocally": true
+  },
+  "openIssues": [
+    "Complex gray/merged tables: giant low-confidence pseudo-words and missed fields remain",
+    "Short Chinese heading ghosting and screenshot/diagram recognition remain",
+    "Dark-paper body word ghosting is inherited and remains",
+    "Word text extraction adds existing POI parentheses around positioned words",
+    "Private Office PDF→TXT refuses ambiguous OCR visibility; no artifact delivered",
+    "Tilted OCR numeric conflict, OFD strict failures and wide-sheet resource/latency limits from prior report remain"
+  ],
+  "unrun": [
+    "Microsoft Word",
+    "Native macOS/Windows installer acceptance",
+    "Full load/concurrency and total OS memory acceptance",
+    "New tilted Word or new OCR strategy/model acceptance"
+  ],
+  "helpers": {
+    "generate_ocr_word_spacing.py": "ed69fc5c3425ef64aabb213baee9e60ddbc9631005c6b6abfd21268457428cea",
+    "verify_ocr_word_spacing.py": "5ca6295fbaf7abe4b605a810805dc389a023b0f2fc1c342b8627984c94ae1901",
+    "run_cloud_smoke25.py": "e58f487b89cac2561ca25c2dd15ac6a00062394df8c8af81d3e362e3e09f1ae3",
+    "record_cloud_provenance.py": "91d3cc423598b87b660d9c3bbbfa5fbf5afd89a987ff674849ba2978ca704277"
+  },
+  "reference": {
+    "repo": "ArtifexSoftware/pdf2docx",
+    "revision": "3e1c2319d6a3fbf2ae4d46c3ab734b7fc87bd9b4",
+    "reviewed": "TextSpan font metrics, half-point sizing/scaling; LICENSE MIT",
+    "copiedCode": false,
+    "addedRuntimeDependency": false
+  },
+  "ci": "See exact current-head run on draft PR #9; prior eb0c578 green CI is not acceptance for this change."
+}

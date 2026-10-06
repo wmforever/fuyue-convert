@@ -488,8 +488,15 @@ final class FixedLayoutDocxRenderer {
                     value, line.baselineY(), new FontStyle("Arial", sizePt, false, false, ocrColors.colors().getOrDefault(word, line.style().color())),
                     Math.max(1, line.zOrder()), 0, 0, List.of(), new Transform2D(ratio, 0, 0, 1, 0, 0));
             if (Math.abs(line.transform().rotationDegrees()) < .01d && !line.transform().hasSkew(.001d)) {
+                double wrappingWidth = tolerantTextBox(positioned).width();
+                double availableWidth = wrappingWidth;
+                if (index + 1 < line.ocrWords().size()) {
+                    TextBlock.OcrWord next = line.ocrWords().get(index + 1);
+                    availableWidth = latinWordWidthBeforeNext(word, next, ocrFont(next.text()), sizePt,
+                            box, availableWidth);
+                }
                 double fitted = latinWordScale(word, font, OCR_LATIN_COMPATIBLE_FONT, sizePt, ratio,
-                        tolerantTextBox(positioned).width());
+                        wrappingWidth, availableWidth);
                 if (fitted != ratio) positioned = new TextBlock(positioned.id(), positioned.pageNumber(),
                         positioned.box(), positioned.text(), positioned.baselineY(), positioned.style(), positioned.zOrder(),
                         positioned.textOffsetXmm(), positioned.textOffsetYmm(), positioned.advancesMm(),
@@ -506,7 +513,36 @@ final class FixedLayoutDocxRenderer {
                 ? OCR_CJK_FONT : new java.awt.Font("Arial", java.awt.Font.PLAIN, 100);
     }
 
+    /** The transparent wrapping allowance must not consume a reliable neighboring word's gap. */
+    static double latinWordWidthBeforeNext(TextBlock.OcrWord word, TextBlock.OcrWord next,
+                                          java.awt.Font nextFont, double sizePt, Rect positioned,
+                                          double defaultWidth) {
+        double gap = next.box().x() - word.box().right();
+        if (gap <= 0d || next.confidence() < .85d
+                || next.box().y() >= word.box().bottom() || next.box().bottom() <= word.box().y()) {
+            return defaultWidth;
+        }
+        var glyphs = nextFont.deriveFont(100f).createGlyphVector(OCR_FONT_CONTEXT, next.text()).getVisualBounds();
+        double ratio = next.box().width() * 72d / 25.4d / Math.max(1d, glyphs.getWidth() * sizePt / 100d);
+        ratio = Math.max(.6d, Math.min(1.4d, ratio));
+        double bearing = glyphs.getX() * sizePt / 100d * 25.4d / 72d * ratio;
+        double nextLeft = Math.max(0d, next.box().x() - bearing);
+        double available = nextLeft - positioned.x() - gap * .5d;
+        // Ambiguous/overlapping geometry retains the established fallback.
+        return available > 0d ? Math.min(defaultWidth, available) : defaultWidth;
+    }
+
     /** Correct only a proven width overflow when Java silently substitutes Dialog for Arial. */
+    static double latinWordScale(TextBlock.OcrWord word, java.awt.Font measuredFont,
+                                 java.awt.Font compatibleFont, double sizePt, double original,
+                                 double wrappingWidthMm, double neighborWidthMm) {
+        double established = latinWordScale(word, measuredFont, compatibleFont, sizePt, original, wrappingWidthMm);
+        if (neighborWidthMm >= wrappingWidthMm) return established;
+        // Failure to prove a tighter fit must never undo the established fix.
+        return Math.min(established,
+                latinWordScale(word, measuredFont, compatibleFont, sizePt, original, neighborWidthMm));
+    }
+
     static double latinWordScale(TextBlock.OcrWord word, java.awt.Font measuredFont,
                                  java.awt.Font compatibleFont, double sizePt, double original, double boxWidthMm) {
         if (compatibleFont == null || !"Dialog".equals(measuredFont.getFamily())
