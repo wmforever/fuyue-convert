@@ -1,0 +1,68 @@
+name: Windows Office no-console integration
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - task-service/src/main/java/com/fuyue/formatconverter/task/LibreOfficeConverter.java
+      - task-service/src/main/java/com/fuyue/formatconverter/task/ConversionGuards.java
+      - task-service/src/test/java/com/fuyue/formatconverter/task/WindowsOfficeLaunchProbeTest.java
+      - .github/workflows/windows-office-integration.yml
+
+permissions:
+  contents: read
+
+jobs:
+  office-windows:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Set up pinned JDK
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: "17.0.20+101"
+          cache: maven
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - name: Prepare pinned Office runtime
+        working-directory: desktop
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          node scripts/prepare-libreoffice-runtime.mjs
+      - name: Reproduce installed path and release DOCX fixture
+        shell: pwsh
+        run: |
+          $PinnedRuntime = Join-Path $PWD "desktop\.runtime\libreoffice"
+          "FORMAT_CONVERTER_WINDOWS_PINNED_OFFICE_HOME=$PinnedRuntime" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          $Runtime = Join-Path $env:LOCALAPPDATA "Programs\Fuyue Convert\resources\backend\app\libreoffice"
+          New-Item (Split-Path $Runtime) -ItemType Directory -Force | Out-Null
+          Copy-Item desktop\.runtime\libreoffice $Runtime -Recurse
+          $SmokeRoot = Join-Path $env:RUNNER_TEMP "fuyue-full-office-smoke"
+          New-Item $SmokeRoot -ItemType Directory -Force | Out-Null
+          $PackageRoot = Join-Path $SmokeRoot "synthetic-docx"
+          New-Item (Join-Path $PackageRoot "_rels") -ItemType Directory -Force | Out-Null
+          New-Item (Join-Path $PackageRoot "word") -ItemType Directory -Force | Out-Null
+          $Utf8 = [System.Text.UTF8Encoding]::new($false)
+          $ContentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>'
+          $Relationships = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'
+          $Document = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>Fuyue Convert Full edition smoke test</w:t></w:r></w:p><w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr></w:body></w:document>'
+          [IO.File]::WriteAllText((Join-Path $PackageRoot "[Content_Types].xml"), $ContentTypes, $Utf8)
+          [IO.File]::WriteAllText((Join-Path $PackageRoot "_rels\.rels"), $Relationships, $Utf8)
+          [IO.File]::WriteAllText((Join-Path $PackageRoot "word\document.xml"), $Document, $Utf8)
+          $Docx = Join-Path $SmokeRoot "smoke.docx"
+          [IO.Compression.ZipFile]::CreateFromDirectory($PackageRoot, $Docx)
+          if (-not (Test-Path $Docx)) { throw "Synthetic smoke DOCX was not created" }
+
+          "FORMAT_CONVERTER_WINDOWS_OFFICE_HOME=$Runtime" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "FORMAT_CONVERTER_WINDOWS_SMOKE_DOCX=$Docx" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Exercise real conversion from Java without a Windows console
+        shell: pwsh
+        run: |
+          mvn -B -ntp -pl task-service -am "-Dskip.frontend=true" "-Dtest=WindowsOfficeLaunchProbeTest" "-Dsurefire.failIfNoSpecifiedTests=false" test

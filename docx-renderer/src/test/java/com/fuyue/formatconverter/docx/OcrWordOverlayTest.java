@@ -46,7 +46,8 @@ class OcrWordOverlayTest {
                 Rect sourceBox = words.get(index).box();
                 assertEquals(sourceBox.x() - .15, mm(style, "margin-left"), .001);
                 assertEquals(sourceBox.width() + .3, mm(style, "width"), .001);
-                assertTrue(style.contains("z-index:-251658751"), "遮罩在扫描背景之上、原生内容之下");
+                assertTrue(style.contains(index == 0 ? "z-index:1;" : "z-index:-251658751;"),
+                        "与原生正文分离的可靠词可覆盖扫描；低置信度词保留原层级");
                 assertEquals("#FFFFFF", masks.get(index).getAttribute("fillcolor"));
                 double maskLeft = mm(style, "margin-left"), maskRight = maskLeft + mm(style, "width");
                 assertTrue(maskRight <= 32.151 || maskLeft >= 59.849,
@@ -58,6 +59,23 @@ class OcrWordOverlayTest {
             assertEquals(List.of("Native body"), docx.getParagraphs().stream()
                     .filter(p -> !p.getCTP().xmlText().contains("txbxContent"))
                     .map(p -> p.getText()).filter(s -> !s.isBlank()).toList());
+        }
+    }
+
+    @Test void scanOnlyMasksAreInFrontOfDrawingMlBackgroundAndBelowEditableText() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        ImageBlock background = new ImageBlock("scan", 1, new Rect(0, 0, 100, 100),
+                "image/png", png(false), "OCR_SCAN_BACKGROUND", 0);
+        try (XWPFDocument docx = new XWPFDocument(Files.newInputStream(render(List.of(line), List.of(background))))) {
+            var xml = xml(docx);
+            assertEquals(1, masks(xml).size());
+            assertTrue(masks(xml).get(0).getAttribute("style").contains("z-index:1;"));
+            assertEquals(1, elements(xml,
+                    "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing", "anchor").size());
+            assertTrue(elements(xml, VML, "rect").stream()
+                    .filter(element -> element.getElementsByTagNameNS(WORD, "txbxContent").getLength() > 0)
+                    .allMatch(element -> element.getAttribute("style").contains("z-index:3;")));
+            assertArrayEquals(background.data(), docx.getAllPictures().get(0).getData());
         }
     }
 
@@ -113,6 +131,9 @@ class OcrWordOverlayTest {
                 var masks = masks(xml);
                 assertEquals(1, masks.size());
                 assertEquals("#%02X%02X%02X".formatted(gray, gray, gray), masks.get(0).getAttribute("fillcolor"));
+                assertTrue(masks.get(0).getAttribute("style").contains(gray < 110
+                        ? "z-index:-251658751;" : "z-index:1;"),
+                        "需要白字的暗纸页必须保留跨Office版本已验证的旧层级");
                 assertEquals("GRAY PAPER", elements(xml, WORD, "t").stream().map(Element::getTextContent).reduce("", String::concat));
                 assertTrue(elements(xml, WORD, "color").stream().anyMatch(color ->
                         (gray < 110 ? "FFFFFF" : "000000").equals(color.getAttributeNS(WORD, "val"))));
@@ -135,11 +156,231 @@ class OcrWordOverlayTest {
         }
     }
 
+    @Test void preservesConflictingNativeValueEvenWhenItOnlyExistsInBodyParagraphs() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        TextBlock nativeText = new TextBlock("native", 1, line.box(), "127.51", 34, FontStyle.defaults(), 4);
+        var paragraph = new ParagraphModel(nativeText.box(), List.of(nativeText), ParagraphModel.Alignment.LEFT, 0);
+        // The native run is absent from both textBlocks and the overlay list.
+        assertMixedLayer(line, List.of(), List.of(paragraph), List.of(), List.of(mixedBackground(255, 255, 255)), false);
+    }
+
+    @Test void protectsNativeParagraphExtentAndFontHeightMargin() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        for (double y : new double[]{37, 70}) {
+            TextBlock nativeText = new TextBlock("native", 1, new Rect(20, y, 30, 4), "Native", y + 4,
+                    new FontStyle("Arial", 12, false, false, null), 4);
+            // Neither run touches the word; the near run's body margin and the
+            // far run's declared paragraph extent must independently protect it.
+            Rect paragraphBox = y == 70 ? new Rect(20, 30, 30, 44) : nativeText.box();
+            assertMixedLayer(line, List.of(nativeText), List.of(new ParagraphModel(paragraphBox,
+                    List.of(nativeText), ParagraphModel.Alignment.LEFT, 0)), List.of(),
+                    List.of(mixedBackground(255, 255, 255)), false);
+        }
+    }
+
+    @Test void retainsLayeringForReflowAndTransformedNativeOcrCombinations() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        for (int variant = 0; variant < 3; variant++) {
+            TextBlock nativeText = new TextBlock("native", 1, new Rect(20, 70, 30, 4), "Native", 74,
+                    FontStyle.defaults(), 4, 0, 0, List.of(), variant == 1
+                    ? new Transform2D(1, 0, 0, 1, 0, 3) : Transform2D.IDENTITY);
+            TextBlock overlay = variant != 2 ? line : new TextBlock(line.id(), 1, line.box(), line.text(),
+                    line.baselineY(), line.style(), 1, 0, 0, List.of(), new Transform2D(1, 0, 0, 1, 0, 3), line.ocrWords());
+            var paragraph = new ParagraphModel(nativeText.box(), List.of(nativeText), ParagraphModel.Alignment.LEFT, 0,
+                    variant == 0 ? new ParagraphModel.Flow(2, 0) : null);
+            assertMixedLayer(overlay, List.of(nativeText), List.of(paragraph), List.of(),
+                    List.of(mixedBackground(255, 255, 255)), false);
+        }
+    }
+
+    @Test void mixedMasksRequireNeutralLightPaperAndNoIndependentGraphics() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        TextBlock nativeText = new TextBlock("native", 1, new Rect(20, 70, 30, 4), "Native", 74, FontStyle.defaults(), 4);
+        for (int[] rgb : new int[][]{{225,225,225}, {65,65,65}, {255,225,190}}) {
+            assertMixedLayer(line, List.of(nativeText), List.of(), List.of(),
+                    List.of(mixedBackground(rgb[0], rgb[1], rgb[2])), rgb[0] == 225);
+        }
+        ImageBlock background = mixedBackground(255, 255, 255);
+        assertMixedLayer(line, List.of(nativeText), List.of(), List.of(new LineElement("line", 1,
+                new Point(70, 80), new Point(80, 80), .2, ColorValue.BLACK, 3)), List.of(background), false);
+        assertMixedLayer(line, List.of(nativeText), List.of(), List.of(), List.of(background,
+                new ImageBlock("photo", 1, new Rect(70, 80, 10, 10), "image/png", png(), "PDF_IMAGE", 3)), false);
+    }
+
+    @Test void denseMixedPageSkipsOptionalPromotion() throws Exception {
+        TextBlock line = ocr(java.util.stream.IntStream.range(0, 513)
+                .mapToObj(i -> new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "X", .98)).toList(), "X ".repeat(513));
+        TextBlock nativeText = new TextBlock("native", 1, new Rect(20, 70, 30, 4), "Native", 74, FontStyle.defaults(), 4);
+        assertMixedLayer(line, List.of(nativeText), List.of(), List.of(), List.of(mixedBackground(255, 255, 255)), false);
+    }
+
+    @Test void supportsFirstOfdAdditionAndBaselineOffsetInsideNativeBoundary() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        line = new TextBlock(line.id(), 1, line.box(), line.text(), line.baselineY(), line.style(), 1,
+                0, 0, List.of(), Transform2D.IDENTITY, line.ocrWords());
+        TextBlock nativeText = new TextBlock("native", 1, new Rect(20, 70, 30, 4), "Native", 74,
+                FontStyle.defaults(), 4, 0, 4, List.of(), Transform2D.IDENTITY);
+        assertMixedLayer(line, List.of(nativeText), List.of(), List.of(), List.of(mixedBackground(255, 255, 255)), true);
+    }
+
+    @Test void uncertainNativeOffsetOutsideBoundaryRetainsScanLayer() throws Exception {
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "127.50", .98)), "127.50");
+        TextBlock nativeText = new TextBlock("native", 1, new Rect(20, 70, 30, 4), "Native", 82,
+                FontStyle.defaults(), 4, 0, 12, List.of(), Transform2D.IDENTITY);
+        assertMixedLayer(line, List.of(nativeText), List.of(), List.of(), List.of(mixedBackground(255, 255, 255)), false);
+    }
+
+    private ImageBlock mixedBackground(int r, int g, int b) throws Exception {
+        BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        var graphics = image.createGraphics(); graphics.setColor(new java.awt.Color(r, g, b));
+        graphics.fillRect(0, 0, 100, 100); graphics.dispose();
+        var data = new ByteArrayOutputStream(); ImageIO.write(image, "png", data); image.flush();
+        return new ImageBlock("scan", 1, new Rect(0, 0, 100, 100), "image/png", data.toByteArray(), "OCR_SCAN_BACKGROUND", 0);
+    }
+
+    private void assertMixedLayer(TextBlock line, List<TextBlock> nativeText, List<ParagraphModel> paragraphs,
+                                  List<LineElement> lines, List<ImageBlock> images, boolean promoted) throws Exception {
+        List<TextBlock> all = new ArrayList<>(nativeText); all.add(line);
+        var page = new PageModel(1, new Rect(0, 0, 100, 100), all, lines, images, paragraphs, List.of(), List.of());
+        try (var docx = new XWPFDocument()) {
+            new FixedLayoutDocxRenderer().renderOverlays(docx, docx.createParagraph(), page, List.of(line));
+            var masks = masks(xml(docx)); assertFalse(masks.isEmpty());
+            assertTrue(masks.stream().allMatch(mask -> mask.getAttribute("style").contains(
+                    promoted ? "z-index:1;" : "z-index:-251658751;")));
+            assertEquals(line.text(), elements(xml(docx), WORD, "t").stream().map(Element::getTextContent).reduce("", String::concat));
+            assertArrayEquals(images.get(0).data(), docx.getAllPictures().get(0).getData());
+        }
+    }
+
     private TextBlock ocr(List<TextBlock.OcrWord> words, String text) {
         Rect box = words.stream().map(TextBlock.OcrWord::box).reduce(Rect::union).orElseThrow();
         return new TextBlock("ocr-line", 1, box, text, box.bottom(),
                 new FontStyle("Arial", 10, false, false, null), 2,
                 0, 0, List.of(), Transform2D.IDENTITY, words);
+    }
+
+    @Test void numericEditReserveKeepsMasksAndPositionButRejectsUnknownInkAndLowConfidence() throws Exception {
+        List<Double> widths = new ArrayList<>();
+        for (int variant = 0; variant < 4; variant++) {
+            TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "7.50", variant == 2 ? .45 : .98)), "7.50");
+            ImageBlock background = new ImageBlock("scan", 1, new Rect(0, 0, 100, 100),
+                    "image/png", png(variant == 1), "OCR_SCAN_BACKGROUND", 0);
+            List<TextBlock> lines = new ArrayList<>(List.of(line));
+            if (variant == 3) lines.add(ocr(java.util.stream.IntStream.range(0, 512)
+                    .mapToObj(i -> new TextBlock.OcrWord(new Rect(70, 70, 2, 2), "X", .98)).toList(), "X ".repeat(512)));
+            try (XWPFDocument docx = new XWPFDocument(Files.newInputStream(render(lines, List.of(background))))) {
+                var xml = xml(docx);
+                var shape = elements(xml, VML, "rect").stream().filter(e -> e.getElementsByTagNameNS(WORD, "txbxContent").getLength() > 0).findFirst().orElseThrow();
+                widths.add(mm(shape.getAttribute("style"), "width"));
+                assertEquals(19.85, mm(masks(xml).get(0).getAttribute("style"), "margin-left"), .001);
+                assertEquals(12.3, mm(masks(xml).get(0).getAttribute("style"), "width"), .001);
+                assertEquals("7.50", elements(xml, WORD, "t").get(0).getTextContent());
+                assertArrayEquals(background.data(), docx.getAllPictures().get(0).getData());
+            }
+        }
+        assertTrue(widths.get(0) > widths.get(1) + 2d, widths.toString());
+        assertEquals(widths.get(1), widths.get(2));
+        assertEquals(widths.get(1), widths.get(3), "Dense pages skip the optional reserve before neighbor scans");
+    }
+
+    @Test void anomalousDarkWordPromotesOnlyReliableSmallLightPaperDecimals() throws Exception {
+        for (int variant = 0; variant < 8; variant++) {
+            var pixels = new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_RGB);
+            var g = pixels.createGraphics(); g.setColor(java.awt.Color.WHITE); g.fillRect(0, 0, 1000, 1000);
+            g.setColor(java.awt.Color.BLACK); g.fillRect(40, 90, 720, 220);
+            if (variant == 2) { g.setColor(java.awt.Color.DARK_GRAY); g.fillRect(190, 590, 140, 60); }
+            if (variant == 3) { g.setColor(java.awt.Color.RED); g.fillRect(240, 610, 20, 20); }
+            g.dispose(); var bytes = new ByteArrayOutputStream(); ImageIO.write(pixels, "png", bytes); pixels.flush();
+            var background = new ImageBlock("scan", 1, new Rect(0, 0, 100, 100), "image/png", bytes.toByteArray(), "OCR_SCAN_BACKGROUND", 0);
+            var huge = new TextBlock("huge", 1, new Rect(5, 10, 70, 20), "Ce", 27, FontStyle.defaults(), 1,
+                    0, 0, List.of(), Transform2D.IDENTITY, List.of(new TextBlock.OcrWord(new Rect(5, 10, 70, 20), "Ce", variant == 5 ? .98 : .2)));
+            String value = variant == 7 ? "170" : "0170.80";
+            var number = new TextBlock("amount", 1, new Rect(20, 60, 12, 4), value, 63, FontStyle.defaults(), 2,
+                    0, 0, List.of(), variant == 6 ? new Transform2D(1, .1, 0, 1, 0, 0) : Transform2D.IDENTITY,
+                    List.of(new TextBlock.OcrWord(new Rect(20, 60, 12, 4), value, variant == 1 ? .6 : .98)));
+            var images = variant == 4 ? List.of(background, new ImageBlock("other", 1, new Rect(80, 80, 5, 5), "image/png", png(), "PDF_IMAGE", 3)) : List.of(background);
+            var page = new PageModel(1, new Rect(0, 0, 100, 100), List.of(huge, number), List.of(), images, List.of(), List.of(), List.of());
+            try (var docx = new XWPFDocument()) {
+                new FixedLayoutDocxRenderer().renderOverlays(docx, docx.createParagraph(), page, List.of(huge, number));
+                var xml = xml(docx); var all = masks(xml);
+                var hugeMasks = all.stream().filter(e -> e.getAttribute("id").startsWith("ocr-mask-huge-")).toList();
+                assertFalse(hugeMasks.isEmpty()); assertTrue(hugeMasks.stream().allMatch(e -> e.getAttribute("style").contains("z-index:-251658751;")));
+                var amounts = all.stream().filter(e -> e.getAttribute("id").startsWith("ocr-mask-amount-")).toList();
+                if (variant == 3) assertTrue(amounts.isEmpty(), "Colored unknown ink must remain exposed");
+                else {
+                    assertFalse(amounts.isEmpty());
+                    String layer = variant == 0 ? "z-index:1;" : "z-index:-251658751;";
+                    assertTrue(amounts.stream().allMatch(e -> e.getAttribute("style").contains(layer)), "variant " + variant);
+                }
+                assertEquals("Ce" + value, elements(xml, WORD, "t").stream().map(Element::getTextContent).reduce("", String::concat));
+                assertArrayEquals(background.data(), docx.getAllPictures().get(0).getData());
+            }
+        }
+    }
+
+    @Test void screenshotWhiteWordsDoNotDemoteReliableLightPaperProse() throws Exception {
+        for (int variant = 0; variant < 4; variant++) {
+            BufferedImage pixels = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+            var graphics = pixels.createGraphics();
+            graphics.setColor(java.awt.Color.WHITE); graphics.fillRect(0, 0, 200, 200);
+            graphics.setColor(java.awt.Color.BLACK); graphics.fillRect(0, 0, 200, 100);
+            if (variant == 3) { graphics.setColor(java.awt.Color.RED); graphics.fillRect(45, 142, 6, 12); }
+            graphics.dispose();
+            var bytes = new ByteArrayOutputStream(); ImageIO.write(pixels, "png", bytes); pixels.flush();
+            ImageBlock scan = new ImageBlock("scan", 1, new Rect(0, 0, 100, 100),
+                    "image/png", bytes.toByteArray(), "OCR_SCAN_BACKGROUND", 0);
+            TextBlock dark = new TextBlock("dark", 1, new Rect(20, 20, 10, 4), "TERMINAL", 24,
+                    FontStyle.defaults(), 2, 0, 0, List.of(), Transform2D.IDENTITY,
+                    List.of(new TextBlock.OcrWord(new Rect(20, 20, 10, 4), "TERMINAL", .96)));
+            String value = variant == 2 ? "00127" : "正文";
+            TextBlock light = new TextBlock("light", 1, new Rect(20, 70, 10, 4), value, 74,
+                    FontStyle.defaults(), 3, 0, 0, List.of(), Transform2D.IDENTITY,
+                    List.of(new TextBlock.OcrWord(new Rect(20, 70, 10, 4), value, variant == 1 ? .45 : .96)));
+            try (XWPFDocument docx = new XWPFDocument(Files.newInputStream(render(List.of(dark, light), List.of(scan))))) {
+                var xml = xml(docx); var all = masks(xml);
+                var darkMasks = all.stream().filter(e -> e.getAttribute("id").startsWith("ocr-mask-dark-")).toList();
+                assertFalse(darkMasks.isEmpty());
+                assertTrue(darkMasks.stream().allMatch(e -> e.getAttribute("style").contains("z-index:-251658751;")));
+                var lightMasks = all.stream().filter(e -> e.getAttribute("id").startsWith("ocr-mask-light-")).toList();
+                if (variant == 3) assertTrue(lightMasks.isEmpty(), "未知彩色印记不能覆盖");
+                else {
+                    assertFalse(lightMasks.isEmpty());
+                    String expectedLayer = variant == 0 ? "z-index:1;" : "z-index:-251658751;";
+                    assertTrue(lightMasks.stream().allMatch(e -> e.getAttribute("style").contains(
+                            expectedLayer)));
+                }
+                assertEquals("TERMINAL" + value, elements(xml, WORD, "t").stream().map(Element::getTextContent).reduce("", String::concat));
+                assertArrayEquals(scan.data(), docx.getAllPictures().get(0).getData());
+            }
+        }
+    }
+
+    @Test void longNumericReserveIsBoundedAndRetainsShortReserveAroundUnknownInkOrNeighbor() throws Exception {
+        List<Double> widths = new ArrayList<>();
+        List<String> maskStyles = new ArrayList<>();
+        List<Double> lefts = new ArrayList<>();
+        for (int variant = 0; variant < 3; variant++) {
+            var pixels = ImageIO.read(new ByteArrayInputStream(png(false)));
+            if (variant == 1) pixels.setRGB(50, 30, 0xff0000); // Beyond old reserve, inside proposed extension.
+            var bytes = new ByteArrayOutputStream(); assertTrue(ImageIO.write(pixels, "png", bytes)); pixels.flush();
+            var background = new ImageBlock("scan", 1, new Rect(0, 0, 100, 100), "image/png", bytes.toByteArray(), "OCR_SCAN_BACKGROUND", 0);
+            var line = ocr(List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "7.50", .98)), "7.50");
+            var lines = new ArrayList<>(List.of(line));
+            if (variant == 2) lines.add(ocr(List.of(new TextBlock.OcrWord(new Rect(50, 30, 4, 4), "NOTE", .98)), "NOTE"));
+            try (var docx = new XWPFDocument(Files.newInputStream(render(lines, List.of(background))))) {
+                var xml = xml(docx);
+                var shape = elements(xml, VML, "rect").stream().filter(e -> e.getElementsByTagNameNS(WORD, "t").getLength() > 0
+                        && e.getElementsByTagNameNS(WORD, "t").item(0).getTextContent().equals("7.50")).findFirst().orElseThrow();
+                widths.add(mm(shape.getAttribute("style"), "width"));lefts.add(mm(shape.getAttribute("style"), "margin-left"));
+                maskStyles.add(masks(xml).get(0).getAttribute("style"));
+                assertTrue(lefts.get(variant) + widths.get(variant) <= 57.001, "Only the checked 25mm region may grow");
+                assertArrayEquals(background.data(), docx.getAllPictures().get(0).getData());
+            }
+        }
+        assertTrue(widths.get(0) > widths.get(1) + 8d);
+        assertEquals(widths.get(1), widths.get(2), .001, "Unknown ink and known neighbor preserve the short reserve");
+        assertEquals(lefts.get(0), lefts.get(1));assertEquals(lefts.get(0), lefts.get(2));
+        assertEquals(maskStyles.get(0), maskStyles.get(1));assertEquals(maskStyles.get(0), maskStyles.get(2));
     }
 
     private Path render(List<TextBlock> text, List<ImageBlock> images) throws Exception {
@@ -150,6 +391,86 @@ class OcrWordOverlayTest {
         Path result = Files.createTempFile(temp, "ocr-words-", ".docx");
         new PoiDocxRenderer().render(new DocumentModel("scan.pdf", "test", 1, List.of(page), List.of()), result);
         return result;
+    }
+
+    @Test void preservesRecognizedColumnOrderWhenHeadingBridgesTwoGutters() throws Exception {
+        List<String> expected = List.of("Scan heading", "LEFT 00619", "LEFT -053.25",
+                "MIDDLE 01238", "MIDDLE +0106.50", "RIGHT 02476", "RIGHT 0213.00");
+        for (boolean recognized : List.of(true, false)) {
+            List<TextBlock> blocks = new ArrayList<>();
+            for (int index = 0; index < expected.size(); index++) {
+                double x = index == 0 ? 5 : List.of(5d, 35d, 75d).get((index - 1) / 2);
+                double y = index == 0 ? 10 : 30 + ((index - 1) % 2) * 15;
+                Rect box = new Rect(x, y, index == 0 ? 55 : 16, 4);
+                String text = expected.get(index);
+                blocks.add(new TextBlock("line-" + index, 1, box, text, y + 4,
+                        new FontStyle("Arial", 10, false, false, null), index + 1,
+                        0, 0, List.of(), Transform2D.IDENTITY,
+                        recognized ? List.of(new TextBlock.OcrWord(box, text, .98)) : List.of()));
+            }
+            // Analyzer/body lists may be spatially sorted; recognition order is
+            // carried by zOrder, not the incidental order of these inputs.
+            java.util.Collections.reverse(blocks);
+            List<String> actual;
+            if (recognized) {
+                try (XWPFDocument docx = new XWPFDocument(Files.newInputStream(render(blocks, List.of())))) {
+                    actual = elements(xml(docx), WORD, "t").stream().map(Element::getTextContent).toList();
+                }
+            } else {
+                try (XWPFDocument docx = new XWPFDocument()) {
+                    var page = new PageModel(1, new Rect(0, 0, 100, 100), blocks, List.of(),
+                            List.of(), List.of(), List.of(), List.of());
+                    new FixedLayoutDocxRenderer().renderOverlays(docx, docx.createParagraph(), page, blocks);
+                    actual = elements(xml(docx), WORD, "t").stream().map(Element::getTextContent).toList();
+                }
+            }
+            if (recognized) assertEquals(expected, actual,
+                    "A bridging heading must not cause a second column heuristic to interleave recognized columns");
+            else assertEquals(List.of("Scan heading", "LEFT 00619", "MIDDLE 01238", "LEFT -053.25",
+                    "MIDDLE +0106.50", "RIGHT 02476", "RIGHT 0213.00"), actual,
+                    "Born-digital column inference retains its existing policy");
+        }
+    }
+
+    @Test void separatesScanColumnsWhenIndependentOcrImagesRestartLineOrder() throws Exception {
+        for (boolean localOrdinals : List.of(true, false)) {
+            multiSourceColumnOrder(localOrdinals);
+        }
+    }
+
+    private void multiSourceColumnOrder(boolean localOrdinals) throws Exception {
+        var nativeHeader = new TextBlock("native-header", 1, new Rect(5, 5, 90, 5),
+                "NATIVE HEADER 00573", 10, new FontStyle("Arial", 12, false, false, null), 0);
+        List<TextBlock> blocks = new ArrayList<>(List.of(nativeHeader));
+        for (String side : List.of("LEFT", "RIGHT")) {
+            for (int row = 0; row < 2; row++) {
+                var box = new Rect(side.equals("LEFT") ? 10 : 60, 30 + row * 15, 20, 4);
+                String text = side + " " + (row + 1);
+                // Even unique ordinals assigned in right-image-first append
+                // order cannot establish the author's left-to-right intent.
+                int order = row + 1 + (!localOrdinals && side.equals("LEFT") ? 2 : 0);
+                blocks.add(new TextBlock("ocr-" + side + "-" + row, 1, box, text, box.bottom(),
+                        new FontStyle("Arial", 10, false, false, null), order,
+                        0, 0, List.of(), Transform2D.IDENTITY,
+                        List.of(new TextBlock.OcrWord(box, text, .98))));
+            }
+        }
+        byte[] pixels = png(false);
+        var backgrounds = List.of(new ImageBlock("left-scan", 1, new Rect(5, 20, 30, 60),
+                        "image/png", pixels, "OCR_SCAN_BACKGROUND", 0),
+                new ImageBlock("right-scan", 1, new Rect(55, 20, 35, 60),
+                        "image/png", png(true), "OCR_SCAN_BACKGROUND", 0));
+        try (XWPFDocument docx = new XWPFDocument(Files.newInputStream(render(blocks, backgrounds)))) {
+            var document = xml(docx);
+            var actual = elements(document, VML, "rect").stream()
+                    .filter(e -> e.getElementsByTagNameNS(WORD, "t").getLength() > 0)
+                    .map(e -> e.getElementsByTagNameNS(WORD, "t").item(0).getTextContent()).toList();
+            assertEquals(List.of("LEFT 1", "LEFT 2", "RIGHT 1", "RIGHT 2"), actual,
+                    "Per-image local line ordinals must not be interpreted as one page reading sequence");
+            assertEquals(1, elements(document, WORD, "t").stream()
+                    .filter(e -> e.getTextContent().equals("NATIVE HEADER 00573")).count());
+            assertEquals(2, docx.getAllPictures().size());
+        }
     }
 
     private byte[] png() throws Exception { return png(true); }

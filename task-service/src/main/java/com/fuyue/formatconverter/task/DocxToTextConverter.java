@@ -14,12 +14,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.regex.Pattern;
 
 public final class DocxToTextConverter implements FileConverter {
+    private static final String WORD = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+    private static final String VML = "urn:schemas-microsoft-com:vml";
+    private static final Pattern OCR_WORD_ID = Pattern.compile("text-(ocr-p[0-9]+-l[0-9]+)-word-([0-9]+)-[0-9]+");
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.DOCX, DocumentFormat.TXT,
-            "从 Word DOCX 按故事区和正文对象顺序提取 UTF-8 文本，包括表格、页眉页脚、文本框、脚注尾注、批注和修订。",
+            "提取 Word 文字，包括正文、表格、文本框、页眉页脚、脚注尾注、批注和修订。",
             QualityLevel.BETA, ConversionStrategy.EXTRACTION, List.of(),
-            List.of("不保留版式和样式", "页眉页脚、脚注尾注、批注和修订以带标签的固定故事区顺序追加"));
+            List.of("不保留版式和样式", "页眉放在正文前，页脚、脚注尾注和批注放在正文后，并标明来源；修订在对应段落后标明"));
 
     @Override public ConversionRoute route() { return route; }
 
@@ -78,6 +83,11 @@ public final class DocxToTextConverter implements FileConverter {
     }
 
     private static void appendParagraph(StringBuilder out, XWPFParagraph paragraph) {
+        List<String> ocrLines = ocrAnchorLines(paragraph.getCTP().getDomNode());
+        if (ocrLines != null) {
+            ocrLines.forEach(line -> appendLine(out, line));
+            return;
+        }
         String value = paragraph.getText();
         appendLine(out, value);
         for (String textBox : descendantContainerTexts(paragraph.getCTP().getDomNode(), "txbxContent")) {
@@ -89,6 +99,50 @@ public final class DocxToTextConverter implements FileConverter {
         appendRevisionTexts(out, paragraph.getCTP().getDomNode(), "del", "修订-删除");
         appendRevisionTexts(out, paragraph.getCTP().getDomNode(), "moveFrom", "修订-移出");
         appendRevisionTexts(out, paragraph.getCTP().getDomNode(), "moveTo", "修订-移入");
+    }
+
+    /** POI wraps picture textbox text in parentheses. Read our standalone OCR anchors
+     * from their editable runs instead, keeping real punctuation and original line IDs.
+     * Mixed, revised or unfamiliar content retains the general extraction path. */
+    private static List<String> ocrAnchorLines(Node root) {
+        List<Element> boxes = descendants(root, "txbxContent");
+        if (boxes.isEmpty()) return null;
+        for (String name : List.of("ins", "del", "moveFrom", "moveTo", "instrText", "sym", "fldChar", "sdt")) {
+            if (!descendants(root, name).isEmpty()) return null;
+        }
+        var wordIds = new HashSet<String>();
+        var lineIds = new HashSet<String>();
+        List<String> lines = new ArrayList<>();
+        String currentLine = null;
+        StringBuilder line = new StringBuilder();
+        for (Element box : boxes) {
+            Node parent = box.getParentNode();
+            Node shape = parent == null ? null : parent.getParentNode();
+            if (!WORD.equals(box.getNamespaceURI()) || !(shape instanceof Element rect)
+                    || !VML.equals(rect.getNamespaceURI()) || !"rect".equals(rect.getLocalName())
+                    || !VML.equals(parent.getNamespaceURI()) || !"textbox".equals(parent.getLocalName())
+                    || box.getElementsByTagNameNS(WORD, "p").getLength() != 1
+                    || !descendants(box, "tbl").isEmpty()) return null;
+            var id = OCR_WORD_ID.matcher(rect.getAttribute("id"));
+            if (!id.matches() || !wordIds.add(id.group(1) + "-" + id.group(2))) return null;
+            if (!id.group(1).equals(currentLine)) {
+                if (!lineIds.add(id.group(1))) return null;
+                if (currentLine != null) lines.add(line.toString());
+                line.setLength(0);
+                currentLine = id.group(1);
+            }
+            collectText(box, line);
+        }
+        // Never bypass body text outside the recognized boxes, including tabs/breaks.
+        for (String name : List.of("t", "delText", "tab", "br", "cr")) {
+            for (Element text : descendants(root, name)) {
+                Node ancestor = text.getParentNode();
+                while (ancestor != null && !boxes.contains(ancestor)) ancestor = ancestor.getParentNode();
+                if (ancestor == null) return null;
+            }
+        }
+        lines.add(line.toString());
+        return lines;
     }
 
     private static void appendTable(StringBuilder out, XWPFTable table) {

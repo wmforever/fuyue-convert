@@ -1,0 +1,644 @@
+{
+  "jarSha256": "de05c153351caf48a41ed5522fb9b591756f2e8d178301e3a7aa7619d9630b18",
+  "manifestSha256": "b01d3ff3bdc49be9cebe79e67b6d235bbd4ca2ccde2e6686dcc33d0989c907cf",
+  "rows": [
+    {
+      "case": "white",
+      "changes": [
+        {
+          "text": "RESERVE",
+          "beforeScale": 119,
+          "afterScale": 100,
+          "beforeStyle": "position:absolute;margin-left:57.735pt;margin-top:22.634pt;width:72.870pt;height:17.404pt;z-index:2;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "afterStyle": "position:absolute;margin-left:57.735pt;margin-top:22.634pt;width:72.870pt;height:17.404pt;z-index:2;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none"
+        }
+      ],
+      "beforeNative": "EDIT RESERV\nE \n2053\nRecord 00621\nAmount 4.10\nDate 2053-07-16\nControl 32.45\n",
+      "afterNative": "EDIT RESERVE 2053\nRecord 00621\nAmount 4.10\nDate 2053-07-16\nControl 32.45\n",
+      "beforeApiMetrics": {
+        "expectedCharacters": 62,
+        "actualCharacters": 62,
+        "editDistance": 2,
+        "cer": 0.03225806451612903,
+        "alignedCharacterRecall": 0.9838709677419355,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2053",
+          "00621",
+          "4",
+          "10",
+          "2053",
+          "07",
+          "16",
+          "32",
+          "45"
+        ],
+        "actualNumbers": [
+          "2053",
+          "00621",
+          "4",
+          "10",
+          "2053",
+          "07",
+          "16",
+          "32",
+          "45"
+        ]
+      },
+      "afterApiMetrics": {
+        "expectedCharacters": 62,
+        "actualCharacters": 62,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2053",
+          "00621",
+          "4",
+          "10",
+          "2053",
+          "07",
+          "16",
+          "32",
+          "45"
+        ],
+        "actualNumbers": [
+          "2053",
+          "00621",
+          "4",
+          "10",
+          "2053",
+          "07",
+          "16",
+          "32",
+          "45"
+        ]
+      },
+      "beforeApiText": "EDIT RESERV2053\nE\nRecord 00621\nAmount 4.10\nDate 2053-07-16\nControl 32.45\n",
+      "afterApiText": "EDIT RESERVE 2053\nRecord 00621\nAmount 4.10\nDate 2053-07-16\nControl 32.45\n",
+      "apiRawExact": true,
+      "remainingApiIssue": null,
+      "numericLexemesExact": true,
+      "sourceImagesMasksFontSizesPositionsExact": true,
+      "changedWordScaleOnly": true,
+      "pixelsOutsideChangedWordRegionsExact": true,
+      "warningsExact": true,
+      "beforeVisibleHeading": {
+        "text": "EDIT RESERV 2053\nE\n",
+        "metrics": {
+          "expectedCharacters": 15,
+          "actualCharacters": 15,
+          "editDistance": 2,
+          "cer": 0.13333333333333333,
+          "alignedCharacterRecall": 0.9333333333333333,
+          "exactLines": 0,
+          "expectedNumbers": [
+            "2053"
+          ],
+          "actualNumbers": [
+            "2053"
+          ]
+        },
+        "reusedCompletedProbe": true,
+        "pngSha256": "a46d3dff8686c0929beabce0fb46c30646b1dc82feb0d0bbe4d7879adb9d425d",
+        "textSha256": "bbe50c7b71f0b8852635ba689ae6dbec90d5aca767f0d173bf397e9437c82e28"
+      },
+      "afterVisibleHeading": {
+        "text": "EDIT RESERVE 2053\n",
+        "metrics": {
+          "expectedCharacters": 15,
+          "actualCharacters": 15,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "2053"
+          ],
+          "actualNumbers": [
+            "2053"
+          ]
+        },
+        "reusedCompletedProbe": true,
+        "pngSha256": "178a1db49064e317389af58ea9db9379a705add9cb5e284bc36c1ec9c749ade5",
+        "textSha256": "b4346d343f510cb21db203b3d166fc4784997e6c908edbe5c8fb9f7c437c3261"
+      }
+    },
+    {
+      "case": "negative",
+      "changes": [
+        {
+          "text": "RESERVE",
+          "beforeScale": 119,
+          "afterScale": 100,
+          "beforeStyle": "position:absolute;margin-left:57.735pt;margin-top:22.634pt;width:72.870pt;height:17.404pt;z-index:2;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "afterStyle": "position:absolute;margin-left:57.735pt;margin-top:22.634pt;width:72.870pt;height:17.404pt;z-index:2;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none"
+        }
+      ],
+      "beforeNative": "EDIT RESERV\nE \n2053\nRecord 00621\nAmount -6.20\nDate 2053-07-16\nControl 32.45\n",
+      "afterNative": "EDIT RESERVE 2053\nRecord 00621\nAmount -6.20\nDate 2053-07-16\nControl 32.45\n",
+      "beforeApiMetrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 2,
+        "cer": 0.031746031746031744,
+        "alignedCharacterRecall": 0.9841269841269841,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2053",
+          "00621",
+          "6",
+          "20",
+          "2053",
+          "07",
+          "16",
+          "32",
+          "45"
+        ],
+        "actualNumbers": [
+          "2053",
+          "00621",
+          "6",
+          "20",
+          "2053",
+          "07",
+          "16",
+          "32",
+          "45"
+        ]
+      },
+      "afterApiMetrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2053",
+          "00621",
+          "6",
+          "20",
+          "2053",
+          "07",
+          "16",
+          "32",
+          "45"
+        ],
+        "actualNumbers": [
+          "2053",
+          "00621",
+          "6",
+          "20",
+          "2053",
+          "07",
+          "16",
+          "32",
+          "45"
+        ]
+      },
+      "beforeApiText": "EDIT RESERV2053\nE\nRecord 00621\nAmount -6.20\nDate 2053-07-16\nControl 32.45\n",
+      "afterApiText": "EDIT RESERVE 2053\nRecord 00621\nAmount -6.20\nDate 2053-07-16\nControl 32.45\n",
+      "apiRawExact": true,
+      "remainingApiIssue": null,
+      "numericLexemesExact": true,
+      "sourceImagesMasksFontSizesPositionsExact": true,
+      "changedWordScaleOnly": true,
+      "pixelsOutsideChangedWordRegionsExact": true,
+      "warningsExact": true,
+      "beforeVisibleHeading": {
+        "text": "EDIT RESERV 2053\nE\n",
+        "metrics": {
+          "expectedCharacters": 15,
+          "actualCharacters": 15,
+          "editDistance": 2,
+          "cer": 0.13333333333333333,
+          "alignedCharacterRecall": 0.9333333333333333,
+          "exactLines": 0,
+          "expectedNumbers": [
+            "2053"
+          ],
+          "actualNumbers": [
+            "2053"
+          ]
+        },
+        "reusedCompletedProbe": true,
+        "pngSha256": "f86654fcadd6ef770c60be963467d615e8324fa000503c4c970f517fed680e5f",
+        "textSha256": "bbe50c7b71f0b8852635ba689ae6dbec90d5aca767f0d173bf397e9437c82e28"
+      },
+      "afterVisibleHeading": {
+        "text": "EDIT RESERVE 2053\n",
+        "metrics": {
+          "expectedCharacters": 15,
+          "actualCharacters": 15,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "2053"
+          ],
+          "actualNumbers": [
+            "2053"
+          ]
+        },
+        "reusedCompletedProbe": true,
+        "pngSha256": "80983b89fc53778f26cb900fa23c9b7836265785d4551303822163803a14cbe1",
+        "textSha256": "b4346d343f510cb21db203b3d166fc4784997e6c908edbe5c8fb9f7c437c3261"
+      }
+    },
+    {
+      "case": "zeros",
+      "changes": [
+        {
+          "text": "RESERVE",
+          "beforeScale": 119,
+          "afterScale": 100,
+          "beforeStyle": "position:absolute;margin-left:57.735pt;margin-top:22.634pt;width:72.870pt;height:17.404pt;z-index:2;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "afterStyle": "position:absolute;margin-left:57.735pt;margin-top:22.634pt;width:72.870pt;height:17.404pt;z-index:2;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none"
+        }
+      ],
+      "beforeNative": "EDIT RESERV\nE \n2053\nRecord 00621\nAmount 004.90\nDate 2053-07-16\nControl 32.45\n",
+      "afterNative": "EDIT RESERVE 2053\nRecord 00621\nAmount 004.90\nDate 2053-07-16\nControl 32.45\n",
+      "beforeApiMetrics": {
+        "expectedCharacters": 64,
+        "actualCharacters": 64,
+        "editDistance": 2,
+        "cer": 0.03125,
+        "alignedCharacterRecall": 0.984375,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2053",
+          "00621",
+          "004",
+          "90",
+          "2053",
+          "07",
+          "16",
+          "32",
+          "45"
+        ],
+        "actualNumbers": [
+          "2053",
+          "00621",
+          "004",
+          "90",
+          "2053",
+          "07",
+          "16",
+          "32",
+          "45"
+        ]
+      },
+      "afterApiMetrics": {
+        "expectedCharacters": 64,
+        "actualCharacters": 64,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2053",
+          "00621",
+          "004",
+          "90",
+          "2053",
+          "07",
+          "16",
+          "32",
+          "45"
+        ],
+        "actualNumbers": [
+          "2053",
+          "00621",
+          "004",
+          "90",
+          "2053",
+          "07",
+          "16",
+          "32",
+          "45"
+        ]
+      },
+      "beforeApiText": "EDIT RESERV2053\nE\nRecord 00621\nAmount 004.90\nDate 2053-07-16\nControl 32.45\n",
+      "afterApiText": "EDIT RESERVE 2053\nRecord 00621\nAmount 004.90\nDate 2053-07-16\nControl 32.45\n",
+      "apiRawExact": true,
+      "remainingApiIssue": null,
+      "numericLexemesExact": true,
+      "sourceImagesMasksFontSizesPositionsExact": true,
+      "changedWordScaleOnly": true,
+      "pixelsOutsideChangedWordRegionsExact": true,
+      "warningsExact": true,
+      "beforeVisibleHeading": {
+        "text": "EDIT RESERV 2053\nE\n",
+        "metrics": {
+          "expectedCharacters": 15,
+          "actualCharacters": 15,
+          "editDistance": 2,
+          "cer": 0.13333333333333333,
+          "alignedCharacterRecall": 0.9333333333333333,
+          "exactLines": 0,
+          "expectedNumbers": [
+            "2053"
+          ],
+          "actualNumbers": [
+            "2053"
+          ]
+        },
+        "reusedCompletedProbe": true,
+        "pngSha256": "a46d3dff8686c0929beabce0fb46c30646b1dc82feb0d0bbe4d7879adb9d425d",
+        "textSha256": "bbe50c7b71f0b8852635ba689ae6dbec90d5aca767f0d173bf397e9437c82e28"
+      },
+      "afterVisibleHeading": {
+        "text": "EDIT RESERVE 2053\n",
+        "metrics": {
+          "expectedCharacters": 15,
+          "actualCharacters": 15,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "2053"
+          ],
+          "actualNumbers": [
+            "2053"
+          ]
+        },
+        "reusedCompletedProbe": true,
+        "pngSha256": "178a1db49064e317389af58ea9db9379a705add9cb5e284bc36c1ec9c749ade5",
+        "textSha256": "b4346d343f510cb21db203b3d166fc4784997e6c908edbe5c8fb9f7c437c3261"
+      }
+    },
+    {
+      "case": "project",
+      "changes": [
+        {
+          "text": "PROJECT",
+          "beforeScale": 117,
+          "afterScale": 100,
+          "beforeStyle": "position:absolute;margin-left:23.684pt;margin-top:22.634pt;width:71.910pt;height:17.404pt;z-index:2;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "afterStyle": "position:absolute;margin-left:23.684pt;margin-top:22.634pt;width:71.910pt;height:17.404pt;z-index:2;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none"
+        }
+      ],
+      "beforeNative": "PROJEC\nT \nSUMMARY 2067\nRecord 00916\nAmount -054.80\nDate 2067-11-23\nControl 45.70\n",
+      "afterNative": "PROJECT SUMMARY 2067\nRecord 00916\nAmount -054.80\nDate 2067-11-23\nControl 45.70\n",
+      "beforeApiMetrics": {
+        "expectedCharacters": 68,
+        "actualCharacters": 68,
+        "editDistance": 2,
+        "cer": 0.029411764705882353,
+        "alignedCharacterRecall": 0.9852941176470589,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2067",
+          "00916",
+          "054",
+          "80",
+          "2067",
+          "11",
+          "23",
+          "45",
+          "70"
+        ],
+        "actualNumbers": [
+          "2067",
+          "00916",
+          "054",
+          "80",
+          "2067",
+          "11",
+          "23",
+          "45",
+          "70"
+        ]
+      },
+      "afterApiMetrics": {
+        "expectedCharacters": 68,
+        "actualCharacters": 68,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2067",
+          "00916",
+          "054",
+          "80",
+          "2067",
+          "11",
+          "23",
+          "45",
+          "70"
+        ],
+        "actualNumbers": [
+          "2067",
+          "00916",
+          "054",
+          "80",
+          "2067",
+          "11",
+          "23",
+          "45",
+          "70"
+        ]
+      },
+      "beforeApiText": "PROJECSUMMARY 2067\nT\nRecord 00916\nAmount -054.80\nDate 2067-11-23\nControl 45.70\n",
+      "afterApiText": "PROJECT SUMMARY 2067\nRecord 00916\nAmount -054.80\nDate 2067-11-23\nControl 45.70\n",
+      "apiRawExact": true,
+      "remainingApiIssue": null,
+      "numericLexemesExact": true,
+      "sourceImagesMasksFontSizesPositionsExact": true,
+      "changedWordScaleOnly": true,
+      "pixelsOutsideChangedWordRegionsExact": true,
+      "warningsExact": true,
+      "beforeVisibleHeading": {
+        "text": "PROJEC SUMMARY 2067\nT\n",
+        "metrics": {
+          "expectedCharacters": 18,
+          "actualCharacters": 18,
+          "editDistance": 2,
+          "cer": 0.1111111111111111,
+          "alignedCharacterRecall": 0.9444444444444444,
+          "exactLines": 0,
+          "expectedNumbers": [
+            "2067"
+          ],
+          "actualNumbers": [
+            "2067"
+          ]
+        },
+        "reusedCompletedProbe": true,
+        "pngSha256": "d74e683dd379b60864020635bc18ab3444cf9bc83562d1de0821718a0f2e1c1b",
+        "textSha256": "a5d5f622b68b3d7c1dc7e10c955f724eb982903a762f81b6da8e192de8b4f1a9"
+      },
+      "afterVisibleHeading": {
+        "text": "PROJECT SUMMARY 2067\n",
+        "metrics": {
+          "expectedCharacters": 18,
+          "actualCharacters": 18,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "2067"
+          ],
+          "actualNumbers": [
+            "2067"
+          ]
+        },
+        "reusedCompletedProbe": true,
+        "pngSha256": "d07fcfc0fd5dea8a5992690bb50e664e780150585b80816d44bc37b623391159",
+        "textSha256": "e147e1b89fe02c39041c71a731b1a682d4d47dec1476b80928f8bf31c3d77892"
+      }
+    },
+    {
+      "case": "reserve",
+      "changes": [
+        {
+          "text": "RESERVE",
+          "beforeScale": 119,
+          "afterScale": 100,
+          "beforeStyle": "position:absolute;margin-left:23.655pt;margin-top:22.634pt;width:72.870pt;height:17.404pt;z-index:2;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none",
+          "afterStyle": "position:absolute;margin-left:23.655pt;margin-top:22.634pt;width:72.870pt;height:17.404pt;z-index:2;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none"
+        }
+      ],
+      "beforeNative": "RESERV\nE \nREVIEW 2068\nRecord 00916\nAmount 00062.35\nDate 2067-11-23\nControl 45.70\n",
+      "afterNative": "RESERVE REVIEW 2068\nRecord 00916\nAmount 00062.35\nDate 2067-11-23\nControl 45.70\n",
+      "beforeApiMetrics": {
+        "expectedCharacters": 68,
+        "actualCharacters": 68,
+        "editDistance": 2,
+        "cer": 0.029411764705882353,
+        "alignedCharacterRecall": 0.9852941176470589,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2068",
+          "00916",
+          "00062",
+          "35",
+          "2067",
+          "11",
+          "23",
+          "45",
+          "70"
+        ],
+        "actualNumbers": [
+          "2068",
+          "00916",
+          "00062",
+          "35",
+          "2067",
+          "11",
+          "23",
+          "45",
+          "70"
+        ]
+      },
+      "afterApiMetrics": {
+        "expectedCharacters": 68,
+        "actualCharacters": 68,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2068",
+          "00916",
+          "00062",
+          "35",
+          "2067",
+          "11",
+          "23",
+          "45",
+          "70"
+        ],
+        "actualNumbers": [
+          "2068",
+          "00916",
+          "00062",
+          "35",
+          "2067",
+          "11",
+          "23",
+          "45",
+          "70"
+        ]
+      },
+      "beforeApiText": "RESERVREVIEW2068\nE\nRecord 00916\nAmount 00062.35\nDate 2067-11-23\nControl 45.70\n",
+      "afterApiText": "RESERVE REVIEW2068\nRecord 00916\nAmount 00062.35\nDate 2067-11-23\nControl 45.70\n",
+      "apiRawExact": false,
+      "remainingApiIssue": "REVIEW 2068 joins as REVIEW2068; pre-existing separator/read-order boundary, not repaired by word fit",
+      "numericLexemesExact": true,
+      "sourceImagesMasksFontSizesPositionsExact": true,
+      "changedWordScaleOnly": true,
+      "pixelsOutsideChangedWordRegionsExact": true,
+      "warningsExact": true,
+      "beforeVisibleHeading": {
+        "text": "RESERVREVIEW2068\nE\n",
+        "metrics": {
+          "expectedCharacters": 17,
+          "actualCharacters": 17,
+          "editDistance": 2,
+          "cer": 0.11764705882352941,
+          "alignedCharacterRecall": 0.9411764705882353,
+          "exactLines": 0,
+          "expectedNumbers": [
+            "2068"
+          ],
+          "actualNumbers": [
+            "2068"
+          ]
+        },
+        "reusedCompletedProbe": true,
+        "pngSha256": "55fa7a920e8c52c597540dcf6366dd07355820803a2f2857b8bb653a4c56e50d",
+        "textSha256": "4de4df5d11f93a285f33a4e4d153670f8ed127e902680990b2613509bf44f531"
+      },
+      "afterVisibleHeading": {
+        "text": "RESERVE REVIEW2068\n",
+        "metrics": {
+          "expectedCharacters": 17,
+          "actualCharacters": 17,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "2068"
+          ],
+          "actualNumbers": [
+            "2068"
+          ]
+        },
+        "reusedCompletedProbe": true,
+        "pngSha256": "70231efb377c0e9070f129238c05eeb63cdd3d3d8551cb1896ada5a160d196af",
+        "textSha256": "45a21d7bed3e7c0d02b810d49af6c4d857afc4d1b7551e4abf0cdeb05ed3030e"
+      }
+    }
+  ],
+  "http": 22,
+  "success": 20,
+  "strictFailures": 2,
+  "visibleHeadingOcrCalls": 10,
+  "rawApiExactCases": 4,
+  "remainingApiSeparatorFailureCases": 1,
+  "whitespaceNormalizedCerIsNotCompletenessEvidence": true,
+  "sourceMasksAndNumericFallbacksPreserved": true,
+  "longerEditedAmountAndFullApiExact": true,
+  "darkWordPartsExceptCoreExact": true,
+  "ofdAliasAndMissingAmountExact": true,
+  "originalSparseStrictFailureRetained": true,
+  "noiseNoTextFailureRetained": true,
+  "allWorkersExited": true,
+  "ECHILD": true,
+  "newZombies": [],
+  "resources": {
+    "wallSeconds": 67.54988389500068,
+    "userSeconds": 177.234128,
+    "systemSeconds": 14.500204,
+    "maxChildRssKiB": 349348
+  },
+  "helperSha256": "96ec75e6541b80b6e29bba303a8573fbf5fe93791e55ff520f2bd2be8a2c3a8e"
+}

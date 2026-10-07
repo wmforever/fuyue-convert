@@ -1,0 +1,4493 @@
+{
+  "parentRevision": "bc34be353aba56eb99db15ea9f72a5405b7c3932",
+  "manifest": {
+    "generatorSha256": "0e239063e5e996bba6a609376bc07e6bd9421d851bb92a66fb07387ea4207f42",
+    "PyMuPDF": "1.26.6",
+    "fonts": {
+      "sr": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
+        "sha256": "9caef765d2e891c10dd73658894f01e660fe0c1c83e0bda7d6edf561d8f623d4",
+        "family": "Liberation Serif",
+        "subfamily": "Regular",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "sb": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf",
+        "sha256": "443a4dbd694b6e4689925947b456e0532e10b19c90fa32eb39ea6c2cd9db9ebd",
+        "family": "Liberation Serif",
+        "subfamily": "Bold",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "si": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf",
+        "sha256": "de18fe26337e03241952dca46398d5b66f3c5738d080bfd284f66e67b926f597",
+        "family": "Liberation Serif",
+        "subfamily": "Italic",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "sbi": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-BoldItalic.ttf",
+        "sha256": "4b2635d2ec4d992373dcae577c742a98ecfd841ffc1b8a103b5f10db163dbc7a",
+        "family": "Liberation Serif",
+        "subfamily": "Bold Italic",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "mr": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+        "sha256": "5883330d94debd992952cd8f0571b225f478c2d797d3f36c7521b0a5c9bde0f2",
+        "family": "Liberation Mono",
+        "subfamily": "Regular",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "mb": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf",
+        "sha256": "ddce09ee3483b2d5faf61f0baba8592e76e0ac6dd4ab36683e5334c288bf5eef",
+        "family": "Liberation Mono",
+        "subfamily": "Bold",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "mi": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationMono-Italic.ttf",
+        "sha256": "016743fc425a1b61eb349c72c02f3da6a1349d1da7a5d9aded27321397eed955",
+        "family": "Liberation Mono",
+        "subfamily": "Italic",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "zh": {
+        "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+        "family": "Noto Sans CJK JP",
+        "subfamily": "Regular",
+        "version": "Version 2.004;hotconv 1.0.118;makeotfexe 2.5.65603",
+        "license": "SIL-OFL-1.1"
+      },
+      "dv": {
+        "path": "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "sha256": "57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e",
+        "family": "DejaVu Sans",
+        "subfamily": "Book",
+        "version": "Version 2.37",
+        "license": "Bitstream Vera; DejaVu changes public domain"
+      }
+    },
+    "cases": [
+      {
+        "file": "serif-faces.pdf",
+        "sha256": "e5c277e119fd8ccae220898a66254904a91ebabc902e1ccacf86794e9614a9a1",
+        "kind": "font-faces",
+        "pages": 1,
+        "items": [
+          {
+            "page": 1,
+            "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+            "x": 42,
+            "baseline": 65,
+            "width": 314.953125,
+            "font": "sr",
+            "size": 12
+          },
+          {
+            "page": 1,
+            "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+            "x": 42,
+            "baseline": 130,
+            "width": 328.283203125,
+            "font": "sb",
+            "size": 12
+          },
+          {
+            "page": 1,
+            "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+            "x": 42,
+            "baseline": 195,
+            "width": 319.6171875,
+            "font": "si",
+            "size": 12
+          },
+          {
+            "page": 1,
+            "text": "Font row 4: ID 00734; date 2032-09-24; debit -528.64; credit .28.",
+            "x": 42,
+            "baseline": 260,
+            "width": 321.638671875,
+            "font": "sbi",
+            "size": 12
+          }
+        ],
+        "expectedText": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.\nFont row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.\nFont row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.\nFont row 4: ID 00734; date 2032-09-24; debit -528.64; credit .28."
+      },
+      {
+        "file": "mono-faces.pdf",
+        "sha256": "d884252b1c5742604a79b35ebf78b928669d1785c8e811ac27dd7051bdc45a92",
+        "kind": "font-faces",
+        "pages": 1,
+        "items": [
+          {
+            "page": 1,
+            "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+            "x": 42,
+            "baseline": 65,
+            "width": 468.076171875,
+            "font": "mr",
+            "size": 12
+          },
+          {
+            "page": 1,
+            "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+            "x": 42,
+            "baseline": 130,
+            "width": 468.076171875,
+            "font": "mb",
+            "size": 12
+          },
+          {
+            "page": 1,
+            "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+            "x": 42,
+            "baseline": 195,
+            "width": 468.076171875,
+            "font": "mi",
+            "size": 12
+          }
+        ],
+        "expectedText": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.\nFont row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.\nFont row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28."
+      },
+      {
+        "file": "bilingual-punctuation.pdf",
+        "sha256": "9ff2c72a0f02cbb7be47224996c8c797613e08e9d544327e14829d734b0d6d08",
+        "kind": "mixed-font",
+        "pages": 1,
+        "items": [
+          {
+            "page": 1,
+            "text": "Mixed 中英：编号00731，金额-528.64；日期2032-09-24。",
+            "x": 42,
+            "baseline": 65,
+            "width": 315.50400173664093,
+            "font": "zh",
+            "size": 12
+          },
+          {
+            "page": 1,
+            "text": "中文引号“确认”；Latin quotes “approved”, amount €12.50 and ¥38.20.",
+            "x": 42,
+            "baseline": 127,
+            "width": 389.7120044231415,
+            "font": "zh",
+            "size": 12
+          },
+          {
+            "page": 1,
+            "text": "Latin run: invoice 00927 / amount .28; ",
+            "x": 42,
+            "baseline": 189,
+            "width": 188.63671875,
+            "font": "sr",
+            "size": 12
+          },
+          {
+            "page": 1,
+            "text": "中文补充：保留全部字符。",
+            "x": 234.63671875,
+            "baseline": 189,
+            "width": 144.0,
+            "font": "zh",
+            "size": 12
+          }
+        ],
+        "expectedText": "Mixed 中英：编号00731，金额-528.64；日期2032-09-24。\n中文引号“确认”；Latin quotes “approved”, amount €12.50 and ¥38.20.\nLatin run: invoice 00927 / amount .28; \n中文补充：保留全部字符。"
+      },
+      {
+        "file": "symbols-dejavu.pdf",
+        "sha256": "28ffb39fd8d508480ee4e16c5abe57bb39f24ed1bf3d6874983fe8d1e0216706",
+        "kind": "symbols",
+        "pages": 1,
+        "items": [
+          {
+            "page": 1,
+            "text": "Symbols: −528.64 ±0.05 €12.50 ≤100 ≥2 Ω α β → ∑ × ÷",
+            "x": 42,
+            "baseline": 65,
+            "width": 345.2109375,
+            "font": "dv",
+            "size": 12
+          },
+          {
+            "page": 1,
+            "text": "Ligatures: ﬁ ﬂ; punctuation — … “quoted”; ID 00731 / 2032-09-24.",
+            "x": 42,
+            "baseline": 135,
+            "width": 400.587890625,
+            "font": "dv",
+            "size": 12
+          },
+          {
+            "page": 1,
+            "text": "Cyrillic: Пример; Greek: Ελληνικά; Latin: café naïve résumé.",
+            "x": 42,
+            "baseline": 205,
+            "width": 363.919921875,
+            "font": "dv",
+            "size": 12
+          }
+        ],
+        "expectedText": "Symbols: −528.64 ±0.05 €12.50 ≤100 ≥2 Ω α β → ∑ × ÷\nLigatures: ﬁ ﬂ; punctuation — … “quoted”; ID 00731 / 2032-09-24.\nCyrillic: Пример; Greek: Ελληνικά; Latin: café naïve résumé."
+      },
+      {
+        "file": "line-boundaries.pdf",
+        "sha256": "867fb07c4bd248ab34df9c5f3af3002b2d24207e4f40f0c7bcd2f9a73d253a86",
+        "kind": "line-boundaries",
+        "pages": 1,
+        "items": [
+          {
+            "page": 1,
+            "text": "REFERENCE 00731 / 2032-09-24",
+            "x": 42,
+            "baseline": 65,
+            "width": 166.998046875,
+            "font": "sr",
+            "size": 12
+          },
+          {
+            "page": 1,
+            "text": "Debit -528.64; credit .28; balance 2,108.75.",
+            "x": 42,
+            "baseline": 150,
+            "width": 209.279296875,
+            "font": "sr",
+            "size": 12
+          },
+          {
+            "page": 1,
+            "text": "中文第二段：编号00927，金额-0.05，保持前导零。",
+            "x": 42,
+            "baseline": 235,
+            "width": 276.7800006866455,
+            "font": "zh",
+            "size": 12
+          },
+          {
+            "page": 1,
+            "text": "Separate final line: A-00530 / 2032-10-06.",
+            "x": 42,
+            "baseline": 320,
+            "width": 204.615234375,
+            "font": "sr",
+            "size": 12
+          }
+        ],
+        "expectedText": "REFERENCE 00731 / 2032-09-24\nDebit -528.64; credit .28; balance 2,108.75.\n中文第二段：编号00927，金额-0.05，保持前导零。\nSeparate final line: A-00530 / 2032-10-06."
+      },
+      {
+        "file": "unavailable-family.pdf",
+        "sha256": "c5ddb5484fd3bb4deb4d5f0acf1b44891d737fbd6df3cbcc2b12c47153bb816b",
+        "kind": "unavailable-family",
+        "pages": 1,
+        "items": [
+          {
+            "page": 1,
+            "text": "Explicit unavailable family: ID 00731; -528.64 / 2032-09-24.",
+            "x": 42,
+            "baseline": 65,
+            "width": 294.275390625,
+            "font": "sr",
+            "size": 12
+          }
+        ],
+        "expectedText": "Explicit unavailable family: ID 00731; -528.64 / 2032-09-24.",
+        "explicitDescriptorFamily": "QA Missing Family 2032"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "file": "serif-faces.pdf",
+      "wordRunsBefore": [
+        {
+          "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Serif Regular",
+          "eastAsia": "Liberation Serif Regular",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Serif Bold",
+          "eastAsia": "Liberation Serif Bold",
+          "bold": true,
+          "italic": false
+        },
+        {
+          "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Serif Italic",
+          "eastAsia": "Liberation Serif Italic",
+          "bold": false,
+          "italic": true
+        },
+        {
+          "text": "Font row 4: ID 00734; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Serif Bold Italic",
+          "eastAsia": "Liberation Serif Bold Italic",
+          "bold": false,
+          "italic": true
+        }
+      ],
+      "wordRunsAfter": [
+        {
+          "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Serif",
+          "eastAsia": "Liberation Serif",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Serif",
+          "eastAsia": "Liberation Serif",
+          "bold": true,
+          "italic": false
+        },
+        {
+          "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Serif",
+          "eastAsia": "Liberation Serif",
+          "bold": false,
+          "italic": true
+        },
+        {
+          "text": "Font row 4: ID 00734; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Serif",
+          "eastAsia": "Liberation Serif",
+          "bold": true,
+          "italic": true
+        }
+      ],
+      "fontChecks": [
+        {
+          "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceFontKey": "sr",
+          "expectedFamily": "Liberation Serif",
+          "actualWordRun": {
+            "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+            "ascii": "Liberation Serif",
+            "eastAsia": "Liberation Serif",
+            "bold": false,
+            "italic": false
+          }
+        },
+        {
+          "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceFontKey": "sb",
+          "expectedFamily": "Liberation Serif",
+          "actualWordRun": {
+            "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+            "ascii": "Liberation Serif",
+            "eastAsia": "Liberation Serif",
+            "bold": true,
+            "italic": false
+          }
+        },
+        {
+          "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceFontKey": "si",
+          "expectedFamily": "Liberation Serif",
+          "actualWordRun": {
+            "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+            "ascii": "Liberation Serif",
+            "eastAsia": "Liberation Serif",
+            "bold": false,
+            "italic": true
+          }
+        },
+        {
+          "text": "Font row 4: ID 00734; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceFontKey": "sbi",
+          "expectedFamily": "Liberation Serif",
+          "actualWordRun": {
+            "text": "Font row 4: ID 00734; date 2032-09-24; debit -528.64; credit .28.",
+            "ascii": "Liberation Serif",
+            "eastAsia": "Liberation Serif",
+            "bold": true,
+            "italic": true
+          }
+        }
+      ],
+      "officeFontsBefore": [
+        "NotoSerif-Bold",
+        "NotoSerif-Italic",
+        "NotoSerif-Regular"
+      ],
+      "officeFontsAfter": [
+        "LiberationSerif",
+        "LiberationSerif-Bold",
+        "LiberationSerif-BoldItalic",
+        "LiberationSerif-Italic"
+      ],
+      "officeSpanDisplayFontsBefore": [
+        "NotoSerif-Bold",
+        "NotoSerif-Italic",
+        "NotoSerif-Regular"
+      ],
+      "officeSpanDisplayFontsAfter": [
+        "LiberationSerif",
+        "LiberationSerif-Bold",
+        "LiberationSerif-BoldItal",
+        "LiberationSerif-Italic"
+      ],
+      "wordCerBefore": 0.0,
+      "wordCerAfter": 0.0,
+      "officeCerBefore": 0.0,
+      "officeCerAfter": 0.0,
+      "httpCerBefore": 0.0,
+      "httpCerAfter": 0.0,
+      "allCharactersAndDigitsConserved": true,
+      "unavailableControlPixelExact": false,
+      "geometryBefore": [
+        {
+          "page": 1,
+          "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            54.30799865722656,
+            356.7960510253906,
+            67.59200286865234
+          ],
+          "officeBox": [
+            42.099998474121094,
+            54.122867584228516,
+            396.65234375,
+            70.46686553955078
+          ],
+          "maxShiftPt": 39.856292724609375
+        },
+        {
+          "page": 1,
+          "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            119.30799865722656,
+            370.1760559082031,
+            132.5919952392578
+          ],
+          "officeBox": [
+            42.099998474121094,
+            118.97283935546875,
+            411.3280029296875,
+            135.3168487548828
+          ],
+          "maxShiftPt": 41.151947021484375
+        },
+        {
+          "page": 1,
+          "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            184.30799865722656,
+            361.488037109375,
+            197.5919952392578
+          ],
+          "officeBox": [
+            42.099998474121094,
+            184.1228485107422,
+            392.12811279296875,
+            200.46685791015625
+          ],
+          "maxShiftPt": 30.64007568359375
+        },
+        {
+          "page": 1,
+          "text": "Font row 4: ID 00734; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            249.30799865722656,
+            363.5040588378906,
+            262.5920104980469
+          ],
+          "officeBox": [
+            42.099998474121094,
+            249.12286376953125,
+            392.12811279296875,
+            265.46685791015625
+          ],
+          "maxShiftPt": 28.624053955078125
+        }
+      ],
+      "geometryAfter": [
+        {
+          "page": 1,
+          "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            54.30799865722656,
+            356.7960510253906,
+            67.59200286865234
+          ],
+          "officeBox": [
+            42.099998474121094,
+            56.25886535644531,
+            356.90802001953125,
+            69.5428695678711
+          ],
+          "maxShiftPt": 1.95086669921875
+        },
+        {
+          "page": 1,
+          "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            119.30799865722656,
+            370.1760559082031,
+            132.5919952392578
+          ],
+          "officeBox": [
+            42.099998474121094,
+            121.10884094238281,
+            369.7600402832031,
+            134.39283752441406
+          ],
+          "maxShiftPt": 1.80084228515625
+        },
+        {
+          "page": 1,
+          "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            184.30799865722656,
+            361.488037109375,
+            197.5919952392578
+          ],
+          "officeBox": [
+            42.099998474121094,
+            186.25885009765625,
+            360.65203857421875,
+            199.5428466796875
+          ],
+          "maxShiftPt": 1.9508514404296875
+        },
+        {
+          "page": 1,
+          "text": "Font row 4: ID 00734; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            249.30799865722656,
+            363.5040588378906,
+            262.5920104980469
+          ],
+          "officeBox": [
+            42.099998474121094,
+            251.2588653564453,
+            363.5560302734375,
+            264.5428771972656
+          ],
+          "maxShiftPt": 1.95086669921875
+        }
+      ],
+      "matchedLinesBefore": 4,
+      "matchedLinesAfter": 4,
+      "wordParagraphsBefore": 4,
+      "wordParagraphsAfter": 4,
+      "sourceRows": 4,
+      "medianMaxBoxShiftPtBefore": 35.24818420410156,
+      "medianMaxBoxShiftPtAfter": 1.9508590698242188
+    },
+    {
+      "file": "mono-faces.pdf",
+      "wordRunsBefore": [
+        {
+          "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Mono Regular",
+          "eastAsia": "Liberation Mono Regular",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Mono Bold",
+          "eastAsia": "Liberation Mono Bold",
+          "bold": true,
+          "italic": false
+        },
+        {
+          "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Mono Italic",
+          "eastAsia": "Liberation Mono Italic",
+          "bold": false,
+          "italic": true
+        }
+      ],
+      "wordRunsAfter": [
+        {
+          "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Mono",
+          "eastAsia": "Liberation Mono",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Mono",
+          "eastAsia": "Liberation Mono",
+          "bold": true,
+          "italic": false
+        },
+        {
+          "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+          "ascii": "Liberation Mono",
+          "eastAsia": "Liberation Mono",
+          "bold": false,
+          "italic": true
+        }
+      ],
+      "fontChecks": [
+        {
+          "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceFontKey": "mr",
+          "expectedFamily": "Liberation Mono",
+          "actualWordRun": {
+            "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+            "ascii": "Liberation Mono",
+            "eastAsia": "Liberation Mono",
+            "bold": false,
+            "italic": false
+          }
+        },
+        {
+          "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceFontKey": "mb",
+          "expectedFamily": "Liberation Mono",
+          "actualWordRun": {
+            "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+            "ascii": "Liberation Mono",
+            "eastAsia": "Liberation Mono",
+            "bold": true,
+            "italic": false
+          }
+        },
+        {
+          "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceFontKey": "mi",
+          "expectedFamily": "Liberation Mono",
+          "actualWordRun": {
+            "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+            "ascii": "Liberation Mono",
+            "eastAsia": "Liberation Mono",
+            "bold": false,
+            "italic": true
+          }
+        }
+      ],
+      "officeFontsBefore": [
+        "NotoSerif-Bold",
+        "NotoSerif-Italic",
+        "NotoSerif-Regular"
+      ],
+      "officeFontsAfter": [
+        "LiberationMono",
+        "LiberationMono-Bold",
+        "LiberationMono-Italic"
+      ],
+      "officeSpanDisplayFontsBefore": [
+        "NotoSerif-Bold",
+        "NotoSerif-Italic",
+        "NotoSerif-Regular"
+      ],
+      "officeSpanDisplayFontsAfter": [
+        "LiberationMono",
+        "LiberationMono-Bold",
+        "LiberationMono-Italic"
+      ],
+      "wordCerBefore": 0.0,
+      "wordCerAfter": 0.0,
+      "officeCerBefore": 0.0,
+      "officeCerAfter": 0.0,
+      "httpCerBefore": 0.0,
+      "httpCerAfter": 0.0,
+      "allCharactersAndDigitsConserved": true,
+      "unavailableControlPixelExact": false,
+      "geometryBefore": [
+        {
+          "page": 1,
+          "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            55.01599884033203,
+            510.0003662109375,
+            68.5999984741211
+          ],
+          "officeBox": [
+            42.099998474121094,
+            54.122867584228516,
+            396.65234375,
+            70.46686553955078
+          ],
+          "maxShiftPt": 113.3480224609375
+        },
+        {
+          "page": 1,
+          "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            120.01599884033203,
+            510.0003662109375,
+            133.60000610351562
+          ],
+          "officeBox": [
+            42.099998474121094,
+            118.62286376953125,
+            411.3280029296875,
+            134.9668731689453
+          ],
+          "maxShiftPt": 98.67236328125
+        },
+        {
+          "page": 1,
+          "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            185.01600646972656,
+            510.0003662109375,
+            198.60000610351562
+          ],
+          "officeBox": [
+            42.099998474121094,
+            184.1228485107422,
+            392.12811279296875,
+            200.46685791015625
+          ],
+          "maxShiftPt": 117.87225341796875
+        }
+      ],
+      "geometryAfter": [
+        {
+          "page": 1,
+          "text": "Font row 1: ID 00731; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            55.01599884033203,
+            510.0003662109375,
+            68.5999984741211
+          ],
+          "officeBox": [
+            42.099998474121094,
+            56.96686553955078,
+            510.1363830566406,
+            70.55086517333984
+          ],
+          "maxShiftPt": 1.95086669921875
+        },
+        {
+          "page": 1,
+          "text": "Font row 2: ID 00732; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            120.01599884033203,
+            510.0003662109375,
+            133.60000610351562
+          ],
+          "officeBox": [
+            42.099998474121094,
+            121.46686553955078,
+            510.1363830566406,
+            135.05087280273438
+          ],
+          "maxShiftPt": 1.45086669921875
+        },
+        {
+          "page": 1,
+          "text": "Font row 3: ID 00733; date 2032-09-24; debit -528.64; credit .28.",
+          "sourceBox": [
+            42.0,
+            185.01600646972656,
+            510.0003662109375,
+            198.60000610351562
+          ],
+          "officeBox": [
+            42.099998474121094,
+            186.96685791015625,
+            510.1363830566406,
+            200.5508575439453
+          ],
+          "maxShiftPt": 1.9508514404296875
+        }
+      ],
+      "matchedLinesBefore": 3,
+      "matchedLinesAfter": 3,
+      "wordParagraphsBefore": 3,
+      "wordParagraphsAfter": 3,
+      "sourceRows": 3,
+      "medianMaxBoxShiftPtBefore": 113.3480224609375,
+      "medianMaxBoxShiftPtAfter": 1.9508514404296875
+    },
+    {
+      "file": "bilingual-punctuation.pdf",
+      "wordRunsBefore": [
+        {
+          "text": "Mixed 中英：编号00731，金额-528.64；日期2032-09-24。",
+          "ascii": "Noto Sans CJK JP Regular",
+          "eastAsia": "Droid Sans Fallback",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "中文引号“确认”；Latin quotes “approved”, amount €12.50 and ¥38.20.",
+          "ascii": "Noto Sans CJK JP Regular",
+          "eastAsia": "Droid Sans Fallback",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Latin run: invoice 00927 / amount .28; ",
+          "ascii": "Liberation Serif Regular",
+          "eastAsia": "Liberation Serif Regular",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "中文补充：保留全部字符。",
+          "ascii": "Noto Sans CJK JP Regular",
+          "eastAsia": "Droid Sans Fallback",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "wordRunsAfter": [
+        {
+          "text": "Mixed 中英：编号00731，金额-528.64；日期2032-09-24。",
+          "ascii": "Noto Sans CJK JP",
+          "eastAsia": "Droid Sans Fallback",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "中文引号“确认”；Latin quotes “approved”, amount €12.50 and ¥38.20.",
+          "ascii": "Noto Sans CJK JP",
+          "eastAsia": "Droid Sans Fallback",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Latin run: invoice 00927 / amount .28; ",
+          "ascii": "Liberation Serif",
+          "eastAsia": "Liberation Serif",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "中文补充：保留全部字符。",
+          "ascii": "Noto Sans CJK JP",
+          "eastAsia": "Droid Sans Fallback",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "fontChecks": [
+        {
+          "text": "Mixed 中英：编号00731，金额-528.64；日期2032-09-24。",
+          "sourceFontKey": "zh",
+          "expectedFamily": "Noto Sans CJK JP",
+          "actualWordRun": {
+            "text": "Mixed 中英：编号00731，金额-528.64；日期2032-09-24。",
+            "ascii": "Noto Sans CJK JP",
+            "eastAsia": "Droid Sans Fallback",
+            "bold": false,
+            "italic": false
+          }
+        },
+        {
+          "text": "中文引号“确认”；Latin quotes “approved”, amount €12.50 and ¥38.20.",
+          "sourceFontKey": "zh",
+          "expectedFamily": "Noto Sans CJK JP",
+          "actualWordRun": {
+            "text": "中文引号“确认”；Latin quotes “approved”, amount €12.50 and ¥38.20.",
+            "ascii": "Noto Sans CJK JP",
+            "eastAsia": "Droid Sans Fallback",
+            "bold": false,
+            "italic": false
+          }
+        },
+        {
+          "text": "Latin run: invoice 00927 / amount .28; ",
+          "sourceFontKey": "sr",
+          "expectedFamily": "Liberation Serif",
+          "actualWordRun": {
+            "text": "Latin run: invoice 00927 / amount .28; ",
+            "ascii": "Liberation Serif",
+            "eastAsia": "Liberation Serif",
+            "bold": false,
+            "italic": false
+          }
+        },
+        {
+          "text": "中文补充：保留全部字符。",
+          "sourceFontKey": "zh",
+          "expectedFamily": "Noto Sans CJK JP",
+          "actualWordRun": {
+            "text": "中文补充：保留全部字符。",
+            "ascii": "Noto Sans CJK JP",
+            "eastAsia": "Droid Sans Fallback",
+            "bold": false,
+            "italic": false
+          }
+        }
+      ],
+      "officeFontsBefore": [
+        "DroidSansFallback",
+        "NotoSans-Regular",
+        "NotoSerif-Regular"
+      ],
+      "officeFontsAfter": [
+        "DroidSansFallback",
+        "LiberationSerif",
+        "NotoSans-Regular",
+        "NotoSansCJKjp-Regular"
+      ],
+      "officeSpanDisplayFontsBefore": [
+        "DroidSansFallback",
+        "NotoSans-Regular",
+        "NotoSerif-Regular"
+      ],
+      "officeSpanDisplayFontsAfter": [
+        "DroidSansFallback",
+        "LiberationSerif",
+        "NotoSans-Regular",
+        "NotoSansCJKjp-Regular"
+      ],
+      "wordCerBefore": 0.0,
+      "wordCerAfter": 0.0,
+      "officeCerBefore": 0.029411764705882353,
+      "officeCerAfter": 0.029411764705882353,
+      "httpCerBefore": 0.0,
+      "httpCerAfter": 0.0,
+      "allCharactersAndDigitsConserved": true,
+      "unavailableControlPixelExact": false,
+      "geometryBefore": [
+        {
+          "page": 1,
+          "text": "Mixed 中英：编号00731，金额-528.64；日期2032-09-24。",
+          "sourceBox": [
+            42.0,
+            51.08000183105469,
+            357.50408935546875,
+            68.45600128173828
+          ],
+          "officeBox": [
+            42.099998474121094,
+            48.77292251586914,
+            364.6499938964844,
+            65.1169204711914
+          ],
+          "maxShiftPt": 7.145904541015625
+        },
+        {
+          "page": 1,
+          "text": "Latin run: invoice 00927 / amount .28; ",
+          "sourceBox": [
+            42.0,
+            178.30799865722656,
+            230.4960174560547,
+            191.5919952392578
+          ],
+          "officeBox": [
+            42.099998474121094,
+            172.7729034423828,
+            261.2680358886719,
+            189.11691284179688
+          ],
+          "maxShiftPt": 30.772018432617188
+        },
+        {
+          "page": 1,
+          "text": "中文补充：保留全部字符。",
+          "sourceBox": [
+            234.63671875,
+            175.0800018310547,
+            378.63671875,
+            192.45599365234375
+          ],
+          "officeBox": [
+            261.45001220703125,
+            173.09690856933594,
+            405.45001220703125,
+            188.78089904785156
+          ],
+          "maxShiftPt": 26.81329345703125
+        }
+      ],
+      "geometryAfter": [
+        {
+          "page": 1,
+          "text": "Mixed 中英：编号00731，金额-528.64；日期2032-09-24。",
+          "sourceBox": [
+            42.0,
+            51.08000183105469,
+            357.50408935546875,
+            68.45600128173828
+          ],
+          "officeBox": [
+            42.099998474121094,
+            47.68092346191406,
+            362.1000061035156,
+            65.05692291259766
+          ],
+          "maxShiftPt": 4.595916748046875
+        },
+        {
+          "page": 1,
+          "text": "Latin run: invoice 00927 / amount .28; ",
+          "sourceBox": [
+            42.0,
+            178.30799865722656,
+            230.4960174560547,
+            191.5919952392578
+          ],
+          "officeBox": [
+            42.099998474121094,
+            174.90890502929688,
+            230.59600830078125,
+            188.19290161132812
+          ],
+          "maxShiftPt": 3.3990936279296875
+        },
+        {
+          "page": 1,
+          "text": "中文补充：保留全部字符。",
+          "sourceBox": [
+            234.63671875,
+            175.0800018310547,
+            378.63671875,
+            192.45599365234375
+          ],
+          "officeBox": [
+            230.6999969482422,
+            173.09690856933594,
+            374.70001220703125,
+            188.78089904785156
+          ],
+          "maxShiftPt": 3.9367218017578125
+        }
+      ],
+      "matchedLinesBefore": 3,
+      "matchedLinesAfter": 3,
+      "wordParagraphsBefore": 3,
+      "wordParagraphsAfter": 3,
+      "sourceRows": 3,
+      "medianMaxBoxShiftPtBefore": 26.81329345703125,
+      "medianMaxBoxShiftPtAfter": 3.9367218017578125
+    },
+    {
+      "file": "symbols-dejavu.pdf",
+      "wordRunsBefore": [
+        {
+          "text": "Symbols: −528.64 ±0.05 €12.50 ≤100 ≥2 Ω α β → ∑ × ÷",
+          "ascii": "DejaVu Sans Book",
+          "eastAsia": "DejaVu Sans Book",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Ligatures: ﬁ ﬂ; punctuation — … “quoted”; ID 00731 / 2032-09-24.",
+          "ascii": "DejaVu Sans Book",
+          "eastAsia": "DejaVu Sans Book",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Cyrillic: Пример; Greek: Ελληνικά; Latin: café naïve résumé.",
+          "ascii": "DejaVu Sans Book",
+          "eastAsia": "DejaVu Sans Book",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "wordRunsAfter": [
+        {
+          "text": "Symbols: −528.64 ±0.05 €12.50 ≤100 ≥2 Ω α β → ∑ × ÷",
+          "ascii": "DejaVu Sans",
+          "eastAsia": "DejaVu Sans",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Ligatures: ﬁ ﬂ; punctuation — … “quoted”; ID 00731 / 2032-09-24.",
+          "ascii": "DejaVu Sans",
+          "eastAsia": "DejaVu Sans",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Cyrillic: Пример; Greek: Ελληνικά; Latin: café naïve résumé.",
+          "ascii": "DejaVu Sans",
+          "eastAsia": "DejaVu Sans",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "fontChecks": [
+        {
+          "text": "Symbols: −528.64 ±0.05 €12.50 ≤100 ≥2 Ω α β → ∑ × ÷",
+          "sourceFontKey": "dv",
+          "expectedFamily": "DejaVu Sans",
+          "actualWordRun": {
+            "text": "Symbols: −528.64 ±0.05 €12.50 ≤100 ≥2 Ω α β → ∑ × ÷",
+            "ascii": "DejaVu Sans",
+            "eastAsia": "DejaVu Sans",
+            "bold": false,
+            "italic": false
+          }
+        },
+        {
+          "text": "Ligatures: ﬁ ﬂ; punctuation — … “quoted”; ID 00731 / 2032-09-24.",
+          "sourceFontKey": "dv",
+          "expectedFamily": "DejaVu Sans",
+          "actualWordRun": {
+            "text": "Ligatures: ﬁ ﬂ; punctuation — … “quoted”; ID 00731 / 2032-09-24.",
+            "ascii": "DejaVu Sans",
+            "eastAsia": "DejaVu Sans",
+            "bold": false,
+            "italic": false
+          }
+        },
+        {
+          "text": "Cyrillic: Пример; Greek: Ελληνικά; Latin: café naïve résumé.",
+          "sourceFontKey": "dv",
+          "expectedFamily": "DejaVu Sans",
+          "actualWordRun": {
+            "text": "Cyrillic: Пример; Greek: Ελληνικά; Latin: café naïve résumé.",
+            "ascii": "DejaVu Sans",
+            "eastAsia": "DejaVu Sans",
+            "bold": false,
+            "italic": false
+          }
+        }
+      ],
+      "officeFontsBefore": [
+        "DejaVuSerif",
+        "NotoSerif-Regular"
+      ],
+      "officeFontsAfter": [
+        "DejaVuSans"
+      ],
+      "officeSpanDisplayFontsBefore": [
+        "DejaVuSerif",
+        "NotoSerif-Regular"
+      ],
+      "officeSpanDisplayFontsAfter": [
+        "DejaVuSans"
+      ],
+      "wordCerBefore": 0.0,
+      "wordCerAfter": 0.0,
+      "officeCerBefore": 0.0547945205479452,
+      "officeCerAfter": 0.0,
+      "httpCerBefore": 0.0,
+      "httpCerAfter": 0.0,
+      "allCharactersAndDigitsConserved": true,
+      "unavailableControlPixelExact": false,
+      "geometryBefore": [
+        {
+          "page": 1,
+          "text": "Ligatures: ﬁ ﬂ; punctuation — … “quoted”; ID 00731 / 2032-09-24.",
+          "sourceBox": [
+            42.0,
+            123.86399841308594,
+            442.15179443359375,
+            137.82000732421875
+          ],
+          "officeBox": [
+            42.099998474121094,
+            121.672607421875,
+            410.2362060546875,
+            138.01661682128906
+          ],
+          "maxShiftPt": 31.91558837890625
+        },
+        {
+          "page": 1,
+          "text": "Cyrillic: Пример; Greek: Ελληνικά; Latin: café naïve résumé.",
+          "sourceBox": [
+            42.0,
+            193.86399841308594,
+            405.468017578125,
+            207.82000732421875
+          ],
+          "officeBox": [
+            42.099998474121094,
+            191.672607421875,
+            387.80804443359375,
+            208.01661682128906
+          ],
+          "maxShiftPt": 17.65997314453125
+        }
+      ],
+      "geometryAfter": [
+        {
+          "page": 1,
+          "text": "Symbols: −528.64 ±0.05 €12.50 ≤100 ≥2 Ω α β → ∑ × ÷",
+          "sourceBox": [
+            42.0,
+            53.86399841308594,
+            386.8439025878906,
+            67.81999969482422
+          ],
+          "officeBox": [
+            42.099998474121094,
+            53.36460876464844,
+            387.0758361816406,
+            67.32061004638672
+          ],
+          "maxShiftPt": 0.4993896484375
+        },
+        {
+          "page": 1,
+          "text": "Ligatures: ﬁ ﬂ; punctuation — … “quoted”; ID 00731 / 2032-09-24.",
+          "sourceBox": [
+            42.0,
+            123.86399841308594,
+            442.15179443359375,
+            137.82000732421875
+          ],
+          "officeBox": [
+            42.099998474121094,
+            123.36460876464844,
+            442.0957336425781,
+            137.32061767578125
+          ],
+          "maxShiftPt": 0.4993896484375
+        },
+        {
+          "page": 1,
+          "text": "Cyrillic: Пример; Greek: Ελληνικά; Latin: café naïve résumé.",
+          "sourceBox": [
+            42.0,
+            193.86399841308594,
+            405.468017578125,
+            207.82000732421875
+          ],
+          "officeBox": [
+            42.099998474121094,
+            193.36460876464844,
+            405.1119384765625,
+            207.32061767578125
+          ],
+          "maxShiftPt": 0.4993896484375
+        }
+      ],
+      "matchedLinesBefore": 2,
+      "matchedLinesAfter": 3,
+      "wordParagraphsBefore": 3,
+      "wordParagraphsAfter": 3,
+      "sourceRows": 3,
+      "medianMaxBoxShiftPtBefore": 24.78778076171875,
+      "medianMaxBoxShiftPtAfter": 0.4993896484375
+    },
+    {
+      "file": "line-boundaries.pdf",
+      "wordRunsBefore": [
+        {
+          "text": "REFERENCE 00731 / 2032-09-24",
+          "ascii": "Liberation Serif Regular",
+          "eastAsia": "Liberation Serif Regular",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Debit -528.64; credit .28; balance 2,108.75.",
+          "ascii": "Liberation Serif Regular",
+          "eastAsia": "Liberation Serif Regular",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "中文第二段：编号00927，金额-0.05，保持前导零。",
+          "ascii": "Noto Sans CJK JP Regular",
+          "eastAsia": "Droid Sans Fallback",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Separate final line: A-00530 / 2032-10-06.",
+          "ascii": "Liberation Serif Regular",
+          "eastAsia": "Liberation Serif Regular",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "wordRunsAfter": [
+        {
+          "text": "REFERENCE 00731 / 2032-09-24",
+          "ascii": "Liberation Serif",
+          "eastAsia": "Liberation Serif",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Debit -528.64; credit .28; balance 2,108.75.",
+          "ascii": "Liberation Serif",
+          "eastAsia": "Liberation Serif",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "中文第二段：编号00927，金额-0.05，保持前导零。",
+          "ascii": "Noto Sans CJK JP",
+          "eastAsia": "Droid Sans Fallback",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "Separate final line: A-00530 / 2032-10-06.",
+          "ascii": "Liberation Serif",
+          "eastAsia": "Liberation Serif",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "fontChecks": [
+        {
+          "text": "REFERENCE 00731 / 2032-09-24",
+          "sourceFontKey": "sr",
+          "expectedFamily": "Liberation Serif",
+          "actualWordRun": {
+            "text": "REFERENCE 00731 / 2032-09-24",
+            "ascii": "Liberation Serif",
+            "eastAsia": "Liberation Serif",
+            "bold": false,
+            "italic": false
+          }
+        },
+        {
+          "text": "Debit -528.64; credit .28; balance 2,108.75.",
+          "sourceFontKey": "sr",
+          "expectedFamily": "Liberation Serif",
+          "actualWordRun": {
+            "text": "Debit -528.64; credit .28; balance 2,108.75.",
+            "ascii": "Liberation Serif",
+            "eastAsia": "Liberation Serif",
+            "bold": false,
+            "italic": false
+          }
+        },
+        {
+          "text": "中文第二段：编号00927，金额-0.05，保持前导零。",
+          "sourceFontKey": "zh",
+          "expectedFamily": "Noto Sans CJK JP",
+          "actualWordRun": {
+            "text": "中文第二段：编号00927，金额-0.05，保持前导零。",
+            "ascii": "Noto Sans CJK JP",
+            "eastAsia": "Droid Sans Fallback",
+            "bold": false,
+            "italic": false
+          }
+        },
+        {
+          "text": "Separate final line: A-00530 / 2032-10-06.",
+          "sourceFontKey": "sr",
+          "expectedFamily": "Liberation Serif",
+          "actualWordRun": {
+            "text": "Separate final line: A-00530 / 2032-10-06.",
+            "ascii": "Liberation Serif",
+            "eastAsia": "Liberation Serif",
+            "bold": false,
+            "italic": false
+          }
+        }
+      ],
+      "officeFontsBefore": [
+        "DroidSansFallback",
+        "NotoSerif-Regular"
+      ],
+      "officeFontsAfter": [
+        "DroidSansFallback",
+        "LiberationSerif",
+        "NotoSansCJKjp-Regular"
+      ],
+      "officeSpanDisplayFontsBefore": [
+        "DroidSansFallback",
+        "NotoSerif-Regular"
+      ],
+      "officeSpanDisplayFontsAfter": [
+        "DroidSansFallback",
+        "LiberationSerif",
+        "NotoSansCJKjp-Regular"
+      ],
+      "wordCerBefore": 0.0,
+      "wordCerAfter": 0.0,
+      "officeCerBefore": 0.0,
+      "officeCerAfter": 0.0,
+      "httpCerBefore": 0.0,
+      "httpCerAfter": 0.0,
+      "allCharactersAndDigitsConserved": true,
+      "unavailableControlPixelExact": false,
+      "geometryBefore": [
+        {
+          "page": 1,
+          "text": "REFERENCE 00731 / 2032-09-24",
+          "sourceBox": [
+            42.0,
+            54.30799865722656,
+            208.9080047607422,
+            67.59200286865234
+          ],
+          "officeBox": [
+            42.099998474121094,
+            54.12253189086914,
+            218.66806030273438,
+            70.4665298461914
+          ],
+          "maxShiftPt": 9.760055541992188
+        },
+        {
+          "page": 1,
+          "text": "Debit -528.64; credit .28; balance 2,108.75.",
+          "sourceBox": [
+            42.0,
+            139.30799865722656,
+            251.13600158691406,
+            152.5919952392578
+          ],
+          "officeBox": [
+            42.099998474121094,
+            139.12252807617188,
+            278.9560852050781,
+            155.46653747558594
+          ],
+          "maxShiftPt": 27.820083618164062
+        },
+        {
+          "page": 1,
+          "text": "中文第二段：编号00927，金额-0.05，保持前导零。",
+          "sourceBox": [
+            42.0,
+            221.0800018310547,
+            318.780029296875,
+            238.45599365234375
+          ],
+          "officeBox": [
+            42.099998474121094,
+            219.09654235839844,
+            320.79998779296875,
+            234.78053283691406
+          ],
+          "maxShiftPt": 3.6754608154296875
+        },
+        {
+          "page": 1,
+          "text": "Separate final line: A-00530 / 2032-10-06.",
+          "sourceBox": [
+            42.0,
+            309.3080139160156,
+            246.48001098632812,
+            322.5920104980469
+          ],
+          "officeBox": [
+            42.099998474121094,
+            309.12255859375,
+            271.9601135253906,
+            325.466552734375
+          ],
+          "maxShiftPt": 25.4801025390625
+        }
+      ],
+      "geometryAfter": [
+        {
+          "page": 1,
+          "text": "REFERENCE 00731 / 2032-09-24",
+          "sourceBox": [
+            42.0,
+            54.30799865722656,
+            208.9080047607422,
+            67.59200286865234
+          ],
+          "officeBox": [
+            42.099998474121094,
+            56.25852966308594,
+            208.97198486328125,
+            69.54253387451172
+          ],
+          "maxShiftPt": 1.950531005859375
+        },
+        {
+          "page": 1,
+          "text": "Debit -528.64; credit .28; balance 2,108.75.",
+          "sourceBox": [
+            42.0,
+            139.30799865722656,
+            251.13600158691406,
+            152.5919952392578
+          ],
+          "officeBox": [
+            42.099998474121094,
+            141.25852966308594,
+            251.25999450683594,
+            154.5425262451172
+          ],
+          "maxShiftPt": 1.950531005859375
+        },
+        {
+          "page": 1,
+          "text": "中文第二段：编号00927，金额-0.05，保持前导零。",
+          "sourceBox": [
+            42.0,
+            221.0800018310547,
+            318.780029296875,
+            238.45599365234375
+          ],
+          "officeBox": [
+            42.099998474121094,
+            217.6805419921875,
+            321.20001220703125,
+            235.05653381347656
+          ],
+          "maxShiftPt": 3.3994598388671875
+        },
+        {
+          "page": 1,
+          "text": "Separate final line: A-00530 / 2032-10-06.",
+          "sourceBox": [
+            42.0,
+            309.3080139160156,
+            246.48001098632812,
+            322.5920104980469
+          ],
+          "officeBox": [
+            42.099998474121094,
+            311.2585754394531,
+            245.9440155029297,
+            324.5425720214844
+          ],
+          "maxShiftPt": 1.9505615234375
+        }
+      ],
+      "matchedLinesBefore": 4,
+      "matchedLinesAfter": 4,
+      "wordParagraphsBefore": 4,
+      "wordParagraphsAfter": 4,
+      "sourceRows": 4,
+      "medianMaxBoxShiftPtBefore": 17.620079040527344,
+      "medianMaxBoxShiftPtAfter": 1.9505462646484375
+    },
+    {
+      "file": "unavailable-family.pdf",
+      "wordRunsBefore": [
+        {
+          "text": "Explicit unavailable family: ID 00731; -528.64 / 2032-09-24.",
+          "ascii": "QA Missing Family 2032",
+          "eastAsia": "QA Missing Family 2032",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "wordRunsAfter": [
+        {
+          "text": "Explicit unavailable family: ID 00731; -528.64 / 2032-09-24.",
+          "ascii": "QA Missing Family 2032",
+          "eastAsia": "QA Missing Family 2032",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "fontChecks": [
+        {
+          "text": "Explicit unavailable family: ID 00731; -528.64 / 2032-09-24.",
+          "sourceFontKey": "sr",
+          "expectedFamily": "QA Missing Family 2032",
+          "actualWordRun": {
+            "text": "Explicit unavailable family: ID 00731; -528.64 / 2032-09-24.",
+            "ascii": "QA Missing Family 2032",
+            "eastAsia": "QA Missing Family 2032",
+            "bold": false,
+            "italic": false
+          }
+        }
+      ],
+      "officeFontsBefore": [
+        "NotoSerif-Regular"
+      ],
+      "officeFontsAfter": [
+        "NotoSerif-Regular"
+      ],
+      "officeSpanDisplayFontsBefore": [
+        "NotoSerif-Regular"
+      ],
+      "officeSpanDisplayFontsAfter": [
+        "NotoSerif-Regular"
+      ],
+      "wordCerBefore": 0.0,
+      "wordCerAfter": 0.0,
+      "officeCerBefore": 0.0,
+      "officeCerAfter": 0.0,
+      "httpCerBefore": 0.0,
+      "httpCerAfter": 0.0,
+      "allCharactersAndDigitsConserved": true,
+      "unavailableControlPixelExact": true,
+      "geometryBefore": [
+        {
+          "page": 1,
+          "text": "Explicit unavailable family: ID 00731; -528.64 / 2032-09-24.",
+          "sourceBox": [
+            42.0,
+            54.30799865722656,
+            336.072021484375,
+            67.59200286865234
+          ],
+          "officeBox": [
+            42.099998474121094,
+            54.1225471496582,
+            372.8202209472656,
+            70.46654510498047
+          ],
+          "maxShiftPt": 36.748199462890625
+        }
+      ],
+      "geometryAfter": [
+        {
+          "page": 1,
+          "text": "Explicit unavailable family: ID 00731; -528.64 / 2032-09-24.",
+          "sourceBox": [
+            42.0,
+            54.30799865722656,
+            336.072021484375,
+            67.59200286865234
+          ],
+          "officeBox": [
+            42.099998474121094,
+            54.1225471496582,
+            372.8202209472656,
+            70.46654510498047
+          ],
+          "maxShiftPt": 36.748199462890625
+        }
+      ],
+      "matchedLinesBefore": 1,
+      "matchedLinesAfter": 1,
+      "wordParagraphsBefore": 1,
+      "wordParagraphsAfter": 1,
+      "sourceRows": 1,
+      "medianMaxBoxShiftPtBefore": 36.748199462890625,
+      "medianMaxBoxShiftPtAfter": 36.748199462890625
+    }
+  ],
+  "before": {
+    "jarSha256": "0bfefe757c430925f45d5a40f0024bc313e69286ca2cc305ad07a1f761a98321",
+    "manifestSha256": "1344d023bd073d2262c553e51537684e0cbebb73cb8d082daec342368ba59916",
+    "cases": [
+      {
+        "case": "serif-faces",
+        "stage": "word",
+        "target": "docx",
+        "seconds": 3.739988514000288,
+        "task": {
+          "taskId": "10b94ec6-13d4-44e2-a339-fa5786eff14b",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "serif-faces.pdf",
+              "success": true,
+              "outputName": "serif-faces.docx",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "docx"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "serif-faces.docx",
+          "sourceFormat": "pdf",
+          "targetFormat": "docx",
+          "createdAt": "2026-10-04T10:31:54.385929859Z",
+          "updatedAt": "2026-10-04T10:31:57.779653657Z",
+          "expiresAt": "2026-10-05T10:31:57.779653657Z"
+        },
+        "artifact": "serif-faces-word.docx",
+        "sha256": "d73b17558f1a9780458e6b06d851ca8784eb3fabc0a761f47706d137d17ab88c"
+      },
+      {
+        "case": "serif-faces",
+        "stage": "office",
+        "target": "pdf",
+        "seconds": 2.4547679820025223,
+        "task": {
+          "taskId": "a5f4c4a8-0a36-496d-adb9-eaf6939c87ab",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "serif-faces-word.docx",
+              "success": true,
+              "outputName": "serif-faces-word.pdf",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "docx",
+              "targetFormat": "pdf"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "serif-faces-word.pdf",
+          "sourceFormat": "docx",
+          "targetFormat": "pdf",
+          "createdAt": "2026-10-04T10:31:58.045890586Z",
+          "updatedAt": "2026-10-04T10:32:00.441709057Z",
+          "expiresAt": "2026-10-05T10:32:00.441709057Z"
+        },
+        "artifact": "serif-faces-office.pdf",
+        "sha256": "5509c89d74a54243dd60c6ccf58c21298a6d4d0328189f5972c9a0612e4a0587"
+      },
+      {
+        "case": "serif-faces",
+        "stage": "text",
+        "target": "txt",
+        "seconds": 1.882520420000219,
+        "task": {
+          "taskId": "d8214b0d-4a1f-40ea-b279-38eed7774e99",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "serif-faces-office.pdf",
+              "success": true,
+              "outputName": "serif-faces-office.txt",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "txt"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "serif-faces-office.txt",
+          "sourceFormat": "pdf",
+          "targetFormat": "txt",
+          "createdAt": "2026-10-04T10:32:00.486713296Z",
+          "updatedAt": "2026-10-04T10:32:02.329189700Z",
+          "expiresAt": "2026-10-05T10:32:02.329189700Z"
+        },
+        "artifact": "serif-faces-text.txt",
+        "sha256": "6abac9573edeb326e5673f449b1a2f4f3ff5da8b7ee7ab934cb3507ee0b4c768"
+      },
+      {
+        "case": "mono-faces",
+        "stage": "word",
+        "target": "docx",
+        "seconds": 3.622364803999517,
+        "task": {
+          "taskId": "a93fc305-e05e-4955-aa7d-51caff1d37d8",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "mono-faces.pdf",
+              "success": true,
+              "outputName": "mono-faces.docx",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "docx"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "mono-faces.docx",
+          "sourceFormat": "pdf",
+          "targetFormat": "docx",
+          "createdAt": "2026-10-04T10:32:02.375856661Z",
+          "updatedAt": "2026-10-04T10:32:05.949895128Z",
+          "expiresAt": "2026-10-05T10:32:05.949895128Z"
+        },
+        "artifact": "mono-faces-word.docx",
+        "sha256": "f210a2dcca200de675898f0db8cd201e3c48f4b66175eb7dfbe3a07b4729ff72"
+      },
+      {
+        "case": "mono-faces",
+        "stage": "office",
+        "target": "pdf",
+        "seconds": 1.7808817609984544,
+        "task": {
+          "taskId": "589c2a9d-f8d5-435f-9099-1f0dc720f9d6",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "mono-faces-word.docx",
+              "success": true,
+              "outputName": "mono-faces-word.pdf",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "docx",
+              "targetFormat": "pdf"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "mono-faces-word.pdf",
+          "sourceFormat": "docx",
+          "targetFormat": "pdf",
+          "createdAt": "2026-10-04T10:32:05.994802464Z",
+          "updatedAt": "2026-10-04T10:32:07.666249638Z",
+          "expiresAt": "2026-10-05T10:32:07.666249638Z"
+        },
+        "artifact": "mono-faces-office.pdf",
+        "sha256": "c31ac5bdc97931a4c8c3f01cbca7258d1b53a6723ecf9a98defcecc46668f8db"
+      },
+      {
+        "case": "mono-faces",
+        "stage": "text",
+        "target": "txt",
+        "seconds": 1.4146142280005733,
+        "task": {
+          "taskId": "4ac3a40f-e215-4f28-bcd1-a36b3b268716",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "mono-faces-office.pdf",
+              "success": true,
+              "outputName": "mono-faces-office.txt",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "txt"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "mono-faces-office.txt",
+          "sourceFormat": "pdf",
+          "targetFormat": "txt",
+          "createdAt": "2026-10-04T10:32:07.775007454Z",
+          "updatedAt": "2026-10-04T10:32:09.130337267Z",
+          "expiresAt": "2026-10-05T10:32:09.130337267Z"
+        },
+        "artifact": "mono-faces-text.txt",
+        "sha256": "2b3a6d4db86c4a1a63e4c5edef88f899cf6cb2bc2e6ff4762e5f3d011ecffebe"
+      },
+      {
+        "case": "bilingual-punctuation",
+        "stage": "word",
+        "target": "docx",
+        "seconds": 4.406891671998892,
+        "task": {
+          "taskId": "7b82c185-305f-4ae6-ab4c-3f07bef0a3f2",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "bilingual-punctuation.pdf",
+              "success": true,
+              "outputName": "bilingual-punctuation.docx",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "docx"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "bilingual-punctuation.docx",
+          "sourceFormat": "pdf",
+          "targetFormat": "docx",
+          "createdAt": "2026-10-04T10:32:09.315381635Z",
+          "updatedAt": "2026-10-04T10:32:13.611140356Z",
+          "expiresAt": "2026-10-05T10:32:13.611140356Z"
+        },
+        "artifact": "bilingual-punctuation-word.docx",
+        "sha256": "643be0a60bfa430f39a3138c07be197662d0a65a2bd5ad172be4d62d44ed9ea3"
+      },
+      {
+        "case": "bilingual-punctuation",
+        "stage": "office",
+        "target": "pdf",
+        "seconds": 2.3529882590009947,
+        "task": {
+          "taskId": "3d59148a-1e98-4b85-8815-e1ac83af9ad4",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "bilingual-punctuation-word.docx",
+              "success": true,
+              "outputName": "bilingual-punctuation-word.pdf",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "docx",
+              "targetFormat": "pdf"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "bilingual-punctuation-word.pdf",
+          "sourceFormat": "docx",
+          "targetFormat": "pdf",
+          "createdAt": "2026-10-04T10:32:13.657095302Z",
+          "updatedAt": "2026-10-04T10:32:15.905710336Z",
+          "expiresAt": "2026-10-05T10:32:15.905710336Z"
+        },
+        "artifact": "bilingual-punctuation-office.pdf",
+        "sha256": "7fce9a3a028533e7dc04558cf1d64e25cd588bcbd96205cfb6b99bd851f75a22"
+      },
+      {
+        "case": "bilingual-punctuation",
+        "stage": "text",
+        "target": "txt",
+        "seconds": 1.7286830320008448,
+        "task": {
+          "taskId": "0e5da9c1-f3fa-4275-8969-1a4d3d7bacd2",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "bilingual-punctuation-office.pdf",
+              "success": true,
+              "outputName": "bilingual-punctuation-office.txt",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "txt"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "bilingual-punctuation-office.txt",
+          "sourceFormat": "pdf",
+          "targetFormat": "txt",
+          "createdAt": "2026-10-04T10:32:15.996047984Z",
+          "updatedAt": "2026-10-04T10:32:17.694999995Z",
+          "expiresAt": "2026-10-05T10:32:17.694999995Z"
+        },
+        "artifact": "bilingual-punctuation-text.txt",
+        "sha256": "4c411dbb8dab52a42d7ef2e43fccf730b587f9135e2356a52d1fdf0571e89c4e"
+      },
+      {
+        "case": "symbols-dejavu",
+        "stage": "word",
+        "target": "docx",
+        "seconds": 2.83521526000186,
+        "task": {
+          "taskId": "e72c8772-5e8d-4b29-b2cb-0dcb60317be6",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "symbols-dejavu.pdf",
+              "success": true,
+              "outputName": "symbols-dejavu.docx",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "docx"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "symbols-dejavu.docx",
+          "sourceFormat": "pdf",
+          "targetFormat": "docx",
+          "createdAt": "2026-10-04T10:32:17.727838058Z",
+          "updatedAt": "2026-10-04T10:32:20.477454757Z",
+          "expiresAt": "2026-10-05T10:32:20.477454757Z"
+        },
+        "artifact": "symbols-dejavu-word.docx",
+        "sha256": "9c4131cd419e28af1fb17e7ccd799d2a7cafeeaee00845388647d11c7c61a8dd"
+      },
+      {
+        "case": "symbols-dejavu",
+        "stage": "office",
+        "target": "pdf",
+        "seconds": 1.9524881719989935,
+        "task": {
+          "taskId": "648ffb67-56d3-4369-9365-456e8b548d7b",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "symbols-dejavu-word.docx",
+              "success": true,
+              "outputName": "symbols-dejavu-word.pdf",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "docx",
+              "targetFormat": "pdf"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "symbols-dejavu-word.pdf",
+          "sourceFormat": "docx",
+          "targetFormat": "pdf",
+          "createdAt": "2026-10-04T10:32:20.562897798Z",
+          "updatedAt": "2026-10-04T10:32:22.477575116Z",
+          "expiresAt": "2026-10-05T10:32:22.477575116Z"
+        },
+        "artifact": "symbols-dejavu-office.pdf",
+        "sha256": "c0f87d575bc301b342aba9304dc4f367e993961c240f16aede08585e531e8285"
+      },
+      {
+        "case": "symbols-dejavu",
+        "stage": "text",
+        "target": "txt",
+        "seconds": 1.634561790000589,
+        "task": {
+          "taskId": "8e32e135-8233-40a9-82db-35c2cc78b931",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "symbols-dejavu-office.pdf",
+              "success": true,
+              "outputName": "symbols-dejavu-office.txt",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "txt"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "symbols-dejavu-office.txt",
+          "sourceFormat": "pdf",
+          "targetFormat": "txt",
+          "createdAt": "2026-10-04T10:32:22.514382174Z",
+          "updatedAt": "2026-10-04T10:32:24.033832169Z",
+          "expiresAt": "2026-10-05T10:32:24.033832169Z"
+        },
+        "artifact": "symbols-dejavu-text.txt",
+        "sha256": "835d3ba35a920cbafe16f8fd382eafc6fb764ce3e2e840c4a9c4fabb8b478b2a"
+      },
+      {
+        "case": "line-boundaries",
+        "stage": "word",
+        "target": "docx",
+        "seconds": 4.180223856001248,
+        "task": {
+          "taskId": "be7e3237-ab72-4746-b0aa-5c53e7150542",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "line-boundaries.pdf",
+              "success": true,
+              "outputName": "line-boundaries.docx",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "docx"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "line-boundaries.docx",
+          "sourceFormat": "pdf",
+          "targetFormat": "docx",
+          "createdAt": "2026-10-04T10:32:24.269646406Z",
+          "updatedAt": "2026-10-04T10:32:28.347664362Z",
+          "expiresAt": "2026-10-05T10:32:28.347664362Z"
+        },
+        "artifact": "line-boundaries-word.docx",
+        "sha256": "95b0b934a75ec4c3b38751c60374c13acd59c1aacafd4408a88d00c36cdca1ed"
+      },
+      {
+        "case": "line-boundaries",
+        "stage": "office",
+        "target": "pdf",
+        "seconds": 3.9452643139993597,
+        "task": {
+          "taskId": "b49bd538-9b44-4c57-a503-86e952e6a944",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "line-boundaries-word.docx",
+              "success": true,
+              "outputName": "line-boundaries-word.pdf",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "docx",
+              "targetFormat": "pdf"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "line-boundaries-word.pdf",
+          "sourceFormat": "docx",
+          "targetFormat": "pdf",
+          "createdAt": "2026-10-04T10:32:28.380055169Z",
+          "updatedAt": "2026-10-04T10:32:32.236468477Z",
+          "expiresAt": "2026-10-05T10:32:32.236468477Z"
+        },
+        "artifact": "line-boundaries-office.pdf",
+        "sha256": "1eb3779b825cbfc606fd6d44fa26cac95388f8841b6f968ef4f826afbfefa5ee"
+      },
+      {
+        "case": "line-boundaries",
+        "stage": "text",
+        "target": "txt",
+        "seconds": 2.542849514997215,
+        "task": {
+          "taskId": "50b955e5-7e33-4aea-a2b7-f7c33c704035",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "line-boundaries-office.pdf",
+              "success": true,
+              "outputName": "line-boundaries-office.txt",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "txt"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "line-boundaries-office.txt",
+          "sourceFormat": "pdf",
+          "targetFormat": "txt",
+          "createdAt": "2026-10-04T10:32:32.326167926Z",
+          "updatedAt": "2026-10-04T10:32:34.795461652Z",
+          "expiresAt": "2026-10-05T10:32:34.795461652Z"
+        },
+        "artifact": "line-boundaries-text.txt",
+        "sha256": "99c973aea648ea10b02740eb3882568540f086298a7369b491b4d3794fbb9d08"
+      },
+      {
+        "case": "unavailable-family",
+        "stage": "word",
+        "target": "docx",
+        "seconds": 4.465628574002039,
+        "task": {
+          "taskId": "26f786da-a26e-4ac7-b1b6-7eb243763b08",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "unavailable-family.pdf",
+              "success": true,
+              "outputName": "unavailable-family.docx",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "docx"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "unavailable-family.docx",
+          "sourceFormat": "pdf",
+          "targetFormat": "docx",
+          "createdAt": "2026-10-04T10:32:34.869284638Z",
+          "updatedAt": "2026-10-04T10:32:39.285176081Z",
+          "expiresAt": "2026-10-05T10:32:39.285176081Z"
+        },
+        "artifact": "unavailable-family-word.docx",
+        "sha256": "4cf99f14f2f4a08b8febbcba6e0ac5887e85bc7fda7355f6371bc96a30b3bde3"
+      },
+      {
+        "case": "unavailable-family",
+        "stage": "office",
+        "target": "pdf",
+        "seconds": 1.9966388149987324,
+        "task": {
+          "taskId": "21772b73-fc4a-4e41-871d-0696360f249d",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "unavailable-family-word.docx",
+              "success": true,
+              "outputName": "unavailable-family-word.pdf",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "docx",
+              "targetFormat": "pdf"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "unavailable-family-word.pdf",
+          "sourceFormat": "docx",
+          "targetFormat": "pdf",
+          "createdAt": "2026-10-04T10:32:39.331140293Z",
+          "updatedAt": "2026-10-04T10:32:41.276237002Z",
+          "expiresAt": "2026-10-05T10:32:41.276237002Z"
+        },
+        "artifact": "unavailable-family-office.pdf",
+        "sha256": "386eb3052dfd3dc42a0858b05998d4f6615bf352d07bc806b42363d2ed40abb4"
+      },
+      {
+        "case": "unavailable-family",
+        "stage": "text",
+        "target": "txt",
+        "seconds": 1.3966968580025423,
+        "task": {
+          "taskId": "527b82cb-8e43-4a89-aef9-c51636a4f72c",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "unavailable-family-office.pdf",
+              "success": true,
+              "outputName": "unavailable-family-office.txt",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "txt"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "unavailable-family-office.txt",
+          "sourceFormat": "pdf",
+          "targetFormat": "txt",
+          "createdAt": "2026-10-04T10:32:41.327681488Z",
+          "updatedAt": "2026-10-04T10:32:42.618110419Z",
+          "expiresAt": "2026-10-05T10:32:42.618110419Z"
+        },
+        "artifact": "unavailable-family-text.txt",
+        "sha256": "29b8a8c8d09d1005e51500d78b88bc3a071737f1d248f0dea217a7b3b06345a3"
+      }
+    ],
+    "status": "completed",
+    "failures": [],
+    "workerPids": [
+      60709,
+      60778,
+      60853,
+      60902,
+      60971,
+      61039,
+      61085,
+      61167,
+      61251,
+      61298,
+      61384,
+      61454,
+      61501,
+      61578,
+      61667,
+      61722,
+      61796,
+      61866
+    ],
+    "helperSha256": {
+      "run_word_iteration19.py": "5204cf6e5c3191352ccd17784554be6b5cab3131970936a453b14348348cd73e",
+      "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85",
+      "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9"
+    },
+    "health": {
+      "status": "UP",
+      "version": "0.1.4",
+      "parser": "OFDRW 2.3.9",
+      "javaVersion": "17.0.16",
+      "os": "Linux",
+      "arch": "amd64",
+      "office": {
+        "enabled": true,
+        "available": true,
+        "binaryName": "soffice",
+        "version": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+        "message": "Office 引擎可用"
+      },
+      "ocr": {
+        "enabled": false,
+        "available": false,
+        "binaryName": null,
+        "version": null,
+        "requestedLanguages": null,
+        "availableLanguages": [],
+        "timeoutSeconds": null,
+        "maxConcurrency": null,
+        "maxImagePixels": null,
+        "minimumConfidence": null,
+        "bundled": null,
+        "errorCode": null,
+        "message": "本地 OCR 未启用"
+      },
+      "time": "2026-10-04T10:31:54.202990796Z"
+    },
+    "supervision": {
+      "supervisor": {
+        "pid": 60619,
+        "state": "R",
+        "parent": 60618,
+        "startTicks": "2308509"
+      },
+      "root": {
+        "pid": 60620,
+        "state": "R",
+        "parent": 60619,
+        "startTicks": "2308512"
+      },
+      "registered": [
+        {
+          "pid": 60620,
+          "state": "Z",
+          "parent": 60619,
+          "startTicks": "2308512"
+        },
+        {
+          "pid": 60656,
+          "state": "S",
+          "parent": 60620,
+          "startTicks": "2308814"
+        },
+        {
+          "pid": 60661,
+          "state": "S",
+          "parent": 60656,
+          "startTicks": "2308816"
+        },
+        {
+          "pid": 60669,
+          "state": "R",
+          "parent": 60661,
+          "startTicks": "2308817"
+        },
+        {
+          "pid": 60671,
+          "state": "R",
+          "parent": 60661,
+          "startTicks": "2308818"
+        },
+        {
+          "pid": 60673,
+          "state": "S",
+          "parent": 60620,
+          "startTicks": "2308828"
+        },
+        {
+          "pid": 60677,
+          "state": "S",
+          "parent": 60673,
+          "startTicks": "2308829"
+        },
+        {
+          "pid": 60687,
+          "state": "R",
+          "parent": 60677,
+          "startTicks": "2308831"
+        },
+        {
+          "pid": 60709,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2308957"
+        },
+        {
+          "pid": 60778,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2309315"
+        },
+        {
+          "pid": 60818,
+          "state": "S",
+          "parent": 60778,
+          "startTicks": "2309462"
+        },
+        {
+          "pid": 60819,
+          "state": "S",
+          "parent": 60818,
+          "startTicks": "2309463"
+        },
+        {
+          "pid": 60832,
+          "state": "R",
+          "parent": 60818,
+          "startTicks": "2309469"
+        },
+        {
+          "pid": 60853,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2309559"
+        },
+        {
+          "pid": 60902,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2309748"
+        },
+        {
+          "pid": 60971,
+          "state": "S",
+          "parent": 60620,
+          "startTicks": "2310110"
+        },
+        {
+          "pid": 61004,
+          "state": "S",
+          "parent": 60971,
+          "startTicks": "2310193"
+        },
+        {
+          "pid": 61019,
+          "state": "R",
+          "parent": 61004,
+          "startTicks": "2310204"
+        },
+        {
+          "pid": 61039,
+          "state": "S",
+          "parent": 60620,
+          "startTicks": "2310288"
+        },
+        {
+          "pid": 61085,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2310442"
+        },
+        {
+          "pid": 61167,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2310876"
+        },
+        {
+          "pid": 61208,
+          "state": "S",
+          "parent": 61167,
+          "startTicks": "2310997"
+        },
+        {
+          "pid": 61211,
+          "state": "S",
+          "parent": 61208,
+          "startTicks": "2310998"
+        },
+        {
+          "pid": 61212,
+          "state": "R",
+          "parent": 61211,
+          "startTicks": "2310998"
+        },
+        {
+          "pid": 61220,
+          "state": "Z",
+          "parent": 61208,
+          "startTicks": "2310999"
+        },
+        {
+          "pid": 61223,
+          "state": "R",
+          "parent": 61208,
+          "startTicks": "2311005"
+        },
+        {
+          "pid": 61251,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2311110"
+        },
+        {
+          "pid": 61298,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2311283"
+        },
+        {
+          "pid": 61384,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2311566"
+        },
+        {
+          "pid": 61420,
+          "state": "S",
+          "parent": 61384,
+          "startTicks": "2311676"
+        },
+        {
+          "pid": 61421,
+          "state": "R",
+          "parent": 61420,
+          "startTicks": "2311676"
+        },
+        {
+          "pid": 61422,
+          "state": "Z",
+          "parent": 61421,
+          "startTicks": "2311676"
+        },
+        {
+          "pid": 61432,
+          "state": "R",
+          "parent": 61420,
+          "startTicks": "2311678"
+        },
+        {
+          "pid": 61434,
+          "state": "R",
+          "parent": 61420,
+          "startTicks": "2311682"
+        },
+        {
+          "pid": 61454,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2311762"
+        },
+        {
+          "pid": 61501,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2311937"
+        },
+        {
+          "pid": 61578,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2312348"
+        },
+        {
+          "pid": 61621,
+          "state": "S",
+          "parent": 61578,
+          "startTicks": "2312533"
+        },
+        {
+          "pid": 61622,
+          "state": "Z",
+          "parent": 61621,
+          "startTicks": "2312534"
+        },
+        {
+          "pid": 61634,
+          "state": "R",
+          "parent": 61621,
+          "startTicks": "2312536"
+        },
+        {
+          "pid": 61636,
+          "state": "R",
+          "parent": 61621,
+          "startTicks": "2312542"
+        },
+        {
+          "pid": 61645,
+          "state": "R",
+          "parent": 61636,
+          "startTicks": "2312617"
+        },
+        {
+          "pid": 61667,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2312743"
+        },
+        {
+          "pid": 61722,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2312997"
+        },
+        {
+          "pid": 61796,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2313443"
+        },
+        {
+          "pid": 61833,
+          "state": "S",
+          "parent": 61796,
+          "startTicks": "2313557"
+        },
+        {
+          "pid": 61836,
+          "state": "S",
+          "parent": 61833,
+          "startTicks": "2313558"
+        },
+        {
+          "pid": 61846,
+          "state": "Z",
+          "parent": 61833,
+          "startTicks": "2313559"
+        },
+        {
+          "pid": 61848,
+          "state": "R",
+          "parent": 61833,
+          "startTicks": "2313563"
+        },
+        {
+          "pid": 61866,
+          "state": "Z",
+          "parent": 60620,
+          "startTicks": "2313643"
+        }
+      ],
+      "reaped": [
+        {
+          "pid": 60620,
+          "exitCode": 143
+        }
+      ],
+      "signals": [
+        {
+          "identity": {
+            "pid": 60620,
+            "state": "S",
+            "parent": 60619,
+            "startTicks": "2308512"
+          },
+          "signal": 15
+        }
+      ],
+      "status": "reaped",
+      "rootExitCode": 143,
+      "waitpidNoChildren": true
+    },
+    "workerIdentities": [
+      {
+        "pid": 60709,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2308957"
+      },
+      {
+        "pid": 60778,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2309315"
+      },
+      {
+        "pid": 60853,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2309559"
+      },
+      {
+        "pid": 60902,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2309748"
+      },
+      {
+        "pid": 60971,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2310110"
+      },
+      {
+        "pid": 61039,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2310288"
+      },
+      {
+        "pid": 61085,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2310442"
+      },
+      {
+        "pid": 61167,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2310876"
+      },
+      {
+        "pid": 61251,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2311110"
+      },
+      {
+        "pid": 61298,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2311283"
+      },
+      {
+        "pid": 61384,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2311566"
+      },
+      {
+        "pid": 61454,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2311762"
+      },
+      {
+        "pid": 61501,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2311937"
+      },
+      {
+        "pid": 61578,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2312348"
+      },
+      {
+        "pid": 61667,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2312743"
+      },
+      {
+        "pid": 61722,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2312997"
+      },
+      {
+        "pid": 61796,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2313443"
+      },
+      {
+        "pid": 61866,
+        "state": "S",
+        "parent": 60620,
+        "startTicks": "2313643"
+      }
+    ],
+    "newZombies": [],
+    "resources": {
+      "wallSeconds": 52.95625997499883,
+      "userSeconds": 141.606902,
+      "systemSeconds": 12.020239,
+      "maxChildRssKiB": 426364
+    }
+  },
+  "after": {
+    "jarSha256": "a576db38614824fca7e2e08e6e233e7cdf50a75297a874405a6be90ebb922fb0",
+    "manifestSha256": "1344d023bd073d2262c553e51537684e0cbebb73cb8d082daec342368ba59916",
+    "cases": [
+      {
+        "case": "serif-faces",
+        "stage": "word",
+        "target": "docx",
+        "seconds": 2.6742740600020625,
+        "task": {
+          "taskId": "a5e44250-9dcb-4f76-bf31-944808425b13",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "serif-faces.pdf",
+              "success": true,
+              "outputName": "serif-faces.docx",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "docx"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "serif-faces.docx",
+          "sourceFormat": "pdf",
+          "targetFormat": "docx",
+          "createdAt": "2026-10-04T10:43:48.872977534Z",
+          "updatedAt": "2026-10-04T10:43:51.368224945Z",
+          "expiresAt": "2026-10-05T10:43:51.368224945Z"
+        },
+        "artifact": "serif-faces-word.docx",
+        "sha256": "ad72949463bd3bcb933ab90172aa5c701f65df86346c236b0de5d2bec1e07e6d"
+      },
+      {
+        "case": "serif-faces",
+        "stage": "office",
+        "target": "pdf",
+        "seconds": 2.199566120001691,
+        "task": {
+          "taskId": "0d4a64b2-9d7c-464e-b5a5-e047c1ea5d02",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "serif-faces-word.docx",
+              "success": true,
+              "outputName": "serif-faces-word.pdf",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "docx",
+              "targetFormat": "pdf"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "serif-faces-word.pdf",
+          "sourceFormat": "docx",
+          "targetFormat": "pdf",
+          "createdAt": "2026-10-04T10:43:51.463338725Z",
+          "updatedAt": "2026-10-04T10:43:53.622616151Z",
+          "expiresAt": "2026-10-05T10:43:53.622616151Z"
+        },
+        "artifact": "serif-faces-office.pdf",
+        "sha256": "84d827fa1d14a0825a454e237e23b3e8d32b92f5eed8dafbd6e4c95944fa57ba"
+      },
+      {
+        "case": "serif-faces",
+        "stage": "text",
+        "target": "txt",
+        "seconds": 2.09061400200153,
+        "task": {
+          "taskId": "97208f4f-0c75-490f-b468-ef951fe0a014",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "serif-faces-office.pdf",
+              "success": true,
+              "outputName": "serif-faces-office.txt",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "txt"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "serif-faces-office.txt",
+          "sourceFormat": "pdf",
+          "targetFormat": "txt",
+          "createdAt": "2026-10-04T10:43:53.661870923Z",
+          "updatedAt": "2026-10-04T10:43:55.665079858Z",
+          "expiresAt": "2026-10-05T10:43:55.665079858Z"
+        },
+        "artifact": "serif-faces-text.txt",
+        "sha256": "6abac9573edeb326e5673f449b1a2f4f3ff5da8b7ee7ab934cb3507ee0b4c768"
+      },
+      {
+        "case": "serif-faces",
+        "stage": "edited-office",
+        "target": "pdf",
+        "seconds": 1.7427405740018003,
+        "task": {
+          "taskId": "b94b975b-aaab-4eaf-a620-ae6969e83632",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "serif-faces-edited.docx",
+              "success": true,
+              "outputName": "serif-faces-edited.pdf",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "docx",
+              "targetFormat": "pdf"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "serif-faces-edited.pdf",
+          "sourceFormat": "docx",
+          "targetFormat": "pdf",
+          "createdAt": "2026-10-04T10:43:55.753777106Z",
+          "updatedAt": "2026-10-04T10:43:57.433235605Z",
+          "expiresAt": "2026-10-05T10:43:57.433235605Z"
+        },
+        "artifact": "serif-faces-edited-office.pdf",
+        "sha256": "574de143e02ee866364d1e7c675229e9954a447e0295c50643a7b2171a9993ca"
+      },
+      {
+        "case": "serif-faces",
+        "stage": "edited-text",
+        "target": "txt",
+        "seconds": 1.4260335369981476,
+        "task": {
+          "taskId": "a7ca4b4d-6d44-467b-a800-b714964d05d0",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "serif-faces-edited-office.pdf",
+              "success": true,
+              "outputName": "serif-faces-edited-office.txt",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "txt"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "serif-faces-edited-office.txt",
+          "sourceFormat": "pdf",
+          "targetFormat": "txt",
+          "createdAt": "2026-10-04T10:43:57.497688032Z",
+          "updatedAt": "2026-10-04T10:43:58.824572373Z",
+          "expiresAt": "2026-10-05T10:43:58.824572373Z"
+        },
+        "artifact": "serif-faces-edited-text.txt",
+        "sha256": "5bcaa1e0e0b021bbbbaf988fbbaeee0cdb7b4c0730b5411f2780ac30d1651b88"
+      },
+      {
+        "case": "mono-faces",
+        "stage": "word",
+        "target": "docx",
+        "seconds": 2.437799842999084,
+        "task": {
+          "taskId": "8df94a19-ac6e-4948-9a82-e011ab765846",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "mono-faces.pdf",
+              "success": true,
+              "outputName": "mono-faces.docx",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "docx"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "mono-faces.docx",
+          "sourceFormat": "pdf",
+          "targetFormat": "docx",
+          "createdAt": "2026-10-04T10:43:58.932664270Z",
+          "updatedAt": "2026-10-04T10:44:01.284708308Z",
+          "expiresAt": "2026-10-05T10:44:01.284708308Z"
+        },
+        "artifact": "mono-faces-word.docx",
+        "sha256": "0c6c0b685d51030fa46ac94a94d5e1c0a95e844b529c936b7132ab4eda1fa2fc"
+      },
+      {
+        "case": "mono-faces",
+        "stage": "office",
+        "target": "pdf",
+        "seconds": 2.8082674680008495,
+        "task": {
+          "taskId": "ffaf6b8e-d1e2-4d37-8663-d693fd8d74e9",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "mono-faces-word.docx",
+              "success": true,
+              "outputName": "mono-faces-word.pdf",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "docx",
+              "targetFormat": "pdf"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "mono-faces-word.pdf",
+          "sourceFormat": "docx",
+          "targetFormat": "pdf",
+          "createdAt": "2026-10-04T10:44:01.367487336Z",
+          "updatedAt": "2026-10-04T10:44:04.136014076Z",
+          "expiresAt": "2026-10-05T10:44:04.136014076Z"
+        },
+        "artifact": "mono-faces-office.pdf",
+        "sha256": "2578080a0df90adbb92eacff26dbe00ec657e5eed57b67a68ee1e00aaa54295d"
+      },
+      {
+        "case": "mono-faces",
+        "stage": "text",
+        "target": "txt",
+        "seconds": 1.411159636998491,
+        "task": {
+          "taskId": "fdf8014a-e12b-4f2c-a9ad-edb7820e792e",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "mono-faces-office.pdf",
+              "success": true,
+              "outputName": "mono-faces-office.txt",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "txt"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "mono-faces-office.txt",
+          "sourceFormat": "pdf",
+          "targetFormat": "txt",
+          "createdAt": "2026-10-04T10:44:04.175738280Z",
+          "updatedAt": "2026-10-04T10:44:05.518662753Z",
+          "expiresAt": "2026-10-05T10:44:05.518662753Z"
+        },
+        "artifact": "mono-faces-text.txt",
+        "sha256": "2b3a6d4db86c4a1a63e4c5edef88f899cf6cb2bc2e6ff4762e5f3d011ecffebe"
+      },
+      {
+        "case": "bilingual-punctuation",
+        "stage": "word",
+        "target": "docx",
+        "seconds": 4.0388084199985315,
+        "task": {
+          "taskId": "83f663d7-bf72-40a8-b352-2bf3209c10b3",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "bilingual-punctuation.pdf",
+              "success": true,
+              "outputName": "bilingual-punctuation.docx",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "docx"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "bilingual-punctuation.docx",
+          "sourceFormat": "pdf",
+          "targetFormat": "docx",
+          "createdAt": "2026-10-04T10:44:05.721243062Z",
+          "updatedAt": "2026-10-04T10:44:09.601300088Z",
+          "expiresAt": "2026-10-05T10:44:09.601300088Z"
+        },
+        "artifact": "bilingual-punctuation-word.docx",
+        "sha256": "04b94f44c87bad396bc4ab86c14bbcb4076d359330240b224877db9959a5178e"
+      },
+      {
+        "case": "bilingual-punctuation",
+        "stage": "office",
+        "target": "pdf",
+        "seconds": 2.105311098999664,
+        "task": {
+          "taskId": "90a9007a-3075-4d40-9435-15b755cad24d",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "bilingual-punctuation-word.docx",
+              "success": true,
+              "outputName": "bilingual-punctuation-word.pdf",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "docx",
+              "targetFormat": "pdf"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "bilingual-punctuation-word.pdf",
+          "sourceFormat": "docx",
+          "targetFormat": "pdf",
+          "createdAt": "2026-10-04T10:44:09.697815087Z",
+          "updatedAt": "2026-10-04T10:44:11.737429025Z",
+          "expiresAt": "2026-10-05T10:44:11.737429025Z"
+        },
+        "artifact": "bilingual-punctuation-office.pdf",
+        "sha256": "8a5bae8381480254b31d2f2b8c77bda4ed22c88bddb30f7768b5f79534a327a4"
+      },
+      {
+        "case": "bilingual-punctuation",
+        "stage": "text",
+        "target": "txt",
+        "seconds": 1.1896874949998164,
+        "task": {
+          "taskId": "017f8576-9ac2-4878-983c-974ad8aeb6ec",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "bilingual-punctuation-office.pdf",
+              "success": true,
+              "outputName": "bilingual-punctuation-office.txt",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "txt"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "bilingual-punctuation-office.txt",
+          "sourceFormat": "pdf",
+          "targetFormat": "txt",
+          "createdAt": "2026-10-04T10:44:11.791926985Z",
+          "updatedAt": "2026-10-04T10:44:12.931071699Z",
+          "expiresAt": "2026-10-05T10:44:12.931071699Z"
+        },
+        "artifact": "bilingual-punctuation-text.txt",
+        "sha256": "4c411dbb8dab52a42d7ef2e43fccf730b587f9135e2356a52d1fdf0571e89c4e"
+      },
+      {
+        "case": "symbols-dejavu",
+        "stage": "word",
+        "target": "docx",
+        "seconds": 2.071230841000215,
+        "task": {
+          "taskId": "1ad85276-f58c-4be0-a0ee-3228de266ca3",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "symbols-dejavu.pdf",
+              "success": true,
+              "outputName": "symbols-dejavu.docx",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "docx"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "symbols-dejavu.docx",
+          "sourceFormat": "pdf",
+          "targetFormat": "docx",
+          "createdAt": "2026-10-04T10:44:12.985390879Z",
+          "updatedAt": "2026-10-04T10:44:14.952303316Z",
+          "expiresAt": "2026-10-05T10:44:14.952303316Z"
+        },
+        "artifact": "symbols-dejavu-word.docx",
+        "sha256": "f30c23596981a0e40ecb4a86543d082e490a4deb09bb7d2f673b8b67e6e6f6f5"
+      },
+      {
+        "case": "symbols-dejavu",
+        "stage": "office",
+        "target": "pdf",
+        "seconds": 2.140474372998142,
+        "task": {
+          "taskId": "8c1e3335-4504-4090-b696-1708d6bb5c77",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "symbols-dejavu-word.docx",
+              "success": true,
+              "outputName": "symbols-dejavu-word.pdf",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "docx",
+              "targetFormat": "pdf"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "symbols-dejavu-word.pdf",
+          "sourceFormat": "docx",
+          "targetFormat": "pdf",
+          "createdAt": "2026-10-04T10:44:15.058012756Z",
+          "updatedAt": "2026-10-04T10:44:17.136269157Z",
+          "expiresAt": "2026-10-05T10:44:17.136269157Z"
+        },
+        "artifact": "symbols-dejavu-office.pdf",
+        "sha256": "b315096bd6494e7b345a1b064b47faa5059ed7582e18bbab91fb3a86a8a753ad"
+      },
+      {
+        "case": "symbols-dejavu",
+        "stage": "text",
+        "target": "txt",
+        "seconds": 1.9472852289982256,
+        "task": {
+          "taskId": "29a74fdf-ca6e-4f6e-8ab1-9b8e9b49c951",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "symbols-dejavu-office.pdf",
+              "success": true,
+              "outputName": "symbols-dejavu-office.txt",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "txt"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "symbols-dejavu-office.txt",
+          "sourceFormat": "pdf",
+          "targetFormat": "txt",
+          "createdAt": "2026-10-04T10:44:17.200575226Z",
+          "updatedAt": "2026-10-04T10:44:19.105596284Z",
+          "expiresAt": "2026-10-05T10:44:19.105596284Z"
+        },
+        "artifact": "symbols-dejavu-text.txt",
+        "sha256": "ab1e20f3b17c0ce80cdc10333b7f1d6d1ea4dd9f8dca31c0cc7b6d09a8ad91aa"
+      },
+      {
+        "case": "line-boundaries",
+        "stage": "word",
+        "target": "docx",
+        "seconds": 4.018565318998299,
+        "task": {
+          "taskId": "46e32f1c-aa9d-4f68-bb56-cca95ab5910b",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "line-boundaries.pdf",
+              "success": true,
+              "outputName": "line-boundaries.docx",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "docx"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "line-boundaries.docx",
+          "sourceFormat": "pdf",
+          "targetFormat": "docx",
+          "createdAt": "2026-10-04T10:44:19.292776459Z",
+          "updatedAt": "2026-10-04T10:44:23.103019705Z",
+          "expiresAt": "2026-10-05T10:44:23.103019705Z"
+        },
+        "artifact": "line-boundaries-word.docx",
+        "sha256": "77d3e7a7e62631d9366cbb6774eb64afe9fc611742a74df92c19a4ea6aa7e5a1"
+      },
+      {
+        "case": "line-boundaries",
+        "stage": "office",
+        "target": "pdf",
+        "seconds": 2.0168766870010586,
+        "task": {
+          "taskId": "014fad50-710b-40ad-a484-2d89f895d7fb",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "line-boundaries-word.docx",
+              "success": true,
+              "outputName": "line-boundaries-word.pdf",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "docx",
+              "targetFormat": "pdf"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "line-boundaries-word.pdf",
+          "sourceFormat": "docx",
+          "targetFormat": "pdf",
+          "createdAt": "2026-10-04T10:44:23.231260160Z",
+          "updatedAt": "2026-10-04T10:44:25.153178807Z",
+          "expiresAt": "2026-10-05T10:44:25.153178807Z"
+        },
+        "artifact": "line-boundaries-office.pdf",
+        "sha256": "9162e360eab92a0b4be0d84ea634e3dec6765189bc5dd5ff795b73eb8ba6f95d"
+      },
+      {
+        "case": "line-boundaries",
+        "stage": "text",
+        "target": "txt",
+        "seconds": 1.4317995239980519,
+        "task": {
+          "taskId": "e9e04f7c-39ee-40d6-9675-a890e482d1e8",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "line-boundaries-office.pdf",
+              "success": true,
+              "outputName": "line-boundaries-office.txt",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "txt"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "line-boundaries-office.txt",
+          "sourceFormat": "pdf",
+          "targetFormat": "txt",
+          "createdAt": "2026-10-04T10:44:25.238719156Z",
+          "updatedAt": "2026-10-04T10:44:26.630656657Z",
+          "expiresAt": "2026-10-05T10:44:26.630656657Z"
+        },
+        "artifact": "line-boundaries-text.txt",
+        "sha256": "99c973aea648ea10b02740eb3882568540f086298a7369b491b4d3794fbb9d08"
+      },
+      {
+        "case": "unavailable-family",
+        "stage": "word",
+        "target": "docx",
+        "seconds": 3.3174568979993637,
+        "task": {
+          "taskId": "e5aa5b81-4a14-4e89-a777-f9709327ffe9",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "unavailable-family.pdf",
+              "success": true,
+              "outputName": "unavailable-family.docx",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "docx"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "unavailable-family.docx",
+          "sourceFormat": "pdf",
+          "targetFormat": "docx",
+          "createdAt": "2026-10-04T10:44:26.676375984Z",
+          "updatedAt": "2026-10-04T10:44:29.923699879Z",
+          "expiresAt": "2026-10-05T10:44:29.923699879Z"
+        },
+        "artifact": "unavailable-family-word.docx",
+        "sha256": "c88ffb05089e580eba3c9a4b436d616dab14d7530fcfce78b9ed3b82fe8a120f"
+      },
+      {
+        "case": "unavailable-family",
+        "stage": "office",
+        "target": "pdf",
+        "seconds": 2.1047502560031717,
+        "task": {
+          "taskId": "b498de60-46d6-447d-9c3b-d319b02b78da",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "unavailable-family-word.docx",
+              "success": true,
+              "outputName": "unavailable-family-word.pdf",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "docx",
+              "targetFormat": "pdf"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "unavailable-family-word.pdf",
+          "sourceFormat": "docx",
+          "targetFormat": "pdf",
+          "createdAt": "2026-10-04T10:44:29.990121469Z",
+          "updatedAt": "2026-10-04T10:44:32.008175399Z",
+          "expiresAt": "2026-10-05T10:44:32.008175399Z"
+        },
+        "artifact": "unavailable-family-office.pdf",
+        "sha256": "14aacd24d29069e161a0598bbb41b929cec82675986d1884c11c97f2538881ef"
+      },
+      {
+        "case": "unavailable-family",
+        "stage": "text",
+        "target": "txt",
+        "seconds": 1.3819711479991383,
+        "task": {
+          "taskId": "8d90e4ca-9ecf-44fb-98f1-e83da9e5e8ec",
+          "status": "SUCCESS",
+          "stage": "COMPLETED",
+          "progress": 100,
+          "errorCode": null,
+          "errorMessage": null,
+          "warnings": [],
+          "files": [
+            {
+              "fileName": "unavailable-family-office.pdf",
+              "success": true,
+              "outputName": "unavailable-family-office.txt",
+              "pageCount": 1,
+              "errorCode": null,
+              "errorMessage": null,
+              "sourceFormat": "pdf",
+              "targetFormat": "txt"
+            }
+          ],
+          "downloadReady": true,
+          "downloadName": "unavailable-family-office.txt",
+          "sourceFormat": "pdf",
+          "targetFormat": "txt",
+          "createdAt": "2026-10-04T10:44:32.094935919Z",
+          "updatedAt": "2026-10-04T10:44:33.400530364Z",
+          "expiresAt": "2026-10-05T10:44:33.400530364Z"
+        },
+        "artifact": "unavailable-family-text.txt",
+        "sha256": "29b8a8c8d09d1005e51500d78b88bc3a071737f1d248f0dea217a7b3b06345a3"
+      }
+    ],
+    "status": "completed",
+    "failures": [],
+    "workerPids": [
+      64822,
+      64879,
+      64953,
+      65001,
+      65069,
+      65113,
+      65168,
+      65244,
+      65288,
+      65359,
+      65432,
+      65472,
+      65524,
+      65596,
+      65643,
+      65714,
+      65785,
+      65829,
+      65892,
+      65963
+    ],
+    "helperSha256": {
+      "run_word_iteration19.py": "8affdfc11c1fd65522d00426e098524b8729a6b37446b619ce2358b9ce109a3b",
+      "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85",
+      "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9"
+    },
+    "health": {
+      "status": "UP",
+      "version": "0.1.4",
+      "parser": "OFDRW 2.3.9",
+      "javaVersion": "17.0.16",
+      "os": "Linux",
+      "arch": "amd64",
+      "office": {
+        "enabled": true,
+        "available": true,
+        "binaryName": "soffice",
+        "version": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+        "message": "Office 引擎可用"
+      },
+      "ocr": {
+        "enabled": false,
+        "available": false,
+        "binaryName": null,
+        "version": null,
+        "requestedLanguages": null,
+        "availableLanguages": [],
+        "timeoutSeconds": null,
+        "maxConcurrency": null,
+        "maxImagePixels": null,
+        "minimumConfidence": null,
+        "bundled": null,
+        "errorCode": null,
+        "message": "本地 OCR 未启用"
+      },
+      "time": "2026-10-04T10:43:48.716630916Z"
+    },
+    "edits": [
+      {
+        "case": "serif-faces",
+        "artifact": "serif-faces-edited.docx",
+        "sha256": "1fcd4e867d395f3ff87a7f1ecb942e558cfaa2d31ec42441feddf6ec4755a0fa",
+        "change": {
+          "replace": [
+            "00731",
+            "00739"
+          ],
+          "runOnly": true,
+          "occurrences": 1
+        }
+      }
+    ],
+    "supervision": {
+      "supervisor": {
+        "pid": 64726,
+        "state": "R",
+        "parent": 64725,
+        "startTicks": "2379962"
+      },
+      "root": {
+        "pid": 64727,
+        "state": "R",
+        "parent": 64726,
+        "startTicks": "2379966"
+      },
+      "registered": [
+        {
+          "pid": 64727,
+          "state": "Z",
+          "parent": 64726,
+          "startTicks": "2379966"
+        },
+        {
+          "pid": 64771,
+          "state": "S",
+          "parent": 64727,
+          "startTicks": "2380261"
+        },
+        {
+          "pid": 64776,
+          "state": "S",
+          "parent": 64771,
+          "startTicks": "2380262"
+        },
+        {
+          "pid": 64780,
+          "state": "Z",
+          "parent": 64776,
+          "startTicks": "2380263"
+        },
+        {
+          "pid": 64786,
+          "state": "R",
+          "parent": 64776,
+          "startTicks": "2380264"
+        },
+        {
+          "pid": 64788,
+          "state": "S",
+          "parent": 64727,
+          "startTicks": "2380276"
+        },
+        {
+          "pid": 64792,
+          "state": "S",
+          "parent": 64788,
+          "startTicks": "2380277"
+        },
+        {
+          "pid": 64802,
+          "state": "R",
+          "parent": 64792,
+          "startTicks": "2380278"
+        },
+        {
+          "pid": 64803,
+          "state": "R",
+          "parent": 64788,
+          "startTicks": "2380294"
+        },
+        {
+          "pid": 64822,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2380404"
+        },
+        {
+          "pid": 64879,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2380657"
+        },
+        {
+          "pid": 64915,
+          "state": "S",
+          "parent": 64879,
+          "startTicks": "2380774"
+        },
+        {
+          "pid": 64930,
+          "state": "R",
+          "parent": 64915,
+          "startTicks": "2380782"
+        },
+        {
+          "pid": 64935,
+          "state": "R",
+          "parent": 64930,
+          "startTicks": "2380812"
+        },
+        {
+          "pid": 64953,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2380877"
+        },
+        {
+          "pid": 65001,
+          "state": "S",
+          "parent": 64727,
+          "startTicks": "2381086"
+        },
+        {
+          "pid": 65034,
+          "state": "S",
+          "parent": 65001,
+          "startTicks": "2381164"
+        },
+        {
+          "pid": 65049,
+          "state": "R",
+          "parent": 65034,
+          "startTicks": "2381174"
+        },
+        {
+          "pid": 65053,
+          "state": "R",
+          "parent": 65049,
+          "startTicks": "2381202"
+        },
+        {
+          "pid": 65069,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2381260"
+        },
+        {
+          "pid": 65113,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2381404"
+        },
+        {
+          "pid": 65168,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2381647"
+        },
+        {
+          "pid": 65210,
+          "state": "S",
+          "parent": 65168,
+          "startTicks": "2381837"
+        },
+        {
+          "pid": 65216,
+          "state": "R",
+          "parent": 65215,
+          "startTicks": "2381838"
+        },
+        {
+          "pid": 65215,
+          "state": "S",
+          "parent": 65210,
+          "startTicks": "2381838"
+        },
+        {
+          "pid": 65225,
+          "state": "R",
+          "parent": 65210,
+          "startTicks": "2381843"
+        },
+        {
+          "pid": 65229,
+          "state": "R",
+          "parent": 65225,
+          "startTicks": "2381867"
+        },
+        {
+          "pid": 65244,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2381928"
+        },
+        {
+          "pid": 65288,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2382082"
+        },
+        {
+          "pid": 65359,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2382480"
+        },
+        {
+          "pid": 65395,
+          "state": "S",
+          "parent": 65359,
+          "startTicks": "2382591"
+        },
+        {
+          "pid": 65400,
+          "state": "S",
+          "parent": 65395,
+          "startTicks": "2382592"
+        },
+        {
+          "pid": 65401,
+          "state": "R",
+          "parent": 65400,
+          "startTicks": "2382592"
+        },
+        {
+          "pid": 65410,
+          "state": "R",
+          "parent": 65395,
+          "startTicks": "2382597"
+        },
+        {
+          "pid": 65414,
+          "state": "S",
+          "parent": 65410,
+          "startTicks": "2382623"
+        },
+        {
+          "pid": 65432,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2382689"
+        },
+        {
+          "pid": 65472,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2382809"
+        },
+        {
+          "pid": 65524,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2383016"
+        },
+        {
+          "pid": 65561,
+          "state": "S",
+          "parent": 65524,
+          "startTicks": "2383133"
+        },
+        {
+          "pid": 65562,
+          "state": "S",
+          "parent": 65561,
+          "startTicks": "2383134"
+        },
+        {
+          "pid": 65563,
+          "state": "R",
+          "parent": 65562,
+          "startTicks": "2383134"
+        },
+        {
+          "pid": 65575,
+          "state": "R",
+          "parent": 65561,
+          "startTicks": "2383142"
+        },
+        {
+          "pid": 65596,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2383230"
+        },
+        {
+          "pid": 65643,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2383439"
+        },
+        {
+          "pid": 65714,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2383834"
+        },
+        {
+          "pid": 65748,
+          "state": "S",
+          "parent": 65714,
+          "startTicks": "2383925"
+        },
+        {
+          "pid": 65749,
+          "state": "S",
+          "parent": 65748,
+          "startTicks": "2383926"
+        },
+        {
+          "pid": 65750,
+          "state": "R",
+          "parent": 65749,
+          "startTicks": "2383926"
+        },
+        {
+          "pid": 65756,
+          "state": "Z",
+          "parent": 65748,
+          "startTicks": "2383927"
+        },
+        {
+          "pid": 65763,
+          "state": "R",
+          "parent": 65748,
+          "startTicks": "2383932"
+        },
+        {
+          "pid": 65785,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2384034"
+        },
+        {
+          "pid": 65829,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2384178"
+        },
+        {
+          "pid": 65892,
+          "state": "Z",
+          "parent": 64727,
+          "startTicks": "2384509"
+        },
+        {
+          "pid": 65928,
+          "state": "S",
+          "parent": 65892,
+          "startTicks": "2384618"
+        },
+        {
+          "pid": 65929,
+          "state": "S",
+          "parent": 65928,
+          "startTicks": "2384619"
+        },
+        {
+          "pid": 65930,
+          "state": "R",
+          "parent": 65929,
+          "startTicks": "2384619"
+        },
+        {
+          "pid": 65943,
+          "state": "R",
+          "parent": 65928,
+          "startTicks": "2384626"
+        },
+        {
+          "pid": 65963,
+          "state": "S",
+          "parent": 64727,
+          "startTicks": "2384720"
+        }
+      ],
+      "reaped": [
+        {
+          "pid": 64727,
+          "exitCode": 143
+        }
+      ],
+      "signals": [
+        {
+          "identity": {
+            "pid": 64727,
+            "state": "S",
+            "parent": 64726,
+            "startTicks": "2379966"
+          },
+          "signal": 15
+        }
+      ],
+      "status": "reaped",
+      "rootExitCode": 143,
+      "waitpidNoChildren": true
+    },
+    "workerIdentities": [
+      {
+        "pid": 64822,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2380404"
+      },
+      {
+        "pid": 64879,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2380657"
+      },
+      {
+        "pid": 64953,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2380877"
+      },
+      {
+        "pid": 65001,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2381086"
+      },
+      {
+        "pid": 65069,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2381260"
+      },
+      {
+        "pid": 65113,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2381404"
+      },
+      {
+        "pid": 65168,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2381647"
+      },
+      {
+        "pid": 65244,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2381928"
+      },
+      {
+        "pid": 65288,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2382082"
+      },
+      {
+        "pid": 65359,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2382480"
+      },
+      {
+        "pid": 65432,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2382689"
+      },
+      {
+        "pid": 65472,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2382809"
+      },
+      {
+        "pid": 65524,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2383016"
+      },
+      {
+        "pid": 65596,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2383230"
+      },
+      {
+        "pid": 65643,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2383439"
+      },
+      {
+        "pid": 65714,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2383834"
+      },
+      {
+        "pid": 65785,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2384034"
+      },
+      {
+        "pid": 65829,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2384178"
+      },
+      {
+        "pid": 65892,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2384509"
+      },
+      {
+        "pid": 65963,
+        "state": "S",
+        "parent": 64727,
+        "startTicks": "2384720"
+      }
+    ],
+    "newZombies": [],
+    "resources": {
+      "wallSeconds": 49.19195609500093,
+      "userSeconds": 133.359459,
+      "systemSeconds": 10.764788,
+      "maxChildRssKiB": 429752
+    }
+  },
+  "originalNativeGeometryAndTextExact": true,
+  "edit": {
+    "replacement": [
+      "00731",
+      "00739"
+    ],
+    "occurrences": 1,
+    "wordOfficeAndApiTextExact": true,
+    "pages": 1
+  },
+  "limits": [
+    "Installed cloud fonts verified separately from embedded font metadata; correct requests do not guarantee fonts exist on another machine",
+    "Bundled Droid CJK fallback remains intentional and unchanged; no source-perfect CJK font claim",
+    "No new font programs redistributed in production; corpus license notices retained",
+    "Native Microsoft Word/platform installers unrun"
+  ],
+  "cleanup": {
+    "runs": [
+      {
+        "label": "before",
+        "contracts": 18,
+        "directWorkers": 18,
+        "registeredGone": true,
+        "helperHashesVerified": true
+      },
+      {
+        "label": "after",
+        "contracts": 20,
+        "directWorkers": 20,
+        "registeredGone": true,
+        "helperHashesVerified": true
+      }
+    ],
+    "newZombies": 0,
+    "oldTenAuditZombiesUnchanged": true
+  },
+  "classDiff": {
+    "beforeCount": 223,
+    "afterCount": 223,
+    "changed": [
+      "task-service/com/fuyue/formatconverter/task/PdfFontNames$Face.class",
+      "task-service/com/fuyue/formatconverter/task/PdfFontNames.class"
+    ],
+    "added": [],
+    "removed": [],
+    "unchanged": 221
+  },
+  "build": {
+    "counts": {
+      "tests": 427,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "skips": [
+      {
+        "class": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+        "method": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning",
+        "reason": "org.opentest4j.TestAbortedException: Assumption failed: 可选真实签章 OFD 回归样本未提供"
+      }
+    ]
+  },
+  "focused": {
+    "counts": {
+      "tests": 52,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "classes": [
+      "com.fuyue.formatconverter.docx.PoiDocxRendererTest",
+      "com.fuyue.formatconverter.task.PdfToDocxColumnsTest",
+      "com.fuyue.formatconverter.task.PdfToDocxContentTest",
+      "com.fuyue.formatconverter.task.PdfColumnHeadingOrderTest",
+      "com.fuyue.formatconverter.task.PdfEmbeddedFontMetadataTest",
+      "com.fuyue.formatconverter.task.PdfToDocxFontTest",
+      "com.fuyue.formatconverter.task.PdfCrossPageParagraphTest",
+      "com.fuyue.formatconverter.task.PdfToDocxTableGeometryTest"
+    ]
+  },
+  "runtime": {
+    "fontHashesReverified": {
+      "en": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
+        "sha256": "9caef765d2e891c10dd73658894f01e660fe0c1c83e0bda7d6edf561d8f623d4",
+        "family": "Liberation Serif",
+        "version": "Version 2.1.5"
+      },
+      "zh": {
+        "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+        "family": "Noto Sans CJK JP",
+        "version": "Version 2.004;hotconv 1.0.118;makeotfexe 2.5.65603"
+      }
+    },
+    "bundledOcrFilesRehashed": {
+      "desktop/.runtime/ocr/tessdata/eng.traineddata": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+      "desktop/.runtime/ocr/tessdata/osd.traineddata": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff",
+      "desktop/.runtime/ocr/tessdata/chi_sim.traineddata": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730",
+      "desktop/.runtime/ocr/tessdata/chi_sim_vert.traineddata": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da",
+      "desktop/.runtime/ocr/bin/tesseract": "90730922627269352568d54e788c7e42fd2e1783e03795d75560efa385de1489"
+    },
+    "runtimePins": "Temurin17.0.16+8 Maven3.9.11 Node22.17.0 Python3.12.14 PyMuPDF1.26.6 Linux6.18.44; LibreOfficeDev26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5; Tesseract5.5.2 Leptonica1.87.0 libpng1.6.57 zlib1.3.1; tessdata_fast87416418657359cb625c412a48b6e1d6d41c29bd",
+    "fontLicenses": "SIL OFL1.1",
+    "newNativeOcrAccuracySweep": false,
+    "iteration21SourceFonts": {
+      "sr": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
+        "sha256": "9caef765d2e891c10dd73658894f01e660fe0c1c83e0bda7d6edf561d8f623d4",
+        "family": "Liberation Serif",
+        "subfamily": "Regular",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "sb": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf",
+        "sha256": "443a4dbd694b6e4689925947b456e0532e10b19c90fa32eb39ea6c2cd9db9ebd",
+        "family": "Liberation Serif",
+        "subfamily": "Bold",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "si": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf",
+        "sha256": "de18fe26337e03241952dca46398d5b66f3c5738d080bfd284f66e67b926f597",
+        "family": "Liberation Serif",
+        "subfamily": "Italic",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "sbi": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-BoldItalic.ttf",
+        "sha256": "4b2635d2ec4d992373dcae577c742a98ecfd841ffc1b8a103b5f10db163dbc7a",
+        "family": "Liberation Serif",
+        "subfamily": "Bold Italic",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "mr": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+        "sha256": "5883330d94debd992952cd8f0571b225f478c2d797d3f36c7521b0a5c9bde0f2",
+        "family": "Liberation Mono",
+        "subfamily": "Regular",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "mb": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf",
+        "sha256": "ddce09ee3483b2d5faf61f0baba8592e76e0ac6dd4ab36683e5334c288bf5eef",
+        "family": "Liberation Mono",
+        "subfamily": "Bold",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "mi": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationMono-Italic.ttf",
+        "sha256": "016743fc425a1b61eb349c72c02f3da6a1349d1da7a5d9aded27321397eed955",
+        "family": "Liberation Mono",
+        "subfamily": "Italic",
+        "version": "Version 2.1.5",
+        "license": "SIL-OFL-1.1"
+      },
+      "zh": {
+        "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+        "family": "Noto Sans CJK JP",
+        "subfamily": "Regular",
+        "version": "Version 2.004;hotconv 1.0.118;makeotfexe 2.5.65603",
+        "license": "SIL-OFL-1.1"
+      },
+      "dv": {
+        "path": "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "sha256": "57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e",
+        "family": "DejaVu Sans",
+        "subfamily": "Book",
+        "version": "Version 2.37",
+        "license": "Bitstream Vera; DejaVu changes public domain"
+      }
+    }
+  },
+  "provenance": {
+    "buildInputSha256": "5cdace2c72f278ce60c1af9d728400bd5ec8fc50ad9109eeaba71fbd77d2b29d",
+    "parentRevision": "bc34be353aba56eb99db15ea9f72a5405b7c3932",
+    "workingTreeDirtyAtBuildStart": true,
+    "jarSha256": "a576db38614824fca7e2e08e6e233e7cdf50a75297a874405a6be90ebb922fb0",
+    "applicationClassCount": 223,
+    "applicationClassSha256": "6990f2d13501db8404267b6681a48095a0281594f8d6f7e6f4800da457b1d275",
+    "packagedClassesMatchTargets": true
+  },
+  "sourceEmbeddedMetadata": [
+    {
+      "fonts": [
+        {
+          "resource": "zh",
+          "name": "Noto Sans CJK JP Regular",
+          "embedded": true,
+          "descriptorFamily": null,
+          "embeddedFamily": "Noto Sans CJK JP",
+          "embeddedSubfamily": "Regular",
+          "embeddedWeight": 400
+        },
+        {
+          "resource": "sr",
+          "name": "Liberation Serif Regular",
+          "embedded": true,
+          "descriptorFamily": null,
+          "embeddedFamily": "Liberation Serif",
+          "embeddedSubfamily": "Regular",
+          "embeddedWeight": 400
+        }
+      ],
+      "file": "bilingual-punctuation.pdf"
+    },
+    {
+      "fonts": [
+        {
+          "resource": "sr",
+          "name": "Liberation Serif Regular",
+          "embedded": true,
+          "descriptorFamily": null,
+          "embeddedFamily": "Liberation Serif",
+          "embeddedSubfamily": "Regular",
+          "embeddedWeight": 400
+        },
+        {
+          "resource": "zh",
+          "name": "Noto Sans CJK JP Regular",
+          "embedded": true,
+          "descriptorFamily": null,
+          "embeddedFamily": "Noto Sans CJK JP",
+          "embeddedSubfamily": "Regular",
+          "embeddedWeight": 400
+        }
+      ],
+      "file": "line-boundaries.pdf"
+    },
+    {
+      "fonts": [
+        {
+          "resource": "mr",
+          "name": "Liberation Mono Regular",
+          "embedded": true,
+          "descriptorFamily": null,
+          "embeddedFamily": "Liberation Mono",
+          "embeddedSubfamily": "Regular",
+          "embeddedWeight": 400
+        },
+        {
+          "resource": "mb",
+          "name": "Liberation Mono Bold",
+          "embedded": true,
+          "descriptorFamily": null,
+          "embeddedFamily": "Liberation Mono",
+          "embeddedSubfamily": "Bold",
+          "embeddedWeight": 700
+        },
+        {
+          "resource": "mi",
+          "name": "Liberation Mono Italic",
+          "embedded": true,
+          "descriptorFamily": null,
+          "embeddedFamily": "Liberation Mono",
+          "embeddedSubfamily": "Italic",
+          "embeddedWeight": 400
+        }
+      ],
+      "file": "mono-faces.pdf"
+    },
+    {
+      "fonts": [
+        {
+          "resource": "sr",
+          "name": "Liberation Serif Regular",
+          "embedded": true,
+          "descriptorFamily": null,
+          "embeddedFamily": "Liberation Serif",
+          "embeddedSubfamily": "Regular",
+          "embeddedWeight": 400
+        },
+        {
+          "resource": "sb",
+          "name": "Liberation Serif Bold",
+          "embedded": true,
+          "descriptorFamily": null,
+          "embeddedFamily": "Liberation Serif",
+          "embeddedSubfamily": "Bold",
+          "embeddedWeight": 700
+        },
+        {
+          "resource": "si",
+          "name": "Liberation Serif Italic",
+          "embedded": true,
+          "descriptorFamily": null,
+          "embeddedFamily": "Liberation Serif",
+          "embeddedSubfamily": "Italic",
+          "embeddedWeight": 400
+        },
+        {
+          "resource": "sbi",
+          "name": "Liberation Serif Bold Italic",
+          "embedded": true,
+          "descriptorFamily": null,
+          "embeddedFamily": "Liberation Serif",
+          "embeddedSubfamily": "Bold Italic",
+          "embeddedWeight": 700
+        }
+      ],
+      "file": "serif-faces.pdf"
+    },
+    {
+      "fonts": [
+        {
+          "resource": "dv",
+          "name": "DejaVu Sans Book",
+          "embedded": true,
+          "descriptorFamily": null,
+          "embeddedFamily": "DejaVu Sans",
+          "embeddedSubfamily": "Book",
+          "embeddedWeight": 400
+        }
+      ],
+      "file": "symbols-dejavu.pdf"
+    },
+    {
+      "fonts": [
+        {
+          "resource": "sr",
+          "name": "Liberation Serif Regular",
+          "embedded": true,
+          "descriptorFamily": "QA Missing Family 2032",
+          "embeddedFamily": "Liberation Serif",
+          "embeddedSubfamily": "Regular",
+          "embeddedWeight": 400
+        }
+      ],
+      "file": "unavailable-family.pdf"
+    }
+  ]
+}

@@ -1,0 +1,378 @@
+{
+  "parentRevision": "c97de2a2fc05b177b2d34fef525d3637b3d96667",
+  "jarSha256": "eb46974700a79e276ad2831be3c8006e60d4bca556a0a7697cb4787ca58ecf09",
+  "manifestSha256": "cbd3582270af633ee1685a5e3005327487ed24de66c92fea9d2cfe2053bb593b",
+  "traceSha256": "62810eaa53372e1ae8ddbd664b33a9a72824fc9cf312887ba3f9b2c7179c49dd",
+  "uniqueTraceRecognitions": 4,
+  "normalizedPixelsExactAllSeven": true,
+  "rows": [
+    {
+      "input": "original.png",
+      "case": "original-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 1.7637958150007762,
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 127.50\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "numericLexemesExact": true,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "图片已使用本地 Tesseract OCR，平均置信度 93.1%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9313790686666666
+        }
+      ]
+    },
+    {
+      "input": "original.pdf",
+      "case": "original-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 2.801739660993917,
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 127.50\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "numericLexemesExact": true,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页已使用本地 Tesseract OCR，平均置信度 93.1%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9313790686666666
+        }
+      ]
+    },
+    {
+      "input": "independent.png",
+      "case": "independent-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 2.069488856002863,
+      "text": "SPARSE TRACE 2064\nRecord 00793\nAmount 048.65\nDate 2064-09-28\n",
+      "metrics": {
+        "expectedCharacters": 52,
+        "actualCharacters": 52,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2064",
+          "00793",
+          "048",
+          "65",
+          "2064",
+          "09",
+          "28"
+        ],
+        "actualNumbers": [
+          "2064",
+          "00793",
+          "048",
+          "65",
+          "2064",
+          "09",
+          "28"
+        ]
+      },
+      "numericLexemesExact": true,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "图片已使用本地 Tesseract OCR，平均置信度 91.9%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9189654122222223
+        }
+      ]
+    },
+    {
+      "input": "independent.pdf",
+      "case": "independent-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 4.080577636996168,
+      "text": "SPARSE TRACE 2064\nRecord 00793\nAmount 048.65\nDate 2064-09-28\n",
+      "metrics": {
+        "expectedCharacters": 52,
+        "actualCharacters": 52,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2064",
+          "00793",
+          "048",
+          "65",
+          "2064",
+          "09",
+          "28"
+        ],
+        "actualNumbers": [
+          "2064",
+          "00793",
+          "048",
+          "65",
+          "2064",
+          "09",
+          "28"
+        ]
+      },
+      "numericLexemesExact": true,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页已使用本地 Tesseract OCR，平均置信度 91.9%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9189654122222223
+        }
+      ]
+    },
+    {
+      "input": "image-only.ofd",
+      "case": "image-only-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 2.515402395998535,
+      "text": "SPARSE TRACE 2064\nRecord 00793\nAmount 048.65\nDate 2064-09-28\n",
+      "metrics": {
+        "expectedCharacters": 52,
+        "actualCharacters": 52,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2064",
+          "00793",
+          "048",
+          "65",
+          "2064",
+          "09",
+          "28"
+        ],
+        "actualNumbers": [
+          "2064",
+          "00793",
+          "048",
+          "65",
+          "2064",
+          "09",
+          "28"
+        ]
+      },
+      "numericLexemesExact": true,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.9%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9189654122222222
+        }
+      ]
+    },
+    {
+      "input": "native-backed.ofd",
+      "case": "native-backed-txt",
+      "status": "FAILED",
+      "errorCode": "OCR_NO_NEW_TEXT",
+      "seconds": 2.9951275499988697
+    },
+    {
+      "input": "missing-amount.ofd",
+      "case": "missing-amount-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 3.2470188699953724,
+      "text": "SPARSE TRACE 2064\nRecord 00793\nAmount 048.65\nDate 2064-09-28\n",
+      "metrics": {
+        "expectedCharacters": 52,
+        "actualCharacters": 52,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2064",
+          "00793",
+          "048",
+          "65",
+          "2064",
+          "09",
+          "28"
+        ],
+        "actualNumbers": [
+          "2064",
+          "00793",
+          "048",
+          "65",
+          "2064",
+          "09",
+          "28"
+        ]
+      },
+      "numericLexemesExact": true,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.9%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9189654122222222
+        }
+      ]
+    },
+    {
+      "input": "alias-missing-amount.ofd",
+      "case": "alias-missing-amount-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 2.5855594870008645,
+      "text": "SPARSE TRACE 2064\nRecord 00793\nAmount 048.65\nDate 2064-09-28\n",
+      "metrics": {
+        "expectedCharacters": 52,
+        "actualCharacters": 52,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2064",
+          "00793",
+          "048",
+          "65",
+          "2064",
+          "09",
+          "28"
+        ],
+        "actualNumbers": [
+          "2064",
+          "00793",
+          "048",
+          "65",
+          "2064",
+          "09",
+          "28"
+        ]
+      },
+      "numericLexemesExact": true,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.9%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9189654122222222
+        }
+      ]
+    },
+    {
+      "input": "blank.ofd",
+      "case": "blank-txt",
+      "status": "FAILED",
+      "errorCode": "OCR_NO_TEXT",
+      "seconds": 3.2277729630004615
+    },
+    {
+      "input": "noise.ofd",
+      "case": "noise-txt",
+      "status": "FAILED",
+      "errorCode": "OCR_NO_TEXT",
+      "seconds": 3.4454297780030174
+    }
+  ],
+  "originalRecognitionMetrics": {
+    "expectedCharacters": 63,
+    "actualCharacters": 63,
+    "editDistance": 0,
+    "cer": 0.0,
+    "alignedCharacterRecall": 1.0,
+    "exactLines": 4,
+    "expectedNumbers": [
+      "2036",
+      "00842",
+      "127",
+      "50",
+      "2036",
+      "04",
+      "19"
+    ],
+    "actualNumbers": [
+      "2036",
+      "00842",
+      "127",
+      "50",
+      "2036",
+      "04",
+      "19"
+    ]
+  },
+  "originalAllFourLinesDeduplicated": true,
+  "labelCorrection": "Initial PNG/PDF action labels collided; independent recorded tasks produced identical payload SHA256s. Future generator labels include the input extension. Frozen executed manifest unchanged; no HTTP rerun.",
+  "decision": "Sparse original is a conservative native-coverage/completeness refusal, not a pixel extraction/scaling/recognition loss. No strictness or confidence/numeric gate changed. Pivot to independently reproduced heading font-metric mismatch.",
+  "resources": {
+    "wallSeconds": 34.02489760699973,
+    "userSeconds": 82.83075,
+    "systemSeconds": 6.356461,
+    "maxChildRssKiB": 429748
+  },
+  "allWorkersExited": true,
+  "ECHILD": true,
+  "newZombies": [],
+  "helperSha256": "6ae238c1edc8b2330e957903186934b63121224ab5ddbf02389e65a05fa6b7a6"
+}

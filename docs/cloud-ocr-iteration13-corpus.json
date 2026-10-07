@@ -1,0 +1,544 @@
+{
+  "seed": 130042026,
+  "provenance": "Distinct public synthetic text in known-qualifying upright geometry; fixed four modest true-angle transforms chosen analytically before OCR measurements or production edits",
+  "license": "Apache-2.0 generated text/code; separate SIL-OFL-1.1 font",
+  "fonts": {
+    "mono": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+      "sha256": "5883330d94debd992952cd8f0571b225f478c2d797d3f36c7521b0a5c9bde0f2",
+      "versions": [
+        "Version 2.1.5"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/liberationfonts/liberation-fonts"
+    }
+  },
+  "versions": {
+    "Pillow": "12.3.0"
+  },
+  "generatorSha256": "d6ef53946b1dac890c0338febcebfa5573976d1c5d9a0889eaf4975c34d51c07",
+  "angleSelectionBasis": "870px row span and roughly21-24px ink height give half-height edge budget near0.69-0.79deg; choose±0.35/±0.65, not a sweep",
+  "limits": [
+    "Native qualification of this distinct upright rendering must be independently verified; shared layout is not sufficient",
+    "Detector minimum1degree means these true modest angles can still have a false larger global stagger projection",
+    "No claim of broad native angle safety or intent inference"
+  ],
+  "cases": [
+    {
+      "file": "spruce-stagger-angle+0.00.png",
+      "sha256": "6629eb50ffe218b59967822489641d6cbf694c050be1d80a327b7f3f9a1cadda",
+      "expectedLines": [
+        "Spruce keeps ticket07",
+        "Spruce keeps ticket08",
+        "Spruce keeps ticket09",
+        "Spruce keeps ticket10",
+        "Lagoon keeps ticket07",
+        "Lagoon keeps ticket08",
+        "Lagoon keeps ticket09",
+        "Lagoon keeps ticket10",
+        "Orchid keeps ticket07",
+        "Orchid keeps ticket08",
+        "Orchid keeps ticket09",
+        "Orchid keeps ticket10"
+      ],
+      "font": "mono",
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "layout": "three-columns",
+      "fontSize": 29,
+      "rowStep": 290,
+      "columnStagger": [
+        0,
+        35,
+        70
+      ],
+      "unrotatedBaselines": [
+        {
+          "text": "Spruce keeps ticket07",
+          "x": 120,
+          "y": 250,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket08",
+          "x": 120,
+          "y": 540,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket09",
+          "x": 120,
+          "y": 830,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket10",
+          "x": 120,
+          "y": 1120,
+          "column": 0
+        },
+        {
+          "text": "Lagoon keeps ticket07",
+          "x": 840,
+          "y": 285,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket08",
+          "x": 840,
+          "y": 575,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket09",
+          "x": 840,
+          "y": 865,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket10",
+          "x": 840,
+          "y": 1155,
+          "column": 1
+        },
+        {
+          "text": "Orchid keeps ticket07",
+          "x": 1560,
+          "y": 320,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket08",
+          "x": 1560,
+          "y": 610,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket09",
+          "x": 1560,
+          "y": 900,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket10",
+          "x": 1560,
+          "y": 1190,
+          "column": 2
+        }
+      ]
+    },
+    {
+      "file": "spruce-stagger-angle-0.35.png",
+      "sha256": "e205aa238203fbc6ccc12a5633a90d298325d4b2f5b776b4a302a4ed55513fc1",
+      "expectedLines": [
+        "Spruce keeps ticket07",
+        "Spruce keeps ticket08",
+        "Spruce keeps ticket09",
+        "Spruce keeps ticket10",
+        "Lagoon keeps ticket07",
+        "Lagoon keeps ticket08",
+        "Lagoon keeps ticket09",
+        "Lagoon keeps ticket10",
+        "Orchid keeps ticket07",
+        "Orchid keeps ticket08",
+        "Orchid keeps ticket09",
+        "Orchid keeps ticket10"
+      ],
+      "font": "mono",
+      "sourceSkewDegrees": -0.35,
+      "dpi": 300,
+      "layout": "three-columns",
+      "fontSize": 29,
+      "rowStep": 290,
+      "columnStagger": [
+        0,
+        35,
+        70
+      ],
+      "unrotatedBaselines": [
+        {
+          "text": "Spruce keeps ticket07",
+          "x": 120,
+          "y": 250,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket08",
+          "x": 120,
+          "y": 540,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket09",
+          "x": 120,
+          "y": 830,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket10",
+          "x": 120,
+          "y": 1120,
+          "column": 0
+        },
+        {
+          "text": "Lagoon keeps ticket07",
+          "x": 840,
+          "y": 285,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket08",
+          "x": 840,
+          "y": 575,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket09",
+          "x": 840,
+          "y": 865,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket10",
+          "x": 840,
+          "y": 1155,
+          "column": 1
+        },
+        {
+          "text": "Orchid keeps ticket07",
+          "x": 1560,
+          "y": 320,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket08",
+          "x": 1560,
+          "y": 610,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket09",
+          "x": 1560,
+          "y": 900,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket10",
+          "x": 1560,
+          "y": 1190,
+          "column": 2
+        }
+      ]
+    },
+    {
+      "file": "spruce-stagger-angle+0.35.png",
+      "sha256": "a61e2684b42e5c6dd67caafcccf86d53688a82efa4189e4684e6fb12c86d1e3b",
+      "expectedLines": [
+        "Spruce keeps ticket07",
+        "Spruce keeps ticket08",
+        "Spruce keeps ticket09",
+        "Spruce keeps ticket10",
+        "Lagoon keeps ticket07",
+        "Lagoon keeps ticket08",
+        "Lagoon keeps ticket09",
+        "Lagoon keeps ticket10",
+        "Orchid keeps ticket07",
+        "Orchid keeps ticket08",
+        "Orchid keeps ticket09",
+        "Orchid keeps ticket10"
+      ],
+      "font": "mono",
+      "sourceSkewDegrees": 0.35,
+      "dpi": 300,
+      "layout": "three-columns",
+      "fontSize": 29,
+      "rowStep": 290,
+      "columnStagger": [
+        0,
+        35,
+        70
+      ],
+      "unrotatedBaselines": [
+        {
+          "text": "Spruce keeps ticket07",
+          "x": 120,
+          "y": 250,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket08",
+          "x": 120,
+          "y": 540,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket09",
+          "x": 120,
+          "y": 830,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket10",
+          "x": 120,
+          "y": 1120,
+          "column": 0
+        },
+        {
+          "text": "Lagoon keeps ticket07",
+          "x": 840,
+          "y": 285,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket08",
+          "x": 840,
+          "y": 575,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket09",
+          "x": 840,
+          "y": 865,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket10",
+          "x": 840,
+          "y": 1155,
+          "column": 1
+        },
+        {
+          "text": "Orchid keeps ticket07",
+          "x": 1560,
+          "y": 320,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket08",
+          "x": 1560,
+          "y": 610,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket09",
+          "x": 1560,
+          "y": 900,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket10",
+          "x": 1560,
+          "y": 1190,
+          "column": 2
+        }
+      ]
+    },
+    {
+      "file": "spruce-stagger-angle-0.65.png",
+      "sha256": "0e81b803cbaeacbd8683941e1fd5a0f7b7d11ab21ed02f863c9befdb18e553e7",
+      "expectedLines": [
+        "Spruce keeps ticket07",
+        "Spruce keeps ticket08",
+        "Spruce keeps ticket09",
+        "Spruce keeps ticket10",
+        "Lagoon keeps ticket07",
+        "Lagoon keeps ticket08",
+        "Lagoon keeps ticket09",
+        "Lagoon keeps ticket10",
+        "Orchid keeps ticket07",
+        "Orchid keeps ticket08",
+        "Orchid keeps ticket09",
+        "Orchid keeps ticket10"
+      ],
+      "font": "mono",
+      "sourceSkewDegrees": -0.65,
+      "dpi": 300,
+      "layout": "three-columns",
+      "fontSize": 29,
+      "rowStep": 290,
+      "columnStagger": [
+        0,
+        35,
+        70
+      ],
+      "unrotatedBaselines": [
+        {
+          "text": "Spruce keeps ticket07",
+          "x": 120,
+          "y": 250,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket08",
+          "x": 120,
+          "y": 540,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket09",
+          "x": 120,
+          "y": 830,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket10",
+          "x": 120,
+          "y": 1120,
+          "column": 0
+        },
+        {
+          "text": "Lagoon keeps ticket07",
+          "x": 840,
+          "y": 285,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket08",
+          "x": 840,
+          "y": 575,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket09",
+          "x": 840,
+          "y": 865,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket10",
+          "x": 840,
+          "y": 1155,
+          "column": 1
+        },
+        {
+          "text": "Orchid keeps ticket07",
+          "x": 1560,
+          "y": 320,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket08",
+          "x": 1560,
+          "y": 610,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket09",
+          "x": 1560,
+          "y": 900,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket10",
+          "x": 1560,
+          "y": 1190,
+          "column": 2
+        }
+      ]
+    },
+    {
+      "file": "spruce-stagger-angle+0.65.png",
+      "sha256": "13391fcddef34cc49a0333c37ab75dc30374f6877a5c8c2545f530b159136554",
+      "expectedLines": [
+        "Spruce keeps ticket07",
+        "Spruce keeps ticket08",
+        "Spruce keeps ticket09",
+        "Spruce keeps ticket10",
+        "Lagoon keeps ticket07",
+        "Lagoon keeps ticket08",
+        "Lagoon keeps ticket09",
+        "Lagoon keeps ticket10",
+        "Orchid keeps ticket07",
+        "Orchid keeps ticket08",
+        "Orchid keeps ticket09",
+        "Orchid keeps ticket10"
+      ],
+      "font": "mono",
+      "sourceSkewDegrees": 0.65,
+      "dpi": 300,
+      "layout": "three-columns",
+      "fontSize": 29,
+      "rowStep": 290,
+      "columnStagger": [
+        0,
+        35,
+        70
+      ],
+      "unrotatedBaselines": [
+        {
+          "text": "Spruce keeps ticket07",
+          "x": 120,
+          "y": 250,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket08",
+          "x": 120,
+          "y": 540,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket09",
+          "x": 120,
+          "y": 830,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket10",
+          "x": 120,
+          "y": 1120,
+          "column": 0
+        },
+        {
+          "text": "Lagoon keeps ticket07",
+          "x": 840,
+          "y": 285,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket08",
+          "x": 840,
+          "y": 575,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket09",
+          "x": 840,
+          "y": 865,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket10",
+          "x": 840,
+          "y": 1155,
+          "column": 1
+        },
+        {
+          "text": "Orchid keeps ticket07",
+          "x": 1560,
+          "y": 320,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket08",
+          "x": 1560,
+          "y": 610,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket09",
+          "x": 1560,
+          "y": 900,
+          "column": 2
+        },
+        {
+          "text": "Orchid keeps ticket10",
+          "x": 1560,
+          "y": 1190,
+          "column": 2
+        }
+      ]
+    }
+  ],
+  "containerCases": []
+}

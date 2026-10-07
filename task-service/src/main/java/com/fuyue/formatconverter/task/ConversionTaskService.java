@@ -298,6 +298,10 @@ public final class ConversionTaskService implements AutoCloseable {
                         if (produced != null) try { Files.deleteIfExists(produced); } catch (IOException ignored) { }
                         try { Files.deleteIfExists(output); } catch (IOException ignored) { }
                     }
+                    // Future waits use whole milliseconds and can expire just
+                    // before the absolute Instant deadline. A consumed task
+                    // budget must not create a phantom result for another file.
+                    if (e instanceof TaskDeadlineExceededException) throw e;
                 } finally {
                     fileActive.set(false);
                     if (!isFileCleanupDeferred(record, work)) deleteTree(work);
@@ -435,7 +439,7 @@ public final class ConversionTaskService implements AutoCloseable {
                                                 ConversionInput input, Path work, Path output,
                                                 Instant deadline, ConversionProgress progress) throws Exception {
         long remainingMillis = Duration.between(Instant.now(), deadline).toMillis();
-        if (remainingMillis <= 0) throw new TimeoutException("转换超时");
+        if (remainingMillis <= 0) throw new TaskDeadlineExceededException("转换超时");
         ExecutorService single = Executors.newSingleThreadExecutor(namedFactory("format-file-"));
         Future<ConversionOutput> future = single.submit(() ->
                 converter.convert(input, work, output, config.parseLimits(), progress));
@@ -448,7 +452,7 @@ public final class ConversionTaskService implements AutoCloseable {
             String message = deferred
                     ? "转换超时；" + DEFERRED_CLEANUP_DETAIL
                     : "转换超时";
-            throw new TimeoutException(message);
+            throw new TaskDeadlineExceededException(message);
         } catch (InterruptedException e) {
             stopRequested = true;
             stopFileWorker(record, input.displayName(), work, output, future, single);
@@ -920,7 +924,7 @@ public final class ConversionTaskService implements AutoCloseable {
             case DOCX, XLSX, PPTX, OFD -> isZip(header);
             case UOF -> isZip(header) || looksLikeXml(file);
             case WPS, ET, DPS -> isOle(header) || isZip(header);
-            case TXT, CSV, HTML -> looksLikeText(file);
+            case TXT, CSV, HTML -> looksLikeText(file, sourceFormat);
             case PDF_MERGED, PDF_SPLIT, PDF_WATERMARKED, PDF_COMPRESSED -> false;
         };
         if (!ok) throw new IllegalArgumentException(sourceFormat.label() + " 文件头校验失败，请确认文件未损坏且格式真实");
@@ -939,8 +943,20 @@ public final class ConversionTaskService implements AutoCloseable {
     }
     private boolean isZip(byte[] header) { return startsWith(header, new byte[] {0x50, 0x4B, 0x03, 0x04}) || startsWith(header, new byte[] {0x50, 0x4B, 0x05, 0x06}) || startsWith(header, new byte[] {0x50, 0x4B, 0x07, 0x08}); }
     private boolean isOle(byte[] header) { return startsWith(header, new byte[] {(byte) 0xD0, (byte) 0xCF, 0x11, (byte) 0xE0, (byte) 0xA1, (byte) 0xB1, 0x1A, (byte) 0xE1}); }
-    private boolean looksLikeText(Path file) throws IOException {
+    private boolean looksLikeText(Path file, DocumentFormat sourceFormat) throws IOException {
         byte[] data = readHeader(file, 4096);
+        boolean utf16Bom = startsWith(data, new byte[] {(byte) 0xFF, (byte) 0xFE})
+                || startsWith(data, new byte[] {(byte) 0xFE, (byte) 0xFF});
+        if (utf16Bom && (sourceFormat == DocumentFormat.TXT || sourceFormat == DocumentFormat.CSV)) {
+            // Zero bytes encode ordinary UTF-16 characters. Validate decoded text
+            // with the converter's strict decoder instead of treating them as NUL.
+            try {
+                TextInputReader.readContent(file, config.parseLimits());
+                return true;
+            } catch (ConversionFailureException error) {
+                throw new IllegalArgumentException(error.getMessage(), error);
+            }
+        }
         for (byte datum : data) if (datum == 0) return false;
         return true;
     }
@@ -1068,6 +1084,10 @@ public final class ConversionTaskService implements AutoCloseable {
             Thread.currentThread().interrupt();
             log.warn("Interrupted while waiting for {} executor shutdown", name);
         }
+    }
+
+    private static final class TaskDeadlineExceededException extends TimeoutException {
+        private TaskDeadlineExceededException(String message) { super(message); }
     }
 
     private record InputFile(String displayName, String contentType, long size, Path path,

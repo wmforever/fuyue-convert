@@ -1,0 +1,18 @@
+{
+  "case": "en-mono-shadow.png",
+  "originalWordFrames": 8,
+  "newWordFrames": 18,
+  "originalMasks": 10,
+  "addedMasks": 18,
+  "originalFramesAndMasksExact": true,
+  "sourceMediaExact": true,
+  "newMasksDisjointFromOriginalFrames": true,
+  "originalRanksExact": true,
+  "newMasksContainedInAddedWordFramesWithinPt": 0.5,
+  "numericLexemes": [
+    "-17",
+    "37.50"
+  ],
+  "officeNumericMaxShiftPt": 0,
+  "limitations": "Generated shape IDs are excluded; geometry/style/z-order are exact. New mask containment allows0.5pt antialias margin; PDF tolerance0.05pt accounts for Office rounding. Other glyphs and private documents are not certified."
+}

@@ -31,7 +31,7 @@ final class TextInputReader {
         return new DecodedText(List.copyOf(pages), content.charsetName(), content.warnings());
     }
 
-    static DecodedContent readContent(Path path, ParseLimits limits) throws Exception {
+    static DecodedContent readContent(Path path, ParseLimits limits) throws java.io.IOException {
         long declaredSize = Files.size(path);
         if (declaredSize > limits.maxArchiveBytes()) {
             throw new ConversionFailureException("TEXT_TOO_LARGE",

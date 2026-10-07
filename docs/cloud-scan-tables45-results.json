@@ -1,0 +1,4939 @@
+{
+  "status": "accepted-recognized-OCR-copy-order-only",
+  "productionChanged": true,
+  "baseline": {
+    "parentRevision": "8eae8590ff26b5f8d96f6362e6035857568ea310",
+    "status": "audited-quality-boundary-unaccepted",
+    "productionChanged": false,
+    "manifestSha256": "d51cd6f3ff75b7cf235347fb494d7d7a2ab9f62371d7f280cabede311334c0de",
+    "sourceFont": {
+      "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+      "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+      "version": [
+        "Version 2.004;hotconv 1.0.118;makeotfexe 2.5.65603"
+      ],
+      "license": "SIL-OFL-1.1"
+    },
+    "sourceBoundJarSha256": "1ead3c12b621c612535ba7a9f338915484b79be3b74509cf3c3b8a304b2ce68b",
+    "productionFingerprint": "07911c45cf0a510f7fa9f8ae279e977341c795e246c19711c3dce83aee95b198",
+    "counts": {
+      "sourceScans": 2,
+      "actualHttpContracts": 9,
+      "independentWorkers": 9,
+      "sourceTsvIdentities": 4,
+      "transientSnapshots": 8,
+      "extraDiagnosticOCR": 0,
+      "newOfficeConversions": 3,
+      "fullRenderedPages": 5,
+      "auditNewFullRenders": 0,
+      "editedWordTextNodes": 1
+    },
+    "words": [
+      {
+        "id": "ruled-direct-word",
+        "tables": 0,
+        "textFrames": 22,
+        "frames": [
+          {
+            "id": "text-ocr-p1-l1-word-0-1",
+            "boxPt": [
+              28.93,
+              19.317,
+              41.622,
+              20.836
+            ],
+            "zIndex": 2,
+            "text": "扫描"
+          },
+          {
+            "id": "text-ocr-p1-l1-word-1-2",
+            "boxPt": [
+              62.85,
+              19.317,
+              29.022,
+              20.836
+            ],
+            "zIndex": 2,
+            "text": "台"
+          },
+          {
+            "id": "text-ocr-p1-l1-word-2-3",
+            "boxPt": [
+              80.834,
+              19.317,
+              20.022,
+              20.836
+            ],
+            "zIndex": 2,
+            "text": "账 "
+          },
+          {
+            "id": "text-ocr-p1-l1-word-3-4",
+            "boxPt": [
+              92.445,
+              19.317,
+              45.222,
+              20.836
+            ],
+            "zIndex": 2,
+            "text": "Scan "
+          },
+          {
+            "id": "text-ocr-p1-l1-word-4-5",
+            "boxPt": [
+              130.507,
+              19.317,
+              56.022,
+              20.836
+            ],
+            "zIndex": 2,
+            "text": "ledger "
+          },
+          {
+            "id": "text-ocr-p1-l1-word-5-6",
+            "boxPt": [
+              178.196,
+              19.317,
+              53.502,
+              20.836
+            ],
+            "zIndex": 2,
+            "text": "00783"
+          },
+          {
+            "id": "text-ocr-p1-l2-word-0-7",
+            "boxPt": [
+              38.714,
+              78.492,
+              47.439,
+              23.269
+            ],
+            "zIndex": 3,
+            "text": "编号 "
+          },
+          {
+            "id": "text-ocr-p1-l2-word-1-8",
+            "boxPt": [
+              78.115,
+              78.492,
+              29.597,
+              23.269
+            ],
+            "zIndex": 3,
+            "text": "1D "
+          },
+          {
+            "id": "text-ocr-p1-l2-word-2-9",
+            "boxPt": [
+              242.654,
+              78.492,
+              44.559,
+              23.269
+            ],
+            "zIndex": 3,
+            "text": "日"
+          },
+          {
+            "id": "text-ocr-p1-l2-word-3-10",
+            "boxPt": [
+              271.377,
+              78.492,
+              27.639,
+              23.269
+            ],
+            "zIndex": 3,
+            "text": "期 "
+          },
+          {
+            "id": "text-ocr-p1-l2-word-4-11",
+            "boxPt": [
+              282.779,
+              78.492,
+              48.879,
+              23.269
+            ],
+            "zIndex": 3,
+            "text": "Date "
+          },
+          {
+            "id": "text-ocr-p1-l2-word-5-12",
+            "boxPt": [
+              456.315,
+              78.492,
+              47.439,
+              23.269
+            ],
+            "zIndex": 3,
+            "text": "金额 "
+          },
+          {
+            "id": "text-ocr-p1-l2-word-6-13",
+            "boxPt": [
+              495.001,
+              78.492,
+              78.399,
+              23.269
+            ],
+            "zIndex": 3,
+            "text": "Amount"
+          },
+          {
+            "id": "text-ocr-p1-l3-word-0-14",
+            "boxPt": [
+              38.769,
+              136.066,
+              61.298,
+              23.559
+            ],
+            "zIndex": 4,
+            "text": "01936 "
+          },
+          {
+            "id": "text-ocr-p1-l3-word-1-15",
+            "boxPt": [
+              243.986,
+              136.066,
+              102.125,
+              23.559
+            ],
+            "zIndex": 4,
+            "text": "2093-12-04 "
+          },
+          {
+            "id": "text-ocr-p1-l3-word-2-16",
+            "boxPt": [
+              456.52,
+              136.066,
+              71.738,
+              23.559
+            ],
+            "zIndex": 4,
+            "text": "-042.70"
+          },
+          {
+            "id": "text-ocr-p1-l4-word-0-17",
+            "boxPt": [
+              38.774,
+              190.066,
+              60.938,
+              23.559
+            ],
+            "zIndex": 5,
+            "text": "03872 "
+          },
+          {
+            "id": "text-ocr-p1-l4-word-1-18",
+            "boxPt": [
+              243.983,
+              190.066,
+              101.742,
+              23.559
+            ],
+            "zIndex": 5,
+            "text": "2093-12-05 "
+          },
+          {
+            "id": "text-ocr-p1-l4-word-2-19",
+            "boxPt": [
+              456.36,
+              190.066,
+              84.698,
+              23.559
+            ],
+            "zIndex": 5,
+            "text": "+0085.40"
+          },
+          {
+            "id": "text-ocr-p1-l5-word-0-20",
+            "boxPt": [
+              38.777,
+              244.066,
+              61.298,
+              23.559
+            ],
+            "zIndex": 6,
+            "text": "07744 "
+          },
+          {
+            "id": "text-ocr-p1-l5-word-1-21",
+            "boxPt": [
+              243.982,
+              244.066,
+              102.125,
+              23.559
+            ],
+            "zIndex": 6,
+            "text": "2093-12-06 "
+          },
+          {
+            "id": "text-ocr-p1-l5-word-2-22",
+            "boxPt": [
+              456.372,
+              244.066,
+              75.338,
+              23.559
+            ],
+            "zIndex": 6,
+            "text": "0170.80"
+          }
+        ],
+        "masks": [],
+        "media": [],
+        "pageBoundsPt": [
+          691.2,
+          345.6
+        ],
+        "outOfPageFrames": [],
+        "text": "扫描\n台\n账 \nScan \nledger \n00783\n编号 \n1D \n日\n期 \nDate \n金额 \nAmount\n01936 \n2093-12-04 \n-042.70\n03872 \n2093-12-05 \n+0085.40\n07744 \n2093-12-06 \n0170.80",
+        "textMetrics": {
+          "expectedCharacters": 104,
+          "actualCharacters": 104,
+          "editDistance": 1,
+          "cer": 0.009615384615384616,
+          "alignedCharacterRecall": 0.9903846153846154,
+          "exactLines": 4,
+          "expectedNumbers": [
+            "00783",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "07744",
+            "2093",
+            "12",
+            "06",
+            "0170",
+            "80"
+          ],
+          "actualNumbers": [
+            "00783",
+            "1",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "07744",
+            "2093",
+            "12",
+            "06",
+            "0170",
+            "80"
+          ]
+        },
+        "numberInventory": [
+          {
+            "value": "01936",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "2093-12-04",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "-042.70",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "03872",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "2093-12-05",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "+0085.40",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "07744",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "2093-12-06",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "0170.80",
+            "exactOccurrences": 1
+          }
+        ],
+        "geometricCellContent": [
+          {
+            "row": 0,
+            "column": 0,
+            "expected": "编号 ID",
+            "assignedFrameText": "编号 1D ",
+            "compactExact": false
+          },
+          {
+            "row": 0,
+            "column": 1,
+            "expected": "日期 Date",
+            "assignedFrameText": "日期 Date ",
+            "compactExact": true
+          },
+          {
+            "row": 0,
+            "column": 2,
+            "expected": "金额 Amount",
+            "assignedFrameText": "金额 Amount",
+            "compactExact": true
+          },
+          {
+            "row": 1,
+            "column": 0,
+            "expected": "01936",
+            "assignedFrameText": "01936 ",
+            "compactExact": true
+          },
+          {
+            "row": 1,
+            "column": 1,
+            "expected": "2093-12-04",
+            "assignedFrameText": "2093-12-04 ",
+            "compactExact": true
+          },
+          {
+            "row": 1,
+            "column": 2,
+            "expected": "-042.70",
+            "assignedFrameText": "-042.70",
+            "compactExact": true
+          },
+          {
+            "row": 2,
+            "column": 0,
+            "expected": "03872",
+            "assignedFrameText": "03872 ",
+            "compactExact": true
+          },
+          {
+            "row": 2,
+            "column": 1,
+            "expected": "2093-12-05",
+            "assignedFrameText": "2093-12-05 ",
+            "compactExact": true
+          },
+          {
+            "row": 2,
+            "column": 2,
+            "expected": "+0085.40",
+            "assignedFrameText": "+0085.40",
+            "compactExact": true
+          },
+          {
+            "row": 3,
+            "column": 0,
+            "expected": "07744",
+            "assignedFrameText": "07744 ",
+            "compactExact": true
+          },
+          {
+            "row": 3,
+            "column": 1,
+            "expected": "2093-12-06",
+            "assignedFrameText": "2093-12-06 ",
+            "compactExact": true
+          },
+          {
+            "row": 3,
+            "column": 2,
+            "expected": "0170.80",
+            "assignedFrameText": "0170.80",
+            "compactExact": true
+          }
+        ],
+        "exactGeometricSourceCells": 11,
+        "note": "Geometric assignment diagnoses text;it does not create logical editable cells"
+      },
+      {
+        "id": "ruled-scan-word",
+        "tables": 0,
+        "textFrames": 13,
+        "frames": [
+          {
+            "id": "text-ocr-p1-l1-word-0-14",
+            "boxPt": [
+              28.93,
+              19.438,
+              41.616,
+              20.827
+            ],
+            "zIndex": 2,
+            "text": "扫描"
+          },
+          {
+            "id": "text-ocr-p1-l1-word-1-15",
+            "boxPt": [
+              61.664,
+              19.438,
+              30.096,
+              20.827
+            ],
+            "zIndex": 2,
+            "text": "台"
+          },
+          {
+            "id": "text-ocr-p1-l1-word-2-16",
+            "boxPt": [
+              81.554,
+              19.438,
+              19.296,
+              20.827
+            ],
+            "zIndex": 2,
+            "text": "账 "
+          },
+          {
+            "id": "text-ocr-p1-l1-word-3-17",
+            "boxPt": [
+              92.565,
+              19.438,
+              45.216,
+              20.827
+            ],
+            "zIndex": 2,
+            "text": "Scan "
+          },
+          {
+            "id": "text-ocr-p1-l1-word-4-18",
+            "boxPt": [
+              130.507,
+              19.438,
+              56.016,
+              20.827
+            ],
+            "zIndex": 2,
+            "text": "ledger "
+          },
+          {
+            "id": "text-ocr-p1-l1-word-5-19",
+            "boxPt": [
+              178.318,
+              19.438,
+              53.376,
+              20.827
+            ],
+            "zIndex": 2,
+            "text": "00783"
+          },
+          {
+            "id": "text-ocr-p1-l2-word-0-20",
+            "boxPt": [
+              23.858,
+              56.4,
+              689.761,
+              93.6
+            ],
+            "zIndex": 3,
+            "text": "Ce "
+          },
+          {
+            "id": "text-ocr-p1-l2-word-1-21",
+            "boxPt": [
+              309.337,
+              56.4,
+              178.8,
+              93.6
+            ],
+            "zIndex": 3,
+            "text": "ee "
+          },
+          {
+            "id": "text-ocr-p1-l2-word-2-22",
+            "boxPt": [
+              507.337,
+              56.4,
+              206.4,
+              93.6
+            ],
+            "zIndex": 3,
+            "text": "ee"
+          },
+          {
+            "id": "text-ocr-p1-l3-word-0-23",
+            "boxPt": [
+              243.983,
+              190.046,
+              102.82,
+              23.771
+            ],
+            "zIndex": 4,
+            "text": "2093-12-05 "
+          },
+          {
+            "id": "text-ocr-p1-l3-word-1-24",
+            "boxPt": [
+              456.358,
+              190.046,
+              85.578,
+              23.771
+            ],
+            "zIndex": 4,
+            "text": "+0085.40"
+          },
+          {
+            "id": "text-ocr-p1-l4-word-0-25",
+            "boxPt": [
+              243.981,
+              244.046,
+              103.337,
+              23.771
+            ],
+            "zIndex": 5,
+            "text": "2093-12-06 "
+          },
+          {
+            "id": "text-ocr-p1-l4-word-1-26",
+            "boxPt": [
+              456.371,
+              244.046,
+              75.589,
+              23.771
+            ],
+            "zIndex": 5,
+            "text": "0170.80"
+          }
+        ],
+        "masks": [
+          {
+            "id": "ocr-mask-ocr-p1-l1-2",
+            "boxPt": [
+              29.095,
+              20.935,
+              29.65,
+              15.25
+            ],
+            "zIndex": -251658751,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l1-3",
+            "boxPt": [
+              62.935,
+              20.935,
+              18.13,
+              15.25
+            ],
+            "zIndex": -251658751,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l1-4",
+            "boxPt": [
+              81.655,
+              21.175,
+              7.33,
+              15.01
+            ],
+            "zIndex": -251658751,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l1-5",
+            "boxPt": [
+              92.935,
+              22.375,
+              33.25,
+              12.61
+            ],
+            "zIndex": -251658751,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l1-6",
+            "boxPt": [
+              131.335,
+              21.655,
+              44.05,
+              16.93
+            ],
+            "zIndex": -251658751,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l1-7",
+            "boxPt": [
+              178.615,
+              22.615,
+              41.41,
+              12.37
+            ],
+            "zIndex": -251658751,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l2-8",
+            "boxPt": [
+              29.575,
+              65.575,
+              633.012,
+              53.41
+            ],
+            "zIndex": -251658751,
+            "color": "#000000"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l2-9",
+            "boxPt": [
+              314.455,
+              64.615,
+              122.051,
+              66.851
+            ],
+            "zIndex": -251658751,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l3-10",
+            "boxPt": [
+              244.375,
+              191.815,
+              87.971,
+              14.29
+            ],
+            "zIndex": -251658751,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l3-11",
+            "boxPt": [
+              456.776,
+              191.815,
+              71.171,
+              14.29
+            ],
+            "zIndex": -251658751,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l4-12",
+            "boxPt": [
+              244.375,
+              245.815,
+              88.451,
+              14.29
+            ],
+            "zIndex": -251658751,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l4-13",
+            "boxPt": [
+              456.776,
+              245.815,
+              61.811,
+              14.29
+            ],
+            "zIndex": -251658751,
+            "color": "#FFFFFF"
+          }
+        ],
+        "media": [
+          {
+            "part": "word/media/image1.png",
+            "pixels": [
+              2880,
+              1440
+            ],
+            "sha256": "e1cbec05e7e8ad6266fb65ec7dbbb3ed35a07bdc98b48c71495be436b0218d1a"
+          }
+        ],
+        "pageBoundsPt": [
+          691.2,
+          345.6
+        ],
+        "outOfPageFrames": [
+          {
+            "id": "text-ocr-p1-l2-word-0-20",
+            "boxPt": [
+              23.858,
+              56.4,
+              689.761,
+              93.6
+            ],
+            "zIndex": 3,
+            "text": "Ce "
+          },
+          {
+            "id": "text-ocr-p1-l2-word-2-22",
+            "boxPt": [
+              507.337,
+              56.4,
+              206.4,
+              93.6
+            ],
+            "zIndex": 3,
+            "text": "ee"
+          }
+        ],
+        "text": "扫描\n台\n账 \nScan \nledger \n00783\nCe \nee \nee\n2093-12-05 \n+0085.40\n2093-12-06 \n0170.80",
+        "textMetrics": {
+          "expectedCharacters": 104,
+          "actualCharacters": 60,
+          "editDistance": 49,
+          "cer": 0.47115384615384615,
+          "alignedCharacterRecall": 0.5288461538461539,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00783",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "07744",
+            "2093",
+            "12",
+            "06",
+            "0170",
+            "80"
+          ],
+          "actualNumbers": [
+            "00783",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "2093",
+            "12",
+            "06",
+            "0170",
+            "80"
+          ]
+        },
+        "numberInventory": [
+          {
+            "value": "01936",
+            "exactOccurrences": 0
+          },
+          {
+            "value": "2093-12-04",
+            "exactOccurrences": 0
+          },
+          {
+            "value": "-042.70",
+            "exactOccurrences": 0
+          },
+          {
+            "value": "03872",
+            "exactOccurrences": 0
+          },
+          {
+            "value": "2093-12-05",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "+0085.40",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "07744",
+            "exactOccurrences": 0
+          },
+          {
+            "value": "2093-12-06",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "0170.80",
+            "exactOccurrences": 1
+          }
+        ],
+        "geometricCellContent": [
+          {
+            "row": 0,
+            "column": 0,
+            "expected": "编号 ID",
+            "assignedFrameText": "",
+            "compactExact": false
+          },
+          {
+            "row": 0,
+            "column": 1,
+            "expected": "日期 Date",
+            "assignedFrameText": "ee ",
+            "compactExact": false
+          },
+          {
+            "row": 0,
+            "column": 2,
+            "expected": "金额 Amount",
+            "assignedFrameText": "ee",
+            "compactExact": false
+          },
+          {
+            "row": 1,
+            "column": 0,
+            "expected": "01936",
+            "assignedFrameText": "",
+            "compactExact": false
+          },
+          {
+            "row": 1,
+            "column": 1,
+            "expected": "2093-12-04",
+            "assignedFrameText": "",
+            "compactExact": false
+          },
+          {
+            "row": 1,
+            "column": 2,
+            "expected": "-042.70",
+            "assignedFrameText": "",
+            "compactExact": false
+          },
+          {
+            "row": 2,
+            "column": 0,
+            "expected": "03872",
+            "assignedFrameText": "",
+            "compactExact": false
+          },
+          {
+            "row": 2,
+            "column": 1,
+            "expected": "2093-12-05",
+            "assignedFrameText": "2093-12-05 ",
+            "compactExact": true
+          },
+          {
+            "row": 2,
+            "column": 2,
+            "expected": "+0085.40",
+            "assignedFrameText": "+0085.40",
+            "compactExact": true
+          },
+          {
+            "row": 3,
+            "column": 0,
+            "expected": "07744",
+            "assignedFrameText": "",
+            "compactExact": false
+          },
+          {
+            "row": 3,
+            "column": 1,
+            "expected": "2093-12-06",
+            "assignedFrameText": "2093-12-06 ",
+            "compactExact": true
+          },
+          {
+            "row": 3,
+            "column": 2,
+            "expected": "0170.80",
+            "assignedFrameText": "0170.80",
+            "compactExact": true
+          }
+        ],
+        "exactGeometricSourceCells": 4,
+        "note": "Geometric assignment diagnoses text;it does not create logical editable cells"
+      },
+      {
+        "id": "columns-scan-word",
+        "tables": 0,
+        "textFrames": 44,
+        "frames": [
+          {
+            "id": "text-ocr-p1-l1-word-0-45",
+            "boxPt": [
+              28.871,
+              19.459,
+              41.472,
+              20.592
+            ],
+            "zIndex": 2,
+            "text": "独立"
+          },
+          {
+            "id": "text-ocr-p1-l1-word-1-46",
+            "boxPt": [
+              62.856,
+              19.459,
+              28.512,
+              20.592
+            ],
+            "zIndex": 2,
+            "text": "多"
+          },
+          {
+            "id": "text-ocr-p1-l1-word-2-47",
+            "boxPt": [
+              82.06,
+              19.459,
+              25.632,
+              20.592
+            ],
+            "zIndex": 2,
+            "text": "栏 "
+          },
+          {
+            "id": "text-ocr-p1-l1-word-3-48",
+            "boxPt": [
+              98.077,
+              19.459,
+              103.381,
+              20.592
+            ],
+            "zIndex": 2,
+            "text": "Independent "
+          },
+          {
+            "id": "text-ocr-p1-l1-word-4-49",
+            "boxPt": [
+              187.086,
+              19.459,
+              71.712,
+              20.592
+            ],
+            "zIndex": 2,
+            "text": "columns "
+          },
+          {
+            "id": "text-ocr-p1-l1-word-5-50",
+            "boxPt": [
+              251.043,
+              19.459,
+              111.903,
+              20.592
+            ],
+            "zIndex": 2,
+            "text": "00649"
+          },
+          {
+            "id": "text-ocr-p1-l2-word-0-51",
+            "boxPt": [
+              28.988,
+              66.488,
+              32.748,
+              18.116
+            ],
+            "zIndex": 3,
+            "text": "Left "
+          },
+          {
+            "id": "text-ocr-p1-l2-word-1-52",
+            "boxPt": [
+              54.834,
+              66.488,
+              48.588,
+              18.116
+            ],
+            "zIndex": 3,
+            "text": "ledger "
+          },
+          {
+            "id": "text-ocr-p1-l2-word-2-53",
+            "boxPt": [
+              96.48,
+              66.488,
+              36.108,
+              18.116
+            ],
+            "zIndex": 3,
+            "text": "A"
+          },
+          {
+            "id": "text-ocr-p1-l7-word-0-54",
+            "boxPt": [
+              248.611,
+              65.106,
+              49.639,
+              17.483
+            ],
+            "zIndex": 8,
+            "text": "Middle "
+          },
+          {
+            "id": "text-ocr-p1-l7-word-1-55",
+            "boxPt": [
+              292.448,
+              65.106,
+              47.719,
+              17.483
+            ],
+            "zIndex": 8,
+            "text": "ledger "
+          },
+          {
+            "id": "text-ocr-p1-l7-word-2-56",
+            "boxPt": [
+              332.501,
+              65.106,
+              34.759,
+              17.483
+            ],
+            "zIndex": 8,
+            "text": "中"
+          },
+          {
+            "id": "text-ocr-p1-l7-word-3-57",
+            "boxPt": [
+              349.319,
+              65.106,
+              20.119,
+              17.483
+            ],
+            "zIndex": 8,
+            "text": "栏"
+          },
+          {
+            "id": "text-ocr-p1-l3-word-0-58",
+            "boxPt": [
+              29.794,
+              115.067,
+              21.287,
+              17.041
+            ],
+            "zIndex": 4,
+            "text": "ID "
+          },
+          {
+            "id": "text-ocr-p1-l3-word-1-59",
+            "boxPt": [
+              44.506,
+              115.067,
+              106.041,
+              17.041
+            ],
+            "zIndex": 4,
+            "text": "00619"
+          },
+          {
+            "id": "text-ocr-p1-l8-word-0-60",
+            "boxPt": [
+              249.394,
+              115.067,
+              21.287,
+              17.041
+            ],
+            "zIndex": 9,
+            "text": "ID "
+          },
+          {
+            "id": "text-ocr-p1-l8-word-1-61",
+            "boxPt": [
+              264.106,
+              115.067,
+              106.04,
+              17.041
+            ],
+            "zIndex": 9,
+            "text": "01238"
+          },
+          {
+            "id": "text-ocr-p1-l4-word-0-62",
+            "boxPt": [
+              29.024,
+              161.889,
+              36.262,
+              16.805
+            ],
+            "zIndex": 5,
+            "text": "Date "
+          },
+          {
+            "id": "text-ocr-p1-l4-word-1-63",
+            "boxPt": [
+              59.872,
+              161.889,
+              75.142,
+              16.805
+            ],
+            "zIndex": 5,
+            "text": "2094-01-13"
+          },
+          {
+            "id": "text-ocr-p1-l9-word-0-64",
+            "boxPt": [
+              248.624,
+              161.889,
+              36.262,
+              16.805
+            ],
+            "zIndex": 10,
+            "text": "Date "
+          },
+          {
+            "id": "text-ocr-p1-l9-word-1-65",
+            "boxPt": [
+              279.473,
+              161.889,
+              75.622,
+              16.805
+            ],
+            "zIndex": 10,
+            "text": "2094-01-14"
+          },
+          {
+            "id": "text-ocr-p1-l5-word-0-66",
+            "boxPt": [
+              28.8,
+              208.695,
+              58.54,
+              16.737
+            ],
+            "zIndex": 6,
+            "text": "Amount "
+          },
+          {
+            "id": "text-ocr-p1-l5-word-1-67",
+            "boxPt": [
+              80.613,
+              208.695,
+              113.853,
+              16.737
+            ],
+            "zIndex": 6,
+            "text": "-053.25"
+          },
+          {
+            "id": "text-ocr-p1-l10-word-0-68",
+            "boxPt": [
+              248.4,
+              208.695,
+              58.54,
+              16.737
+            ],
+            "zIndex": 11,
+            "text": "Amount "
+          },
+          {
+            "id": "text-ocr-p1-l10-word-1-69",
+            "boxPt": [
+              299.611,
+              208.695,
+              124.056,
+              16.737
+            ],
+            "zIndex": 11,
+            "text": "+0106.50"
+          },
+          {
+            "id": "text-ocr-p1-l6-word-0-70",
+            "boxPt": [
+              28.988,
+              253.747,
+              32.359,
+              17.483
+            ],
+            "zIndex": 7,
+            "text": "Left "
+          },
+          {
+            "id": "text-ocr-p1-l6-word-1-71",
+            "boxPt": [
+              54.731,
+              253.747,
+              32.119,
+              17.483
+            ],
+            "zIndex": 7,
+            "text": "end "
+          },
+          {
+            "id": "text-ocr-p1-l6-word-2-72",
+            "boxPt": [
+              81.081,
+              253.747,
+              35.239,
+              17.483
+            ],
+            "zIndex": 7,
+            "text": "完成"
+          },
+          {
+            "id": "text-ocr-p1-l11-word-0-73",
+            "boxPt": [
+              248.611,
+              253.752,
+              49.602,
+              17.423
+            ],
+            "zIndex": 12,
+            "text": "Middle "
+          },
+          {
+            "id": "text-ocr-p1-l11-word-1-74",
+            "boxPt": [
+              292.332,
+              253.752,
+              32.082,
+              17.423
+            ],
+            "zIndex": 12,
+            "text": "end "
+          },
+          {
+            "id": "text-ocr-p1-l11-word-2-75",
+            "boxPt": [
+              318.202,
+              253.752,
+              35.202,
+              17.423
+            ],
+            "zIndex": 12,
+            "text": "完成"
+          },
+          {
+            "id": "text-ocr-p1-l12-word-0-76",
+            "boxPt": [
+              468.195,
+              64.591,
+              41.235,
+              17.866
+            ],
+            "zIndex": 13,
+            "text": "Right "
+          },
+          {
+            "id": "text-ocr-p1-l12-word-1-77",
+            "boxPt": [
+              502.921,
+              64.591,
+              48.195,
+              17.866
+            ],
+            "zIndex": 13,
+            "text": "ledger "
+          },
+          {
+            "id": "text-ocr-p1-l12-word-2-78",
+            "boxPt": [
+              543.494,
+              64.591,
+              35.955,
+              17.866
+            ],
+            "zIndex": 13,
+            "text": "右"
+          },
+          {
+            "id": "text-ocr-p1-l12-word-3-79",
+            "boxPt": [
+              561.507,
+              64.591,
+              19.635,
+              17.866
+            ],
+            "zIndex": 13,
+            "text": "栏"
+          },
+          {
+            "id": "text-ocr-p1-l13-word-0-80",
+            "boxPt": [
+              468.995,
+              115.067,
+              21.287,
+              17.041
+            ],
+            "zIndex": 14,
+            "text": "ID "
+          },
+          {
+            "id": "text-ocr-p1-l13-word-1-81",
+            "boxPt": [
+              483.707,
+              115.067,
+              106.04,
+              17.041
+            ],
+            "zIndex": 14,
+            "text": "02476"
+          },
+          {
+            "id": "text-ocr-p1-l14-word-0-82",
+            "boxPt": [
+              468.225,
+              161.889,
+              36.262,
+              16.805
+            ],
+            "zIndex": 15,
+            "text": "Date "
+          },
+          {
+            "id": "text-ocr-p1-l14-word-1-83",
+            "boxPt": [
+              499.073,
+              161.889,
+              75.142,
+              16.805
+            ],
+            "zIndex": 15,
+            "text": "2094-01-15"
+          },
+          {
+            "id": "text-ocr-p1-l15-word-0-84",
+            "boxPt": [
+              468.001,
+              208.695,
+              58.54,
+              16.737
+            ],
+            "zIndex": 16,
+            "text": "Amount "
+          },
+          {
+            "id": "text-ocr-p1-l15-word-1-85",
+            "boxPt": [
+              519.71,
+              208.695,
+              116.358,
+              16.737
+            ],
+            "zIndex": 16,
+            "text": "0213.00"
+          },
+          {
+            "id": "text-ocr-p1-l16-word-0-86",
+            "boxPt": [
+              468.195,
+              253.752,
+              40.962,
+              17.423
+            ],
+            "zIndex": 17,
+            "text": "Right "
+          },
+          {
+            "id": "text-ocr-p1-l16-word-1-87",
+            "boxPt": [
+              503.068,
+              253.752,
+              31.602,
+              17.423
+            ],
+            "zIndex": 17,
+            "text": "end "
+          },
+          {
+            "id": "text-ocr-p1-l16-word-2-88",
+            "boxPt": [
+              528.922,
+              253.752,
+              35.202,
+              17.423
+            ],
+            "zIndex": 17,
+            "text": "完成"
+          }
+        ],
+        "masks": [
+          {
+            "id": "ocr-mask-ocr-p1-l1-2",
+            "boxPt": [
+              29.095,
+              20.935,
+              29.65,
+              15.25
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l1-3",
+            "boxPt": [
+              82.135,
+              21.175,
+              13.81,
+              13.81
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l1-4",
+            "boxPt": [
+              98.215,
+              21.655,
+              85.811,
+              16.69
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l1-5",
+            "boxPt": [
+              187.495,
+              21.895,
+              59.891,
+              13.09
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l1-6",
+            "boxPt": [
+              251.335,
+              22.615,
+              41.17,
+              12.37
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l12-7",
+            "boxPt": [
+              469.016,
+              68.455,
+              31.09,
+              14.05
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l12-8",
+            "boxPt": [
+              503.576,
+              68.455,
+              38.05,
+              14.05
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l12-9",
+            "boxPt": [
+              543.896,
+              67.735,
+              25.81,
+              13.09
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l12-10",
+            "boxPt": [
+              561.416,
+              65.815,
+              9.49,
+              17.65
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l7-11",
+            "boxPt": [
+              249.415,
+              68.455,
+              39.73,
+              11.17
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l7-12",
+            "boxPt": [
+              293.095,
+              68.455,
+              37.81,
+              14.05
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l7-13",
+            "boxPt": [
+              334.135,
+              67.735,
+              24.85,
+              13.09
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l7-14",
+            "boxPt": [
+              349.255,
+              66.295,
+              10.21,
+              17.17
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l2-15",
+            "boxPt": [
+              29.815,
+              67.975,
+              22.45,
+              11.65
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l2-16",
+            "boxPt": [
+              55.495,
+              68.455,
+              38.29,
+              14.05
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l2-17",
+            "boxPt": [
+              96.055,
+              67.735,
+              25.81,
+              13.09
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l3-18",
+            "boxPt": [
+              29.815,
+              116.215,
+              11.65,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l3-19",
+            "boxPt": [
+              44.695,
+              116.215,
+              35.41,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l8-20",
+            "boxPt": [
+              249.415,
+              116.215,
+              11.65,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l8-21",
+            "boxPt": [
+              264.295,
+              116.215,
+              35.41,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l13-22",
+            "boxPt": [
+              469.016,
+              116.215,
+              11.65,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l13-23",
+            "boxPt": [
+              483.896,
+              116.215,
+              35.41,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l4-24",
+            "boxPt": [
+              29.815,
+              163.015,
+              26.77,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l4-25",
+            "boxPt": [
+              60.055,
+              163.015,
+              65.651,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l9-26",
+            "boxPt": [
+              249.415,
+              163.015,
+              26.77,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l9-27",
+            "boxPt": [
+              279.655,
+              163.015,
+              66.131,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l14-28",
+            "boxPt": [
+              469.016,
+              163.015,
+              26.77,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l14-29",
+            "boxPt": [
+              499.256,
+              163.015,
+              65.651,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l5-30",
+            "boxPt": [
+              28.375,
+              209.815,
+              49.09,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l5-31",
+            "boxPt": [
+              80.695,
+              209.815,
+              43.33,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l10-32",
+            "boxPt": [
+              247.975,
+              209.815,
+              49.09,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l10-33",
+            "boxPt": [
+              299.815,
+              209.815,
+              53.41,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l15-34",
+            "boxPt": [
+              467.576,
+              209.815,
+              49.09,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l15-35",
+            "boxPt": [
+              519.896,
+              209.815,
+              45.73,
+              10.21
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l6-36",
+            "boxPt": [
+              29.815,
+              255.175,
+              22.45,
+              11.65
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l6-37",
+            "boxPt": [
+              55.015,
+              255.655,
+              22.21,
+              11.17
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l6-38",
+            "boxPt": [
+              81.415,
+              254.935,
+              25.33,
+              13.09
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l11-39",
+            "boxPt": [
+              249.415,
+              255.655,
+              39.73,
+              11.17
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l11-40",
+            "boxPt": [
+              292.615,
+              255.655,
+              22.21,
+              11.17
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l11-41",
+            "boxPt": [
+              318.535,
+              254.935,
+              25.33,
+              13.09
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l16-42",
+            "boxPt": [
+              469.016,
+              255.655,
+              31.09,
+              14.05
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l16-43",
+            "boxPt": [
+              503.336,
+              255.655,
+              21.73,
+              11.17
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          },
+          {
+            "id": "ocr-mask-ocr-p1-l16-44",
+            "boxPt": [
+              529.256,
+              254.935,
+              25.33,
+              13.09
+            ],
+            "zIndex": 1,
+            "color": "#FFFFFF"
+          }
+        ],
+        "media": [
+          {
+            "part": "word/media/image1.png",
+            "pixels": [
+              2880,
+              1440
+            ],
+            "sha256": "ae9c399ff5f5e9a334cd4024db42b6f837ba0de955fff1e63cd46ad3ac6c4d17"
+          }
+        ],
+        "pageBoundsPt": [
+          691.2,
+          345.6
+        ],
+        "outOfPageFrames": [],
+        "text": "独立\n多\n栏 \nIndependent \ncolumns \n00649\nLeft \nledger \nA\nMiddle \nledger \n中\n栏\nID \n00619\nID \n01238\nDate \n2094-01-13\nDate \n2094-01-14\nAmount \n-053.25\nAmount \n+0106.50\nLeft \nend \n完成\nMiddle \nend \n完成\nRight \nledger \n右\n栏\nID \n02476\nDate \n2094-01-15\nAmount \n0213.00\nRight \nend \n完成",
+        "textMetrics": {
+          "expectedCharacters": 199,
+          "actualCharacters": 198,
+          "editDistance": 74,
+          "cer": 0.37185929648241206,
+          "alignedCharacterRecall": 0.6834170854271356,
+          "exactLines": 15,
+          "expectedNumbers": [
+            "00649",
+            "00619",
+            "2094",
+            "01",
+            "13",
+            "053",
+            "25",
+            "01238",
+            "2094",
+            "01",
+            "14",
+            "0106",
+            "50",
+            "02476",
+            "2094",
+            "01",
+            "15",
+            "0213",
+            "00"
+          ],
+          "actualNumbers": [
+            "00649",
+            "00619",
+            "01238",
+            "2094",
+            "01",
+            "13",
+            "2094",
+            "01",
+            "14",
+            "053",
+            "25",
+            "0106",
+            "50",
+            "02476",
+            "2094",
+            "01",
+            "15",
+            "0213",
+            "00"
+          ]
+        },
+        "numberInventory": [
+          {
+            "value": "00619",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "2094-01-13",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "-053.25",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "01238",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "2094-01-14",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "+0106.50",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "02476",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "2094-01-15",
+            "exactOccurrences": 1
+          },
+          {
+            "value": "0213.00",
+            "exactOccurrences": 1
+          }
+        ],
+        "geometricCellContent": [],
+        "exactGeometricSourceCells": 0,
+        "note": "Geometric assignment diagnoses text;it does not create logical editable cells",
+        "idsInFrameOrder": [
+          "00619",
+          "01238",
+          "02476"
+        ],
+        "columnMajorCompactExact": false,
+        "visualRowMajorMetrics": {
+          "expectedCharacters": 199,
+          "actualCharacters": 198,
+          "editDistance": 93,
+          "cer": 0.46733668341708545,
+          "alignedCharacterRecall": 0.7185929648241206,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00649",
+            "00619",
+            "01238",
+            "02476",
+            "2094",
+            "01",
+            "13",
+            "2094",
+            "01",
+            "14",
+            "2094",
+            "01",
+            "15",
+            "053",
+            "25",
+            "0106",
+            "50",
+            "0213",
+            "00"
+          ],
+          "actualNumbers": [
+            "00649",
+            "00619",
+            "01238",
+            "2094",
+            "01",
+            "13",
+            "2094",
+            "01",
+            "14",
+            "053",
+            "25",
+            "0106",
+            "50",
+            "02476",
+            "2094",
+            "01",
+            "15",
+            "0213",
+            "00"
+          ]
+        }
+      }
+    ],
+    "nativeTsvs": [
+      {
+        "taskId": "8747f060-b3ba-4be3-8a42-5eed3d9e59e3",
+        "source": "8747f060-b3ba-4be3-8a42-5eed3d9e59e3/work/file-0001/conversion/ocr/tesseract-page-0001.tsv",
+        "artifact": "ocr-capture/8747f060-b3ba-4be3-8a42-5eed3d9e59e3/f607106c71e9e493e7fa46e47323e09d3e04180229e75ef26dcd00bca3c44157.tsv",
+        "sha256": "f607106c71e9e493e7fa46e47323e09d3e04180229e75ef26dcd00bca3c44157",
+        "bytes": 2541,
+        "pixels": [
+          1920,
+          960
+        ],
+        "characterWeightedConfidencePercent": 90.500344375,
+        "words": [
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "82",
+            "top": "59",
+            "width": "80",
+            "height": "40",
+            "conf": "93.102486",
+            "text": "扫描"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "179",
+            "top": "59",
+            "width": "45",
+            "height": "40",
+            "conf": "92.432014",
+            "text": "台"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "226",
+            "top": "60",
+            "width": "20",
+            "height": "39",
+            "conf": "92.800827",
+            "text": "账"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "4",
+            "left": "259",
+            "top": "63",
+            "width": "90",
+            "height": "33",
+            "conf": "95.870132",
+            "text": "Scan"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "5",
+            "left": "366",
+            "top": "61",
+            "width": "120",
+            "height": "45",
+            "conf": "92.783836",
+            "text": "ledger"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "6",
+            "left": "497",
+            "top": "64",
+            "width": "113",
+            "height": "32",
+            "conf": "92.522301",
+            "text": "00783"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "110",
+            "top": "229",
+            "width": "92",
+            "height": "45",
+            "conf": "66.550079",
+            "text": "编号"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "220",
+            "top": "235",
+            "width": "39",
+            "height": "35",
+            "conf": "66.550079",
+            "text": "1D"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "686",
+            "top": "230",
+            "width": "84",
+            "height": "45",
+            "conf": "96.220787",
+            "text": "日"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "4",
+            "left": "756",
+            "top": "224",
+            "width": "37",
+            "height": "63",
+            "conf": "96.065254",
+            "text": "期"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "5",
+            "left": "790",
+            "top": "235",
+            "width": "96",
+            "height": "36",
+            "conf": "92.509781",
+            "text": "Date"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "6",
+            "left": "1270",
+            "top": "229",
+            "width": "92",
+            "height": "45",
+            "conf": "95.309441",
+            "text": "金额"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "7",
+            "left": "1375",
+            "top": "235",
+            "width": "178",
+            "height": "36",
+            "conf": "91.458466",
+            "text": "Amount"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "2",
+            "word_num": "1",
+            "left": "110",
+            "top": "384",
+            "width": "130",
+            "height": "37",
+            "conf": "90.992584",
+            "text": "01936"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "2",
+            "word_num": "2",
+            "left": "680",
+            "top": "384",
+            "width": "243",
+            "height": "37",
+            "conf": "90.993858",
+            "text": "2093-12-04"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "2",
+            "word_num": "3",
+            "left": "1270",
+            "top": "384",
+            "width": "159",
+            "height": "37",
+            "conf": "90.975197",
+            "text": "-042.70"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "3",
+            "word_num": "1",
+            "left": "110",
+            "top": "534",
+            "width": "129",
+            "height": "37",
+            "conf": "89.611969",
+            "text": "03872"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "3",
+            "word_num": "2",
+            "left": "680",
+            "top": "534",
+            "width": "242",
+            "height": "37",
+            "conf": "89.884407",
+            "text": "2093-12-05"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "3",
+            "word_num": "3",
+            "left": "1270",
+            "top": "534",
+            "width": "195",
+            "height": "37",
+            "conf": "89.597870",
+            "text": "+0085.40"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "4",
+            "word_num": "1",
+            "left": "110",
+            "top": "684",
+            "width": "130",
+            "height": "37",
+            "conf": "91.836761",
+            "text": "07744"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "4",
+            "word_num": "2",
+            "left": "680",
+            "top": "684",
+            "width": "243",
+            "height": "37",
+            "conf": "91.030266",
+            "text": "2093-12-06"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "4",
+            "word_num": "3",
+            "left": "1270",
+            "top": "684",
+            "width": "169",
+            "height": "37",
+            "conf": "90.715225",
+            "text": "0170.80"
+          }
+        ],
+        "contract": "ruled-direct-word",
+        "rawWordsText": "扫描\n台\n账\nScan\nledger\n00783\n编号\n1D\n日\n期\nDate\n金额\nAmount\n01936\n2093-12-04\n-042.70\n03872\n2093-12-05\n+0085.40\n07744\n2093-12-06\n0170.80",
+        "readingStreamMetrics": {
+          "expectedCharacters": 104,
+          "actualCharacters": 104,
+          "editDistance": 1,
+          "cer": 0.009615384615384616,
+          "alignedCharacterRecall": 0.9903846153846154,
+          "exactLines": 4,
+          "expectedNumbers": [
+            "00783",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "07744",
+            "2093",
+            "12",
+            "06",
+            "0170",
+            "80"
+          ],
+          "actualNumbers": [
+            "00783",
+            "1",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "07744",
+            "2093",
+            "12",
+            "06",
+            "0170",
+            "80"
+          ]
+        }
+      },
+      {
+        "taskId": "168bd8ff-2c0b-4bfc-9950-c2114889320a",
+        "source": "168bd8ff-2c0b-4bfc-9950-c2114889320a/work/file-0001/conversion/pdf-ocr/page-0001/tesseract-page-0001.tsv",
+        "artifact": "ocr-capture/168bd8ff-2c0b-4bfc-9950-c2114889320a/691c88fc553f867de2ade31d2ca911a9b676b71dfce87a7efc5a6ae1e85122a6.tsv",
+        "sha256": "691c88fc553f867de2ade31d2ca911a9b676b71dfce87a7efc5a6ae1e85122a6",
+        "bytes": 1143,
+        "pixels": [
+          2880,
+          1440
+        ],
+        "characterWeightedConfidencePercent": 87.43013243333333,
+        "words": [
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "123",
+            "top": "89",
+            "width": "120",
+            "height": "60",
+            "conf": "93.066345",
+            "text": "扫描"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "264",
+            "top": "89",
+            "width": "72",
+            "height": "60",
+            "conf": "89.660858",
+            "text": "台"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "342",
+            "top": "90",
+            "width": "27",
+            "height": "59",
+            "conf": "91.537437",
+            "text": "账"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "4",
+            "left": "389",
+            "top": "95",
+            "width": "135",
+            "height": "49",
+            "conf": "95.848785",
+            "text": "Scan"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "5",
+            "left": "549",
+            "top": "92",
+            "width": "180",
+            "height": "67",
+            "conf": "91.092926",
+            "text": "ledger"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "6",
+            "left": "746",
+            "top": "96",
+            "width": "169",
+            "height": "48",
+            "conf": "91.750565",
+            "text": "00783"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "2",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "125",
+            "top": "275",
+            "width": "2634",
+            "height": "219",
+            "conf": "15.561668",
+            "text": "Ce"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "2",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "1312",
+            "top": "271",
+            "width": "505",
+            "height": "275",
+            "conf": "30.531136",
+            "text": "ee"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "2",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "2137",
+            "top": "271",
+            "width": "620",
+            "height": "275",
+            "conf": "27.816795",
+            "text": "ee"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "3",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "1020",
+            "top": "801",
+            "width": "363",
+            "height": "56",
+            "conf": "96.818741",
+            "text": "2093-12-05"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "3",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "1905",
+            "top": "801",
+            "width": "293",
+            "height": "56",
+            "conf": "91.633743",
+            "text": "+0085.40"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "3",
+            "par_num": "1",
+            "line_num": "2",
+            "word_num": "1",
+            "left": "1020",
+            "top": "1026",
+            "width": "365",
+            "height": "56",
+            "conf": "96.744690",
+            "text": "2093-12-06"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "3",
+            "par_num": "1",
+            "line_num": "2",
+            "word_num": "2",
+            "left": "1905",
+            "top": "1026",
+            "width": "254",
+            "height": "56",
+            "conf": "96.178284",
+            "text": "0170.80"
+          }
+        ],
+        "contract": "ruled-scan-word",
+        "rawWordsText": "扫描\n台\n账\nScan\nledger\n00783\nCe\nee\nee\n2093-12-05\n+0085.40\n2093-12-06\n0170.80",
+        "readingStreamMetrics": {
+          "expectedCharacters": 104,
+          "actualCharacters": 60,
+          "editDistance": 49,
+          "cer": 0.47115384615384615,
+          "alignedCharacterRecall": 0.5288461538461539,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00783",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "07744",
+            "2093",
+            "12",
+            "06",
+            "0170",
+            "80"
+          ],
+          "actualNumbers": [
+            "00783",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "2093",
+            "12",
+            "06",
+            "0170",
+            "80"
+          ]
+        }
+      },
+      {
+        "taskId": "b7664710-878c-435e-864b-796e6243f8c2",
+        "source": "b7664710-878c-435e-864b-796e6243f8c2/work/file-0001/conversion/pdf-ocr/image-0001-001/tesseract-page-0001.tsv",
+        "artifact": "ocr-capture/b7664710-878c-435e-864b-796e6243f8c2/22f228b935fd704cb59b4669f170ab331b629c359dd7c626de9d34fde6e753d6.tsv",
+        "sha256": "22f228b935fd704cb59b4669f170ab331b629c359dd7c626de9d34fde6e753d6",
+        "bytes": 1037,
+        "pixels": [
+          1600,
+          800
+        ],
+        "characterWeightedConfidencePercent": 92.40213375,
+        "words": [
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "68",
+            "top": "49",
+            "width": "67",
+            "height": "34",
+            "conf": "91.668022",
+            "text": "扫描"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "148",
+            "top": "49",
+            "width": "38",
+            "height": "34",
+            "conf": "88.144592",
+            "text": "台"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "189",
+            "top": "50",
+            "width": "16",
+            "height": "33",
+            "conf": "92.546860",
+            "text": "账"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "4",
+            "left": "216",
+            "top": "53",
+            "width": "75",
+            "height": "27",
+            "conf": "95.884270",
+            "text": "Scan"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "5",
+            "left": "305",
+            "top": "51",
+            "width": "100",
+            "height": "37",
+            "conf": "92.457413",
+            "text": "ledger"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "6",
+            "left": "414",
+            "top": "53",
+            "width": "94",
+            "height": "27",
+            "conf": "92.059860",
+            "text": "00783"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "2",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "92",
+            "top": "320",
+            "width": "108",
+            "height": "31",
+            "conf": "88.098816",
+            "text": "01936"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "2",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "567",
+            "top": "320",
+            "width": "203",
+            "height": "31",
+            "conf": "91.365250",
+            "text": "2093-12-04"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "2",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "1058",
+            "top": "320",
+            "width": "133",
+            "height": "31",
+            "conf": "89.930557",
+            "text": "-042.70"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "3",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "92",
+            "top": "445",
+            "width": "108",
+            "height": "31",
+            "conf": "91.594299",
+            "text": "03872"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "3",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "567",
+            "top": "445",
+            "width": "201",
+            "height": "31",
+            "conf": "96.620064",
+            "text": "2093-12-05"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "3",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "1058",
+            "top": "445",
+            "width": "163",
+            "height": "31",
+            "conf": "92.911949",
+            "text": "+0085.40"
+          }
+        ],
+        "contract": "ruled-edited-api",
+        "rawWordsText": "扫描\n台\n账\nScan\nledger\n00783\n01936\n2093-12-04\n-042.70\n03872\n2093-12-05\n+0085.40",
+        "readingStreamMetrics": {
+          "expectedCharacters": 104,
+          "actualCharacters": 64,
+          "editDistance": 40,
+          "cer": 0.38461538461538464,
+          "alignedCharacterRecall": 0.6153846153846154,
+          "exactLines": 3,
+          "expectedNumbers": [
+            "00783",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "07744",
+            "2093",
+            "12",
+            "06",
+            "0180",
+            "80"
+          ],
+          "actualNumbers": [
+            "00783",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40"
+          ]
+        }
+      },
+      {
+        "taskId": "30553fce-6b67-47ee-a579-6eafa3c202b4",
+        "source": "30553fce-6b67-47ee-a579-6eafa3c202b4/work/file-0001/conversion/pdf-ocr/page-0001/tesseract-page-0001.tsv",
+        "artifact": "ocr-capture/30553fce-6b67-47ee-a579-6eafa3c202b4/01250bc541fdb6311f6a7b199dcc4969786bfda2c5b9bf9b1f480eb390f6a63c.tsv",
+        "sha256": "01250bc541fdb6311f6a7b199dcc4969786bfda2c5b9bf9b1f480eb390f6a63c",
+        "bytes": 3595,
+        "pixels": [
+          2880,
+          1440
+        ],
+        "characterWeightedConfidencePercent": 94.57153723737373,
+        "words": [
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "123",
+            "top": "89",
+            "width": "120",
+            "height": "60",
+            "conf": "96.216187",
+            "text": "独立"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "267",
+            "top": "89",
+            "width": "66",
+            "height": "60",
+            "conf": "93.254631",
+            "text": "多"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "344",
+            "top": "90",
+            "width": "54",
+            "height": "54",
+            "conf": "92.503891",
+            "text": "栏"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "4",
+            "left": "411",
+            "top": "92",
+            "width": "354",
+            "height": "66",
+            "conf": "90.085403",
+            "text": "Independent"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "5",
+            "left": "783",
+            "top": "93",
+            "width": "246",
+            "height": "51",
+            "conf": "96.270630",
+            "text": "columns"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "1",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "6",
+            "left": "1049",
+            "top": "96",
+            "width": "168",
+            "height": "48",
+            "conf": "96.377487",
+            "text": "00649"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "2",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "126",
+            "top": "285",
+            "width": "90",
+            "height": "45",
+            "conf": "96.015823",
+            "text": "Left"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "2",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "233",
+            "top": "287",
+            "width": "156",
+            "height": "55",
+            "conf": "94.732430",
+            "text": "ledger"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "2",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "402",
+            "top": "284",
+            "width": "104",
+            "height": "51",
+            "conf": "63.396332",
+            "text": "A"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "3",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "126",
+            "top": "486",
+            "width": "45",
+            "height": "39",
+            "conf": "91.755783",
+            "text": "ID"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "3",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "188",
+            "top": "486",
+            "width": "144",
+            "height": "39",
+            "conf": "95.716003",
+            "text": "00619"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "4",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "126",
+            "top": "681",
+            "width": "108",
+            "height": "39",
+            "conf": "96.368233",
+            "text": "Date"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "4",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "252",
+            "top": "681",
+            "width": "270",
+            "height": "39",
+            "conf": "96.137451",
+            "text": "2094-01-13"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "5",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "120",
+            "top": "876",
+            "width": "201",
+            "height": "39",
+            "conf": "93.183655",
+            "text": "Amount"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "5",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "338",
+            "top": "876",
+            "width": "177",
+            "height": "39",
+            "conf": "91.626846",
+            "text": "-053.25"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "6",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "126",
+            "top": "1065",
+            "width": "90",
+            "height": "45",
+            "conf": "96.581665",
+            "text": "Left"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "6",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "231",
+            "top": "1067",
+            "width": "89",
+            "height": "43",
+            "conf": "95.868156",
+            "text": "end"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "6",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "341",
+            "top": "1064",
+            "width": "102",
+            "height": "51",
+            "conf": "96.739059",
+            "text": "完成"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "7",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "1041",
+            "top": "287",
+            "width": "162",
+            "height": "43",
+            "conf": "96.151901",
+            "text": "Middle"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "7",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "1223",
+            "top": "287",
+            "width": "154",
+            "height": "55",
+            "conf": "96.343033",
+            "text": "ledger"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "7",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "1394",
+            "top": "284",
+            "width": "100",
+            "height": "51",
+            "conf": "93.275475",
+            "text": "中"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "7",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "4",
+            "left": "1457",
+            "top": "278",
+            "width": "39",
+            "height": "68",
+            "conf": "91.025894",
+            "text": "栏"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "8",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "1041",
+            "top": "486",
+            "width": "45",
+            "height": "39",
+            "conf": "92.651810",
+            "text": "ID"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "8",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "1103",
+            "top": "486",
+            "width": "144",
+            "height": "39",
+            "conf": "92.651810",
+            "text": "01238"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "1041",
+            "top": "681",
+            "width": "108",
+            "height": "39",
+            "conf": "96.482872",
+            "text": "Date"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "9",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "1167",
+            "top": "681",
+            "width": "272",
+            "height": "39",
+            "conf": "96.402901",
+            "text": "2094-01-14"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "10",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "1035",
+            "top": "876",
+            "width": "201",
+            "height": "39",
+            "conf": "93.114471",
+            "text": "Amount"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "10",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "1251",
+            "top": "876",
+            "width": "219",
+            "height": "39",
+            "conf": "92.529648",
+            "text": "+0106.50"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "11",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "1041",
+            "top": "1067",
+            "width": "162",
+            "height": "43",
+            "conf": "95.866379",
+            "text": "Middle"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "11",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "1221",
+            "top": "1067",
+            "width": "89",
+            "height": "43",
+            "conf": "93.277061",
+            "text": "end"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "11",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "1329",
+            "top": "1064",
+            "width": "102",
+            "height": "51",
+            "conf": "96.489021",
+            "text": "完成"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "12",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "1956",
+            "top": "287",
+            "width": "126",
+            "height": "55",
+            "conf": "96.196274",
+            "text": "Right"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "12",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "2100",
+            "top": "287",
+            "width": "155",
+            "height": "55",
+            "conf": "92.652489",
+            "text": "ledger"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "12",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "2268",
+            "top": "284",
+            "width": "104",
+            "height": "51",
+            "conf": "92.356201",
+            "text": "右"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "12",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "4",
+            "left": "2341",
+            "top": "276",
+            "width": "36",
+            "height": "70",
+            "conf": "89.425812",
+            "text": "栏"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "13",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "1956",
+            "top": "486",
+            "width": "45",
+            "height": "39",
+            "conf": "91.145027",
+            "text": "ID"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "13",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "2018",
+            "top": "486",
+            "width": "144",
+            "height": "39",
+            "conf": "91.145027",
+            "text": "02476"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "14",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "1956",
+            "top": "681",
+            "width": "108",
+            "height": "39",
+            "conf": "96.467171",
+            "text": "Date"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "14",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "2082",
+            "top": "681",
+            "width": "270",
+            "height": "39",
+            "conf": "96.296570",
+            "text": "2094-01-15"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "15",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "1950",
+            "top": "876",
+            "width": "201",
+            "height": "39",
+            "conf": "96.259918",
+            "text": "Amount"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "15",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "2168",
+            "top": "876",
+            "width": "187",
+            "height": "39",
+            "conf": "96.451271",
+            "text": "0213.00"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "16",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "1",
+            "left": "1956",
+            "top": "1067",
+            "width": "126",
+            "height": "55",
+            "conf": "96.540108",
+            "text": "Right"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "16",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "2",
+            "left": "2099",
+            "top": "1067",
+            "width": "87",
+            "height": "43",
+            "conf": "96.068893",
+            "text": "end"
+          },
+          {
+            "level": "5",
+            "page_num": "1",
+            "block_num": "16",
+            "par_num": "1",
+            "line_num": "1",
+            "word_num": "3",
+            "left": "2207",
+            "top": "1064",
+            "width": "102",
+            "height": "51",
+            "conf": "96.840355",
+            "text": "完成"
+          }
+        ],
+        "contract": "columns-scan-word",
+        "rawWordsText": "独立\n多\n栏\nIndependent\ncolumns\n00649\nLeft\nledger\nA\nID\n00619\nDate\n2094-01-13\nAmount\n-053.25\nLeft\nend\n完成\nMiddle\nledger\n中\n栏\nID\n01238\nDate\n2094-01-14\nAmount\n+0106.50\nMiddle\nend\n完成\nRight\nledger\n右\n栏\nID\n02476\nDate\n2094-01-15\nAmount\n0213.00\nRight\nend\n完成",
+        "readingStreamMetrics": {
+          "expectedCharacters": 199,
+          "actualCharacters": 198,
+          "editDistance": 2,
+          "cer": 0.010050251256281407,
+          "alignedCharacterRecall": 0.9899497487437185,
+          "exactLines": 15,
+          "expectedNumbers": [
+            "00649",
+            "00619",
+            "2094",
+            "01",
+            "13",
+            "053",
+            "25",
+            "01238",
+            "2094",
+            "01",
+            "14",
+            "0106",
+            "50",
+            "02476",
+            "2094",
+            "01",
+            "15",
+            "0213",
+            "00"
+          ],
+          "actualNumbers": [
+            "00649",
+            "00619",
+            "2094",
+            "01",
+            "13",
+            "053",
+            "25",
+            "01238",
+            "2094",
+            "01",
+            "14",
+            "0106",
+            "50",
+            "02476",
+            "2094",
+            "01",
+            "15",
+            "0213",
+            "00"
+          ]
+        }
+      }
+    ],
+    "pdfs": [
+      {
+        "id": "ruled-wrap",
+        "sha256": "ced64afc7fb6f8fba2cf5dab495a303f00a3d33ea53772e04b5571748e5f553e",
+        "pages": 1,
+        "boundsPt": [
+          0.0,
+          0.0,
+          691.2013549804688,
+          345.6006774902344
+        ],
+        "nativeText": "",
+        "nativeTextMetrics": {
+          "expectedCharacters": 104,
+          "actualCharacters": 0,
+          "editDistance": 104,
+          "cer": 1.0,
+          "alignedCharacterRecall": 0.0,
+          "exactLines": 0,
+          "expectedNumbers": [
+            "00783",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "07744",
+            "2093",
+            "12",
+            "06",
+            "0170",
+            "80"
+          ],
+          "actualNumbers": []
+        },
+        "sourceImages": [
+          {
+            "pixels": [
+              1920,
+              960
+            ],
+            "colorSpace": "DeviceRGB"
+          }
+        ],
+        "renderedPng": "qa-samples/work/iteration45-render/ruled-wrap.png",
+        "renderedSha256": "26525cb871118ae021b4c46640400743130340aa9390cf4fb32bb121c4bde512",
+        "renderDpi": 200
+      },
+      {
+        "id": "ruled-office",
+        "sha256": "d64514da4a7be731496aac08ea509cbd47a95a73d844996680828ef2ad6d7100",
+        "pages": 1,
+        "boundsPt": [
+          0.0,
+          0.0,
+          691.2000122070312,
+          345.6000061035156
+        ],
+        "nativeText": "扫描台账 Scan ledger 00783\nCe \nee ee\n2093-12-05 \n+0085.40\n2093-12-06 \n0170.80\n",
+        "nativeTextMetrics": {
+          "expectedCharacters": 104,
+          "actualCharacters": 60,
+          "editDistance": 49,
+          "cer": 0.47115384615384615,
+          "alignedCharacterRecall": 0.5288461538461539,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00783",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "07744",
+            "2093",
+            "12",
+            "06",
+            "0170",
+            "80"
+          ],
+          "actualNumbers": [
+            "00783",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "2093",
+            "12",
+            "06",
+            "0170",
+            "80"
+          ]
+        },
+        "sourceImages": [
+          {
+            "pixels": [
+              2880,
+              1440
+            ],
+            "colorSpace": "DeviceRGB"
+          }
+        ],
+        "renderedPng": "qa-samples/work/iteration45-render/ruled-office.png",
+        "renderedSha256": "52e227dddada48abb7c6d32b83047314c38bd07df395b0b7e0e94c6ac7ab3717",
+        "renderDpi": 200
+      },
+      {
+        "id": "ruled-edited-office",
+        "sha256": "7d623a55efe9f51ed235cdb677ec492de876b41dbf78b04b7a1173d73c536558",
+        "pages": 1,
+        "boundsPt": [
+          0.0,
+          0.0,
+          691.2000122070312,
+          345.6000061035156
+        ],
+        "nativeText": "扫描台账 Scan ledger 00783\nCe \nee ee\n2093-12-05 \n+0085.40\n2093-12-06 \n0180.80\n",
+        "nativeTextMetrics": {
+          "expectedCharacters": 104,
+          "actualCharacters": 60,
+          "editDistance": 49,
+          "cer": 0.47115384615384615,
+          "alignedCharacterRecall": 0.5288461538461539,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00783",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "07744",
+            "2093",
+            "12",
+            "06",
+            "0180",
+            "80"
+          ],
+          "actualNumbers": [
+            "00783",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "2093",
+            "12",
+            "06",
+            "0180",
+            "80"
+          ]
+        },
+        "sourceImages": [
+          {
+            "pixels": [
+              2880,
+              1440
+            ],
+            "colorSpace": "DeviceRGB"
+          }
+        ],
+        "renderedPng": "qa-samples/work/iteration45-render/ruled-edited-office.png",
+        "renderedSha256": "89539355836884c885d05832db690761e53e6a38e40a007a3f2f05ce888f1474",
+        "renderDpi": 200
+      },
+      {
+        "id": "columns-wrap",
+        "sha256": "6365f6b7b310606808f8e21d51bee9549f76715b53a167688efd29569c94a327",
+        "pages": 1,
+        "boundsPt": [
+          0.0,
+          0.0,
+          691.2013549804688,
+          345.6006774902344
+        ],
+        "nativeText": "",
+        "nativeTextMetrics": {
+          "expectedCharacters": 199,
+          "actualCharacters": 0,
+          "editDistance": 199,
+          "cer": 1.0,
+          "alignedCharacterRecall": 0.0,
+          "exactLines": 0,
+          "expectedNumbers": [
+            "00649",
+            "00619",
+            "2094",
+            "01",
+            "13",
+            "053",
+            "25",
+            "01238",
+            "2094",
+            "01",
+            "14",
+            "0106",
+            "50",
+            "02476",
+            "2094",
+            "01",
+            "15",
+            "0213",
+            "00"
+          ],
+          "actualNumbers": []
+        },
+        "sourceImages": [
+          {
+            "pixels": [
+              1920,
+              960
+            ],
+            "colorSpace": "DeviceRGB"
+          }
+        ],
+        "renderedPng": "qa-samples/work/iteration45-render/columns-wrap.png",
+        "renderedSha256": "50cb5e1875818cfddf0235fcf6d2cf455f1b84ec327bc31bf6cfef1addee590d",
+        "renderDpi": 200
+      },
+      {
+        "id": "columns-office",
+        "sha256": "84a620c29418137d4a4c3d231e1e577d4fe3a8faff43e83dc691b22141dda4d1",
+        "pages": 1,
+        "boundsPt": [
+          0.0,
+          0.0,
+          691.2000122070312,
+          345.6000061035156
+        ],
+        "nativeText": "独立多栏 Independent columns 00649\nLeft ledger A\nMiddle ledger 中\nID 00619\nDate 2094-01-13\nAmount -053.25\nLeft end 完成\n栏\nID 01238\nDate 2094-01-14\nAmount +0106.50\nMiddle end 完成\nRight ledger 右栏\nID 02476\nDate 2094-01-15\nAmount 0213.00\nRight end 完成\n",
+        "nativeTextMetrics": {
+          "expectedCharacters": 199,
+          "actualCharacters": 198,
+          "editDistance": 27,
+          "cer": 0.135678391959799,
+          "alignedCharacterRecall": 0.9246231155778895,
+          "exactLines": 14,
+          "expectedNumbers": [
+            "00649",
+            "00619",
+            "2094",
+            "01",
+            "13",
+            "053",
+            "25",
+            "01238",
+            "2094",
+            "01",
+            "14",
+            "0106",
+            "50",
+            "02476",
+            "2094",
+            "01",
+            "15",
+            "0213",
+            "00"
+          ],
+          "actualNumbers": [
+            "00649",
+            "00619",
+            "2094",
+            "01",
+            "13",
+            "053",
+            "25",
+            "01238",
+            "2094",
+            "01",
+            "14",
+            "0106",
+            "50",
+            "02476",
+            "2094",
+            "01",
+            "15",
+            "0213",
+            "00"
+          ]
+        },
+        "sourceImages": [
+          {
+            "pixels": [
+              2880,
+              1440
+            ],
+            "colorSpace": "DeviceRGB"
+          }
+        ],
+        "renderedPng": "qa-samples/work/iteration45-render/columns-office.png",
+        "renderedSha256": "9bd7edb70054f12eeac8177e5e16284b5f3c549362e5b6573942089eeccec84c",
+        "renderDpi": 200
+      }
+    ],
+    "edit": {
+      "old": "0170.80",
+      "new": "0180.80",
+      "row": 3,
+      "column": 2,
+      "oneWordTextNodeOnly": true,
+      "otherWordPartsByteExact": true,
+      "normalToEditedChangedPixels": 489,
+      "outsideEditedSourceCellChangedPixels": 0,
+      "changedBoxPixels": [
+        1323,
+        682,
+        1346,
+        719
+      ],
+      "apiRaw": "扫描台账 Scan ledger 00783\nCe ee ee\n扫描台账 Scan ledger 00783\n01936 2093-12-04 -042.70\n03872 2093-12-05 +0085.402093-12-05 +0085.40\n2093-12-06 0180.80\n",
+      "apiMetrics": {
+        "expectedCharacters": 104,
+        "actualCharacters": 124,
+        "editDistance": 39,
+        "cer": 0.375,
+        "alignedCharacterRecall": 0.8173076923076923,
+        "exactLines": 3,
+        "expectedNumbers": [
+          "00783",
+          "01936",
+          "2093",
+          "12",
+          "04",
+          "042",
+          "70",
+          "03872",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "07744",
+          "2093",
+          "12",
+          "06",
+          "0180",
+          "80"
+        ],
+        "actualNumbers": [
+          "00783",
+          "00783",
+          "01936",
+          "2093",
+          "12",
+          "04",
+          "042",
+          "70",
+          "03872",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "402093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "2093",
+          "12",
+          "06",
+          "0180",
+          "80"
+        ]
+      },
+      "editedValuePresent": true,
+      "oldValueAbsentFromNativeAndApi": true,
+      "apiNumberInventory": [
+        {
+          "value": "01936",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "2093-12-04",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "-042.70",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "03872",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "2093-12-05",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "+0085.40",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "07744",
+          "exactOccurrences": 0
+        },
+        {
+          "value": "2093-12-06",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "0180.80",
+          "exactOccurrences": 1
+        }
+      ],
+      "visibleEditAccepted": false,
+      "visibleEditReason": "Manual full/cell render inspection:original 0170.80 and editable 0180.80 overprint;native/API absence is not visible absence"
+    },
+    "sourceScanResolutionPreserved": false,
+    "scanWordRetainsFullRenderedBackground": true,
+    "rasterGridIsNotEditableCellStructure": true,
+    "ruledTableRecovered": false,
+    "unruledControlNoFalseTable": true,
+    "resources": {
+      "wallSeconds": 34.90902872600418,
+      "userSeconds": 86.849351,
+      "systemSeconds": 7.398029,
+      "maxChildRssKiB": 364144
+    },
+    "contractSeconds": [
+      {
+        "id": "ruled-direct-word",
+        "seconds": 4.268750890987576
+      },
+      {
+        "id": "ruled-wrap",
+        "seconds": 1.7573764960106928
+      },
+      {
+        "id": "ruled-scan-word",
+        "seconds": 5.009704141994007
+      },
+      {
+        "id": "ruled-office",
+        "seconds": 2.4166390979953576
+      },
+      {
+        "id": "ruled-edited-office",
+        "seconds": 2.4010763670085
+      },
+      {
+        "id": "ruled-edited-api",
+        "seconds": 3.2717883529985556
+      },
+      {
+        "id": "columns-wrap",
+        "seconds": 1.9838785269967047
+      },
+      {
+        "id": "columns-scan-word",
+        "seconds": 5.868021011003293
+      },
+      {
+        "id": "columns-office",
+        "seconds": 2.8080235079978593
+      }
+    ],
+    "warnings": [
+      {
+        "id": "ruled-direct-word",
+        "warnings": [
+          {
+            "code": "OCR_APPLIED",
+            "message": "图片第 1 页已使用本地 Tesseract OCR，平均置信度 90.0%，结果必须人工复核。",
+            "pageNumber": 1,
+            "region": null,
+            "confidence": 0.8999152818181818
+          }
+        ]
+      },
+      {
+        "id": "ruled-wrap",
+        "warnings": []
+      },
+      {
+        "id": "ruled-scan-word",
+        "warnings": [
+          {
+            "code": "OCR_APPLIED",
+            "message": "PDF 第 1 页已使用本地 Tesseract OCR，平均置信度 77.6%，结果必须人工复核。",
+            "pageNumber": 1,
+            "region": null,
+            "confidence": 0.7755707484615385
+          }
+        ]
+      },
+      {
+        "id": "ruled-office",
+        "warnings": []
+      },
+      {
+        "id": "ruled-edited-office",
+        "warnings": []
+      },
+      {
+        "id": "ruled-edited-api",
+        "warnings": [
+          {
+            "code": "OCR_APPLIED",
+            "message": "PDF 第 1 页图片 1已使用本地 Tesseract OCR，平均置信度 91.9%，结果必须人工复核。",
+            "pageNumber": 1,
+            "region": null,
+            "confidence": 0.9194016266666667
+          }
+        ]
+      },
+      {
+        "id": "columns-wrap",
+        "warnings": []
+      },
+      {
+        "id": "columns-scan-word",
+        "warnings": [
+          {
+            "code": "OCR_APPLIED",
+            "message": "PDF 第 1 页已使用本地 Tesseract OCR，平均置信度 93.8%，结果必须人工复核。",
+            "pageNumber": 1,
+            "region": null,
+            "confidence": 0.9379402402272725
+          }
+        ]
+      },
+      {
+        "id": "columns-office",
+        "warnings": []
+      }
+    ],
+    "allWorkersAbsent": true,
+    "ECHILD": true,
+    "newZombies": [],
+    "versions": {
+      "python": "3.12.14",
+      "pillow": "12.3.0",
+      "numpy": "2.3.5",
+      "pymupdf": "1.26.6",
+      "java": "Temurin17.0.16+8",
+      "tesseract": "5.5.2",
+      "leptonica": "1.87.0",
+      "pdfbox": "3.0.8",
+      "poi": "5.4.1",
+      "models": "tessdata_fast87416418657359cb625c412a48b6e1d6d41c29bd chi_sim+eng PSM3",
+      "office": "26.8.0.0.alpha0+ 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5"
+    },
+    "unrun": [
+      "No production or DPI/PSM/threshold/deskew candidate, no new OCR diagnostics",
+      "Direct image Word not reopened with Office;no additional HTTP",
+      "No scanned editable-table renderer, row insertion, arbitrary edit or automatic column-intent recovery",
+      "Native macOS/Windows packages and Microsoft Word unrun;optional signed-OFD fixture unavailable"
+    ],
+    "localBuild": "Production unchanged40:505total/504pass/1optional signedfixture skip;10bundled tests executed;no fresh45fullbuild"
+  },
+  "changedArtifactManifestSha256": "0cc61470785eba40bb8ab48ca717d5324b4c24a35d8b255c61334b9bd556688f",
+  "sourceBoundJarSha256": "41a75070b3d15c239bf42fe78c942457d4f0e9db8ba273660b41d69228759669",
+  "productionFingerprint": "11b3c1d372c2ed1a632bd90c9ecb2b59c6cd465dac5611eea1959f7c8bf7fa7c",
+  "sourceBoundClasses": 232,
+  "changedPackagedFiles": [
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OcrMask.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OcrAppearance.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$1.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OverlayRenderException.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$FixedItem.class"
+  ],
+  "unchangedApplicationClasses": 226,
+  "changedOwnerAndNestedClasses": 6,
+  "fiveNestedMethodBytecodesExact": [
+    {
+      "path": "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OcrMask.class",
+      "methodBytecodeExact": true,
+      "javapSha256": "cc96b9e6a235dcdb15b45831f00b8d6c50b710bbbd434093a63f91872ff31093"
+    },
+    {
+      "path": "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OcrAppearance.class",
+      "methodBytecodeExact": true,
+      "javapSha256": "e5cfd26390c9bf707f30ba5cfd9e1fbb63ea4296feddf4128cd1da9b6ba7e9d7"
+    },
+    {
+      "path": "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$1.class",
+      "methodBytecodeExact": true,
+      "javapSha256": "1b35ebc68fe80621f7fb7b09bf420cba85a859e4be603d59d142f6261008840e"
+    },
+    {
+      "path": "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OverlayRenderException.class",
+      "methodBytecodeExact": true,
+      "javapSha256": "1d9761bd7cc3b751aa994ddbb6a5bda83e18638ca3c118daeecbd5a9e14c3a1c"
+    },
+    {
+      "path": "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$FixedItem.class",
+      "methodBytecodeExact": true,
+      "javapSha256": "0d39c5d10515a5628520af1c9d4c1a92e52c9f2729b32704189ab1ab901461eb"
+    }
+  ],
+  "allOtherPackagedClassesAndResourcesByteExact": true,
+  "words": [
+    {
+      "id": "ruled-direct-word",
+      "rawTextMultisetExact": true,
+      "sourceImageBytesExact": true,
+      "masksExact": true,
+      "wordGeometryFontTransformAndZOrderExact": true,
+      "documentXmlByteExact": true,
+      "beforeText": "扫描\n台\n账 \nScan \nledger \n00783\n编号 \n1D \n日\n期 \nDate \n金额 \nAmount\n01936 \n2093-12-04 \n-042.70\n03872 \n2093-12-05 \n+0085.40\n07744 \n2093-12-06 \n0170.80",
+      "afterText": "扫描\n台\n账 \nScan \nledger \n00783\n编号 \n1D \n日\n期 \nDate \n金额 \nAmount\n01936 \n2093-12-04 \n-042.70\n03872 \n2093-12-05 \n+0085.40\n07744 \n2093-12-06 \n0170.80",
+      "beforeMetrics": {
+        "expectedCharacters": 104,
+        "actualCharacters": 104,
+        "editDistance": 1,
+        "cer": 0.009615384615384616,
+        "alignedCharacterRecall": 0.9903846153846154,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "00783",
+          "01936",
+          "2093",
+          "12",
+          "04",
+          "042",
+          "70",
+          "03872",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "07744",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ],
+        "actualNumbers": [
+          "00783",
+          "1",
+          "01936",
+          "2093",
+          "12",
+          "04",
+          "042",
+          "70",
+          "03872",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "07744",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ]
+      },
+      "afterMetrics": {
+        "expectedCharacters": 104,
+        "actualCharacters": 104,
+        "editDistance": 1,
+        "cer": 0.009615384615384616,
+        "alignedCharacterRecall": 0.9903846153846154,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "00783",
+          "01936",
+          "2093",
+          "12",
+          "04",
+          "042",
+          "70",
+          "03872",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "07744",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ],
+        "actualNumbers": [
+          "00783",
+          "1",
+          "01936",
+          "2093",
+          "12",
+          "04",
+          "042",
+          "70",
+          "03872",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "07744",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ]
+      },
+      "afterNumberInventory": [
+        {
+          "value": "01936",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "2093-12-04",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "-042.70",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "03872",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "2093-12-05",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "+0085.40",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "07744",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "2093-12-06",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "0170.80",
+          "exactOccurrences": 1
+        }
+      ],
+      "outOfPageFramesBefore": [],
+      "outOfPageFramesAfter": []
+    },
+    {
+      "id": "ruled-scan-word",
+      "rawTextMultisetExact": true,
+      "sourceImageBytesExact": true,
+      "masksExact": true,
+      "wordGeometryFontTransformAndZOrderExact": true,
+      "documentXmlByteExact": true,
+      "beforeText": "扫描\n台\n账 \nScan \nledger \n00783\nCe \nee \nee\n2093-12-05 \n+0085.40\n2093-12-06 \n0170.80",
+      "afterText": "扫描\n台\n账 \nScan \nledger \n00783\nCe \nee \nee\n2093-12-05 \n+0085.40\n2093-12-06 \n0170.80",
+      "beforeMetrics": {
+        "expectedCharacters": 104,
+        "actualCharacters": 60,
+        "editDistance": 49,
+        "cer": 0.47115384615384615,
+        "alignedCharacterRecall": 0.5288461538461539,
+        "exactLines": 1,
+        "expectedNumbers": [
+          "00783",
+          "01936",
+          "2093",
+          "12",
+          "04",
+          "042",
+          "70",
+          "03872",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "07744",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ],
+        "actualNumbers": [
+          "00783",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ]
+      },
+      "afterMetrics": {
+        "expectedCharacters": 104,
+        "actualCharacters": 60,
+        "editDistance": 49,
+        "cer": 0.47115384615384615,
+        "alignedCharacterRecall": 0.5288461538461539,
+        "exactLines": 1,
+        "expectedNumbers": [
+          "00783",
+          "01936",
+          "2093",
+          "12",
+          "04",
+          "042",
+          "70",
+          "03872",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "07744",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ],
+        "actualNumbers": [
+          "00783",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ]
+      },
+      "afterNumberInventory": [
+        {
+          "value": "01936",
+          "exactOccurrences": 0
+        },
+        {
+          "value": "2093-12-04",
+          "exactOccurrences": 0
+        },
+        {
+          "value": "-042.70",
+          "exactOccurrences": 0
+        },
+        {
+          "value": "03872",
+          "exactOccurrences": 0
+        },
+        {
+          "value": "2093-12-05",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "+0085.40",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "07744",
+          "exactOccurrences": 0
+        },
+        {
+          "value": "2093-12-06",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "0170.80",
+          "exactOccurrences": 1
+        }
+      ],
+      "outOfPageFramesBefore": [
+        {
+          "id": "text-ocr-p1-l2-word-0-20",
+          "boxPt": [
+            23.858,
+            56.4,
+            689.761,
+            93.6
+          ],
+          "zIndex": 3,
+          "text": "Ce "
+        },
+        {
+          "id": "text-ocr-p1-l2-word-2-22",
+          "boxPt": [
+            507.337,
+            56.4,
+            206.4,
+            93.6
+          ],
+          "zIndex": 3,
+          "text": "ee"
+        }
+      ],
+      "outOfPageFramesAfter": [
+        {
+          "id": "text-ocr-p1-l2-word-0-20",
+          "boxPt": [
+            23.858,
+            56.4,
+            689.761,
+            93.6
+          ],
+          "zIndex": 3,
+          "text": "Ce "
+        },
+        {
+          "id": "text-ocr-p1-l2-word-2-22",
+          "boxPt": [
+            507.337,
+            56.4,
+            206.4,
+            93.6
+          ],
+          "zIndex": 3,
+          "text": "ee"
+        }
+      ]
+    },
+    {
+      "id": "columns-scan-word",
+      "rawTextMultisetExact": true,
+      "sourceImageBytesExact": true,
+      "masksExact": true,
+      "wordGeometryFontTransformAndZOrderExact": true,
+      "documentXmlByteExact": false,
+      "beforeText": "独立\n多\n栏 \nIndependent \ncolumns \n00649\nLeft \nledger \nA\nMiddle \nledger \n中\n栏\nID \n00619\nID \n01238\nDate \n2094-01-13\nDate \n2094-01-14\nAmount \n-053.25\nAmount \n+0106.50\nLeft \nend \n完成\nMiddle \nend \n完成\nRight \nledger \n右\n栏\nID \n02476\nDate \n2094-01-15\nAmount \n0213.00\nRight \nend \n完成",
+      "afterText": "独立\n多\n栏 \nIndependent \ncolumns \n00649\nLeft \nledger \nA\nID \n00619\nDate \n2094-01-13\nAmount \n-053.25\nLeft \nend \n完成\nMiddle \nledger \n中\n栏\nID \n01238\nDate \n2094-01-14\nAmount \n+0106.50\nMiddle \nend \n完成\nRight \nledger \n右\n栏\nID \n02476\nDate \n2094-01-15\nAmount \n0213.00\nRight \nend \n完成",
+      "beforeMetrics": {
+        "expectedCharacters": 199,
+        "actualCharacters": 198,
+        "editDistance": 74,
+        "cer": 0.37185929648241206,
+        "alignedCharacterRecall": 0.6834170854271356,
+        "exactLines": 15,
+        "expectedNumbers": [
+          "00649",
+          "00619",
+          "2094",
+          "01",
+          "13",
+          "053",
+          "25",
+          "01238",
+          "2094",
+          "01",
+          "14",
+          "0106",
+          "50",
+          "02476",
+          "2094",
+          "01",
+          "15",
+          "0213",
+          "00"
+        ],
+        "actualNumbers": [
+          "00649",
+          "00619",
+          "01238",
+          "2094",
+          "01",
+          "13",
+          "2094",
+          "01",
+          "14",
+          "053",
+          "25",
+          "0106",
+          "50",
+          "02476",
+          "2094",
+          "01",
+          "15",
+          "0213",
+          "00"
+        ]
+      },
+      "afterMetrics": {
+        "expectedCharacters": 199,
+        "actualCharacters": 198,
+        "editDistance": 2,
+        "cer": 0.010050251256281407,
+        "alignedCharacterRecall": 0.9899497487437185,
+        "exactLines": 15,
+        "expectedNumbers": [
+          "00649",
+          "00619",
+          "2094",
+          "01",
+          "13",
+          "053",
+          "25",
+          "01238",
+          "2094",
+          "01",
+          "14",
+          "0106",
+          "50",
+          "02476",
+          "2094",
+          "01",
+          "15",
+          "0213",
+          "00"
+        ],
+        "actualNumbers": [
+          "00649",
+          "00619",
+          "2094",
+          "01",
+          "13",
+          "053",
+          "25",
+          "01238",
+          "2094",
+          "01",
+          "14",
+          "0106",
+          "50",
+          "02476",
+          "2094",
+          "01",
+          "15",
+          "0213",
+          "00"
+        ]
+      },
+      "afterNumberInventory": [
+        {
+          "value": "00619",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "2094-01-13",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "-053.25",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "01238",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "2094-01-14",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "+0106.50",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "02476",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "2094-01-15",
+          "exactOccurrences": 1
+        },
+        {
+          "value": "0213.00",
+          "exactOccurrences": 1
+        }
+      ],
+      "outOfPageFramesBefore": [],
+      "outOfPageFramesAfter": []
+    }
+  ],
+  "pdfs": [
+    {
+      "id": "ruled-office",
+      "pages": 1,
+      "sha256": "7fa379a1d0ebcb6d7ee9c1b244d1698600ff8aa58579ad21211f798a8d150264",
+      "nativeText": "扫描台账 Scan ledger 00783\nCe \nee ee\n2093-12-05 \n+0085.40\n2093-12-06 \n0170.80\n",
+      "metrics": {
+        "expectedCharacters": 104,
+        "actualCharacters": 60,
+        "editDistance": 49,
+        "cer": 0.47115384615384615,
+        "alignedCharacterRecall": 0.5288461538461539,
+        "exactLines": 1,
+        "expectedNumbers": [
+          "00783",
+          "01936",
+          "2093",
+          "12",
+          "04",
+          "042",
+          "70",
+          "03872",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "07744",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ],
+        "actualNumbers": [
+          "00783",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ]
+      },
+      "beforeAfterRenderedPixelsExact": true,
+      "changedPixels": 0,
+      "renderDpi": 200,
+      "renderSha256": "52e227dddada48abb7c6d32b83047314c38bd07df395b0b7e0e94c6ac7ab3717",
+      "fonts": [
+        "BAAAAA+DroidSansFallback",
+        "CAAAAA+LiberationSans",
+        "DAAAAA+LiberationSans",
+        "EAAAAA+LiberationSans"
+      ]
+    },
+    {
+      "id": "ruled-edited-office",
+      "pages": 1,
+      "sha256": "dbf67c8c1b02af355392b2f24f1c70fa1add39cf2344fd47f2939bc1ea8bff85",
+      "nativeText": "扫描台账 Scan ledger 00783\nCe \nee ee\n2093-12-05 \n+0085.40\n2093-12-06 \n0180.80\n",
+      "metrics": {
+        "expectedCharacters": 104,
+        "actualCharacters": 60,
+        "editDistance": 49,
+        "cer": 0.47115384615384615,
+        "alignedCharacterRecall": 0.5288461538461539,
+        "exactLines": 1,
+        "expectedNumbers": [
+          "00783",
+          "01936",
+          "2093",
+          "12",
+          "04",
+          "042",
+          "70",
+          "03872",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "07744",
+          "2093",
+          "12",
+          "06",
+          "0180",
+          "80"
+        ],
+        "actualNumbers": [
+          "00783",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "2093",
+          "12",
+          "06",
+          "0180",
+          "80"
+        ]
+      },
+      "beforeAfterRenderedPixelsExact": true,
+      "changedPixels": 0,
+      "renderDpi": 200,
+      "renderSha256": "89539355836884c885d05832db690761e53e6a38e40a007a3f2f05ce888f1474",
+      "fonts": [
+        "BAAAAA+DroidSansFallback",
+        "CAAAAA+LiberationSans",
+        "DAAAAA+LiberationSans",
+        "EAAAAA+LiberationSans"
+      ]
+    },
+    {
+      "id": "columns-office",
+      "pages": 1,
+      "sha256": "dfdbd7c262dc538e0a8ab8aefad8235343645dfb3d909fc1b3a021df4d47b7c9",
+      "nativeText": "独立多栏 Independent columns 00649\nLeft ledger A\nID 00619\nDate 2094-01-13\nAmount -053.25\nLeft end 完成\nMiddle ledger 中栏\nID 01238\nDate 2094-01-14\nAmount +0106.50\nMiddle end 完成\nRight ledger 右栏\nID 02476\nDate 2094-01-15\nAmount 0213.00\nRight end 完成\n",
+      "metrics": {
+        "expectedCharacters": 199,
+        "actualCharacters": 198,
+        "editDistance": 2,
+        "cer": 0.010050251256281407,
+        "alignedCharacterRecall": 0.9899497487437185,
+        "exactLines": 15,
+        "expectedNumbers": [
+          "00649",
+          "00619",
+          "2094",
+          "01",
+          "13",
+          "053",
+          "25",
+          "01238",
+          "2094",
+          "01",
+          "14",
+          "0106",
+          "50",
+          "02476",
+          "2094",
+          "01",
+          "15",
+          "0213",
+          "00"
+        ],
+        "actualNumbers": [
+          "00649",
+          "00619",
+          "2094",
+          "01",
+          "13",
+          "053",
+          "25",
+          "01238",
+          "2094",
+          "01",
+          "14",
+          "0106",
+          "50",
+          "02476",
+          "2094",
+          "01",
+          "15",
+          "0213",
+          "00"
+        ]
+      },
+      "beforeAfterRenderedPixelsExact": true,
+      "changedPixels": 0,
+      "renderDpi": 200,
+      "renderSha256": "9bd7edb70054f12eeac8177e5e16284b5f3c549362e5b6573942089eeccec84c",
+      "fonts": [
+        "BAAAAA+DroidSansFallback",
+        "CAAAAA+LiberationSans",
+        "DAAAAA+LiberationSans",
+        "EAAAAA+LiberationSans",
+        "FAAAAA+LiberationSans",
+        "GAAAAA+DroidSansFallback"
+      ]
+    }
+  ],
+  "apiRawByteExact": true,
+  "actualBaselineHttp": 9,
+  "actualChangedArtifactHttp": 7,
+  "totalActualWorkers": 16,
+  "unchangedNativeTsvs": 4,
+  "extraDiagnosticOCR": 0,
+  "totalFullRenderedPages": 8,
+  "changedArtifactFullRenders": 3,
+  "newRendersThisAudit": 0,
+  "changedArtifactResources": {
+    "wallSeconds": 28.425532209992525,
+    "userSeconds": 70.064719,
+    "systemSeconds": 5.8116319999999995,
+    "maxChildRssKiB": 362372
+  },
+  "unchangedRawNumericValues": true,
+  "tableStructureRecovered": false,
+  "visibleEditedAmountAccepted": false,
+  "columnChineseLabelErrorUnchanged": true,
+  "allWorkersAbsent": true,
+  "ECHILD": true,
+  "newZombies": [],
+  "scope": "OnlyallOCRregion sourcezOrder;not a new inference of correct reading intent",
+  "tests": {
+    "beforeFocusedFailures": 1,
+    "afterFocusedPassed": 36,
+    "fullBuild": {
+      "tests": 506,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "fullBuildPassed": 505,
+    "bundledConditionalExecuted": 10
+  },
+  "remaining": [
+    "Ruledscan completeness/headerlargeframes/2out-of-pageframes/visibleoldscan overprint",
+    "Actualeditable scannedtable structure and generalcolumnintentinference",
+    "Leftcolumn左栏→A;editedAPI missing07744 andduplication",
+    "Office24.2 darkpapercontrol/nativeMacWindowspackages/MicrosoftWord unrun"
+  ]
+}

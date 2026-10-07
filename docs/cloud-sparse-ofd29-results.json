@@ -1,0 +1,142 @@
+{
+  "jarSha256": "260552d34b5882946bc24520b869752cbb0946b63dee57fa67e01e2d1614b7be",
+  "sourceSha256": "d10ea3329fab62a3af1c58da09750fac259c19d5bb5fb355c1d17ed1f66a932a",
+  "manifestSha256": "3c436c0594f5cfa95917133026f9c0f9b150306ae42b9286802e2fac129ba18a",
+  "rows": [
+    {
+      "case": "original-txt",
+      "status": "FAILED",
+      "errorCode": "OCR_NO_NEW_TEXT",
+      "seconds": 4.113342272001319,
+      "downloadReady": false
+    },
+    {
+      "case": "original-word",
+      "status": "FAILED",
+      "errorCode": "OCR_NO_NEW_TEXT",
+      "seconds": 3.7208015259966487,
+      "downloadReady": false
+    },
+    {
+      "case": "native-only-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 7.798305798998626,
+      "downloadReady": true,
+      "text": "",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 0,
+        "editDistance": 63,
+        "cer": 1.0,
+        "alignedCharacterRecall": 0.0,
+        "exactLines": 0,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": []
+      },
+      "numericLexemesExact": false,
+      "warnings": []
+    },
+    {
+      "case": "image-only-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 2.222420678997878,
+      "downloadReady": true,
+      "text": "",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 0,
+        "editDistance": 63,
+        "cer": 1.0,
+        "alignedCharacterRecall": 0.0,
+        "exactLines": 0,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": []
+      },
+      "numericLexemesExact": false,
+      "warnings": []
+    },
+    {
+      "case": "missing-native-amount-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 2.044440682999266,
+      "downloadReady": true,
+      "text": "",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 0,
+        "editDistance": 63,
+        "cer": 1.0,
+        "alignedCharacterRecall": 0.0,
+        "exactLines": 0,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": []
+      },
+      "numericLexemesExact": false,
+      "warnings": []
+    }
+  ],
+  "nativeXmlMetrics": {
+    "expectedCharacters": 63,
+    "actualCharacters": 63,
+    "editDistance": 0,
+    "cer": 0.0,
+    "alignedCharacterRecall": 1.0,
+    "exactLines": 4,
+    "expectedNumbers": [
+      "2036",
+      "00842",
+      "127",
+      "50",
+      "2036",
+      "04",
+      "19"
+    ],
+    "actualNumbers": [
+      "2036",
+      "00842",
+      "127",
+      "50",
+      "2036",
+      "04",
+      "19"
+    ]
+  },
+  "resources": {
+    "wallSeconds": 30.0628328160019,
+    "userSeconds": 78.374752,
+    "systemSeconds": 6.205886,
+    "maxChildRssKiB": 314332
+  },
+  "allWorkersExited": true,
+  "ECHILD": true,
+  "newZombies": [],
+  "helperSha256": "205cee840904e1b0660f8f963e84454ce340b740b84bc80d53ea5319f1502086",
+  "decision": "Retain OCR_NO_NEW_TEXT. Duplicate recognition/native agreement does not prove image completeness; no producer-metadata or confidence bypass."
+}

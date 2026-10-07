@@ -1,0 +1,2301 @@
+{
+  "parentRevision": "b8c337ffe2b0d617330f7401115d9249d8631318",
+  "manifestSha256": "18d5a9b545e5dbd33a18b4c19e641d0d3ee54aeb371a93eb728fc5b4edf52b3f",
+  "generatorSha256": "5b873a02b326af4ec45f23df03874f06e69a2cae10d5811668b5c267b376dc93",
+  "status": "passed-finite-native-page-local-table-boundary",
+  "productionChanged": false,
+  "counts": {
+    "originalNativePdfs": 2,
+    "sourcePages": 4,
+    "logicalSourceCells": 64,
+    "actualHttpContracts": 8,
+    "independentWorkers": 8,
+    "normalOfficeConversions": 2,
+    "editedOfficeConversions": 2,
+    "editedApiReads": 2,
+    "diagnosticOCR": 0,
+    "sourceModelParses": 2,
+    "officeModelParses": 4,
+    "renderedPages": 12
+  },
+  "acceptance": {
+    "nativePdfPagesPerCase": 2,
+    "editableTablesPerCase": 2,
+    "logicalCellsPerTable": 16,
+    "gridRowsPerTable": 5,
+    "gridColumnsPerTable": 4,
+    "actualHorizontalSpansPerCase": 2,
+    "actualVerticalRestartsPerCase": 2,
+    "actualVerticalContinuationsPerCase": 2,
+    "exactCellTextAndSignedNumericLiteral": true,
+    "noDuplicateBodyCellText": true,
+    "pageBodyTableOrderExact": true,
+    "officePageCountExact": true,
+    "visibleGlyphsInsideCorrespondingCell": true,
+    "gridAndTextGeometryTolerancePt": 9,
+    "editedCellOnlyOneRun": true,
+    "otherWordPartsExact": true,
+    "editedOfficeAndActualApiRetainNewLiteralAndExcludeOld": true,
+    "fullTextPresenceAloneDoesNotCertifyTableEditability": true
+  },
+  "rows": [
+    {
+      "id": "en",
+      "wordSha256": "f4bf5366d0f550d002a8bef85519cfbf12fdd7d29ecb3126440c241f89a24341",
+      "cellStructure": [
+        {
+          "page": 1,
+          "logicalCells": 16,
+          "physicalCells": 17,
+          "sourceAndWordCellTextExact": true,
+          "horizontalSpans": [
+            [
+              0,
+              0,
+              4
+            ]
+          ],
+          "verticalMerges": [
+            [
+              2,
+              0,
+              "restart"
+            ],
+            [
+              3,
+              0,
+              "continue"
+            ]
+          ]
+        },
+        {
+          "page": 2,
+          "logicalCells": 16,
+          "physicalCells": 17,
+          "sourceAndWordCellTextExact": true,
+          "horizontalSpans": [
+            [
+              0,
+              0,
+              4
+            ]
+          ],
+          "verticalMerges": [
+            [
+              2,
+              0,
+              "restart"
+            ],
+            [
+              3,
+              0,
+              "continue"
+            ]
+          ]
+        }
+      ],
+      "bodyTableCrossPageOrderExact": true,
+      "noCellTextDuplicatedInBody": true,
+      "autoHeaderFlags": 0,
+      "pageLocalTablesNotStitched": true,
+      "oneEditedCellOnly": true,
+      "allOtherWordPartsByteExact": true,
+      "edit": {
+        "table": 1,
+        "row": 2,
+        "column": 3,
+        "old": "-0074.80",
+        "new": "-012345.67"
+      },
+      "apiRawExactIncludingTabsAndPageBreak": true,
+      "apiMetrics": {
+        "expectedCharacters": 317,
+        "actualCharacters": 317,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 14,
+        "expectedNumbers": [
+          "00731",
+          "1",
+          "00957",
+          "00064",
+          "2092",
+          "11",
+          "06",
+          "0037",
+          "40",
+          "00128",
+          "2092",
+          "11",
+          "07",
+          "0081",
+          "25",
+          "00256",
+          "2092",
+          "11",
+          "08",
+          "0093",
+          "70",
+          "1",
+          "00731",
+          "2",
+          "00957",
+          "00512",
+          "2092",
+          "11",
+          "09",
+          "012345",
+          "67",
+          "01024",
+          "2092",
+          "11",
+          "10",
+          "0162",
+          "50",
+          "02048",
+          "2092",
+          "11",
+          "11",
+          "0187",
+          "40",
+          "2"
+        ],
+        "actualNumbers": [
+          "00731",
+          "1",
+          "00957",
+          "00064",
+          "2092",
+          "11",
+          "06",
+          "0037",
+          "40",
+          "00128",
+          "2092",
+          "11",
+          "07",
+          "0081",
+          "25",
+          "00256",
+          "2092",
+          "11",
+          "08",
+          "0093",
+          "70",
+          "1",
+          "00731",
+          "2",
+          "00957",
+          "00512",
+          "2092",
+          "11",
+          "09",
+          "012345",
+          "67",
+          "01024",
+          "2092",
+          "11",
+          "10",
+          "0162",
+          "50",
+          "02048",
+          "2092",
+          "11",
+          "11",
+          "0187",
+          "40",
+          "2"
+        ]
+      },
+      "stages": {
+        "source": {
+          "pages": 2,
+          "pdfSha256": "767482dc103d47af9236df2934948c4357d89bba2353c94dbc32a1c3ff33f2d9",
+          "cellTextExact": true,
+          "editableNativeText": true,
+          "noRasterBacking": true
+        },
+        "normal": {
+          "pages": 2,
+          "pdfSha256": "7137e520c3c157f2ef51f9a7c403bb8255fb712b29a14b1ecd8c37f47be94d74",
+          "cellTextExact": true,
+          "editableNativeText": true,
+          "noRasterBacking": true
+        },
+        "edited": {
+          "pages": 2,
+          "pdfSha256": "ab4f3f0fc476f04b4695b662cce1dc0e2e623ccba5d1ae69b9c9d5fa013a32d4",
+          "cellTextExact": true,
+          "editableNativeText": true,
+          "noRasterBacking": true
+        }
+      },
+      "geometry": [
+        {
+          "stage": "source",
+          "page": 1,
+          "maxGridXDeltaPt": 0.0,
+          "maxGridYDeltaPt": 0.0,
+          "tableBoxPt": [
+            47.99999999999999,
+            109.99999999999999,
+            547.9999999999999,
+            322.0
+          ]
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "maxGridXDeltaPt": 0.0,
+          "maxGridYDeltaPt": 0.0,
+          "tableBoxPt": [
+            47.99999999999999,
+            109.99999999999999,
+            547.9999999999999,
+            322.0
+          ]
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "maxGridXDeltaPt": 5.40002441406245,
+          "maxGridYDeltaPt": 3.6000061035156206,
+          "tableBoxPt": [
+            42.599998474121094,
+            110.40002441406249,
+            542.5999755859375,
+            325.6000061035156
+          ]
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "maxGridXDeltaPt": 5.40002441406245,
+          "maxGridYDeltaPt": 3.6000061035156206,
+          "tableBoxPt": [
+            42.599998474121094,
+            110.40002441406249,
+            542.5999755859375,
+            325.6000061035156
+          ]
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "maxGridXDeltaPt": 5.40002441406245,
+          "maxGridYDeltaPt": 3.6000061035156206,
+          "tableBoxPt": [
+            42.599998474121094,
+            110.40002441406249,
+            542.5999755859375,
+            325.6000061035156
+          ]
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "maxGridXDeltaPt": 5.40002441406245,
+          "maxGridYDeltaPt": 3.6000061035156206,
+          "tableBoxPt": [
+            42.599998474121094,
+            110.40002441406249,
+            542.5999755859375,
+            325.6000061035156
+          ]
+        }
+      ],
+      "inkChecks": [
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 0,
+          "column": 0,
+          "text": "PAYMENTS 00957",
+          "visibleDarkPixelsInGlyphBox": 746
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 1,
+          "column": 0,
+          "text": "Group",
+          "visibleDarkPixelsInGlyphBox": 282
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 1,
+          "column": 1,
+          "text": "Record",
+          "visibleDarkPixelsInGlyphBox": 313
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 1,
+          "column": 2,
+          "text": "Date",
+          "visibleDarkPixelsInGlyphBox": 236
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 1,
+          "column": 3,
+          "text": "Amount",
+          "visibleDarkPixelsInGlyphBox": 345
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 2,
+          "column": 0,
+          "text": "SET A",
+          "visibleDarkPixelsInGlyphBox": 252
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 2,
+          "column": 1,
+          "text": "00064",
+          "visibleDarkPixelsInGlyphBox": 292
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 2,
+          "column": 2,
+          "text": "2092-11-06",
+          "visibleDarkPixelsInGlyphBox": 433
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 2,
+          "column": 3,
+          "text": "-0037.40",
+          "visibleDarkPixelsInGlyphBox": 321
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 3,
+          "column": 1,
+          "text": "00128",
+          "visibleDarkPixelsInGlyphBox": 302
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 3,
+          "column": 2,
+          "text": "2092-11-07",
+          "visibleDarkPixelsInGlyphBox": 449
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 3,
+          "column": 3,
+          "text": "+0081.25",
+          "visibleDarkPixelsInGlyphBox": 403
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 4,
+          "column": 0,
+          "text": "SET B",
+          "visibleDarkPixelsInGlyphBox": 237
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 4,
+          "column": 1,
+          "text": "00256",
+          "visibleDarkPixelsInGlyphBox": 278
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 4,
+          "column": 2,
+          "text": "2092-11-08",
+          "visibleDarkPixelsInGlyphBox": 436
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 4,
+          "column": 3,
+          "text": "0093.70",
+          "visibleDarkPixelsInGlyphBox": 317
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 0,
+          "column": 0,
+          "text": "PAYMENTS 00957 CONTINUED",
+          "visibleDarkPixelsInGlyphBox": 1272
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 1,
+          "column": 0,
+          "text": "Group",
+          "visibleDarkPixelsInGlyphBox": 282
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 1,
+          "column": 1,
+          "text": "Record",
+          "visibleDarkPixelsInGlyphBox": 313
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 1,
+          "column": 2,
+          "text": "Date",
+          "visibleDarkPixelsInGlyphBox": 236
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 1,
+          "column": 3,
+          "text": "Amount",
+          "visibleDarkPixelsInGlyphBox": 345
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 2,
+          "column": 0,
+          "text": "SET A",
+          "visibleDarkPixelsInGlyphBox": 252
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 2,
+          "column": 1,
+          "text": "00512",
+          "visibleDarkPixelsInGlyphBox": 259
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 2,
+          "column": 2,
+          "text": "2092-11-09",
+          "visibleDarkPixelsInGlyphBox": 439
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 2,
+          "column": 3,
+          "text": "-0074.80",
+          "visibleDarkPixelsInGlyphBox": 326
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 3,
+          "column": 1,
+          "text": "01024",
+          "visibleDarkPixelsInGlyphBox": 293
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 3,
+          "column": 2,
+          "text": "2092-11-10",
+          "visibleDarkPixelsInGlyphBox": 460
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 3,
+          "column": 3,
+          "text": "+0162.50",
+          "visibleDarkPixelsInGlyphBox": 398
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 4,
+          "column": 0,
+          "text": "SET B",
+          "visibleDarkPixelsInGlyphBox": 237
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 4,
+          "column": 1,
+          "text": "02048",
+          "visibleDarkPixelsInGlyphBox": 287
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 4,
+          "column": 2,
+          "text": "2092-11-11",
+          "visibleDarkPixelsInGlyphBox": 406
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 4,
+          "column": 3,
+          "text": "0187.40",
+          "visibleDarkPixelsInGlyphBox": 312
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 0,
+          "column": 0,
+          "text": "PAYMENTS 00957",
+          "visibleDarkPixelsInGlyphBox": 743
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 1,
+          "column": 0,
+          "text": "Group",
+          "visibleDarkPixelsInGlyphBox": 260
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 1,
+          "column": 1,
+          "text": "Record",
+          "visibleDarkPixelsInGlyphBox": 326
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 1,
+          "column": 2,
+          "text": "Date",
+          "visibleDarkPixelsInGlyphBox": 231
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 1,
+          "column": 3,
+          "text": "Amount",
+          "visibleDarkPixelsInGlyphBox": 340
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 2,
+          "column": 0,
+          "text": "SET A",
+          "visibleDarkPixelsInGlyphBox": 252
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 2,
+          "column": 1,
+          "text": "00064",
+          "visibleDarkPixelsInGlyphBox": 292
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 2,
+          "column": 2,
+          "text": "2092-11-06",
+          "visibleDarkPixelsInGlyphBox": 442
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 2,
+          "column": 3,
+          "text": "-0037.40",
+          "visibleDarkPixelsInGlyphBox": 331
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 3,
+          "column": 1,
+          "text": "00128",
+          "visibleDarkPixelsInGlyphBox": 278
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 3,
+          "column": 2,
+          "text": "2092-11-07",
+          "visibleDarkPixelsInGlyphBox": 406
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 3,
+          "column": 3,
+          "text": "+0081.25",
+          "visibleDarkPixelsInGlyphBox": 362
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 4,
+          "column": 0,
+          "text": "SET B",
+          "visibleDarkPixelsInGlyphBox": 222
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 4,
+          "column": 1,
+          "text": "00256",
+          "visibleDarkPixelsInGlyphBox": 277
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 4,
+          "column": 2,
+          "text": "2092-11-08",
+          "visibleDarkPixelsInGlyphBox": 442
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 4,
+          "column": 3,
+          "text": "0093.70",
+          "visibleDarkPixelsInGlyphBox": 328
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 0,
+          "column": 0,
+          "text": "PAYMENTS 00957 CONTINUED",
+          "visibleDarkPixelsInGlyphBox": 1294
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 1,
+          "column": 0,
+          "text": "Group",
+          "visibleDarkPixelsInGlyphBox": 260
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 1,
+          "column": 1,
+          "text": "Record",
+          "visibleDarkPixelsInGlyphBox": 326
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 1,
+          "column": 2,
+          "text": "Date",
+          "visibleDarkPixelsInGlyphBox": 231
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 1,
+          "column": 3,
+          "text": "Amount",
+          "visibleDarkPixelsInGlyphBox": 340
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 2,
+          "column": 0,
+          "text": "SET A",
+          "visibleDarkPixelsInGlyphBox": 252
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 2,
+          "column": 1,
+          "text": "00512",
+          "visibleDarkPixelsInGlyphBox": 261
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 2,
+          "column": 2,
+          "text": "2092-11-09",
+          "visibleDarkPixelsInGlyphBox": 438
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 2,
+          "column": 3,
+          "text": "-0074.80",
+          "visibleDarkPixelsInGlyphBox": 345
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 3,
+          "column": 1,
+          "text": "01024",
+          "visibleDarkPixelsInGlyphBox": 268
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 3,
+          "column": 2,
+          "text": "2092-11-10",
+          "visibleDarkPixelsInGlyphBox": 426
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 3,
+          "column": 3,
+          "text": "+0162.50",
+          "visibleDarkPixelsInGlyphBox": 358
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 4,
+          "column": 0,
+          "text": "SET B",
+          "visibleDarkPixelsInGlyphBox": 222
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 4,
+          "column": 1,
+          "text": "02048",
+          "visibleDarkPixelsInGlyphBox": 291
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 4,
+          "column": 2,
+          "text": "2092-11-11",
+          "visibleDarkPixelsInGlyphBox": 409
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 4,
+          "column": 3,
+          "text": "0187.40",
+          "visibleDarkPixelsInGlyphBox": 319
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 0,
+          "column": 0,
+          "text": "PAYMENTS 00957",
+          "visibleDarkPixelsInGlyphBox": 743
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 1,
+          "column": 0,
+          "text": "Group",
+          "visibleDarkPixelsInGlyphBox": 260
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 1,
+          "column": 1,
+          "text": "Record",
+          "visibleDarkPixelsInGlyphBox": 326
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 1,
+          "column": 2,
+          "text": "Date",
+          "visibleDarkPixelsInGlyphBox": 231
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 1,
+          "column": 3,
+          "text": "Amount",
+          "visibleDarkPixelsInGlyphBox": 340
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 2,
+          "column": 0,
+          "text": "SET A",
+          "visibleDarkPixelsInGlyphBox": 252
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 2,
+          "column": 1,
+          "text": "00064",
+          "visibleDarkPixelsInGlyphBox": 292
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 2,
+          "column": 2,
+          "text": "2092-11-06",
+          "visibleDarkPixelsInGlyphBox": 442
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 2,
+          "column": 3,
+          "text": "-0037.40",
+          "visibleDarkPixelsInGlyphBox": 331
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 3,
+          "column": 1,
+          "text": "00128",
+          "visibleDarkPixelsInGlyphBox": 278
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 3,
+          "column": 2,
+          "text": "2092-11-07",
+          "visibleDarkPixelsInGlyphBox": 406
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 3,
+          "column": 3,
+          "text": "+0081.25",
+          "visibleDarkPixelsInGlyphBox": 362
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 4,
+          "column": 0,
+          "text": "SET B",
+          "visibleDarkPixelsInGlyphBox": 222
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 4,
+          "column": 1,
+          "text": "00256",
+          "visibleDarkPixelsInGlyphBox": 277
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 4,
+          "column": 2,
+          "text": "2092-11-08",
+          "visibleDarkPixelsInGlyphBox": 442
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 4,
+          "column": 3,
+          "text": "0093.70",
+          "visibleDarkPixelsInGlyphBox": 328
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 0,
+          "column": 0,
+          "text": "PAYMENTS 00957 CONTINUED",
+          "visibleDarkPixelsInGlyphBox": 1294
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 1,
+          "column": 0,
+          "text": "Group",
+          "visibleDarkPixelsInGlyphBox": 260
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 1,
+          "column": 1,
+          "text": "Record",
+          "visibleDarkPixelsInGlyphBox": 326
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 1,
+          "column": 2,
+          "text": "Date",
+          "visibleDarkPixelsInGlyphBox": 231
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 1,
+          "column": 3,
+          "text": "Amount",
+          "visibleDarkPixelsInGlyphBox": 340
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 2,
+          "column": 0,
+          "text": "SET A",
+          "visibleDarkPixelsInGlyphBox": 252
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 2,
+          "column": 1,
+          "text": "00512",
+          "visibleDarkPixelsInGlyphBox": 261
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 2,
+          "column": 2,
+          "text": "2092-11-09",
+          "visibleDarkPixelsInGlyphBox": 438
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 2,
+          "column": 3,
+          "text": "-012345.67",
+          "visibleDarkPixelsInGlyphBox": 412
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 3,
+          "column": 1,
+          "text": "01024",
+          "visibleDarkPixelsInGlyphBox": 268
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 3,
+          "column": 2,
+          "text": "2092-11-10",
+          "visibleDarkPixelsInGlyphBox": 426
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 3,
+          "column": 3,
+          "text": "+0162.50",
+          "visibleDarkPixelsInGlyphBox": 358
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 4,
+          "column": 0,
+          "text": "SET B",
+          "visibleDarkPixelsInGlyphBox": 222
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 4,
+          "column": 1,
+          "text": "02048",
+          "visibleDarkPixelsInGlyphBox": 291
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 4,
+          "column": 2,
+          "text": "2092-11-11",
+          "visibleDarkPixelsInGlyphBox": 409
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 4,
+          "column": 3,
+          "text": "0187.40",
+          "visibleDarkPixelsInGlyphBox": 319
+        }
+      ],
+      "normalToEditedRasterDiff": [
+        {
+          "page": 1,
+          "pixelExact": true,
+          "changedPixels": 0
+        },
+        {
+          "page": 2,
+          "changedPixels": 841,
+          "outsideEditedCellChangedPixels": 0,
+          "editCellBoxPt": [
+            366.6000061035156,
+            191.59997558593747,
+            542.5999755859375,
+            236.20001220703125
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zh",
+      "wordSha256": "00bcc57319b1cd11aca6bdc9327a7123c70d743d9ba4eea65033371c0cca6400",
+      "cellStructure": [
+        {
+          "page": 1,
+          "logicalCells": 16,
+          "physicalCells": 17,
+          "sourceAndWordCellTextExact": true,
+          "horizontalSpans": [
+            [
+              0,
+              0,
+              4
+            ]
+          ],
+          "verticalMerges": [
+            [
+              2,
+              0,
+              "restart"
+            ],
+            [
+              3,
+              0,
+              "continue"
+            ]
+          ]
+        },
+        {
+          "page": 2,
+          "logicalCells": 16,
+          "physicalCells": 17,
+          "sourceAndWordCellTextExact": true,
+          "horizontalSpans": [
+            [
+              0,
+              0,
+              4
+            ]
+          ],
+          "verticalMerges": [
+            [
+              2,
+              0,
+              "restart"
+            ],
+            [
+              3,
+              0,
+              "continue"
+            ]
+          ]
+        }
+      ],
+      "bodyTableCrossPageOrderExact": true,
+      "noCellTextDuplicatedInBody": true,
+      "autoHeaderFlags": 0,
+      "pageLocalTablesNotStitched": true,
+      "oneEditedCellOnly": true,
+      "allOtherWordPartsByteExact": true,
+      "edit": {
+        "table": 1,
+        "row": 2,
+        "column": 3,
+        "old": "-0074.80",
+        "new": "-012345.67"
+      },
+      "apiRawExactIncludingTabsAndPageBreak": true,
+      "apiMetrics": {
+        "expectedCharacters": 220,
+        "actualCharacters": 220,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 14,
+        "expectedNumbers": [
+          "00731",
+          "1",
+          "00957",
+          "00064",
+          "2092",
+          "11",
+          "06",
+          "0037",
+          "40",
+          "00128",
+          "2092",
+          "11",
+          "07",
+          "0081",
+          "25",
+          "00256",
+          "2092",
+          "11",
+          "08",
+          "0093",
+          "70",
+          "1",
+          "00731",
+          "2",
+          "00957",
+          "00512",
+          "2092",
+          "11",
+          "09",
+          "012345",
+          "67",
+          "01024",
+          "2092",
+          "11",
+          "10",
+          "0162",
+          "50",
+          "02048",
+          "2092",
+          "11",
+          "11",
+          "0187",
+          "40",
+          "2"
+        ],
+        "actualNumbers": [
+          "00731",
+          "1",
+          "00957",
+          "00064",
+          "2092",
+          "11",
+          "06",
+          "0037",
+          "40",
+          "00128",
+          "2092",
+          "11",
+          "07",
+          "0081",
+          "25",
+          "00256",
+          "2092",
+          "11",
+          "08",
+          "0093",
+          "70",
+          "1",
+          "00731",
+          "2",
+          "00957",
+          "00512",
+          "2092",
+          "11",
+          "09",
+          "012345",
+          "67",
+          "01024",
+          "2092",
+          "11",
+          "10",
+          "0162",
+          "50",
+          "02048",
+          "2092",
+          "11",
+          "11",
+          "0187",
+          "40",
+          "2"
+        ]
+      },
+      "stages": {
+        "source": {
+          "pages": 2,
+          "pdfSha256": "220173c0d1f01e7683b973a31d72fbb53b7b1dba5a674f9970ee9076aa552aed",
+          "cellTextExact": true,
+          "editableNativeText": true,
+          "noRasterBacking": true
+        },
+        "normal": {
+          "pages": 2,
+          "pdfSha256": "a1d9c2fa8adbd6f1afc9e9b7889bf64a7f7eb123df1b4de0c7e29000c1d2a4c7",
+          "cellTextExact": true,
+          "editableNativeText": true,
+          "noRasterBacking": true
+        },
+        "edited": {
+          "pages": 2,
+          "pdfSha256": "0b77befdd117ad4ba46020301064d0e6b7831cb96bad0b52aa39cfa656fef945",
+          "cellTextExact": true,
+          "editableNativeText": true,
+          "noRasterBacking": true
+        }
+      },
+      "geometry": [
+        {
+          "stage": "source",
+          "page": 1,
+          "maxGridXDeltaPt": 0.0,
+          "maxGridYDeltaPt": 0.0,
+          "tableBoxPt": [
+            47.99999999999999,
+            109.99999999999999,
+            547.9999999999999,
+            322.0
+          ]
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "maxGridXDeltaPt": 0.0,
+          "maxGridYDeltaPt": 0.0,
+          "tableBoxPt": [
+            47.99999999999999,
+            109.99999999999999,
+            547.9999999999999,
+            322.0
+          ]
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "maxGridXDeltaPt": 5.40002441406245,
+          "maxGridYDeltaPt": 3.6000061035156206,
+          "tableBoxPt": [
+            42.599998474121094,
+            110.40002441406249,
+            542.5999755859375,
+            325.6000061035156
+          ]
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "maxGridXDeltaPt": 5.40002441406245,
+          "maxGridYDeltaPt": 3.6000061035156206,
+          "tableBoxPt": [
+            42.599998474121094,
+            110.40002441406249,
+            542.5999755859375,
+            325.6000061035156
+          ]
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "maxGridXDeltaPt": 5.40002441406245,
+          "maxGridYDeltaPt": 3.6000061035156206,
+          "tableBoxPt": [
+            42.599998474121094,
+            110.40002441406249,
+            542.5999755859375,
+            325.6000061035156
+          ]
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "maxGridXDeltaPt": 5.40002441406245,
+          "maxGridYDeltaPt": 3.6000061035156206,
+          "tableBoxPt": [
+            42.599998474121094,
+            110.40002441406249,
+            542.5999755859375,
+            325.6000061035156
+          ]
+        }
+      ],
+      "inkChecks": [
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 0,
+          "column": 0,
+          "text": "付款记录 00957",
+          "visibleDarkPixelsInGlyphBox": 874
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 1,
+          "column": 0,
+          "text": "组别",
+          "visibleDarkPixelsInGlyphBox": 301
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 1,
+          "column": 1,
+          "text": "编号",
+          "visibleDarkPixelsInGlyphBox": 335
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 1,
+          "column": 2,
+          "text": "日期",
+          "visibleDarkPixelsInGlyphBox": 329
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 1,
+          "column": 3,
+          "text": "金额",
+          "visibleDarkPixelsInGlyphBox": 332
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 2,
+          "column": 0,
+          "text": "甲组",
+          "visibleDarkPixelsInGlyphBox": 276
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 2,
+          "column": 1,
+          "text": "00064",
+          "visibleDarkPixelsInGlyphBox": 353
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 2,
+          "column": 2,
+          "text": "2092-11-06",
+          "visibleDarkPixelsInGlyphBox": 526
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 2,
+          "column": 3,
+          "text": "-0037.40",
+          "visibleDarkPixelsInGlyphBox": 384
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 3,
+          "column": 1,
+          "text": "00128",
+          "visibleDarkPixelsInGlyphBox": 319
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 3,
+          "column": 2,
+          "text": "2092-11-07",
+          "visibleDarkPixelsInGlyphBox": 498
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 3,
+          "column": 3,
+          "text": "+0081.25",
+          "visibleDarkPixelsInGlyphBox": 425
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 4,
+          "column": 0,
+          "text": "乙组",
+          "visibleDarkPixelsInGlyphBox": 265
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 4,
+          "column": 1,
+          "text": "00256",
+          "visibleDarkPixelsInGlyphBox": 317
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 4,
+          "column": 2,
+          "text": "2092-11-08",
+          "visibleDarkPixelsInGlyphBox": 534
+        },
+        {
+          "stage": "source",
+          "page": 1,
+          "row": 4,
+          "column": 3,
+          "text": "0093.70",
+          "visibleDarkPixelsInGlyphBox": 389
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 0,
+          "column": 0,
+          "text": "付款记录 00957 续表",
+          "visibleDarkPixelsInGlyphBox": 1198
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 1,
+          "column": 0,
+          "text": "组别",
+          "visibleDarkPixelsInGlyphBox": 301
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 1,
+          "column": 1,
+          "text": "编号",
+          "visibleDarkPixelsInGlyphBox": 335
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 1,
+          "column": 2,
+          "text": "日期",
+          "visibleDarkPixelsInGlyphBox": 329
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 1,
+          "column": 3,
+          "text": "金额",
+          "visibleDarkPixelsInGlyphBox": 332
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 2,
+          "column": 0,
+          "text": "甲组",
+          "visibleDarkPixelsInGlyphBox": 276
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 2,
+          "column": 1,
+          "text": "00512",
+          "visibleDarkPixelsInGlyphBox": 298
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 2,
+          "column": 2,
+          "text": "2092-11-09",
+          "visibleDarkPixelsInGlyphBox": 526
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 2,
+          "column": 3,
+          "text": "-0074.80",
+          "visibleDarkPixelsInGlyphBox": 407
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 3,
+          "column": 1,
+          "text": "01024",
+          "visibleDarkPixelsInGlyphBox": 323
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 3,
+          "column": 2,
+          "text": "2092-11-10",
+          "visibleDarkPixelsInGlyphBox": 507
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 3,
+          "column": 3,
+          "text": "+0162.50",
+          "visibleDarkPixelsInGlyphBox": 412
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 4,
+          "column": 0,
+          "text": "乙组",
+          "visibleDarkPixelsInGlyphBox": 265
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 4,
+          "column": 1,
+          "text": "02048",
+          "visibleDarkPixelsInGlyphBox": 336
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 4,
+          "column": 2,
+          "text": "2092-11-11",
+          "visibleDarkPixelsInGlyphBox": 484
+        },
+        {
+          "stage": "source",
+          "page": 2,
+          "row": 4,
+          "column": 3,
+          "text": "0187.40",
+          "visibleDarkPixelsInGlyphBox": 383
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 0,
+          "column": 0,
+          "text": "付款记录 ",
+          "visibleDarkPixelsInGlyphBox": 404
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 0,
+          "column": 0,
+          "text": "00957",
+          "visibleDarkPixelsInGlyphBox": 308
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 1,
+          "column": 0,
+          "text": "组别",
+          "visibleDarkPixelsInGlyphBox": 240
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 1,
+          "column": 1,
+          "text": "编号",
+          "visibleDarkPixelsInGlyphBox": 265
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 1,
+          "column": 2,
+          "text": "日期",
+          "visibleDarkPixelsInGlyphBox": 216
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 1,
+          "column": 3,
+          "text": "金额",
+          "visibleDarkPixelsInGlyphBox": 264
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 2,
+          "column": 0,
+          "text": "甲组",
+          "visibleDarkPixelsInGlyphBox": 232
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 2,
+          "column": 1,
+          "text": "00064",
+          "visibleDarkPixelsInGlyphBox": 333
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 2,
+          "column": 2,
+          "text": "2092-11-06",
+          "visibleDarkPixelsInGlyphBox": 510
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 2,
+          "column": 3,
+          "text": "-0037.40",
+          "visibleDarkPixelsInGlyphBox": 399
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 3,
+          "column": 1,
+          "text": "00128",
+          "visibleDarkPixelsInGlyphBox": 330
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 3,
+          "column": 2,
+          "text": "2092-11-07",
+          "visibleDarkPixelsInGlyphBox": 485
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 3,
+          "column": 3,
+          "text": "+0081.25",
+          "visibleDarkPixelsInGlyphBox": 415
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 4,
+          "column": 0,
+          "text": "乙组",
+          "visibleDarkPixelsInGlyphBox": 200
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 4,
+          "column": 1,
+          "text": "00256",
+          "visibleDarkPixelsInGlyphBox": 324
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 4,
+          "column": 2,
+          "text": "2092-11-08",
+          "visibleDarkPixelsInGlyphBox": 517
+        },
+        {
+          "stage": "normal",
+          "page": 1,
+          "row": 4,
+          "column": 3,
+          "text": "0093.70",
+          "visibleDarkPixelsInGlyphBox": 368
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 0,
+          "column": 0,
+          "text": "付款记录 ",
+          "visibleDarkPixelsInGlyphBox": 404
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 0,
+          "column": 0,
+          "text": "00957 ",
+          "visibleDarkPixelsInGlyphBox": 308
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 0,
+          "column": 0,
+          "text": "续表",
+          "visibleDarkPixelsInGlyphBox": 256
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 1,
+          "column": 0,
+          "text": "组别",
+          "visibleDarkPixelsInGlyphBox": 240
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 1,
+          "column": 1,
+          "text": "编号",
+          "visibleDarkPixelsInGlyphBox": 265
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 1,
+          "column": 2,
+          "text": "日期",
+          "visibleDarkPixelsInGlyphBox": 216
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 1,
+          "column": 3,
+          "text": "金额",
+          "visibleDarkPixelsInGlyphBox": 264
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 2,
+          "column": 0,
+          "text": "甲组",
+          "visibleDarkPixelsInGlyphBox": 232
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 2,
+          "column": 1,
+          "text": "00512",
+          "visibleDarkPixelsInGlyphBox": 307
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 2,
+          "column": 2,
+          "text": "2092-11-09",
+          "visibleDarkPixelsInGlyphBox": 512
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 2,
+          "column": 3,
+          "text": "-0074.80",
+          "visibleDarkPixelsInGlyphBox": 401
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 3,
+          "column": 1,
+          "text": "01024",
+          "visibleDarkPixelsInGlyphBox": 306
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 3,
+          "column": 2,
+          "text": "2092-11-10",
+          "visibleDarkPixelsInGlyphBox": 489
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 3,
+          "column": 3,
+          "text": "+0162.50",
+          "visibleDarkPixelsInGlyphBox": 412
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 4,
+          "column": 0,
+          "text": "乙组",
+          "visibleDarkPixelsInGlyphBox": 200
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 4,
+          "column": 1,
+          "text": "02048",
+          "visibleDarkPixelsInGlyphBox": 328
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 4,
+          "column": 2,
+          "text": "2092-11-11",
+          "visibleDarkPixelsInGlyphBox": 472
+        },
+        {
+          "stage": "normal",
+          "page": 2,
+          "row": 4,
+          "column": 3,
+          "text": "0187.40",
+          "visibleDarkPixelsInGlyphBox": 362
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 0,
+          "column": 0,
+          "text": "付款记录 ",
+          "visibleDarkPixelsInGlyphBox": 404
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 0,
+          "column": 0,
+          "text": "00957",
+          "visibleDarkPixelsInGlyphBox": 308
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 1,
+          "column": 0,
+          "text": "组别",
+          "visibleDarkPixelsInGlyphBox": 240
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 1,
+          "column": 1,
+          "text": "编号",
+          "visibleDarkPixelsInGlyphBox": 265
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 1,
+          "column": 2,
+          "text": "日期",
+          "visibleDarkPixelsInGlyphBox": 216
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 1,
+          "column": 3,
+          "text": "金额",
+          "visibleDarkPixelsInGlyphBox": 264
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 2,
+          "column": 0,
+          "text": "甲组",
+          "visibleDarkPixelsInGlyphBox": 232
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 2,
+          "column": 1,
+          "text": "00064",
+          "visibleDarkPixelsInGlyphBox": 333
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 2,
+          "column": 2,
+          "text": "2092-11-06",
+          "visibleDarkPixelsInGlyphBox": 510
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 2,
+          "column": 3,
+          "text": "-0037.40",
+          "visibleDarkPixelsInGlyphBox": 399
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 3,
+          "column": 1,
+          "text": "00128",
+          "visibleDarkPixelsInGlyphBox": 330
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 3,
+          "column": 2,
+          "text": "2092-11-07",
+          "visibleDarkPixelsInGlyphBox": 485
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 3,
+          "column": 3,
+          "text": "+0081.25",
+          "visibleDarkPixelsInGlyphBox": 415
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 4,
+          "column": 0,
+          "text": "乙组",
+          "visibleDarkPixelsInGlyphBox": 200
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 4,
+          "column": 1,
+          "text": "00256",
+          "visibleDarkPixelsInGlyphBox": 324
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 4,
+          "column": 2,
+          "text": "2092-11-08",
+          "visibleDarkPixelsInGlyphBox": 517
+        },
+        {
+          "stage": "edited",
+          "page": 1,
+          "row": 4,
+          "column": 3,
+          "text": "0093.70",
+          "visibleDarkPixelsInGlyphBox": 368
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 0,
+          "column": 0,
+          "text": "付款记录 ",
+          "visibleDarkPixelsInGlyphBox": 404
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 0,
+          "column": 0,
+          "text": "00957 ",
+          "visibleDarkPixelsInGlyphBox": 308
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 0,
+          "column": 0,
+          "text": "续表",
+          "visibleDarkPixelsInGlyphBox": 256
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 1,
+          "column": 0,
+          "text": "组别",
+          "visibleDarkPixelsInGlyphBox": 240
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 1,
+          "column": 1,
+          "text": "编号",
+          "visibleDarkPixelsInGlyphBox": 265
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 1,
+          "column": 2,
+          "text": "日期",
+          "visibleDarkPixelsInGlyphBox": 216
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 1,
+          "column": 3,
+          "text": "金额",
+          "visibleDarkPixelsInGlyphBox": 264
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 2,
+          "column": 0,
+          "text": "甲组",
+          "visibleDarkPixelsInGlyphBox": 232
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 2,
+          "column": 1,
+          "text": "00512",
+          "visibleDarkPixelsInGlyphBox": 307
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 2,
+          "column": 2,
+          "text": "2092-11-09",
+          "visibleDarkPixelsInGlyphBox": 512
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 2,
+          "column": 3,
+          "text": "-012345.67",
+          "visibleDarkPixelsInGlyphBox": 476
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 3,
+          "column": 1,
+          "text": "01024",
+          "visibleDarkPixelsInGlyphBox": 306
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 3,
+          "column": 2,
+          "text": "2092-11-10",
+          "visibleDarkPixelsInGlyphBox": 489
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 3,
+          "column": 3,
+          "text": "+0162.50",
+          "visibleDarkPixelsInGlyphBox": 412
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 4,
+          "column": 0,
+          "text": "乙组",
+          "visibleDarkPixelsInGlyphBox": 200
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 4,
+          "column": 1,
+          "text": "02048",
+          "visibleDarkPixelsInGlyphBox": 328
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 4,
+          "column": 2,
+          "text": "2092-11-11",
+          "visibleDarkPixelsInGlyphBox": 472
+        },
+        {
+          "stage": "edited",
+          "page": 2,
+          "row": 4,
+          "column": 3,
+          "text": "0187.40",
+          "visibleDarkPixelsInGlyphBox": 362
+        }
+      ],
+      "normalToEditedRasterDiff": [
+        {
+          "page": 1,
+          "pixelExact": true,
+          "changedPixels": 0
+        },
+        {
+          "page": 2,
+          "changedPixels": 857,
+          "outsideEditedCellChangedPixels": 0,
+          "editCellBoxPt": [
+            366.6000061035156,
+            191.59997558593747,
+            542.5999755859375,
+            236.20001220703125
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": {
+    "wallSeconds": 28.58842968501267,
+    "userSeconds": 70.391252,
+    "systemSeconds": 7.9686,
+    "maxChildRssKiB": 514320
+  },
+  "warnings": [],
+  "sourceFonts": {
+    "en": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+      "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+      "version": [
+        "Version 2.1.5"
+      ],
+      "license": "SIL-OFL-1.1"
+    },
+    "zh": {
+      "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+      "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+      "version": [
+        "Version 2.004;hotconv 1.0.118;makeotfexe 2.5.65603"
+      ],
+      "license": "SIL-OFL-1.1"
+    }
+  },
+  "versions": {
+    "java": "17.0.16+8",
+    "pymupdf": "1.26.6",
+    "pdfbox": "3.0.8",
+    "poi": "5.4.1",
+    "office": "26.8.0.0.alpha0+ 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5"
+  },
+  "sourceBoundJarSha256": "1ead3c12b621c612535ba7a9f338915484b79be3b74509cf3c3b8a304b2ce68b",
+  "productionFingerprint": "07911c45cf0a510f7fa9f8ae279e977341c795e246c19711c3dce83aee95b198",
+  "sourceBoundClasses": 232,
+  "renderedPngs": [
+    {
+      "path": "qa-samples/work/iteration44-render/en-source-p1.png",
+      "sha256": "2b37c72412f2f96a6d275258e645a6fdb10d0d59b5326be5966751d0a972a5d0"
+    },
+    {
+      "path": "qa-samples/work/iteration44-render/en-source-p2.png",
+      "sha256": "30da53d493791226fc51156d13cc7b49e61938c061cc568c67b81e2e8e010d1b"
+    },
+    {
+      "path": "qa-samples/work/iteration44-render/en-normal-p1.png",
+      "sha256": "c25d3a58fe9603b95a728e6bd338d9cf8716d46ad2733a74c414be8dcaf8358f"
+    },
+    {
+      "path": "qa-samples/work/iteration44-render/en-normal-p2.png",
+      "sha256": "1ffd6d5d4090885b250b7b29d3ab82e51b93c1e45c0e5b1b300c1d2103ee741b"
+    },
+    {
+      "path": "qa-samples/work/iteration44-render/en-edited-p1.png",
+      "sha256": "c25d3a58fe9603b95a728e6bd338d9cf8716d46ad2733a74c414be8dcaf8358f"
+    },
+    {
+      "path": "qa-samples/work/iteration44-render/en-edited-p2.png",
+      "sha256": "59254a1f836dfdbf1e4d3386d81ea2b2d2a6e1e72486a455589167ec47af3d35"
+    },
+    {
+      "path": "qa-samples/work/iteration44-render/zh-source-p1.png",
+      "sha256": "2ba6c734613aae570d1c1ff2b5f7c43a0c13ad505dc1c7e18ecd1a7ace2c76a6"
+    },
+    {
+      "path": "qa-samples/work/iteration44-render/zh-source-p2.png",
+      "sha256": "d961fe8058160bd82b74a817ae94079bdb8ae9f7a6df87f271506826cae7709e"
+    },
+    {
+      "path": "qa-samples/work/iteration44-render/zh-normal-p1.png",
+      "sha256": "93059bb33910f2fc1f343f9158542908f4a830841231b6e8d6ea0b7b4fff3017"
+    },
+    {
+      "path": "qa-samples/work/iteration44-render/zh-normal-p2.png",
+      "sha256": "abae4b7f006beab2a95018f1d3c68f46059076e441d4b26f8951bf7615e7ce89"
+    },
+    {
+      "path": "qa-samples/work/iteration44-render/zh-edited-p1.png",
+      "sha256": "93059bb33910f2fc1f343f9158542908f4a830841231b6e8d6ea0b7b4fff3017"
+    },
+    {
+      "path": "qa-samples/work/iteration44-render/zh-edited-p2.png",
+      "sha256": "38fb827b15c6fad2ba77fc87cbc6218794a7a1e8edb365b5971a70c59fb44bb8"
+    }
+  ],
+  "allWorkersAbsent": true,
+  "ECHILD": true,
+  "newZombies": [],
+  "inheritedLocalTests": "Unchanged40clean505total/504pass/1optional signedfixture skip;10bundledtests executed;not a fresh44localfullbuild",
+  "boundaries": [
+    "Originalnativeunrotatedruledrectangulartablesonly",
+    "Twoexplicitpage-localWordtables;no automaticcross-page tablemerge or new repeat-header behavior",
+    "No scans/OCR tables,nonrectangularspans,arbitrarilylongedits,rotation or previousrejectedflow redesign"
+  ],
+  "unrun": [
+    "Automaticstitchedcross-pageTable and automaticrepeatedheaderaftereditpagination",
+    "Scanned/nonrectangular/rotated/nestedtables/arbitrarylongedit/rowinsert/delete/mixedpagegeometry",
+    "MicrosoftWord/nativeMacWindowspackages/optional signedfixture;priorOCRAPI/oldscan/Wordoverprintlimitations unchanged"
+  ],
+  "initialSourceFailure": "OriginalMuPDF reverseCMap changed nativeASCIIspaces/hyphens and金 compatibility character;fixedproducer declaresexactToUnicode before8HTTP. Initialsources/log/receipt retained andexcludedfromacceptedcorpus."
+}

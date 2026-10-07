@@ -12,6 +12,89 @@ final class OcrWordGeometryRefiner {
     private OcrWordGeometryRefiner() { }
 
     static TextBlock refine(TextBlock line, BufferedImage image, Rect page) {
+        TextBlock regular = refineChinese(line, image, page);
+        if (regular != line || line.ocrWords().size() < 3
+                || !com.fuyue.formatconverter.model.Transform2D.IDENTITY.equals(line.transform())) return regular;
+        // Section numbers are immutable anchors. Apply the existing separated-
+        // ink proof only to a complete Chinese suffix, never to numeric boxes.
+        var number = line.ocrWords().get(0);
+        if (!number.text().matches("[0-9]{1,3}(?:\\.[0-9]{1,3}){0,2}")) return line;
+        var originalWords = line.ocrWords().subList(1, line.ocrWords().size());
+        var words = new ArrayList<>(originalWords);
+        // A low-confidence leading quote can share an oversized Han word box.
+        // Count only its Han ink cells, but retain the quote in editable text:
+        // this is geometry evidence, not permission to correct recognized text.
+        boolean quoted = words.get(0).confidence() < .6d && words.get(0).text().matches("”\\p{IsHan}+");
+        if (quoted) {
+            var word = words.get(0);
+            words.set(0, new TextBlock.OcrWord(word.box(), word.text().substring(1), word.confidence()));
+        }
+        String value = words.stream().map(TextBlock.OcrWord::text).reduce("", String::concat);
+        if (value.codePointCount(0, value.length()) < 6 || !value.codePoints().allMatch(OcrWordGeometryRefiner::han)) return line;
+        Rect box = words.stream().map(TextBlock.OcrWord::box).reduce(Rect::union).orElseThrow();
+        if (number.box().right() + .25d >= box.x()) return line;
+        box = completeConnectedLeftEdge(box, words.get(0).box(), number.box(), image, page);
+        TextBlock suffix = new TextBlock(line.id(), line.pageNumber(), box, value, line.baselineY(), line.style(),
+                line.zOrder(), line.textOffsetXmm(), line.textOffsetYmm(), line.advancesMm(), line.transform(), words);
+        TextBlock refined = refineChinese(suffix, image, page);
+        if (refined == suffix) return line;
+        List<TextBlock.OcrWord> retained = new ArrayList<>(); retained.add(number); retained.addAll(refined.ocrWords());
+        if (quoted) retained.set(1, new TextBlock.OcrWord(retained.get(1).box(),
+                originalWords.get(0).text(), originalWords.get(0).confidence()));
+        return new TextBlock(line.id(), line.pageNumber(), number.box().union(refined.box()), line.text(),
+                line.baselineY(), line.style(), line.zOrder(), line.textOffsetXmm(), line.textOffsetYmm(),
+                line.advancesMm(), line.transform(), retained);
+    }
+
+    /** Complete only ink cut by a numbered heading's left edge, never an independent mark. */
+    private static Rect completeConnectedLeftEdge(Rect box, Rect firstWord, Rect number,
+                                                  BufferedImage image, Rect page) {
+        double sx = image.getWidth() / page.width(), sy = image.getHeight() / page.height();
+        int edge = (int) Math.floor((box.x() - page.x()) * sx);
+        int top = Math.max(0, (int) Math.floor((box.y() - page.y()) * sy));
+        int bottom = Math.min(image.getHeight(), (int) Math.ceil((box.bottom() - page.y()) * sy));
+        int padding = (int) Math.ceil(firstWord.height() * sy * .25d);
+        int left = edge - padding;
+        int width = padding + 1, height = bottom - top;
+        if (padding < 3 || left < 0 || edge >= image.getWidth() || height <= 0
+                || (long) width * height > 25_000
+                || page.x() + left / sx <= number.right() + .25d
+                || blankColumn(image, edge, top, bottom)
+                || !blankColumn(image, left, top, bottom)
+                || !blankColumn(image, left + 1, top, bottom)
+                || !blankColumn(image, left + 2, top, bottom)) return box;
+        // Flood from the original boundary. All extra ink must belong to those
+        // same components; a dot, neighboring word or annotation rejects expansion.
+        boolean[] reached = new boolean[width * height];
+        int[] queue = new int[reached.length]; int count = 0;
+        for (int y = top; y < bottom; y++) if (ink(image.getRGB(edge, y))) {
+            int index = (y - top) * width + padding;
+            reached[index] = true; queue[count++] = index;
+        }
+        for (int head = 0; head < count; head++) {
+            int x = queue[head] % width, y = queue[head] / width;
+            for (int dy = -1; dy <= 1; dy++) for (int dx = -1; dx <= 1; dx++) {
+                int nx = x + dx, ny = y + dy;
+                if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+                int index = ny * width + nx;
+                if (!reached[index] && ink(image.getRGB(left + nx, top + ny))) {
+                    reached[index] = true; queue[count++] = index;
+                }
+            }
+        }
+        for (int y = 0; y < height; y++) for (int x = 0; x < padding; x++) {
+            int rgb = image.getRGB(left + x, top + y);
+            int r = rgb >>> 16 & 255, g = rgb >>> 8 & 255, b = rgb & 255;
+            // Inspect every added pixel: even a bright coloured mark that the
+            // neutral-ink flood does not see must prevent extending the mask.
+            if (Math.max(r, Math.max(g, b)) - Math.min(r, Math.min(g, b)) > 24
+                    || ink(rgb) && !reached[y * width + x]) return box;
+        }
+        double x = page.x() + left / sx;
+        return new Rect(x, box.y(), box.right() - x, box.height());
+    }
+
+    private static TextBlock refineChinese(TextBlock line, BufferedImage image, Rect page) {
         int[] characters = line.text().codePoints().toArray();
         if (characters.length < 6 || line.ocrWords().isEmpty() || !han(characters[0])) return line;
         for (int character : characters) if (!han(character)

@@ -19,6 +19,14 @@ public final class PoiDocxRenderer implements DocxRenderer {
             Files.createDirectories(output.toAbsolutePath().getParent());
             try (XWPFDocument docx = new XWPFDocument()) {
                 if (document.pages().isEmpty()) throw new IOException("文档没有可渲染页面");
+                boolean conflict = hasWarning(document, WarningCode.OCR_RECOGNITION_CONFLICT);
+                if (conflict || hasWarning(document, WarningCode.OCR_APPLIED)) {
+                    var properties = docx.getProperties().getCoreProperties();
+                    properties.setSubjectProperty(conflict ? "OCR 数值冲突：需人工核对" : "OCR 扫描文字：需人工核对");
+                    properties.setDescription("保留原始扫描及可编辑文字。扫描像素不会随文字编辑变化，同位置内容可能叠印；"
+                            + "可编辑不等于数值可靠或文字清晰可见，请对照原图人工核对。"
+                            + (conflict ? "检测到不同数值或符号，保留两层原文，未选择或规范化其中任何来源。" : ""));
+                }
                 if (document.continuousFlow() != null) {
                     renderContinuousProse(docx, document);
                 } else {
@@ -42,11 +50,20 @@ public final class PoiDocxRenderer implements DocxRenderer {
                         List<ParagraphModel> fixedParagraphs = semanticParagraphs.stream().filter(fixed::contains).toList();
                         List<TextBlock> fallbackTexts = fixedParagraphs.stream()
                                 .flatMap(paragraph -> paragraph.runs().stream()).toList();
-                        overlays.renderOverlays(docx, anchor, page, fallbackTexts);
+                        // Plain born-digital column frames belong after their preceding
+                        // body heading in XML/copy order. Reuse that paragraph as the
+                        // anchor without adding line boxes or changing page coordinates.
+                        // OCR, graphics, tables and transformed text retain their path.
+                        boolean interleaveColumns = !fallbackTexts.isEmpty() && page.images().isEmpty()
+                                && page.lines().isEmpty() && page.tables().isEmpty()
+                                && semanticParagraphs.stream().noneMatch(this::requiresFixedPosition);
+                        Map<TextBlock, XWPFParagraph> textAnchors = interleaveColumns ? new IdentityHashMap<>() : null;
+                        if (!interleaveColumns) overlays.renderOverlays(docx, anchor, page, fallbackTexts);
                         boolean geometryChanges = i < pages.size() - 1
                                 && !samePageGeometry(page.physicalBox(), pages.get(i + 1).physicalBox());
                         XWPFParagraph sectionCarrier = renderPage(docx, page, semanticParagraphs,
-                                fixedParagraphs, anchor, geometryChanges);
+                                fixedParagraphs, anchor, geometryChanges, textAnchors);
+                        if (interleaveColumns) overlays.renderOverlays(docx, anchor, page, fallbackTexts, textAnchors);
                         CTPPr boundaryProperties = null;
                         if (i < pages.size() - 1) {
                             boundaryProperties = sectionCarrier.getCTP().isSetPPr()
@@ -71,6 +88,12 @@ public final class PoiDocxRenderer implements DocxRenderer {
         } catch (Exception e) {
             throw new DocxRenderException("DOCX 生成失败", e);
         }
+    }
+
+    private static boolean hasWarning(DocumentModel document, WarningCode code) {
+        return java.util.stream.Stream.concat(document.warnings().stream(),
+                document.pages().stream().flatMap(page -> page.warnings().stream()))
+                .anyMatch(warning -> warning.code() == code);
     }
 
     private void renderContinuousProse(XWPFDocument docx, DocumentModel document) {
@@ -150,7 +173,8 @@ public final class PoiDocxRenderer implements DocxRenderer {
     private XWPFParagraph renderPage(XWPFDocument docx, PageModel page,
                             List<ParagraphModel> semanticParagraphs,
                             List<ParagraphModel> fixedParagraphs,
-                            XWPFParagraph anchor, boolean needsSectionCarrier) throws Exception {
+                            XWPFParagraph anchor, boolean needsSectionCarrier,
+                            Map<TextBlock, XWPFParagraph> textAnchors) throws Exception {
         List<PositionedContent> content = new ArrayList<>();
         for (ParagraphModel paragraph : semanticParagraphs) {
             if (!fixedParagraphs.contains(paragraph)) {
@@ -167,6 +191,11 @@ public final class PoiDocxRenderer implements DocxRenderer {
             if (item.paragraph() != null) {
                 lastParagraph = docx.createParagraph();
                 renderParagraph(lastParagraph, item.paragraph(), page.physicalBox(), previousBottom);
+                if (textAnchors != null) {
+                    for (ParagraphModel fixed : fixedParagraphs) for (TextBlock block : fixed.runs()) {
+                        if (item.paragraph().box().bottom() < block.box().y()) textAnchors.put(block, lastParagraph);
+                    }
+                }
                 previousBottom = item.paragraph().box().y() + paragraphHeightMm(item.paragraph());
                 tableLast = false;
             } else if (item.table() != null) {

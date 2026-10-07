@@ -23,6 +23,43 @@ class OcrContrastEnhancementTest {
     @TempDir Path temp;
 
     @Test
+    void interpolationMatchesBaselinePixelsAtPartialTilesAndNarrowEdges() throws Exception {
+        // Frozen from e3ffde1: includes alpha, gradients, low-contrast strokes,
+        // one-dimensional images, partial tiles and extrapolated page edges.
+        int[][] sizes = {{1, 83}, {83, 1}, {31, 29}, {137, 91}, {257, 259}, {1400, 1000}};
+        String[] expected = {null,
+                "5e1de758e62aea3ab32eb8d7a7daa0fc1035b6ab662a98137c4c7d216fb74a64",
+                "20145ab3173e18b4143bfdce3b0730e18199904dbb0b429cc902bc2e649a51fc",
+                "a546498ec11f5acb0382f50b2b625d163f0a22cc3e4ab6b96ae7b9cb8d6c57f2",
+                "4b72f38d10e18b60de173fbb5d4f42d385576315f8d2fab23f907833995084b7",
+                "ae202966babaf85564908f336705bd6cdd141f3667547a89d5ea6d0ebc188ddd"};
+        for (int index = 0; index < sizes.length; index++) {
+            int width = sizes[index][0], height = sizes[index][1];
+            BufferedImage source = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            for (int y = 0; y < height; y++) for (int x = 0; x < width; x++) {
+                int gray = 110 + x * 70 / width + y * 30 / height;
+                if (x % 37 > 7 && x % 37 < 23 && y % 41 > 13 && y % 41 < 26) gray -= 25;
+                int alpha = (x + y) % 17 == 0 ? 180 : 255;
+                source.setRGB(x, y, (alpha << 24) | (gray << 16) | (gray << 8) | gray);
+            }
+            BufferedImage output = OcrContrastEnhancer.enhance(source);
+            if (expected[index] == null) {
+                assertNull(output);
+            } else {
+                assertNotNull(output);
+                var digest = java.security.MessageDigest.getInstance("SHA-256");
+                for (int y = 0; y < height; y++) for (int x = 0; x < width; x++) {
+                    digest.update((byte) output.getRaster().getSample(x, y, 0));
+                }
+                assertEquals(expected[index], java.util.HexFormat.of().formatHex(digest.digest()),
+                        width + "x" + height + " output pixels must remain identical");
+                output.flush();
+            }
+            source.flush();
+        }
+    }
+
+    @Test
     void removesGrayShadowWithoutMovingInkOrChangingSourcePixels() {
         BufferedImage image = new BufferedImage(512, 256, BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < 256; y++) for (int x = 0; x < 512; x++) {
@@ -156,6 +193,87 @@ class OcrContrastEnhancementTest {
     }
 
     @Test
+    void highConfidenceUncoveredInkWarnsWithoutLaunchingImpossibleGainRetry() throws Exception {
+        Path source = uncoveredShadedImage(); byte[] original = Files.readAllBytes(source);
+        var converter = fake("97", "original 2026", "99", "untrusted replacement", "exit 1");
+        Path work = temp.resolve("uncovered-high");
+        var result = converter.recognizeLayoutResult(source, work, 2, new Rect(10,20,300,200), ParseLimits.defaults());
+        assertEquals("original 2026", result.blocks().get(0).text());
+        assertEquals(.97, result.confidence(), .001);
+        assertTrue(result.possibleTextOmission());
+        assertFalse(result.imageEnhanced());
+        assertTrue(Files.notExists(work.resolve("enhanced-input-path")));
+        assertTrue(converter.warningsFor(result,2,"第 2 页").stream().anyMatch(w ->
+                w.code()==WarningCode.OCR_POSSIBLE_TEXT_OMISSION && w.pageNumber()==2));
+        assertArrayEquals(original,Files.readAllBytes(source));
+    }
+
+    @Test
+    void acceptedEnhancementStillWarnsWhenFinalWordsLeaveShadedInkUncovered() throws Exception {
+        Path source = uncoveredShadedImage();
+        byte[] original = Files.readAllBytes(source);
+        var converter = fake("60", "original 2026", "90", "original 2026 more lines", "");
+        var result = converter.recognizeLayoutResult(source, temp.resolve("accepted-incomplete"), 1,
+                new Rect(0, 0, 600, 400), ParseLimits.defaults());
+        assertTrue(result.imageEnhanced());
+        assertEquals("original 2026 more lines", result.blocks().get(0).text());
+        var pixels = ImageIO.read(source.toFile());
+        assertTrue(OcrCoverageProbe.hasUncoveredShadedInk(pixels, result.blocks(),
+                new Rect(0, 0, 600, 400), System.nanoTime() + 1_000_000_000L));
+        pixels.flush();
+        assertTrue(result.possibleTextOmission(), "adoption cannot certify coverage of the selected words");
+        var warning = converter.warningsFor(result, 1, "第1页").stream()
+                .filter(w -> w.code() == WarningCode.OCR_POSSIBLE_TEXT_OMISSION).findFirst().orElseThrow();
+        assertFalse(warning.message().contains("未采用"), "the full enhanced candidate was actually adopted");
+        assertArrayEquals(original, Files.readAllBytes(source));
+    }
+
+    @Test
+    void acceptedEnhancementWithCompleteCoverageDoesNotWarn() throws Exception {
+        Path source = uncoveredShadedImage();
+        var converter = fake("60", "original 2026", "90", "original 2026 more lines", "", "",
+                "0\\t0\\t600\\t400");
+        var result = converter.recognizeLayoutResult(source, temp.resolve("accepted-covered"), 1,
+                new Rect(0, 0, 600, 400), ParseLimits.defaults());
+        assertTrue(result.imageEnhanced());
+        assertFalse(result.possibleTextOmission());
+        assertTrue(converter.warningsFor(result, 1, "第1页").stream()
+                .noneMatch(w -> w.code() == WarningCode.OCR_POSSIBLE_TEXT_OMISSION));
+    }
+
+    @Test
+    void lateEnhancementDoesNotExtendPageBudgetForFinalCoverageCheck() throws Exception {
+        Path source = uncoveredShadedImage();
+        var converter = fake("60", "original 2026", "90", "original 2026 more lines", "sleep 4.2");
+        long started = System.nanoTime();
+        var result = converter.recognizeLayoutResult(source, temp.resolve("accepted-budget"), 1,
+                new Rect(0, 0, 600, 400), ParseLimits.defaults());
+        assertTrue(Duration.ofNanos(System.nanoTime() - started).toMillis() < 6500);
+        // Scheduling and image preparation consume the same five-second budget.
+        // A late optional process may legitimately time out on a loaded host.
+        assertEquals(result.imageEnhanced() ? "original 2026 more lines" : "original 2026",
+                result.blocks().get(0).text());
+        if (!result.imageEnhanced()) {
+            assertFalse(Files.exists(temp.resolve("accepted-budget/tesseract-enhanced-page-0001.tsv")),
+                    "fallback must follow an incomplete optional recognition");
+        }
+        assertFalse(result.possibleTextOmission(), "optional probe is skipped with less than one second remaining");
+    }
+
+    @Test
+    void coverageWarningDependsOnRemainingInkInsteadOfCandidateAdoption() throws Exception {
+        Path source = uncoveredShadedImage();
+        for (boolean accepted : new boolean[]{false,true}) {
+            var converter=fake("88","original 2026","97",accepted?"original 2026 more lines":"original 20260 more lines","");
+            var result=converter.recognizeLayoutResult(source,temp.resolve("uncovered-"+accepted),1,
+                    new Rect(0,0,600,400),ParseLimits.defaults());
+            assertEquals(accepted,result.imageEnhanced());
+            assertTrue(result.possibleTextOmission(), "both selected word sets leave the lower ink bands uncovered");
+            if(!accepted) assertEquals("original 2026",result.blocks().get(0).text());
+        }
+    }
+
+    @Test
     void sharesPageBudgetAndSkipsRetryWhenOriginalRecognitionUsedIt() throws Exception {
         var converter = fake("60", "usable original", "99", "enhanced", "sleep 8", "sleep 4.2");
         try {
@@ -202,6 +320,46 @@ class OcrContrastEnhancementTest {
     }
 
     @Test
+    void rejectsNumericTokenExtensionsAcrossDecimalSignCurrencyAndPercentBoundaries() {
+        Rect box = new Rect(0, 0, 100, 20);
+        for (String[] pair : new String[][]{{"95", ".95"}, {".95", "0.95"},
+                {"95", "-95"}, {"95", "95%"}, {"$95", "$95.0"}, {"９５", "．９５"},
+                {"95", "$95"}, {"95", "(95)"}, {"95", "95,00"}, {"95", "95‰"},
+                {"٫٩٥", "٠٫٩٥"}, {"USD1\u202f234.50", "USD1234.50"},
+                {"1'234", "01'234"}, {"1,234.50", "1,234.500"}}) {
+            var originalBlock = new com.fuyue.formatconverter.model.TextBlock("line", 1, box, pair[0], 16, null,
+                    0, 0, 0, java.util.List.of(), com.fuyue.formatconverter.model.Transform2D.IDENTITY,
+                    java.util.List.of(new com.fuyue.formatconverter.model.TextBlock.OcrWord(box, pair[0], 0.96)));
+            var candidateBlock = new com.fuyue.formatconverter.model.TextBlock("line", 1, box, pair[1], 16, null, 0);
+            assertFalse(TesseractOcrConverter.preferEnhanced(
+                    new TesseractOcrConverter.RecognitionResult(java.util.List.of(originalBlock), .60, 1),
+                    new TesseractOcrConverter.RecognitionResult(java.util.List.of(candidateBlock), .90, 1), .35),
+                    pair[0] + " must not become " + pair[1]);
+        }
+    }
+
+    @Test
+    void retainsUnchangedNumericSurfacesAndSeparateAmountsDuringEnhancement() {
+        Rect box = new Rect(0, 0, 100, 20);
+        for (String value : java.util.List.of(".95", "-.95", "$0.95", "95%", "９５．００", "1\u202f234.50")) {
+            var block = new com.fuyue.formatconverter.model.TextBlock("line", 1, box, value, 16, null,
+                    0, 0, 0, java.util.List.of(), com.fuyue.formatconverter.model.Transform2D.IDENTITY,
+                    java.util.List.of(new com.fuyue.formatconverter.model.TextBlock.OcrWord(box, value, .96)));
+            assertTrue(TesseractOcrConverter.preferEnhanced(
+                    new TesseractOcrConverter.RecognitionResult(java.util.List.of(block), .60, 1),
+                    new TesseractOcrConverter.RecognitionResult(java.util.List.of(block), .90, 1), .35));
+        }
+        var original = new com.fuyue.formatconverter.model.TextBlock("line", 1, box, "12 34", 16, null,
+                0, 0, 0, java.util.List.of(), com.fuyue.formatconverter.model.Transform2D.IDENTITY,
+                java.util.List.of(new com.fuyue.formatconverter.model.TextBlock.OcrWord(box, "12", .96),
+                        new com.fuyue.formatconverter.model.TextBlock.OcrWord(box, "34", .96)));
+        var merged = new com.fuyue.formatconverter.model.TextBlock("line", 1, box, "1234", 16, null, 0);
+        assertFalse(TesseractOcrConverter.preferEnhanced(
+                new TesseractOcrConverter.RecognitionResult(java.util.List.of(original), .60, 2),
+                new TesseractOcrConverter.RecognitionResult(java.util.List.of(merged), .90, 1), .35));
+    }
+
+    @Test
     void recoversNoTextButDoesNotAcceptCandidateBelowMinimumConfidence() throws Exception {
         var recovered = recognize(fake("-1", "", "92", "recovered 2026", ""), "empty");
         assertTrue(recovered.imageEnhanced());
@@ -218,7 +376,13 @@ class OcrContrastEnhancementTest {
         BufferedImage image = new BufferedImage(1200, 800, BufferedImage.TYPE_INT_RGB);
         var graphics = image.createGraphics();
         graphics.setColor(Color.WHITE); graphics.fillRect(0, 0, 1200, 800);
-        graphics.setColor(Color.BLACK); graphics.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 32));
+        graphics.setColor(Color.BLACK);
+        // Use the same licensed font on every platform: logical SansSerif maps
+        // to different glyphs/spacing and can change Tesseract's column split.
+        try (var font = getClass().getResourceAsStream("/fonts/LiberationSans-Regular.ttf")) {
+            assertNotNull(font);
+            graphics.setFont(Font.createFont(Font.TRUETYPE_FONT, font).deriveFont(32f));
+        }
         graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         String sentence = "Invoice OCR 2026 total amount 12345";
         for (int line = 0; line < 8; line++) graphics.drawString(sentence, 90, 100 + line * 80);
@@ -364,6 +528,16 @@ class OcrContrastEnhancementTest {
         return source;
     }
 
+    private Path uncoveredShadedImage() throws Exception {
+        BufferedImage image=new BufferedImage(600,400,BufferedImage.TYPE_INT_RGB);
+        for(int y=0;y<400;y++) for(int x=0;x<600;x++) {
+            int gray=90+x*130/600;
+            if(y>=60 && y<350 && y%60<10 && x>60 && x<450 && x%20<12) gray=0;
+            image.setRGB(x,y,new Color(gray,gray,gray).getRGB());
+        }
+        Path path=temp.resolve("uncovered-shaded.png");ImageIO.write(image,"png",path.toFile());image.flush();return path;
+    }
+
     private TesseractOcrConverter fake(String confidence, String text, String enhancedConfidence,
                                       String enhancedText, String behavior) throws Exception {
         return fake(confidence, text, enhancedConfidence, enhancedText, behavior, "");
@@ -371,6 +545,13 @@ class OcrContrastEnhancementTest {
 
     private TesseractOcrConverter fake(String confidence, String text, String enhancedConfidence,
                                       String enhancedText, String behavior, String originalBehavior) throws Exception {
+        return fake(confidence, text, enhancedConfidence, enhancedText, behavior, originalBehavior,
+                "50\\t50\\t400\\t100");
+    }
+
+    private TesseractOcrConverter fake(String confidence, String text, String enhancedConfidence,
+                                      String enhancedText, String behavior, String originalBehavior,
+                                      String coordinates) throws Exception {
         assumeTrue(!System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win"));
         Path binary = temp.resolve("fake-" + System.nanoTime());
         String script = "#!/bin/sh\nbase=\"$2\"\nconfidence=" + confidence + "\ntext='" + text + "'\n"
@@ -379,7 +560,7 @@ class OcrContrastEnhancementTest {
                 + "cp \"$1\" \"$(dirname \"$2\")/enhanced-received.png\"\n"
                 + behavior + "\nconfidence=" + enhancedConfidence + "\ntext='" + enhancedText + "'\n;; *) " + originalBehavior + "\n;; esac\n"
                 + "printf 'level\\tpage_num\\tblock_num\\tpar_num\\tline_num\\tword_num\\tleft\\ttop\\twidth\\theight\\tconf\\ttext\\n' > \"${base}.tsv\"\n"
-                + "printf '5\\t1\\t1\\t1\\t1\\t1\\t50\\t50\\t400\\t100\\t%s\\t%s\\n' \"$confidence\" \"$text\" >> \"${base}.tsv\"\n";
+                + "printf '5\\t1\\t1\\t1\\t1\\t1\\t" + coordinates + "\\t%s\\t%s\\n' \"$confidence\" \"$text\" >> \"${base}.tsv\"\n";
         Files.writeString(binary, script); assertTrue(binary.toFile().setExecutable(true));
         return new TesseractOcrConverter(DocumentFormat.PNG, new TesseractOcrConverter.Settings(binary, "eng", "fake",
                 Duration.ofSeconds(5), 1, 0.35, 0.75, 25_000_000L, temp.resolve("locks")));

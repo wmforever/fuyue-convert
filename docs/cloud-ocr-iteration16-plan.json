@@ -1,0 +1,10 @@
+{
+  "sourceRevision": "2fe947d156b34339735de3078dd047ec665e8267",
+  "hypothesis": "Cancellation after enhanced temporary PNG creation can race worker/process cleanup, leaving owned children, temporary files or OCR permit unavailable for subsequent conversion",
+  "fixedCases": {"enhanced-cancel": 3, "original-page-timeout": 2, "task-timeout": 1, "queued-cancel": 1, "permit-wait-cancel": 1},
+  "contract": ["Cancellation stays CANCELLED/TASK_CANCELLED and never becomes downloadable", "Original-page timeout is FAILED/OCR_TIMEOUT; task timeout is FAILED/CONVERSION_TIMEOUT", "Within10s of terminal state, all registered owned worker/engine/child PIDs are gone, no work-file descendants, output files or tesseract-enhanced temporary PNG remain", "Input remains for cancelled/failed task retry until DELETE; DELETE removes task directory within10s", "OCR slot file may persist but POSIX record lock is obtainable after teardown", "Each disruptive scenario followed by a successful OCR numeric TXT conversion on the same server/slot", "Owned sidecar outside server tree remains alive; no unrelated process is killed"],
+  "boundedConfiguration": {"ocrMaxConcurrency":1,"normalOcrTimeoutSeconds":30,"pageTimeoutProbeSeconds":2,"normalTaskTimeoutSeconds":20,"taskTimeoutProbeSeconds":5,"wholeAuditSeconds":240,"childMaxLifetimeSeconds":60,"realHeavyOcrStages":"serial"},
+  "injection": "Foreground controlled engine spawns one registered child and waits; child is not detached. Version/language discovery does not spawn children. Numeric successful response uses frozen complete TSV; no injected confidence is treated as native OCR quality.",
+  "stop": "Failed command or concrete cleanup fault is retained; stop further cases and diagnose smallest safe fix. Otherwise record bounded negative, do not claim all process-tree races impossible; parent-requested OFD propagation repro follows sequentially.",
+  "logs": "Unique per-server/case marker JSON, stdout/stderr and HTTP snapshots; process state includes start-time identity; cleanup kills only still-matching registered owned processes"
+}

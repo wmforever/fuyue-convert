@@ -58,6 +58,7 @@ final class OfdOcrSupport {
             List<TextBlock> recognized = new ArrayList<>();
             List<TextBlock> allTexts = new ArrayList<>(page.textBlocks());
             List<ImageBlock> ocrSources = new ArrayList<>();
+            List<ConversionWarning> imageWarnings = new ArrayList<>();
             double confidenceTotal = 0d;
             int wordCount = 0;
             int imageIndex = 0;
@@ -93,6 +94,13 @@ final class OfdOcrSupport {
                         ocr.requireUsableResult(result,
                                 "OFD 第 " + page.pageNumber() + " 页图片 " + currentImage);
                     }
+                    if (result.blocks().stream().anyMatch(block ->
+                            OcrTextDeduplicator.numericConflict(block, page.textBlocks()))) {
+                        imageWarnings.add(ConversionWarning.of(WarningCode.OCR_RECOGNITION_CONFLICT,
+                                "OFD 第 " + page.pageNumber() + " 页图片 " + currentImage
+                                        + " 与重叠原生文字包含不同数字或数值符号；保留两层内容，未选择或替换数值，请对照原图复核。",
+                                page.pageNumber()));
+                    }
                     List<TextBlock> beyondNative = result.blocks().stream()
                             .filter(block -> !OcrTextDeduplicator.duplicates(block, page.textBlocks()))
                             .toList();
@@ -113,6 +121,11 @@ final class OfdOcrSupport {
                     }
                     confidenceTotal += result.confidence() * result.wordCount();
                     wordCount += result.wordCount();
+                    // Keep candidate/coverage/conflict semantics at image scope. The page result below
+                    // is only a weighted summary; combining flags would misdescribe other scans.
+                    imageWarnings.addAll(ocr.warningsFor(result, page.pageNumber(),
+                                    "OFD 第 " + page.pageNumber() + " 页图片 " + currentImage).stream()
+                            .filter(warning -> warning.code() != WarningCode.OCR_APPLIED).toList());
                 } catch (ConversionFailureException e) {
                     throw e;
                 } catch (Exception e) {
@@ -128,6 +141,7 @@ final class OfdOcrSupport {
                     .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
             warnings.addAll(ocr.warningsFor(pageResult, page.pageNumber(),
                     "OFD 第 " + page.pageNumber() + " 页"));
+            warnings.addAll(imageWarnings);
             pages.add(new PageModel(page.pageNumber(), page.physicalBox(), allTexts, page.lines(),
                     withOcrBackgroundRole(page.images(), ocrSources),
                     List.of(), List.of(), warnings));

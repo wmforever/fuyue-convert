@@ -134,7 +134,19 @@ GET /api/tasks/{taskId}
 - `FAILED`
 - `CANCELLED`
 
-`stage` 提供内部阶段，`progress` 为 0 到 100。`warnings` 是非致命限制，例如字体替代、OCR 低置信度或图像层保真兜底。`OCR_APPLIED` 与 `OCR_LOW_CONFIDENCE` 警告的 `confidence` 为 0-1 的页面平均置信度，其他警告可以为 `null`。采用低置信度图片增强重试结果时另外返回 `OCR_IMAGE_ENHANCED` 警告，表示临时处理了灰底/缓变阴影与对比度，原图和像素坐标系未变；置信度并非逐字准确率。`files` 给出每个文件的成功或失败结果；成功结果中的 `pageCount` 是目标文档实际写入页数。OCR 常见稳定失败码包括 `OCR_REQUIRED`、`OCR_ENGINE_UNAVAILABLE`、`OCR_LANGUAGE_MISSING`、`OCR_PAGE_MISSING`、`OCR_NO_TEXT`、`OCR_NO_NEW_TEXT`、`OCR_IMAGE_INVALID`、`OCR_IMAGE_FAILED`、`OCR_IMAGE_LIMIT_EXCEEDED`、`OCR_LOW_CONFIDENCE`、`OCR_TIMEOUT`、`OCR_CAPACITY_EXCEEDED`、`OCR_RESOURCE_EXHAUSTED` 和 `OCR_ENGINE_FAILED`。PDF/OFD 图像对象无法安全提取时分别返回 `PDF_IMAGE_EXTRACTION_FAILED`、`OFD_IMAGE_EXTRACTION_FAILED`；签名 PDF 被压缩、水印、合并或拆分路线拒绝时返回 `PDF_SIGNATURE_PRESENT`。服务重启恢复历史任务时若发现下载结果文件缺失，会将任务标记为 `FAILED` 并返回 `RESULT_MISSING`，避免继续展示不可用的下载状态。
+`stage` 提供内部阶段，`progress` 为 0 到 100。`warnings` 是非致命限制，例如字体替代、OCR 低置信度或图像层保真兜底。`OCR_APPLIED` 与 `OCR_LOW_CONFIDENCE` 警告的 `confidence` 为 0-1 的识别范围平均置信度（页级摘要或文案注明的图片范围），其他警告可以为 `null`。采用低置信度或受限未覆盖阴影字迹探测触发的图片增强重试结果时另外返回 `OCR_IMAGE_ENHANCED` 警告，表示临时处理了灰底/缓变阴影与对比度，原图和像素坐标系未变；置信度并非逐字准确率。`PNG/JPEG -> TXT` 的可选小角度校正被采用时返回 `OCR_DESKEW_APPLIED`，词框逆变换到原图坐标；可靠原数字与校正候选冲突时保留完整原识别词（含小数点、符号、单位与分组上下文），不拼接正则片段；歧义多词合并或数字数量冲突拒绝候选。采用保留原词的校正结果时返回 `OCR_RECOGNITION_CONFLICT`，可靠文字差异也要求人工复核。这些新警告的 `confidence` 可为 `null`；不会证明内容完整或数字正确。未采用增强/校正候选且阴影覆盖证据仍未解决时，可返回 `OCR_POSSIBLE_TEXT_OMISSION`，表示可能漏识别或包含非文字图形；原文字、数字和坐标保持不变，警告不等于漏字已被证明。超过95%的平均置信度也可触发该警告，但不启动无法满足五个百分点增益的重试。Word 及 PDF/OFD 路线暂不启用此校正。PNG/JPEG 的 TXT 输出在保守双栏推断改变阅读顺序时返回 `OCR_READING_ORDER_ADJUSTED`；所有非空白字符守恒，Word/PDF/OFD 布局不因此改变。检测到多个达到宽度/字高阈值的空栏时保留引擎次序，并返回 `OCR_READING_ORDER_UNCERTAIN`，表示可能是三栏以上或表格、保留的引擎次序仍可能混行；不自动推广双栏规则。短表格、跨栏标题、过窄间隔和密集/超时页面也保留引擎次序，复杂双栏仍需人工复核。`files` 给出每个文件的成功或失败结果；成功结果中的 `pageCount` 是目标文档实际写入页数。OCR 常见稳定失败码包括 `OCR_REQUIRED`、`OCR_ENGINE_UNAVAILABLE`、`OCR_LANGUAGE_MISSING`、`OCR_PAGE_MISSING`、`OCR_NO_TEXT`、`OCR_NO_NEW_TEXT`、`OCR_VISIBILITY_UNCERTAIN`、`OCR_IMAGE_INVALID`、`OCR_IMAGE_FAILED`、`OCR_IMAGE_LIMIT_EXCEEDED`、`OCR_LOW_CONFIDENCE`、`OCR_TIMEOUT`、`OCR_CAPACITY_EXCEEDED`、`OCR_RESOURCE_EXHAUSTED` 和 `OCR_ENGINE_FAILED`。PDF/OFD 图像对象无法安全提取时分别返回 `PDF_IMAGE_EXTRACTION_FAILED`、`OFD_IMAGE_EXTRACTION_FAILED`；OFD 页面对象若使用错误的命名空间 URI，则返回 `OFD_UNSUPPORTED_NAMESPACE`；签名 PDF 被压缩、水印、合并或拆分路线拒绝时返回 `PDF_SIGNATURE_PRESENT`。服务重启恢复历史任务时若发现下载结果文件缺失，会将任务标记为 `FAILED` 并返回 `RESULT_MISSING`，避免继续展示不可用的下载状态。
+
+OCR 的部分补行模式保持全部原识别行、分隔和词框，仅加入严格分离的候选新行；其 `OCR_IMAGE_ENHANCED` / `OCR_DESKEW_APPLIED` 文案明确说明混合输出，并同时返回 `OCR_RECOGNITION_CONFLICT` 和 `OCR_POSSIBLE_TEXT_OMISSION`。混合置信度包含原词，不保证满足整份输出五个百分点增益，不证明内容完整或数字正确；不能安全区分的重叠/跨行/多栏区域不替换。既有完整候选行为不变，路线仍为 experimental；详见 [部分恢复证据](cloud-ocr-iteration7.md)。
+
+完整增强候选被采用也不能证明覆盖完整：对未倾斜校正的水平 PSM3 结果，剩余原页时限超过一秒时，会用最终原坐标词框和原图重查现有阴影覆盖证据，仍未覆盖时同时返回 `OCR_POSSIBLE_TEXT_OMISSION`。该文案明确说明增强候选已经采用；不增加 OCR 重试、不改变文字/数字/坐标，也不延长时限。探测可能由图形触发；时限不足、无警告或置信度提升都不能证明没有遗漏。
+
+An accepted full enhancement can still return `OCR_POSSIBLE_TEXT_OMISSION` when the existing shaded-ink probe finds uncovered regions in final source-space word boxes. The optional horizontal PSM3 check stays within the original page deadline. This warning changes no selected text, coordinates or retry policy and is not an OCR accuracy improvement.
+
+OFD 保留一条按识别词数加权的页级 `OCR_APPLIED` 摘要，同时保留逐图增强、遗漏、冲突及低置信度提示。逐图文案包含“第 N 页图片 M”；其 `OCR_LOW_CONFIDENCE.confidence` 是该图片的平均值，可低于页平均值。图片标记不合并为整页标记，不能据此推断其他图片也增强、部分补行或存在遗漏。
+
+OFD retains one word-weighted page `OCR_APPLIED` summary and supplemental warnings scoped to each image. An image-scoped `OCR_LOW_CONFIDENCE.confidence` is that image's average, which can be lower than the page average. Enhancement, omission and conflict flags are not merged across images.
+
+多个显著空栏的保留引擎次序规则现有一个受限例外：仅 TXT 中，恰好三栏、每栏至少三行、每行三至六个重复严格对齐的短片段，可按左至右栏、上至下行重组；每个原片段全文恰好使用一次，只加入空白分隔，不改写数值/原分隔，不更改词框、Word 或 PDF/OFD。表格数值格、跨栏/已合并行、窄间隔、重叠/近邻行、超时及不满足边界的输入仍保留引擎次序。采用时返回 `OCR_READING_ORDER_ADJUSTED` 和准确描述此例外的 `OCR_READING_ORDER_UNCERTAIN`；未采用时仍说明保留引擎次序。此例外不能补回原 OCR 漏字；见 [三栏片段实测](cloud-ocr-iteration8.md)。
 
 ## 下载
 
@@ -185,3 +197,5 @@ GET /api/health
 新版桌面应用通过受可信主页面限制的 IPC 配置本机 OCR/Office，不开放 HTTP 的可执行文件绑定接口。独立 JAR 可设置 `FORMAT_CONVERTER_TESSDATA_DIR` 选择独立语言包目录。
 
 `office.available=true` 时，DOCX/XLSX/PPTX 到 PDF 以及部分 WPS/UOF 兼容路线会由本机 LibreOffice headless 执行；否则服务回退到 Java 内置基础转换或将对应路线标为规划中。
+
+PDF→TXT 对支持的单张轴对齐扫描图检查后绘制遮罩；只有整行 OCR 词框被确定不透明遮罩完全覆盖时，才不并入这些隐藏底图文字，并返回 `OCR_OCCLUDED_TEXT_IGNORED`（`confidence` 可为 `null`）。部分遮挡、透明/不明确重叠或分析超限返回 `OCR_VISIBILITY_UNCERTAIN`，不提供成功下载。此规则不证明 OCR 完整，也不覆盖复杂多图、旋转或嵌套 Form；[范围与复现](cloud-visibility-iteration27.md)。

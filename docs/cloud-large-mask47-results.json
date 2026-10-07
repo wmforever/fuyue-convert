@@ -1,0 +1,920 @@
+{
+  "status": "rejected-no-visual-benefit",
+  "productionChanged": false,
+  "parentRevision": "cd302610d7e421b2ac7c1bb99b9ce9b494423c5f",
+  "jarSha256": "2e1961405e080daf66bb60bec6b6c8784739ef7091b0171301834336aaae6061",
+  "productionSourceSha256": "fc78abdaa04116847471722836c36b211aeb00c8bd88c5a160b7686c0e838bcc",
+  "candidateSourceSha256": "46d4ac776e3a2eb5450993e604868c6e74001273f0c0ee0dcf9b73fb8000a6cf",
+  "frozenNativeTsvs": [
+    {
+      "path": "qa-samples/work/iteration45-http/ocr-capture/168bd8ff-2c0b-4bfc-9950-c2114889320a/691c88fc553f867de2ade31d2ca911a9b676b71dfce87a7efc5a6ae1e85122a6.tsv",
+      "sha256": "691c88fc553f867de2ade31d2ca911a9b676b71dfce87a7efc5a6ae1e85122a6",
+      "words": [
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "1",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "1",
+          "left": "123",
+          "top": "89",
+          "width": "120",
+          "height": "60",
+          "conf": "93.066345",
+          "text": "扫描"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "1",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "2",
+          "left": "264",
+          "top": "89",
+          "width": "72",
+          "height": "60",
+          "conf": "89.660858",
+          "text": "台"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "1",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "3",
+          "left": "342",
+          "top": "90",
+          "width": "27",
+          "height": "59",
+          "conf": "91.537437",
+          "text": "账"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "1",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "4",
+          "left": "389",
+          "top": "95",
+          "width": "135",
+          "height": "49",
+          "conf": "95.848785",
+          "text": "Scan"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "1",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "5",
+          "left": "549",
+          "top": "92",
+          "width": "180",
+          "height": "67",
+          "conf": "91.092926",
+          "text": "ledger"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "1",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "6",
+          "left": "746",
+          "top": "96",
+          "width": "169",
+          "height": "48",
+          "conf": "91.750565",
+          "text": "00783"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "2",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "1",
+          "left": "125",
+          "top": "275",
+          "width": "2634",
+          "height": "219",
+          "conf": "15.561668",
+          "text": "Ce"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "2",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "2",
+          "left": "1312",
+          "top": "271",
+          "width": "505",
+          "height": "275",
+          "conf": "30.531136",
+          "text": "ee"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "2",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "3",
+          "left": "2137",
+          "top": "271",
+          "width": "620",
+          "height": "275",
+          "conf": "27.816795",
+          "text": "ee"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "3",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "1",
+          "left": "1020",
+          "top": "801",
+          "width": "363",
+          "height": "56",
+          "conf": "96.818741",
+          "text": "2093-12-05"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "3",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "2",
+          "left": "1905",
+          "top": "801",
+          "width": "293",
+          "height": "56",
+          "conf": "91.633743",
+          "text": "+0085.40"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "3",
+          "par_num": "1",
+          "line_num": "2",
+          "word_num": "1",
+          "left": "1020",
+          "top": "1026",
+          "width": "365",
+          "height": "56",
+          "conf": "96.744690",
+          "text": "2093-12-06"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "3",
+          "par_num": "1",
+          "line_num": "2",
+          "word_num": "2",
+          "left": "1905",
+          "top": "1026",
+          "width": "254",
+          "height": "56",
+          "conf": "96.178284",
+          "text": "0170.80"
+        }
+      ]
+    },
+    {
+      "path": "qa-samples/work/iteration45-http/ocr-capture/8747f060-b3ba-4be3-8a42-5eed3d9e59e3/f607106c71e9e493e7fa46e47323e09d3e04180229e75ef26dcd00bca3c44157.tsv",
+      "sha256": "f607106c71e9e493e7fa46e47323e09d3e04180229e75ef26dcd00bca3c44157",
+      "words": [
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "1",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "1",
+          "left": "82",
+          "top": "59",
+          "width": "80",
+          "height": "40",
+          "conf": "93.102486",
+          "text": "扫描"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "1",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "2",
+          "left": "179",
+          "top": "59",
+          "width": "45",
+          "height": "40",
+          "conf": "92.432014",
+          "text": "台"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "1",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "3",
+          "left": "226",
+          "top": "60",
+          "width": "20",
+          "height": "39",
+          "conf": "92.800827",
+          "text": "账"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "1",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "4",
+          "left": "259",
+          "top": "63",
+          "width": "90",
+          "height": "33",
+          "conf": "95.870132",
+          "text": "Scan"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "1",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "5",
+          "left": "366",
+          "top": "61",
+          "width": "120",
+          "height": "45",
+          "conf": "92.783836",
+          "text": "ledger"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "1",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "6",
+          "left": "497",
+          "top": "64",
+          "width": "113",
+          "height": "32",
+          "conf": "92.522301",
+          "text": "00783"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "1",
+          "left": "110",
+          "top": "229",
+          "width": "92",
+          "height": "45",
+          "conf": "66.550079",
+          "text": "编号"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "2",
+          "left": "220",
+          "top": "235",
+          "width": "39",
+          "height": "35",
+          "conf": "66.550079",
+          "text": "1D"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "3",
+          "left": "686",
+          "top": "230",
+          "width": "84",
+          "height": "45",
+          "conf": "96.220787",
+          "text": "日"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "4",
+          "left": "756",
+          "top": "224",
+          "width": "37",
+          "height": "63",
+          "conf": "96.065254",
+          "text": "期"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "5",
+          "left": "790",
+          "top": "235",
+          "width": "96",
+          "height": "36",
+          "conf": "92.509781",
+          "text": "Date"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "6",
+          "left": "1270",
+          "top": "229",
+          "width": "92",
+          "height": "45",
+          "conf": "95.309441",
+          "text": "金额"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "1",
+          "word_num": "7",
+          "left": "1375",
+          "top": "235",
+          "width": "178",
+          "height": "36",
+          "conf": "91.458466",
+          "text": "Amount"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "2",
+          "word_num": "1",
+          "left": "110",
+          "top": "384",
+          "width": "130",
+          "height": "37",
+          "conf": "90.992584",
+          "text": "01936"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "2",
+          "word_num": "2",
+          "left": "680",
+          "top": "384",
+          "width": "243",
+          "height": "37",
+          "conf": "90.993858",
+          "text": "2093-12-04"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "2",
+          "word_num": "3",
+          "left": "1270",
+          "top": "384",
+          "width": "159",
+          "height": "37",
+          "conf": "90.975197",
+          "text": "-042.70"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "3",
+          "word_num": "1",
+          "left": "110",
+          "top": "534",
+          "width": "129",
+          "height": "37",
+          "conf": "89.611969",
+          "text": "03872"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "3",
+          "word_num": "2",
+          "left": "680",
+          "top": "534",
+          "width": "242",
+          "height": "37",
+          "conf": "89.884407",
+          "text": "2093-12-05"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "3",
+          "word_num": "3",
+          "left": "1270",
+          "top": "534",
+          "width": "195",
+          "height": "37",
+          "conf": "89.597870",
+          "text": "+0085.40"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "4",
+          "word_num": "1",
+          "left": "110",
+          "top": "684",
+          "width": "130",
+          "height": "37",
+          "conf": "91.836761",
+          "text": "07744"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "4",
+          "word_num": "2",
+          "left": "680",
+          "top": "684",
+          "width": "243",
+          "height": "37",
+          "conf": "91.030266",
+          "text": "2093-12-06"
+        },
+        {
+          "level": "5",
+          "page_num": "1",
+          "block_num": "9",
+          "par_num": "1",
+          "line_num": "4",
+          "word_num": "3",
+          "left": "1270",
+          "top": "684",
+          "width": "169",
+          "height": "37",
+          "conf": "90.715225",
+          "text": "0170.80"
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "case": "ruled",
+      "rawModelSha256": "9012c89eaa54a287b415d30ddfa9c80626d774bc658cae5bcfd0281c5af24b0a",
+      "rawModel": "ocr-p1-l1\t扫描\t0.93066345\tRect[x=10.414020414882236, y=7.53534810507739, width=10.160019916958278, height=5.080009958479139]\nocr-p1-l1\t台\t0.8966085800000001\tRect[x=22.352043817308214, y=7.53534810507739, width=6.096011950174967, height=5.080009958479139]\nocr-p1-l1\t账\t0.91537437\tRect[x=28.956056763331098, y=7.620014937718709, width=2.286004481315613, height=4.99534312583782]\nocr-p1-l1\tScan\t0.95848785\tRect[x=32.93539789747309, y=8.043349100925305, width=11.430022406578065, height=4.14867479942463]\nocr-p1-l1\tledger\t0.9109292600000001\tRect[x=46.48209112008413, y=7.789348603001347, width=15.240029875437418, height=5.672677786968372]\nocr-p1-l1\t00783\t0.91750565\tRect[x=63.16145715042397, y=8.128015933566624, width=14.308694716382908, height=4.064007966783312]\nocr-p1-l2\tCe\t0.15561667999999998\tRect[x=10.583354080164874, y=23.28337897636272, width=223.0124371772342, height=18.54203634844886]\nocr-p1-l2\tee\t0.30531136\tRect[x=111.08288442541053, y=22.944711645797447, width=42.75675048386609, height=23.28337897636272]\nocr-p1-l2\tee\t0.27816795\tRect[x=180.9330213544987, y=22.944711645797447, width=52.49343623761778, height=23.28337897636272]\nocr-p1-l3\t2093-12-05\t0.9681874100000001\tRect[x=86.36016929414538, y=67.8181329456965, width=30.734060248798794, height=4.7413426279138635]\nocr-p1-l3\t+0085.40\t0.91633743\tRect[x=161.29031618171268, y=67.8181329456965, width=24.80738196390646, height=4.7413426279138635]\nocr-p1-l4\t2093-12-06\t0.9674469000000001\tRect[x=86.36016929414538, y=86.86817028999329, width=30.90339391408143, height=4.7413426279138635]\nocr-p1-l4\t0170.80\t0.96178284\tRect[x=161.29031618171268, y=86.86817028999329, width=21.505375490895023, height=4.7413426279138635]\n",
+      "allWordsConfidenceSourceCoordinatesExact": true,
+      "allTextFramesFontsTransformsColorsZLayersExact": true,
+      "sourceScansByteExact": true,
+      "sourceScanSha256": "e1cbec05e7e8ad6266fb65ec7dbbb3ed35a07bdc98b48c71495be436b0218d1a",
+      "textFrames": 13,
+      "beforeMasks": 12,
+      "afterMasks": 10,
+      "removedMasksXml": [
+        "<ns0:rect xmlns:ns0=\"urn:schemas-microsoft-com:vml\" style=\"position:absolute;margin-left:29.575pt;margin-top:65.575pt;width:633.012pt;height:53.410pt;z-index:-251658751;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none\" filled=\"t\" fillcolor=\"#000000\" stroked=\"f\" />",
+        "<ns0:rect xmlns:ns0=\"urn:schemas-microsoft-com:vml\" style=\"position:absolute;margin-left:314.455pt;margin-top:64.615pt;width:122.051pt;height:66.851pt;z-index:-251658751;mso-position-horizontal-relative:page;mso-position-vertical-relative:page;mso-wrap-style:none\" filled=\"t\" fillcolor=\"#FFFFFF\" stroked=\"f\" />"
+      ],
+      "remainingMasksGeometryColorZExact": true,
+      "outOfPageFrames": [
+        {
+          "id": "text-ocr-p1-l2-word-0-20",
+          "boxPt": [
+            23.858,
+            56.4,
+            689.761,
+            93.6
+          ],
+          "zIndex": 3,
+          "text": "Ce "
+        },
+        {
+          "id": "text-ocr-p1-l2-word-2-22",
+          "boxPt": [
+            507.337,
+            56.4,
+            206.4,
+            93.6
+          ],
+          "zIndex": 3,
+          "text": "ee"
+        }
+      ],
+      "renderPixels": [
+        1920,
+        960
+      ],
+      "changedRenderPixels": 0,
+      "allUnknownRegionsPixelExact": true,
+      "documentXmlByteExact": false,
+      "actualProductionFrameMaskScanParity": true,
+      "all12SourceCellRois": [
+        {
+          "row": 0,
+          "col": 0,
+          "truth": "编号 ID",
+          "pixelExact": true,
+          "renderCropSha256": "d99859dac3f38625fdc039160bce43bf61470f151129bb1718d9dc90fa312e2c"
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "truth": "日期 Date",
+          "pixelExact": true,
+          "renderCropSha256": "caf24d2f830e7a6bad5d2e35136ff1ff3407561b501e0355c03b53c55f161ecb"
+        },
+        {
+          "row": 0,
+          "col": 2,
+          "truth": "金额 Amount",
+          "pixelExact": true,
+          "renderCropSha256": "1a3b880746c8eaca8f7e165edc255b79924f367f8f081d2d72efec508effc310"
+        },
+        {
+          "row": 1,
+          "col": 0,
+          "truth": "01936",
+          "pixelExact": true,
+          "renderCropSha256": "adcc35d2dfd5ee672acc576b5aadcc83c3f95cc117b09d2fc758f4b4b236b56a"
+        },
+        {
+          "row": 1,
+          "col": 1,
+          "truth": "2093-12-04",
+          "pixelExact": true,
+          "renderCropSha256": "ecd4c895c296d8493c42797b8a6828edd54f1333f3bec146a714c0cb59c2ae87"
+        },
+        {
+          "row": 1,
+          "col": 2,
+          "truth": "-042.70",
+          "pixelExact": true,
+          "renderCropSha256": "1b99f734ae07bf5a133b0f9a3ba3f6fb83a94cee6945e08d5cc5c722c5340c30"
+        },
+        {
+          "row": 2,
+          "col": 0,
+          "truth": "03872",
+          "pixelExact": true,
+          "renderCropSha256": "04eaeff017f761a3a2a334692648ef368b196a1b0908bc4be77d31d45a9b6b26"
+        },
+        {
+          "row": 2,
+          "col": 1,
+          "truth": "2093-12-05",
+          "pixelExact": true,
+          "renderCropSha256": "ee24fb29b025fdab38a5e6a18b7ba16f390233cab663b5aa70b03596c7690178"
+        },
+        {
+          "row": 2,
+          "col": 2,
+          "truth": "+0085.40",
+          "pixelExact": true,
+          "renderCropSha256": "15a51de86bbea723f6683abf411f163cc117eba55ab4e868345b73879cec3fba"
+        },
+        {
+          "row": 3,
+          "col": 0,
+          "truth": "07744",
+          "pixelExact": true,
+          "renderCropSha256": "10c162a4b61a2242e2a72fbf59d5c6e6e528dea4375b66b1db94536dd77677ab"
+        },
+        {
+          "row": 3,
+          "col": 1,
+          "truth": "2093-12-06",
+          "pixelExact": true,
+          "renderCropSha256": "ab763f261ece11f96c24f6bc64e150bbefda1e9a5e7ad5322f2b068e8f28d8b4"
+        },
+        {
+          "row": 3,
+          "col": 2,
+          "truth": "0170.80",
+          "pixelExact": true,
+          "renderCropSha256": "5a2b8f78c1df1079ba25baef1391dbb9b4416c7ed4ff68ce3d52f786229b3a96"
+        }
+      ],
+      "giantEeStillOccludesDateAmountHeaders": true,
+      "newlyRecoveredText": false
+    },
+    {
+      "case": "direct",
+      "rawModelSha256": "c3ebd1ba293cdb67a330e1c82bfa30e1124c39de27115ff6311a52492f8e5c66",
+      "rawModel": "ocr-p1-l1\t扫描\t0.93102486\tRect[x=10.414, y=7.492999999999999, width=10.16, height=5.08]\nocr-p1-l1\t台\t0.92432014\tRect[x=22.733, y=7.492999999999999, width=5.715, height=5.08]\nocr-p1-l1\t账\t0.92800827\tRect[x=28.702, y=7.62, width=2.54, height=4.953]\nocr-p1-l1\tScan\t0.95870132\tRect[x=32.893, y=8.001, width=11.43, height=4.191]\nocr-p1-l1\tledger\t0.92783836\tRect[x=46.482, y=7.747, width=15.24, height=5.715]\nocr-p1-l1\t00783\t0.92522301\tRect[x=63.119, y=8.128, width=14.351, height=4.064]\nocr-p1-l2\t编号\t0.66550079\tRect[x=13.97, y=29.083000000000002, width=11.684, height=5.715]\nocr-p1-l2\t1D\t0.66550079\tRect[x=27.94, y=29.845000000000002, width=4.953, height=4.444999999999999]\nocr-p1-l2\t日\t0.96220787\tRect[x=87.122, y=29.21, width=10.668000000000001, height=5.715]\nocr-p1-l2\t期\t0.96065254\tRect[x=96.012, y=28.448, width=4.699, height=8.001]\nocr-p1-l2\tDate\t0.92509781\tRect[x=100.33, y=29.845000000000002, width=12.192, height=4.572]\nocr-p1-l2\t金额\t0.9530944100000001\tRect[x=161.29, y=29.083000000000002, width=11.684, height=5.715]\nocr-p1-l2\tAmount\t0.91458466\tRect[x=174.625, y=29.845000000000002, width=22.606, height=4.572]\nocr-p1-l3\t01936\t0.90992584\tRect[x=13.97, y=48.768, width=16.51, height=4.699]\nocr-p1-l3\t2093-12-04\t0.90993858\tRect[x=86.36, y=48.768, width=30.861, height=4.699]\nocr-p1-l3\t-042.70\t0.90975197\tRect[x=161.29, y=48.768, width=20.192999999999998, height=4.699]\nocr-p1-l4\t03872\t0.89611969\tRect[x=13.97, y=67.818, width=16.383, height=4.699]\nocr-p1-l4\t2093-12-05\t0.89884407\tRect[x=86.36, y=67.818, width=30.733999999999998, height=4.699]\nocr-p1-l4\t+0085.40\t0.8959787\tRect[x=161.29, y=67.818, width=24.765, height=4.699]\nocr-p1-l5\t07744\t0.91836761\tRect[x=13.97, y=86.868, width=16.51, height=4.699]\nocr-p1-l5\t2093-12-06\t0.9103026599999999\tRect[x=86.36, y=86.868, width=30.861, height=4.699]\nocr-p1-l5\t0170.80\t0.90715225\tRect[x=161.29, y=86.868, width=21.463, height=4.699]\n",
+      "allWordsConfidenceSourceCoordinatesExact": true,
+      "allTextFramesFontsTransformsColorsZLayersExact": true,
+      "sourceScansByteExact": true,
+      "sourceScanSha256": "cdbd5c9ef73c9e837c2af61c84c862ae3e0ccc457f76ad1259dc86d11b561eee",
+      "textFrames": 22,
+      "beforeMasks": 22,
+      "afterMasks": 22,
+      "removedMasksXml": [],
+      "remainingMasksGeometryColorZExact": true,
+      "outOfPageFrames": [],
+      "renderPixels": [
+        1920,
+        960
+      ],
+      "changedRenderPixels": 0,
+      "allUnknownRegionsPixelExact": true,
+      "documentXmlByteExact": true
+    },
+    {
+      "case": "dark",
+      "rawModelSha256": "8323b22cf500b4fc22566139d303ca2630ce2cfb87e2f47a09b4f66abaa9e0d9",
+      "rawModel": "ocr-0\tVISIBLE\t0.99\tRect[x=25.0, y=20.0, width=23.0, height=7.0]\nocr-0\tVISIBLE\t0.99\tRect[x=50.0, y=20.0, width=23.0, height=7.0]\nocr-0\tVISIBLE\t0.99\tRect[x=75.0, y=20.0, width=23.0, height=7.0]\nocr-0\tVISIBLE\t0.99\tRect[x=100.0, y=20.0, width=23.0, height=7.0]\nocr-0\tVISIBLE\t0.99\tRect[x=125.0, y=20.0, width=23.0, height=7.0]\nocr-0\tVISIBLE\t0.99\tRect[x=150.0, y=20.0, width=23.0, height=7.0]\nocr-1\tVISIBLE\t0.99\tRect[x=25.0, y=42.0, width=23.0, height=7.0]\nocr-1\tVISIBLE\t0.99\tRect[x=50.0, y=42.0, width=23.0, height=7.0]\nocr-1\tVISIBLE\t0.99\tRect[x=75.0, y=42.0, width=23.0, height=7.0]\nocr-1\tVISIBLE\t0.99\tRect[x=100.0, y=42.0, width=23.0, height=7.0]\nocr-1\tVISIBLE\t0.99\tRect[x=125.0, y=42.0, width=23.0, height=7.0]\nocr-1\tVISIBLE\t0.99\tRect[x=150.0, y=42.0, width=23.0, height=7.0]\nocr-2\tVISIBLE\t0.99\tRect[x=25.0, y=64.0, width=23.0, height=7.0]\nocr-2\tVISIBLE\t0.99\tRect[x=50.0, y=64.0, width=23.0, height=7.0]\nocr-2\tVISIBLE\t0.99\tRect[x=75.0, y=64.0, width=23.0, height=7.0]\nocr-2\tVISIBLE\t0.99\tRect[x=100.0, y=64.0, width=23.0, height=7.0]\nocr-2\tVISIBLE\t0.99\tRect[x=125.0, y=64.0, width=23.0, height=7.0]\nocr-2\tVISIBLE\t0.99\tRect[x=150.0, y=64.0, width=23.0, height=7.0]\nocr-3\tVISIBLE\t0.99\tRect[x=25.0, y=86.0, width=23.0, height=7.0]\nocr-3\tVISIBLE\t0.99\tRect[x=50.0, y=86.0, width=23.0, height=7.0]\nocr-3\tVISIBLE\t0.99\tRect[x=75.0, y=86.0, width=23.0, height=7.0]\nocr-3\tVISIBLE\t0.99\tRect[x=100.0, y=86.0, width=23.0, height=7.0]\nocr-3\tVISIBLE\t0.99\tRect[x=125.0, y=86.0, width=23.0, height=7.0]\nocr-3\tVISIBLE\t0.99\tRect[x=150.0, y=86.0, width=23.0, height=7.0]\nocr-4\tVISIBLE\t0.99\tRect[x=25.0, y=108.0, width=23.0, height=7.0]\nocr-4\tVISIBLE\t0.99\tRect[x=50.0, y=108.0, width=23.0, height=7.0]\nocr-4\tVISIBLE\t0.99\tRect[x=75.0, y=108.0, width=23.0, height=7.0]\nocr-4\tVISIBLE\t0.99\tRect[x=100.0, y=108.0, width=23.0, height=7.0]\nocr-4\tVISIBLE\t0.99\tRect[x=125.0, y=108.0, width=23.0, height=7.0]\nocr-4\tVISIBLE\t0.99\tRect[x=150.0, y=108.0, width=23.0, height=7.0]\nocr-5\tVISIBLE\t0.99\tRect[x=25.0, y=130.0, width=23.0, height=7.0]\nocr-5\tVISIBLE\t0.99\tRect[x=50.0, y=130.0, width=23.0, height=7.0]\nocr-5\tVISIBLE\t0.99\tRect[x=75.0, y=130.0, width=23.0, height=7.0]\nocr-5\tVISIBLE\t0.99\tRect[x=100.0, y=130.0, width=23.0, height=7.0]\nocr-5\tVISIBLE\t0.99\tRect[x=125.0, y=130.0, width=23.0, height=7.0]\nocr-5\tVISIBLE\t0.99\tRect[x=150.0, y=130.0, width=23.0, height=7.0]\nocr-6\tVISIBLE\t0.99\tRect[x=25.0, y=152.0, width=23.0, height=7.0]\nocr-6\tVISIBLE\t0.99\tRect[x=50.0, y=152.0, width=23.0, height=7.0]\nocr-6\tVISIBLE\t0.99\tRect[x=75.0, y=152.0, width=23.0, height=7.0]\nocr-6\tVISIBLE\t0.99\tRect[x=100.0, y=152.0, width=23.0, height=7.0]\nocr-6\tVISIBLE\t0.99\tRect[x=125.0, y=152.0, width=23.0, height=7.0]\nocr-6\tVISIBLE\t0.99\tRect[x=150.0, y=152.0, width=23.0, height=7.0]\nocr-7\tVISIBLE\t0.99\tRect[x=25.0, y=174.0, width=23.0, height=7.0]\nocr-7\tVISIBLE\t0.99\tRect[x=50.0, y=174.0, width=23.0, height=7.0]\nocr-7\tVISIBLE\t0.99\tRect[x=75.0, y=174.0, width=23.0, height=7.0]\nocr-7\tVISIBLE\t0.99\tRect[x=100.0, y=174.0, width=23.0, height=7.0]\nocr-7\tVISIBLE\t0.99\tRect[x=125.0, y=174.0, width=23.0, height=7.0]\nocr-7\tVISIBLE\t0.99\tRect[x=150.0, y=174.0, width=23.0, height=7.0]\n",
+      "allWordsConfidenceSourceCoordinatesExact": true,
+      "allTextFramesFontsTransformsColorsZLayersExact": true,
+      "sourceScansByteExact": true,
+      "sourceScanSha256": "d055b22675ae4658aa591455bf52266425ed0c9173aa4cdf53a10dcf234f8820",
+      "textFrames": 48,
+      "beforeMasks": 133,
+      "afterMasks": 133,
+      "removedMasksXml": [],
+      "remainingMasksGeometryColorZExact": true,
+      "outOfPageFrames": [],
+      "renderPixels": [
+        2500,
+        1667
+      ],
+      "changedRenderPixels": 0,
+      "allUnknownRegionsPixelExact": true,
+      "documentXmlByteExact": true,
+      "brightTextPixels": 2854,
+      "redUnknownRegionUnchanged": true,
+      "existingDarkRegressionGeometryReused": true,
+      "Office24_2Run": false
+    },
+    {
+      "case": "ordinary",
+      "rawModelSha256": "0ec253b78ea342749cccc0d7a98ef03778abac485d215698fa25c49e900723b1",
+      "rawModel": "ordinary-0\tRELIABLE\t0.99\tRect[x=10.0, y=20.0, width=22.0, height=5.0]\nordinary-1\tRELIABLE\t0.99\tRect[x=40.0, y=20.0, width=22.0, height=5.0]\nordinary-2\tRELIABLE\t0.99\tRect[x=70.0, y=20.0, width=22.0, height=5.0]\nordinary-3\tRELIABLE\t0.99\tRect[x=100.0, y=20.0, width=22.0, height=5.0]\nordinary-4\tUNCERTAIN\t0.2\tRect[x=130.0, y=20.0, width=22.0, height=5.0]\n",
+      "allWordsConfidenceSourceCoordinatesExact": true,
+      "allTextFramesFontsTransformsColorsZLayersExact": true,
+      "sourceScansByteExact": true,
+      "sourceScanSha256": "2c543c41a7e67f32b054d050e94e478180a66448446af7bd4f24ebb32cf0be2d",
+      "textFrames": 5,
+      "beforeMasks": 5,
+      "afterMasks": 5,
+      "removedMasksXml": [],
+      "remainingMasksGeometryColorZExact": true,
+      "outOfPageFrames": [],
+      "renderPixels": [
+        1575,
+        788
+      ],
+      "changedRenderPixels": 0,
+      "allUnknownRegionsPixelExact": true,
+      "documentXmlByteExact": true
+    }
+  ],
+  "initialExecution": {
+    "parentRevision": "cd302610d7e421b2ac7c1bb99b9ce9b494423c5f",
+    "jarSha256": "2e1961405e080daf66bb60bec6b6c8784739ef7091b0171301834336aaae6061",
+    "productionSourceSha256": "fc78abdaa04116847471722836c36b211aeb00c8bd88c5a160b7686c0e838bcc",
+    "candidateSourceSha256": "46d4ac776e3a2eb5450993e604868c6e74001273f0c0ee0dcf9b73fb8000a6cf",
+    "helperSha256": "a0d07ffde92500ade6761424c674c7092b1b3c61003af9324afbee2906e03b00",
+    "frozenTsvs": [
+      {
+        "path": "qa-samples/work/iteration45-http/ocr-capture/168bd8ff-2c0b-4bfc-9950-c2114889320a/691c88fc553f867de2ade31d2ca911a9b676b71dfce87a7efc5a6ae1e85122a6.tsv",
+        "sha256": "691c88fc553f867de2ade31d2ca911a9b676b71dfce87a7efc5a6ae1e85122a6"
+      },
+      {
+        "path": "qa-samples/work/iteration45-http/ocr-capture/8747f060-b3ba-4be3-8a42-5eed3d9e59e3/f607106c71e9e493e7fa46e47323e09d3e04180229e75ef26dcd00bca3c44157.tsv",
+        "sha256": "f607106c71e9e493e7fa46e47323e09d3e04180229e75ef26dcd00bca3c44157"
+      }
+    ],
+    "ocrInvocations": 0,
+    "httpInvocations": 0,
+    "officeVersion": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "cases": [
+      {
+        "case": "ruled",
+        "allRawWordsConfidenceOriginalBoxesExact": true,
+        "sourceScanByteExact": true,
+        "changedRenderPixels": 0,
+        "pixelExact": true,
+        "outputs": [
+          {
+            "stage": "baseline",
+            "wordSha256": "ff3389950c06c1c1a4f7c6d8e122a24ca6994c7c9ae10c8c04328409487acd0f",
+            "pdfSha256": "ce084927481c22f99f8a555d3a986d5ead31c19c0f21ff5512637aaf9d70beaf",
+            "renderSha256": "52e227dddada48abb7c6d32b83047314c38bd07df395b0b7e0e94c6ac7ab3717",
+            "nativeText": "扫描台账 Scan ledger 00783\nCe \nee ee\n2093-12-05 \n+0085.40\n2093-12-06 \n0170.80\n",
+            "pages": 1,
+            "officeWallSeconds": 1.3378526309970766
+          },
+          {
+            "stage": "candidate",
+            "wordSha256": "8814c637cd23c5ddb2e353ad0a89df01b635df3f5c0038c3a54075ebfcfb54e2",
+            "pdfSha256": "f65410c52900471d20f3449febc47d6e7fd67b1db58d7cd93dd323ab97be5909",
+            "renderSha256": "52e227dddada48abb7c6d32b83047314c38bd07df395b0b7e0e94c6ac7ab3717",
+            "nativeText": "扫描台账 Scan ledger 00783\nCe \nee ee\n2093-12-05 \n+0085.40\n2093-12-06 \n0170.80\n",
+            "pages": 1,
+            "officeWallSeconds": 0.8635024560062448
+          }
+        ]
+      },
+      {
+        "case": "direct",
+        "allRawWordsConfidenceOriginalBoxesExact": true,
+        "sourceScanByteExact": true,
+        "changedRenderPixels": 0,
+        "pixelExact": true,
+        "outputs": [
+          {
+            "stage": "baseline",
+            "wordSha256": "7bedc32ff2d994d4416be24ba86def5fb3a61611466c14533d09097b6af18f0c",
+            "pdfSha256": "10ebabc2fa9980774155cb6d2ad5b6a4446a778783f80d9df326988021680087",
+            "renderSha256": "147a8c3cc7b2d89c1c3f1df47978957cda565532c421301d77795d76841e3549",
+            "nativeText": "扫描台账 Scan ledger 00783\n编号 1D \n日期 Date \n金额 Amount\n01936 \n2093-12-04 \n-042.70\n03872 \n2093-12-05 \n+0085.40\n07744 \n2093-12-06 \n0170.80\n",
+            "pages": 1,
+            "officeWallSeconds": 0.7361574160022428
+          },
+          {
+            "stage": "candidate",
+            "wordSha256": "3c447361edc79918331b69d18dd5f307f0a41b394b9c4b1c66c846034708650d",
+            "pdfSha256": "b7a74fb8263ee5af3efb480aa77377bd9e71fda0635e74e21eed0ea7453c45a0",
+            "renderSha256": "147a8c3cc7b2d89c1c3f1df47978957cda565532c421301d77795d76841e3549",
+            "nativeText": "扫描台账 Scan ledger 00783\n编号 1D \n日期 Date \n金额 Amount\n01936 \n2093-12-04 \n-042.70\n03872 \n2093-12-05 \n+0085.40\n07744 \n2093-12-06 \n0170.80\n",
+            "pages": 1,
+            "officeWallSeconds": 0.7431578499963507
+          }
+        ]
+      },
+      {
+        "case": "dark",
+        "allRawWordsConfidenceOriginalBoxesExact": true,
+        "sourceScanByteExact": true,
+        "changedRenderPixels": 0,
+        "pixelExact": true,
+        "outputs": [
+          {
+            "stage": "baseline",
+            "wordSha256": "1f790a1d84cb2fe293b6d375ec8206b7da8f7ce26e98eacc538e99c54012cbfa",
+            "pdfSha256": "7a4d5ada3a74877ec9703cd6f4a6c56f8cde42ce50356aeb517e9a50eb8db457",
+            "renderSha256": "1d97459eb362ed0e3957a3b02be9c7245a51aa98b89234c337efea46cbae7600",
+            "nativeText": "VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\n",
+            "pages": 1,
+            "officeWallSeconds": 1.3257614320027642
+          },
+          {
+            "stage": "candidate",
+            "wordSha256": "746f94b76799e5afd22b8bfd0b8a3b400bbc3f7d44b59f4d7c21b65df2adcc6c",
+            "pdfSha256": "3d4bf0e705457c88a6e52bcf0f0a968d54a19d2f497c77ec85a9ef053576f228",
+            "renderSha256": "1d97459eb362ed0e3957a3b02be9c7245a51aa98b89234c337efea46cbae7600",
+            "nativeText": "VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\nVISIBLE VISIBLE VISIBLE VISIBLE VISIBLE VISIBLE\n",
+            "pages": 1,
+            "officeWallSeconds": 1.2713229100045282
+          }
+        ]
+      },
+      {
+        "case": "ordinary",
+        "allRawWordsConfidenceOriginalBoxesExact": true,
+        "sourceScanByteExact": true,
+        "changedRenderPixels": 0,
+        "pixelExact": true,
+        "outputs": [
+          {
+            "stage": "baseline",
+            "wordSha256": "1f824b96f579e58d986914733f02b6752ca963f3fb5d50ad2a4088524a589c2b",
+            "pdfSha256": "a640813309e42800793e7c187a9e43a3793b70edc2c2420dffb34b1faec9cf13",
+            "renderSha256": "c4aebbd4156009a34bb37c5d88d76882cd05de52b3b49810718615797897f235",
+            "nativeText": "RELIABLE\nRELIABLE\nRELIABLE\nRELIABLE\nUNCERTAIN\n",
+            "pages": 1,
+            "officeWallSeconds": 0.6784503849921748
+          },
+          {
+            "stage": "candidate",
+            "wordSha256": "b424d8c610862967c982d6506c53554577d78e6faa7160d56b090f431c9525eb",
+            "pdfSha256": "f42e21679f8c45dfaa8bdcd28efd979f9376670283aef8a13a2cb64fe75d749a",
+            "renderSha256": "c4aebbd4156009a34bb37c5d88d76882cd05de52b3b49810718615797897f235",
+            "nativeText": "RELIABLE\nRELIABLE\nRELIABLE\nRELIABLE\nUNCERTAIN\n",
+            "pages": 1,
+            "officeWallSeconds": 0.6007914579968201
+          }
+        ]
+      }
+    ]
+  },
+  "sourceBoundExecution": {
+    "sourcePdfSha256": "ced64afc7fb6f8fba2cf5dab495a303f00a3d33ea53772e04b5571748e5f553e",
+    "sourcePageMm": [
+      243.8404780069987,
+      121.92023900349935
+    ],
+    "helperSha256": "c399a84ebcae63c5188d204453e1fd1cd939d29299620e0590ac7a6d9cf18928",
+    "harnessSha256": "df6d5eae624b4a17a0d3967c3be5ffb7983d81f3ca5e4c89f1d0c983b1b4fabe",
+    "jarSha256": "2e1961405e080daf66bb60bec6b6c8784739ef7091b0171301834336aaae6061",
+    "ocrInvocations": 0,
+    "httpInvocations": 0,
+    "officeInvocations": 2,
+    "outputs": [
+      {
+        "stage": "baseline",
+        "wordSha256": "227bd66256a3b13e25a62b36d40419539c16ad34ff4cb60d27705187ee3c60b2",
+        "pdfSha256": "ae65a3ea17c4a65e9a27cfbe36ed73f084659b8b32550b9b802514a42b8ee0bf",
+        "renderSha256": "52e227dddada48abb7c6d32b83047314c38bd07df395b0b7e0e94c6ac7ab3717",
+        "nativeText": "扫描台账 Scan ledger 00783\nCe \nee ee\n2093-12-05 \n+0085.40\n2093-12-06 \n0170.80\n",
+        "pages": 1
+      },
+      {
+        "stage": "candidate",
+        "wordSha256": "3e47926c161ff72a6d3a56d9a6ac6dfdf1c7754e3d0fc6e673c8cbd192b26dd1",
+        "pdfSha256": "b6d1b94a654b52d01aaa5274b150a7a475105f1c0ced68954e6b1800106d570e",
+        "renderSha256": "52e227dddada48abb7c6d32b83047314c38bd07df395b0b7e0e94c6ac7ab3717",
+        "nativeText": "扫描台账 Scan ledger 00783\nCe \nee ee\n2093-12-05 \n+0085.40\n2093-12-06 \n0170.80\n",
+        "pages": 1
+      }
+    ],
+    "reason": "243.84 rounded mm caused 0.001pt emitted coordinate differences; bind actual source PDF"
+  },
+  "extraOCR": 0,
+  "actualHTTP": 0,
+  "officeActions": 10,
+  "fullRenders": 10,
+  "Office24_2RegressionEvidence": {
+    "commit": "096f0eda722c626e9680268846979c19c9ee054f",
+    "run": 37207251967,
+    "job": 111450914787,
+    "version": "24.2.7",
+    "failure": "editable white letters must remain visibly readable on dark paper",
+    "reference": "docs/cloud-edit-iteration26.md"
+  },
+  "limits": {
+    "optionalImageDecodePixelCap": 25000000,
+    "maxActualSourcePixels": 9372500,
+    "knownWordCounts": [
+      13,
+      22,
+      48,
+      5
+    ],
+    "perOfficeTimeoutSeconds": 90,
+    "rendererTimeoutSeconds": 120,
+    "matrixTimeoutSeconds": 600,
+    "newOCRTimeoutOrConcurrencyChanges": false,
+    "cpuAndPeakRssNotMeasured": true,
+    "officeSecondsAreSerialSingleRunsNotSpeedComparison": true
+  },
+  "skipped": [
+    "new HTTP/amount edit: no positive renderer gain",
+    "Office24.2 local control unavailable; no global layering change",
+    "Microsoft Word/native Mac/Windows packaging",
+    "OCR or PSM/model/font sweep"
+  ],
+  "bootstrapFailure": "missing QA ParseLimits import before any render/Office; corrected and resumed existing bootstrap",
+  "coordinateCorrection": "Initial rounded243.84mm replay differed by0.001pt; only changed ruled pair repeated using actual PDF dimensions; all production frames/masks/scans now match exactly",
+  "decision": "Mask-only omission is insufficient: huge editable ee glyphs still cover unknown headers. Keep production and layered dark-paper fallback unchanged; no confidence-only word filtering or shrinking adopted."
+}

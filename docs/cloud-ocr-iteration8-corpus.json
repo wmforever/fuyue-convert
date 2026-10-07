@@ -1,0 +1,403 @@
+{
+  "seed": 810032026,
+  "provenance": "New independent public synthetic corpus; truth frozen before algorithm changes and never obtained from OCR",
+  "license": "Apache-2.0 generated text/code; separate SIL-OFL-1.1 font sources above",
+  "versions": {
+    "Pillow": "12.3.0",
+    "PyMuPDF": "1.26.6",
+    "NumPy": "2.3.5"
+  },
+  "fonts": {
+    "mono": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+      "sha256": "5883330d94debd992952cd8f0571b225f478c2d797d3f36c7521b0a5c9bde0f2",
+      "version": [
+        "Version 2.1.5"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/liberationfonts/liberation-fonts"
+    },
+    "serif": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
+      "sha256": "9caef765d2e891c10dd73658894f01e660fe0c1c83e0bda7d6edf561d8f623d4",
+      "version": [
+        "Version 2.1.5"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/liberationfonts/liberation-fonts"
+    },
+    "cjk": {
+      "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+      "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+      "version": [
+        "Version 2.004;hotconv 1.0.118;makeotfexe 2.5.65603"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/notofonts/noto-cjk"
+    },
+    "cjk-serif": {
+      "path": "/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc",
+      "sha256": "5d9c31a059600193c9d7968a998bde886ccdc77e934006ad243b41794c496a7d",
+      "version": [
+        "Version 2.003;hotconv 1.1.1;makeotfexe 2.6.0"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/notofonts/noto-cjk"
+    }
+  },
+  "cases": [
+    {
+      "file": "en-mono-xshade.png",
+      "expectedLines": [
+        "Warehouse record 00953 dated 2026-11-28",
+        "Account ID 08271 credit -615.42 USD",
+        "Unit cost .95 quantity 014 rebate -0.75",
+        "Decimal 18.09 total 013.30 percent 7.25%",
+        "Preserve every word and the original scan",
+        "Reference AB-00562 approved after review",
+        "Closing balance 724.18 on 2026-12-03",
+        "Keep separate tokens 12 34 and all eight lines"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "mono",
+      "layout": "xshade",
+      "sha256": "7f761213da15e8285e05b2abe92e3534e7af53afa23fa01ec0d2392a0b8472f2"
+    },
+    {
+      "file": "en-serif-yshade.png",
+      "expectedLines": [
+        "Warehouse record 00953 dated 2026-11-28",
+        "Account ID 08271 credit -615.42 USD",
+        "Unit cost .95 quantity 014 rebate -0.75",
+        "Decimal 18.09 total 013.30 percent 7.25%",
+        "Preserve every word and the original scan",
+        "Reference AB-00562 approved after review",
+        "Closing balance 724.18 on 2026-12-03",
+        "Keep separate tokens 12 34 and all eight lines"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "serif",
+      "layout": "yshade",
+      "sha256": "0f7fd84e94f101e412ec8badd20e3b11d4af5f231888c6aebf5028037736fda3"
+    },
+    {
+      "file": "zh-sans-yshade.png",
+      "expectedLines": [
+        "仓库记录00953，日期2026年11月28日。",
+        "账户编号08271，贷方金额-615.42元。",
+        "单价0.95，数量014，折扣-0.75元。",
+        "金额18.09，总计013.30，比例7.25%。",
+        "保留每个文字以及原始扫描图像。",
+        "参考编号AB-00562，审核后批准。",
+        "期末余额724.18，日期2026年12月03日。",
+        "保留分开的数字12 34以及全部八行。"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "cjk",
+      "layout": "yshade",
+      "sha256": "589e01d12f2c3f7ce62c10329e80cd8253fb3f89383bacd497e25cdc536ae51c"
+    },
+    {
+      "file": "zh-serif-xshade.png",
+      "expectedLines": [
+        "仓库记录00953，日期2026年11月28日。",
+        "账户编号08271，贷方金额-615.42元。",
+        "单价0.95，数量014，折扣-0.75元。",
+        "金额18.09，总计013.30，比例7.25%。",
+        "保留每个文字以及原始扫描图像。",
+        "参考编号AB-00562，审核后批准。",
+        "期末余额724.18，日期2026年12月03日。",
+        "保留分开的数字12 34以及全部八行。"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "cjk-serif",
+      "layout": "xshade",
+      "sha256": "b1daf47bb931d4457fb1c104ea8ea876c9a282b0b9c4d391c36b04aad2da02a0"
+    },
+    {
+      "file": "en-serif-minus4.png",
+      "expectedLines": [
+        "Warehouse record 00953 dated 2026-11-28",
+        "Account ID 08271 credit -615.42 USD",
+        "Unit cost .95 quantity 014 rebate -0.75",
+        "Decimal 18.09 total 013.30 percent 7.25%",
+        "Preserve every word and the original scan",
+        "Reference AB-00562 approved after review",
+        "Closing balance 724.18 on 2026-12-03",
+        "Keep separate tokens 12 34 and all eight lines"
+      ],
+      "sourceSkewDegrees": -4,
+      "font": "serif",
+      "layout": "plain",
+      "sha256": "faa5b5e9e806de8ee2bb37fa7cd1a57208472af8c1af8440520c48692721f294"
+    },
+    {
+      "file": "en-mono-plus4.png",
+      "expectedLines": [
+        "Warehouse record 00953 dated 2026-11-28",
+        "Account ID 08271 credit -615.42 USD",
+        "Unit cost .95 quantity 014 rebate -0.75",
+        "Decimal 18.09 total 013.30 percent 7.25%",
+        "Preserve every word and the original scan",
+        "Reference AB-00562 approved after review",
+        "Closing balance 724.18 on 2026-12-03",
+        "Keep separate tokens 12 34 and all eight lines"
+      ],
+      "sourceSkewDegrees": 4,
+      "font": "mono",
+      "layout": "plain",
+      "sha256": "501f3f95bf0b99918b0a25e706d786b745264f7b04c30f92a4456872dd6a3ca4"
+    },
+    {
+      "file": "zh-sans-minus4.png",
+      "expectedLines": [
+        "仓库记录00953，日期2026年11月28日。",
+        "账户编号08271，贷方金额-615.42元。",
+        "单价0.95，数量014，折扣-0.75元。",
+        "金额18.09，总计013.30，比例7.25%。",
+        "保留每个文字以及原始扫描图像。",
+        "参考编号AB-00562，审核后批准。",
+        "期末余额724.18，日期2026年12月03日。",
+        "保留分开的数字12 34以及全部八行。"
+      ],
+      "sourceSkewDegrees": -4,
+      "font": "cjk",
+      "layout": "plain",
+      "sha256": "452144a4225336f20eb832602984f0a29891f5c6a5e48b5ba03a66c7b1e2039c"
+    },
+    {
+      "file": "zh-serif-plus4.png",
+      "expectedLines": [
+        "仓库记录00953，日期2026年11月28日。",
+        "账户编号08271，贷方金额-615.42元。",
+        "单价0.95，数量014，折扣-0.75元。",
+        "金额18.09，总计013.30，比例7.25%。",
+        "保留每个文字以及原始扫描图像。",
+        "参考编号AB-00562，审核后批准。",
+        "期末余额724.18，日期2026年12月03日。",
+        "保留分开的数字12 34以及全部八行。"
+      ],
+      "sourceSkewDegrees": 4,
+      "font": "cjk-serif",
+      "layout": "plain",
+      "sha256": "2a142196770a4fc150930f4572492957aad6a4844ed1899bcef46fb69f5a889b"
+    },
+    {
+      "file": "bilingual-upright.png",
+      "expectedLines": [
+        "Warehouse record 00953 dated 2026-11-28",
+        "账户编号08271，贷方金额-615.42元。",
+        "Unit cost .95 quantity 014 rebate -0.75",
+        "金额18.09，总计013.30，比例7.25%。",
+        "Preserve every word and the original scan",
+        "参考编号AB-00562，审核后批准。",
+        "Closing balance 724.18 on 2026-12-03",
+        "保留分开的数字12 34以及全部八行。"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "cjk",
+      "layout": "bilingual",
+      "sha256": "0418fd82a276ceb76c877c25c0b181520d547012075bffc7627dd482040ed9de"
+    },
+    {
+      "file": "en-three-columns.png",
+      "expectedLines": [
+        "Column 1 keeps sentence 1",
+        "Column 1 keeps sentence 2",
+        "Column 1 keeps sentence 3",
+        "Column 1 keeps sentence 4",
+        "Column 2 keeps sentence 1",
+        "Column 2 keeps sentence 2",
+        "Column 2 keeps sentence 3",
+        "Column 2 keeps sentence 4",
+        "Column 3 keeps sentence 1",
+        "Column 3 keeps sentence 2",
+        "Column 3 keeps sentence 3",
+        "Column 3 keeps sentence 4"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "mono",
+      "layout": "columns",
+      "sha256": "63caaf51f9930fc039a51a8db22e1e9c4f256594e694d27dc8c25a922a71ef5c"
+    },
+    {
+      "file": "zh-three-columns.png",
+      "expectedLines": [
+        "第1栏完整保留第1句话。",
+        "第1栏完整保留第2句话。",
+        "第1栏完整保留第3句话。",
+        "第1栏完整保留第4句话。",
+        "第2栏完整保留第1句话。",
+        "第2栏完整保留第2句话。",
+        "第2栏完整保留第3句话。",
+        "第2栏完整保留第4句话。",
+        "第3栏完整保留第1句话。",
+        "第3栏完整保留第2句话。",
+        "第3栏完整保留第3句话。",
+        "第3栏完整保留第4句话。"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "cjk",
+      "layout": "columns",
+      "sha256": "b5b1b53f43ee2144bc9be4e708cc8aecf548a25cf8ed776386d7fa46924a7801"
+    },
+    {
+      "file": "bilingual-table.png",
+      "expectedLines": [
+        "项目 Item 金额 Amount 日期 Date",
+        "货物 A -0.95 2026-11-28",
+        "费用 B 013.30 2026-12-03",
+        "数量 C 12 34 AB-00562",
+        "比例 D 7.25% 编号08271"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "cjk",
+      "layout": "table",
+      "sha256": "47bca94660f72b0055a30447df4958b7ec93be0010da8cbfdd55b8095e387764"
+    },
+    {
+      "file": "shaded-blank-new.png",
+      "expectedLines": [],
+      "expectedErrors": [
+        "OCR_NO_TEXT",
+        "OCR_LOW_CONFIDENCE"
+      ],
+      "sha256": "89b63a8b1a8a8a7f5b329ddf1207f051721d7fed70ff2d877de237aa62fe500f"
+    },
+    {
+      "file": "shaded-noise-new.png",
+      "expectedLines": [],
+      "expectedErrors": [
+        "OCR_NO_TEXT",
+        "OCR_LOW_CONFIDENCE"
+      ],
+      "sha256": "08cbb5391329be50be8d6d3640105feb19cca061bbed902c4333be9c63ea439f"
+    }
+  ],
+  "containerCases": [
+    {
+      "file": "en-mono-xshade.pdf",
+      "expectedLines": [
+        "Warehouse record 00953 dated 2026-11-28",
+        "Account ID 08271 credit -615.42 USD",
+        "Unit cost .95 quantity 014 rebate -0.75",
+        "Decimal 18.09 total 013.30 percent 7.25%",
+        "Preserve every word and the original scan",
+        "Reference AB-00562 approved after review",
+        "Closing balance 724.18 on 2026-12-03",
+        "Keep separate tokens 12 34 and all eight lines"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "mono",
+      "layout": "xshade",
+      "sha256": "b1e3847366193d0e5851c80626d3a7243549e976438680d4efa8714365712611",
+      "rasterSource": "en-mono-xshade.png"
+    },
+    {
+      "file": "en-mono-xshade.ofd",
+      "expectedLines": [
+        "Warehouse record 00953 dated 2026-11-28",
+        "Account ID 08271 credit -615.42 USD",
+        "Unit cost .95 quantity 014 rebate -0.75",
+        "Decimal 18.09 total 013.30 percent 7.25%",
+        "Preserve every word and the original scan",
+        "Reference AB-00562 approved after review",
+        "Closing balance 724.18 on 2026-12-03",
+        "Keep separate tokens 12 34 and all eight lines"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "mono",
+      "layout": "xshade",
+      "sha256": "b99fee06290a209b4c4f16a2b862a3c97e6ca2c6c26e9535bc62eb8a9d3a5dc2",
+      "rasterSource": "en-mono-xshade.png"
+    },
+    {
+      "file": "bilingual-upright.pdf",
+      "expectedLines": [
+        "Warehouse record 00953 dated 2026-11-28",
+        "账户编号08271，贷方金额-615.42元。",
+        "Unit cost .95 quantity 014 rebate -0.75",
+        "金额18.09，总计013.30，比例7.25%。",
+        "Preserve every word and the original scan",
+        "参考编号AB-00562，审核后批准。",
+        "Closing balance 724.18 on 2026-12-03",
+        "保留分开的数字12 34以及全部八行。"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "cjk",
+      "layout": "bilingual",
+      "sha256": "9a82148bf7a51380e7fdf0785f8ece6065635666ac2f4490ff763b855b5b52fb",
+      "rasterSource": "bilingual-upright.png"
+    },
+    {
+      "file": "bilingual-upright.ofd",
+      "expectedLines": [
+        "Warehouse record 00953 dated 2026-11-28",
+        "账户编号08271，贷方金额-615.42元。",
+        "Unit cost .95 quantity 014 rebate -0.75",
+        "金额18.09，总计013.30，比例7.25%。",
+        "Preserve every word and the original scan",
+        "参考编号AB-00562，审核后批准。",
+        "Closing balance 724.18 on 2026-12-03",
+        "保留分开的数字12 34以及全部八行。"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "cjk",
+      "layout": "bilingual",
+      "sha256": "986cbc307d0669cdbcf7d9e7645494d43e72201aaedf5c7eb42beb8533377c30",
+      "rasterSource": "bilingual-upright.png"
+    },
+    {
+      "file": "bilingual-table.pdf",
+      "expectedLines": [
+        "项目 Item 金额 Amount 日期 Date",
+        "货物 A -0.95 2026-11-28",
+        "费用 B 013.30 2026-12-03",
+        "数量 C 12 34 AB-00562",
+        "比例 D 7.25% 编号08271"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "cjk",
+      "layout": "table",
+      "sha256": "4d6fc471111f6be217d699b0786e1492a0127d975313fdb245aa6ab77e429185",
+      "rasterSource": "bilingual-table.png"
+    },
+    {
+      "file": "bilingual-table.ofd",
+      "expectedLines": [
+        "项目 Item 金额 Amount 日期 Date",
+        "货物 A -0.95 2026-11-28",
+        "费用 B 013.30 2026-12-03",
+        "数量 C 12 34 AB-00562",
+        "比例 D 7.25% 编号08271"
+      ],
+      "sourceSkewDegrees": 0,
+      "font": "cjk",
+      "layout": "table",
+      "sha256": "2af9ebb28b5aea69d7048f526def5efbc35a0b79b3d70b7cd64d3093f58b17b8",
+      "rasterSource": "bilingual-table.png"
+    },
+    {
+      "file": "shaded-blank-new.pdf",
+      "expectedLines": [],
+      "expectedErrors": [
+        "OCR_NO_TEXT",
+        "OCR_LOW_CONFIDENCE"
+      ],
+      "sha256": "1c30e63f6351ddd160ca974a67b091e7409b63350aef906fdea7e180c3d103a7",
+      "rasterSource": "shaded-blank-new.png"
+    },
+    {
+      "file": "shaded-blank-new.ofd",
+      "expectedLines": [],
+      "expectedErrors": [
+        "OCR_NO_TEXT",
+        "OCR_LOW_CONFIDENCE"
+      ],
+      "sha256": "7dbceae3456415d414e67d30152d4709179cd983afdf3dae21fa15fb389caeb5",
+      "rasterSource": "shaded-blank-new.png"
+    }
+  ],
+  "generatorSha256": "4ac8e9f323cb40f239408b928181a8fe42d0e458bad80a8690800b4d651fc17e",
+  "ofdGeneratorSha256": "c2f354e57486920245671af482c17a5273eaa3322dfc0cfdc082f20492b5dd74"
+}

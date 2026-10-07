@@ -1,0 +1,8 @@
+{
+  "case": "en-mono-shadow.png",
+  "editedNewWord": "Account -> Ledger",
+  "actualLibreOfficeReopen": true,
+  "newWordPresent": true,
+  "replacedWordAbsentFromEditablePdfText": true,
+  "scope": "Downloaded final scan DOCX edited and reopened through actual cloud Office; source image pixels remain unchanged"
+}

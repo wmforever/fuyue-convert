@@ -100,6 +100,12 @@ Full 版执行 `npm run dist:mac:full`，输出文件名增加 `-Full`，并额�
 
 ## 发布门禁
 
+### 只构建安装包
+
+`.github/workflows/desktop-package.yml` 在该文件合入 main 时构建 Intel 和 Apple Silicon 两种 Full DMG。也可在 Actions 中手动选择 macOS、Windows 或全部平台。构建复用原生安装、内置 OCR/Office 转换和退出检查，完成后把安装包、`BUILD-INFO.json` 和 `SHA256SUMS` 保存为 14 天有效的 Actions 产物；产物名包含完整源码 SHA。它不创建 Release 或修改版本标签，不使用下述发布开关。现有版本号可能与旧安装包相同，请用源码 SHA 和校验值区分构建。
+
+### 公开发布
+
 `.github/workflows/desktop-release.yml` 只在推送与应用版本一致的 `v*` 标签后运行，并且同时要求仓库变量 `FORMAT_CONVERTER_BINARY_RELEASE_APPROVED=true` 与 `FORMAT_CONVERTER_BINARY_RELEASE_APPROVED_SHA=<已审核提交>`。这两个变量是维护者手动、短时开启的发布开关：
 
 ```bash

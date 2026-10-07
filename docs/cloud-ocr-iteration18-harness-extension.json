@@ -1,0 +1,8 @@
+{
+  "sourceRevision": "b14f792b6b4624d8ff7e8b0c154e8becff8ba323",
+  "reason": "Initial success/exception cases prove absence but root exits cooperatively; explicitly exercise formerly dangerous forced-teardown branch before further process-heavy QA",
+  "fixedAdditionalCase": "One SIGTERM-resistant wrapper root and foreground engine/child around the real HTTP independent Worker; inject harness exception after immutable child-ready marker",
+  "acceptance": ["Supervisor receipt records SIGKILL of registered root while supervisor remains alive", "ECHILD, then owner wait; no matching registered PID record including Z", "No new global zombie identity compared with recorded baseline", "Old ten PID1 zombies unchanged; unrelated sidecar alive"],
+  "limits": {"forceAfterSeconds":2,"teardownSeconds":15,"wholeCaseSeconds":100},
+  "stop": "Retain owning reaper on failure; stop further process-heavy work. Do not rerun completed gate cases or touch PID1."
+}

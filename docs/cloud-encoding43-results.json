@@ -1,0 +1,965 @@
+{
+  "parentRevision": "49ea8f8f1876d155010c4e1af5e0d06a03fc05dc",
+  "status": "closed-no-adoptable-production-gain",
+  "productionChanged": false,
+  "counts": {
+    "frozenInputs": 22,
+    "newNativeOCR": 8,
+    "repeated41OCR": 0,
+    "selectorReplays": 4,
+    "partialSelectorInvocations": 0,
+    "http": 0,
+    "office": 0
+  },
+  "definitions": {
+    "A": "Pillow12.3 RGB sample bytes identical;not universally colorimetrically equal",
+    "B": "Exact Java17 ImageIO getRGB-derived integer white-luminance bytes. Probe roundtrips these into opaqueRGB and tests enhancer equality.",
+    "C": "Achromatic integer encoded-sample white composite;no OCR truth assigned after changing visibility"
+  },
+  "manifestSha256": "9b25d217f4c5a2e6d4f57049d875fdc4c1a625522b4056d85549b9aeb6992816",
+  "pixelReportSha256": "35f3a9dfacae82d16d79bcc696e96b28d6551ba704cc8add1e518019ce77240a",
+  "nativeReportSha256": "9004808f25e3401950a8ddd1e895740c30a2f09fd2dc46575339a9db677f89a7",
+  "pairs": [
+    {
+      "gray": "en-gradient-gray",
+      "rgb": "en-gradient-rgb",
+      "definition": "A:exact Pillow12.3 RGB sample bytes;not universal colorimetric equivalence",
+      "pillowSampleBytesExact": true,
+      "javaGetRGBExact": false,
+      "enhancedRawExact": false,
+      "enhancementAvailable": true
+    },
+    {
+      "gray": "zh-gradient-gray",
+      "rgb": "zh-gradient-rgb",
+      "definition": "A:exact Pillow12.3 RGB sample bytes;not universal colorimetric equivalence",
+      "pillowSampleBytesExact": true,
+      "javaGetRGBExact": false,
+      "enhancedRawExact": false,
+      "enhancementAvailable": true
+    },
+    {
+      "gray": "en-local-gray",
+      "rgb": "en-local-rgb",
+      "definition": "A:exact Pillow12.3 RGB sample bytes;not universal colorimetric equivalence",
+      "pillowSampleBytesExact": true,
+      "javaGetRGBExact": false,
+      "enhancedRawExact": false,
+      "enhancementAvailable": true
+    },
+    {
+      "gray": "zh-local-gray",
+      "rgb": "zh-local-rgb",
+      "definition": "A:exact Pillow12.3 RGB sample bytes;not universal colorimetric equivalence",
+      "pillowSampleBytesExact": true,
+      "javaGetRGBExact": false,
+      "enhancedRawExact": false,
+      "enhancementAvailable": true
+    },
+    {
+      "gray": "en-normal-gray",
+      "rgb": "en-normal-rgb",
+      "definition": "A:exact Pillow12.3 RGB sample bytes;not universal colorimetric equivalence",
+      "pillowSampleBytesExact": true,
+      "javaGetRGBExact": false,
+      "enhancedRawExact": false,
+      "enhancementAvailable": true
+    },
+    {
+      "gray": "zh-normal-gray",
+      "rgb": "zh-normal-rgb",
+      "definition": "A:exact Pillow12.3 RGB sample bytes;not universal colorimetric equivalence",
+      "pillowSampleBytesExact": true,
+      "javaGetRGBExact": false,
+      "enhancedRawExact": false,
+      "enhancementAvailable": true
+    },
+    {
+      "gray": "none-blank-gray",
+      "rgb": "none-blank-rgb",
+      "definition": "A:exact Pillow12.3 RGB sample bytes;not universal colorimetric equivalence",
+      "pillowSampleBytesExact": true,
+      "javaGetRGBExact": false,
+      "enhancedRawExact": true,
+      "enhancementAvailable": false
+    },
+    {
+      "gray": "none-noise-gray",
+      "rgb": "none-noise-rgb",
+      "definition": "A:exact Pillow12.3 RGB sample bytes;not universal colorimetric equivalence",
+      "pillowSampleBytesExact": true,
+      "javaGetRGBExact": false,
+      "enhancedRawExact": true,
+      "enhancementAvailable": false
+    },
+    {
+      "alpha": "en-alpha",
+      "matte": "en-matte",
+      "definition": "C:achromatic encoded-sample white composite:(g*a+255*(255-a)+127)//255;no original-text truth assigned to modified visibility",
+      "javaWhiteLuminanceExact": true,
+      "enhancementExact": true
+    },
+    {
+      "alpha": "zh-alpha",
+      "matte": "zh-matte",
+      "definition": "C:achromatic encoded-sample white composite:(g*a+255*(255-a)+127)//255;no original-text truth assigned to modified visibility",
+      "javaWhiteLuminanceExact": true,
+      "enhancementExact": true
+    }
+  ],
+  "all22JavaLuminanceEquivalentEnhancementsExact": true,
+  "rampDecodedGrayValues": {
+    "gray": {
+      "0": 0,
+      "1": 13,
+      "4": 34,
+      "16": 71,
+      "64": 137,
+      "112": 177,
+      "128": 188,
+      "192": 225,
+      "238": 247,
+      "255": 255
+    },
+    "rgb": {
+      "0": 0,
+      "1": 1,
+      "4": 4,
+      "16": 16,
+      "64": 64,
+      "112": 112,
+      "128": 128,
+      "192": 192,
+      "238": 238,
+      "255": 255
+    }
+  },
+  "measurements": [
+    {
+      "id": "en-gradient",
+      "expectedText": "Independent shadow record 00637\nDate 2091-04-26\nAmount -041.85\nRate +12.50% and balance 009.70\nKeep upper lines and original pixels\nReview batch 00846 before approval\nAudit 73519 completed",
+      "stages": {
+        "grayOriginal": {
+          "text": "Keep upper lines and original pixels\nReview batch 00846 before approval\nAudit 73519 completed",
+          "metrics": {
+            "expectedCharacters": 162,
+            "actualCharacters": 80,
+            "editDistance": 82,
+            "cer": 0.5061728395061729,
+            "alignedCharacterRecall": 0.49382716049382713,
+            "exactLines": 3,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": false,
+          "meanConfidence": 0.9635081050000001,
+          "wordCount": 14
+        },
+        "grayEnhanced": {
+          "text": "Keep upper lines and original pixels\nReview batch 00846 before approval\nAudit 73519 completed",
+          "metrics": {
+            "expectedCharacters": 162,
+            "actualCharacters": 80,
+            "editDistance": 82,
+            "cer": 0.5061728395061729,
+            "alignedCharacterRecall": 0.49382716049382713,
+            "exactLines": 3,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": false,
+          "meanConfidence": 0.9647243885714285,
+          "wordCount": 14
+        },
+        "rgbOriginal": {
+          "text": "Keep upper lines and original pixels\nReview batch 00846 before approval\nAudit 73519 completed",
+          "metrics": {
+            "expectedCharacters": 162,
+            "actualCharacters": 80,
+            "editDistance": 82,
+            "cer": 0.5061728395061729,
+            "alignedCharacterRecall": 0.49382716049382713,
+            "exactLines": 3,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": false,
+          "meanConfidence": 0.9635081050000001,
+          "wordCount": 14
+        },
+        "rgbEnhanced": {
+          "text": "Keep upper lines and original pixels\nReview batch 00846 before approval\nAudit 73519 completed",
+          "metrics": {
+            "expectedCharacters": 162,
+            "actualCharacters": 80,
+            "editDistance": 82,
+            "cer": 0.5061728395061729,
+            "alignedCharacterRecall": 0.49382716049382713,
+            "exactLines": 3,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": false,
+          "meanConfidence": 0.9451824950000001,
+          "wordCount": 14
+        }
+      },
+      "originalTsvAndParsedBlocksConfidenceExact": true,
+      "actualRetryEligible": false,
+      "actualFullAccepted": false,
+      "actualPartialAccepted": false,
+      "selectedOriginal": true,
+      "candidateBoxesInsideOriginal": true,
+      "uncoveredShadedInk": false,
+      "originalGeometryStable": true
+    },
+    {
+      "id": "zh-gradient",
+      "expectedText": "独立阴影记录00637\n日期2091-04-26\n金额-041.85\n比例+12.50%，余额009.70\n保留上方文字和原始像素\n审批前复核批次00846\n核验73519完成",
+      "stages": {
+        "grayOriginal": {
+          "text": "保留上方文字和原始像素\n审批前复核批次 00846\n核验 73519 完成",
+          "metrics": {
+            "expectedCharacters": 82,
+            "actualCharacters": 32,
+            "editDistance": 50,
+            "cer": 0.6097560975609756,
+            "alignedCharacterRecall": 0.3902439024390244,
+            "exactLines": 3,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": false,
+          "meanConfidence": 0.887234465882353,
+          "wordCount": 17
+        },
+        "grayEnhanced": {
+          "text": "保留上方广字和原始像素\n审批前复核批次 00846\n核验 73519 完成",
+          "metrics": {
+            "expectedCharacters": 82,
+            "actualCharacters": 32,
+            "editDistance": 51,
+            "cer": 0.6219512195121951,
+            "alignedCharacterRecall": 0.3780487804878049,
+            "exactLines": 2,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": false,
+          "meanConfidence": 0.9076103683333332,
+          "wordCount": 18
+        },
+        "rgbOriginal": {
+          "text": "保留上方文字和原始像素\n审批前复核批次 00846\n核验 73519 完成",
+          "metrics": {
+            "expectedCharacters": 82,
+            "actualCharacters": 32,
+            "editDistance": 50,
+            "cer": 0.6097560975609756,
+            "alignedCharacterRecall": 0.3902439024390244,
+            "exactLines": 3,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": false,
+          "meanConfidence": 0.887234465882353,
+          "wordCount": 17
+        },
+        "rgbEnhanced": {
+          "text": "保留上方广字和原始像素\n审批前复核批次 00846\n核验 73519 完成",
+          "metrics": {
+            "expectedCharacters": 82,
+            "actualCharacters": 32,
+            "editDistance": 51,
+            "cer": 0.6219512195121951,
+            "alignedCharacterRecall": 0.3780487804878049,
+            "exactLines": 2,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": false,
+          "meanConfidence": 0.8975159722222221,
+          "wordCount": 18
+        }
+      },
+      "originalTsvAndParsedBlocksConfidenceExact": true,
+      "actualRetryEligible": false,
+      "actualFullAccepted": false,
+      "actualPartialAccepted": false,
+      "selectedOriginal": true,
+      "candidateBoxesInsideOriginal": true,
+      "uncoveredShadedInk": false,
+      "originalGeometryStable": true
+    },
+    {
+      "id": "en-normal",
+      "expectedText": "Independent shadow record 00637\nDate 2091-04-26\nAmount -041.85\nRate +12.50% and balance 009.70\nKeep upper lines and original pixels\nReview batch 00846 before approval\nAudit 73519 completed",
+      "stages": {
+        "grayOriginal": {
+          "text": "Independent shadow record 00637\nDate 2091-04-26\nAmount -041.85\nRate +12.50% and balance 009.70\nKeep upper lines and original pixels\nReview batch 00846 before approval\nAudit 73519 completed",
+          "metrics": {
+            "expectedCharacters": 162,
+            "actualCharacters": 162,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 7,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00637",
+            "2091-04-26",
+            "-041.85",
+            "+12.50%",
+            "009.70",
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": true,
+          "meanConfidence": 0.9486497044444449,
+          "wordCount": 27
+        },
+        "grayEnhanced": {
+          "text": "Independent shadow record 00637\nDate 2091-04-26\nAmount -041.85\nRate +12.50% and balance 009.70\nKeep upper lines and original pixels\nReview batch 00846 before approval\nAudit 73519 completed",
+          "metrics": {
+            "expectedCharacters": 162,
+            "actualCharacters": 162,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 7,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00637",
+            "2091-04-26",
+            "-041.85",
+            "+12.50%",
+            "009.70",
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": true,
+          "meanConfidence": 0.9493823351851851,
+          "wordCount": 27
+        },
+        "rgbOriginal": {
+          "text": "Independent shadow record 00637\nDate 2091-04-26\nAmount -041.85\nRate +12.50% and balance 009.70\nKeep upper lines and original pixels\nReview batch 00846 before approval\nAudit 73519 completed",
+          "metrics": {
+            "expectedCharacters": 162,
+            "actualCharacters": 162,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 7,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00637",
+            "2091-04-26",
+            "-041.85",
+            "+12.50%",
+            "009.70",
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": true,
+          "meanConfidence": 0.9486497044444449,
+          "wordCount": 27
+        },
+        "rgbEnhanced": {
+          "text": "Independent shadow record 00637\nDate 2091-04-26\nAmount -041.85\nRate +12.50% and balance 009.70\nKeep upper lines and original pixels\nReview batch 00846 before approval\nAudit 73519 completed",
+          "metrics": {
+            "expectedCharacters": 162,
+            "actualCharacters": 162,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 7,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00637",
+            "2091-04-26",
+            "-041.85",
+            "+12.50%",
+            "009.70",
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": true,
+          "meanConfidence": 0.9496703562962965,
+          "wordCount": 27
+        }
+      },
+      "originalTsvAndParsedBlocksConfidenceExact": true,
+      "actualRetryEligible": false,
+      "actualFullAccepted": false,
+      "actualPartialAccepted": false,
+      "selectedOriginal": true,
+      "candidateBoxesInsideOriginal": true,
+      "uncoveredShadedInk": false,
+      "originalGeometryStable": true
+    },
+    {
+      "id": "zh-normal",
+      "expectedText": "独立阴影记录00637\n日期2091-04-26\n金额-041.85\n比例+12.50%，余额009.70\n保留上方文字和原始像素\n审批前复核批次00846\n核验73519完成",
+      "stages": {
+        "grayOriginal": {
+          "text": "独立阴影记录 00637\n日期 2091-04-26\n金额 -041.85\n比例 +12.50%，余额 009.70\n保留上方文字和原始像素\n审批前复核批次 00846\n核验 73519 完成",
+          "metrics": {
+            "expectedCharacters": 82,
+            "actualCharacters": 82,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 7,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00637",
+            "2091-04-26",
+            "-041.85",
+            "+12.50%",
+            "009.70",
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": true,
+          "meanConfidence": 0.9016684177419353,
+          "wordCount": 31
+        },
+        "grayEnhanced": {
+          "text": "独立阴影记录 00637\n日期 2091-04-26\n金额 -041.85\n比例 +12.50%，余额 009.70\n保留上方文字和原始像素\n核验 73519 完成",
+          "metrics": {
+            "expectedCharacters": 82,
+            "actualCharacters": 70,
+            "editDistance": 12,
+            "cer": 0.14634146341463414,
+            "alignedCharacterRecall": 0.8536585365853658,
+            "exactLines": 6,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00637",
+            "2091-04-26",
+            "-041.85",
+            "+12.50%",
+            "009.70",
+            "73519"
+          ],
+          "exactNumericSequence": false,
+          "meanConfidence": 0.8955352035999998,
+          "wordCount": 25
+        },
+        "rgbOriginal": {
+          "text": "独立阴影记录 00637\n日期 2091-04-26\n金额 -041.85\n比例 +12.50%，余额 009.70\n保留上方文字和原始像素\n审批前复核批次 00846\n核验 73519 完成",
+          "metrics": {
+            "expectedCharacters": 82,
+            "actualCharacters": 82,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 7,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00637",
+            "2091-04-26",
+            "-041.85",
+            "+12.50%",
+            "009.70",
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": true,
+          "meanConfidence": 0.9016684177419353,
+          "wordCount": 31
+        },
+        "rgbEnhanced": {
+          "text": "独立阴影记录 00637\n日期 2091-04-26\n金额 -041.85\n比例 +12.509%，余额 009.70\n保留上方文字和原始像素\n审批前复核批次 00846\n核验 73519 完成",
+          "metrics": {
+            "expectedCharacters": 82,
+            "actualCharacters": 83,
+            "editDistance": 1,
+            "cer": 0.012195121951219513,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 6,
+            "expectedNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "50",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ],
+            "actualNumbers": [
+              "00637",
+              "2091",
+              "04",
+              "26",
+              "041",
+              "85",
+              "12",
+              "509",
+              "009",
+              "70",
+              "00846",
+              "73519"
+            ]
+          },
+          "numericSurfaces": [
+            "00637",
+            "2091-04-26",
+            "-041.85",
+            "+12.509%",
+            "009.70",
+            "00846",
+            "73519"
+          ],
+          "exactNumericSequence": false,
+          "meanConfidence": 0.8930271887096776,
+          "wordCount": 31
+        }
+      },
+      "originalTsvAndParsedBlocksConfidenceExact": true,
+      "actualRetryEligible": false,
+      "actualFullAccepted": false,
+      "actualPartialAccepted": false,
+      "selectedOriginal": true,
+      "candidateBoxesInsideOriginal": true,
+      "uncoveredShadedInk": false,
+      "originalGeometryStable": false
+    }
+  ],
+  "runtime": {
+    "java": "17.0.16+8",
+    "pillow": "12.3.0",
+    "numpy": "2.3.5",
+    "tesseract": "5.5.2",
+    "leptonica": "1.87.0",
+    "libpng": "1.6.57",
+    "languages": "chi_sim+eng",
+    "psm": 3,
+    "modelRevision": "87416418657359cb625c412a48b6e1d6d41c29bd",
+    "runtimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+    "fonts": {
+      "en": {
+        "path": "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
+        "sha256": "9caef765d2e891c10dd73658894f01e660fe0c1c83e0bda7d6edf561d8f623d4",
+        "license": "SIL-OFL-1.1",
+        "version": [
+          "Version 2.1.5"
+        ]
+      },
+      "zh": {
+        "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+        "license": "SIL-OFL-1.1",
+        "version": [
+          "Version 2.004;hotconv 1.0.118;makeotfexe 2.5.65603"
+        ]
+      }
+    }
+  },
+  "sourceBoundJarSha256": "1ead3c12b621c612535ba7a9f338915484b79be3b74509cf3c3b8a304b2ce68b",
+  "productionFingerprint": "07911c45cf0a510f7fa9f8ae279e977341c795e246c19711c3dce83aee95b198",
+  "sourceBoundClasses": 232,
+  "inheritedLocalTests": "40 clean full build505 total504pass1optional signed-OFD skip;10bundled conditional tests executed;not rerun43",
+  "resources": {
+    "pixelJavaWallSeconds": 16.633079546,
+    "pixelHeapMiB": 256,
+    "nativeBatchWallSeconds": 8.337305144988932,
+    "nativeCommandsWallSeconds": 4.280469698016532,
+    "nativeUserSeconds": 3.621838,
+    "nativeSystemSeconds": 0.57952,
+    "maximumNativeChildRssKiB": 90852
+  },
+  "receipts": [
+    {
+      "path": "qa-samples/work/iteration43-freeze-receipt.json",
+      "exitCode": 0,
+      "ECHILD": true,
+      "remainingRegisteredProcesses": 0
+    },
+    {
+      "path": "qa-samples/work/iteration43-compile-receipt.json",
+      "exitCode": 0,
+      "ECHILD": true,
+      "remainingRegisteredProcesses": 0
+    },
+    {
+      "path": "qa-samples/work/iteration43-pixel-receipt.json",
+      "exitCode": 0,
+      "ECHILD": true,
+      "remainingRegisteredProcesses": 0
+    },
+    {
+      "path": "qa-samples/work/iteration43-native-receipt.json",
+      "exitCode": 0,
+      "ECHILD": true,
+      "remainingRegisteredProcesses": 0
+    }
+  ],
+  "decision": "Java gray color conversion is observable and enhancement is encoding-sensitive under raw-byte definitionA. Neither gradient gains a missing line. Chinese normal RGB enhancement trades restored00846 for a new+12.509% numeric error;original full truth remains selected. No production normalization or threshold change justified.",
+  "limits": [
+    "No universal PNG colorimetry claim;metadata-tagged/16bit/palette/colored alpha/EXIF rotation not tested",
+    "Local-shadow pairs and blank/noise/alpha controls pixel-only;no newOCR on these",
+    "No new Word/Office/mask/HTTP matrix because production artifact unchanged;no claim of visual/editability acceptance",
+    "Original sparseOFD/lowCJK/per-mille/oldscanoverprint/mixedstrictAPI unresolved;nativeMacWindows/MicrosoftWord/signedfixture unrun"
+  ]
+}

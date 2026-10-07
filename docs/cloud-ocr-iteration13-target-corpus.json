@@ -1,0 +1,544 @@
+{
+  "seed": 130142026,
+  "provenance": "One bounded targeted correction of merged Orchid-keeps third-column rejection, using known separated Copper label; fixed four modest true-angle transforms chosen analytically before OCR measurements or production edits",
+  "license": "Apache-2.0 generated text/code; separate SIL-OFL-1.1 font",
+  "fonts": {
+    "mono": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+      "sha256": "5883330d94debd992952cd8f0571b225f478c2d797d3f36c7521b0a5c9bde0f2",
+      "versions": [
+        "Version 2.1.5"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/liberationfonts/liberation-fonts"
+    }
+  },
+  "versions": {
+    "Pillow": "12.3.0"
+  },
+  "generatorSha256": "1445eb3c0c2581573a8861826de561a8557e86cfa74d4c3a8079c3c32d071b2d",
+  "angleSelectionBasis": "870px row span and roughly21-24px ink height give half-height edge budget near0.69-0.79deg; choose±0.35/±0.65, not a sweep",
+  "limits": [
+    "Native qualification of this distinct upright rendering must be independently verified; shared layout is not sufficient",
+    "Detector minimum1degree means these true modest angles can still have a false larger global stagger projection",
+    "No claim of broad native angle safety or intent inference"
+  ],
+  "cases": [
+    {
+      "file": "spruce-stagger-angle+0.00.png",
+      "sha256": "6b265cf6257cfa7794ff4fc7b8767dab45d8539d1483f3594401f0a636700ce3",
+      "expectedLines": [
+        "Spruce keeps ticket07",
+        "Spruce keeps ticket08",
+        "Spruce keeps ticket09",
+        "Spruce keeps ticket10",
+        "Lagoon keeps ticket07",
+        "Lagoon keeps ticket08",
+        "Lagoon keeps ticket09",
+        "Lagoon keeps ticket10",
+        "Copper keeps ticket07",
+        "Copper keeps ticket08",
+        "Copper keeps ticket09",
+        "Copper keeps ticket10"
+      ],
+      "font": "mono",
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "layout": "three-columns",
+      "fontSize": 29,
+      "rowStep": 290,
+      "columnStagger": [
+        0,
+        35,
+        70
+      ],
+      "unrotatedBaselines": [
+        {
+          "text": "Spruce keeps ticket07",
+          "x": 120,
+          "y": 250,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket08",
+          "x": 120,
+          "y": 540,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket09",
+          "x": 120,
+          "y": 830,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket10",
+          "x": 120,
+          "y": 1120,
+          "column": 0
+        },
+        {
+          "text": "Lagoon keeps ticket07",
+          "x": 840,
+          "y": 285,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket08",
+          "x": 840,
+          "y": 575,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket09",
+          "x": 840,
+          "y": 865,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket10",
+          "x": 840,
+          "y": 1155,
+          "column": 1
+        },
+        {
+          "text": "Copper keeps ticket07",
+          "x": 1560,
+          "y": 320,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket08",
+          "x": 1560,
+          "y": 610,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket09",
+          "x": 1560,
+          "y": 900,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket10",
+          "x": 1560,
+          "y": 1190,
+          "column": 2
+        }
+      ]
+    },
+    {
+      "file": "spruce-stagger-angle-0.35.png",
+      "sha256": "43cb31c5a36d1a4af06b3ef0cc98668b01c4af36d63ffe524792e504b19f62ea",
+      "expectedLines": [
+        "Spruce keeps ticket07",
+        "Spruce keeps ticket08",
+        "Spruce keeps ticket09",
+        "Spruce keeps ticket10",
+        "Lagoon keeps ticket07",
+        "Lagoon keeps ticket08",
+        "Lagoon keeps ticket09",
+        "Lagoon keeps ticket10",
+        "Copper keeps ticket07",
+        "Copper keeps ticket08",
+        "Copper keeps ticket09",
+        "Copper keeps ticket10"
+      ],
+      "font": "mono",
+      "sourceSkewDegrees": -0.35,
+      "dpi": 300,
+      "layout": "three-columns",
+      "fontSize": 29,
+      "rowStep": 290,
+      "columnStagger": [
+        0,
+        35,
+        70
+      ],
+      "unrotatedBaselines": [
+        {
+          "text": "Spruce keeps ticket07",
+          "x": 120,
+          "y": 250,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket08",
+          "x": 120,
+          "y": 540,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket09",
+          "x": 120,
+          "y": 830,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket10",
+          "x": 120,
+          "y": 1120,
+          "column": 0
+        },
+        {
+          "text": "Lagoon keeps ticket07",
+          "x": 840,
+          "y": 285,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket08",
+          "x": 840,
+          "y": 575,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket09",
+          "x": 840,
+          "y": 865,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket10",
+          "x": 840,
+          "y": 1155,
+          "column": 1
+        },
+        {
+          "text": "Copper keeps ticket07",
+          "x": 1560,
+          "y": 320,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket08",
+          "x": 1560,
+          "y": 610,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket09",
+          "x": 1560,
+          "y": 900,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket10",
+          "x": 1560,
+          "y": 1190,
+          "column": 2
+        }
+      ]
+    },
+    {
+      "file": "spruce-stagger-angle+0.35.png",
+      "sha256": "f5cf2b7ad0a8efcbe41018ebf8c7be0a560de11a136545bec3b0d088cd8cffb5",
+      "expectedLines": [
+        "Spruce keeps ticket07",
+        "Spruce keeps ticket08",
+        "Spruce keeps ticket09",
+        "Spruce keeps ticket10",
+        "Lagoon keeps ticket07",
+        "Lagoon keeps ticket08",
+        "Lagoon keeps ticket09",
+        "Lagoon keeps ticket10",
+        "Copper keeps ticket07",
+        "Copper keeps ticket08",
+        "Copper keeps ticket09",
+        "Copper keeps ticket10"
+      ],
+      "font": "mono",
+      "sourceSkewDegrees": 0.35,
+      "dpi": 300,
+      "layout": "three-columns",
+      "fontSize": 29,
+      "rowStep": 290,
+      "columnStagger": [
+        0,
+        35,
+        70
+      ],
+      "unrotatedBaselines": [
+        {
+          "text": "Spruce keeps ticket07",
+          "x": 120,
+          "y": 250,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket08",
+          "x": 120,
+          "y": 540,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket09",
+          "x": 120,
+          "y": 830,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket10",
+          "x": 120,
+          "y": 1120,
+          "column": 0
+        },
+        {
+          "text": "Lagoon keeps ticket07",
+          "x": 840,
+          "y": 285,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket08",
+          "x": 840,
+          "y": 575,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket09",
+          "x": 840,
+          "y": 865,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket10",
+          "x": 840,
+          "y": 1155,
+          "column": 1
+        },
+        {
+          "text": "Copper keeps ticket07",
+          "x": 1560,
+          "y": 320,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket08",
+          "x": 1560,
+          "y": 610,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket09",
+          "x": 1560,
+          "y": 900,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket10",
+          "x": 1560,
+          "y": 1190,
+          "column": 2
+        }
+      ]
+    },
+    {
+      "file": "spruce-stagger-angle-0.65.png",
+      "sha256": "7e360c58b32347a429365299e2e36f94b38d029470ae577d6e47ee7b98b01414",
+      "expectedLines": [
+        "Spruce keeps ticket07",
+        "Spruce keeps ticket08",
+        "Spruce keeps ticket09",
+        "Spruce keeps ticket10",
+        "Lagoon keeps ticket07",
+        "Lagoon keeps ticket08",
+        "Lagoon keeps ticket09",
+        "Lagoon keeps ticket10",
+        "Copper keeps ticket07",
+        "Copper keeps ticket08",
+        "Copper keeps ticket09",
+        "Copper keeps ticket10"
+      ],
+      "font": "mono",
+      "sourceSkewDegrees": -0.65,
+      "dpi": 300,
+      "layout": "three-columns",
+      "fontSize": 29,
+      "rowStep": 290,
+      "columnStagger": [
+        0,
+        35,
+        70
+      ],
+      "unrotatedBaselines": [
+        {
+          "text": "Spruce keeps ticket07",
+          "x": 120,
+          "y": 250,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket08",
+          "x": 120,
+          "y": 540,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket09",
+          "x": 120,
+          "y": 830,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket10",
+          "x": 120,
+          "y": 1120,
+          "column": 0
+        },
+        {
+          "text": "Lagoon keeps ticket07",
+          "x": 840,
+          "y": 285,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket08",
+          "x": 840,
+          "y": 575,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket09",
+          "x": 840,
+          "y": 865,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket10",
+          "x": 840,
+          "y": 1155,
+          "column": 1
+        },
+        {
+          "text": "Copper keeps ticket07",
+          "x": 1560,
+          "y": 320,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket08",
+          "x": 1560,
+          "y": 610,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket09",
+          "x": 1560,
+          "y": 900,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket10",
+          "x": 1560,
+          "y": 1190,
+          "column": 2
+        }
+      ]
+    },
+    {
+      "file": "spruce-stagger-angle+0.65.png",
+      "sha256": "5343abe8bf2dd50b04eee4d8c0c924ec163ae1bb043bfac92fc5d0d39684db81",
+      "expectedLines": [
+        "Spruce keeps ticket07",
+        "Spruce keeps ticket08",
+        "Spruce keeps ticket09",
+        "Spruce keeps ticket10",
+        "Lagoon keeps ticket07",
+        "Lagoon keeps ticket08",
+        "Lagoon keeps ticket09",
+        "Lagoon keeps ticket10",
+        "Copper keeps ticket07",
+        "Copper keeps ticket08",
+        "Copper keeps ticket09",
+        "Copper keeps ticket10"
+      ],
+      "font": "mono",
+      "sourceSkewDegrees": 0.65,
+      "dpi": 300,
+      "layout": "three-columns",
+      "fontSize": 29,
+      "rowStep": 290,
+      "columnStagger": [
+        0,
+        35,
+        70
+      ],
+      "unrotatedBaselines": [
+        {
+          "text": "Spruce keeps ticket07",
+          "x": 120,
+          "y": 250,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket08",
+          "x": 120,
+          "y": 540,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket09",
+          "x": 120,
+          "y": 830,
+          "column": 0
+        },
+        {
+          "text": "Spruce keeps ticket10",
+          "x": 120,
+          "y": 1120,
+          "column": 0
+        },
+        {
+          "text": "Lagoon keeps ticket07",
+          "x": 840,
+          "y": 285,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket08",
+          "x": 840,
+          "y": 575,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket09",
+          "x": 840,
+          "y": 865,
+          "column": 1
+        },
+        {
+          "text": "Lagoon keeps ticket10",
+          "x": 840,
+          "y": 1155,
+          "column": 1
+        },
+        {
+          "text": "Copper keeps ticket07",
+          "x": 1560,
+          "y": 320,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket08",
+          "x": 1560,
+          "y": 610,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket09",
+          "x": 1560,
+          "y": 900,
+          "column": 2
+        },
+        {
+          "text": "Copper keeps ticket10",
+          "x": 1560,
+          "y": 1190,
+          "column": 2
+        }
+      ]
+    }
+  ],
+  "containerCases": []
+}

@@ -16,6 +16,7 @@ final class OcrBackgroundMaskSampler implements AutoCloseable {
     private final BufferedImage image;
     private final Rect background;
     private final double sx, sy;
+    private int blankPixelBudget = 250_000;
 
     private OcrBackgroundMaskSampler(BufferedImage image, Rect background) {
         this.image = image;
@@ -103,6 +104,28 @@ final class OcrBackgroundMaskSampler implements AutoCloseable {
             fills.add(new Fill(new Rect(x1, y1, x2 - x1, y2 - y1), color));
         }
         return List.copyOf(fills);
+    }
+
+    /** Inspect every pixel, never sparse samples, before reserving transparent edit space. */
+    boolean uniformLightPaper(Rect region, String paperHex) {
+        int rgb = Integer.parseInt(paperHex, 16);
+        int[] paper = {(rgb >>> 16) & 255, (rgb >>> 8) & 255, rgb & 255};
+        if (Arrays.stream(paper).min().orElse(0) < 180 || range(paper) > 8) return false;
+        int left = (int) Math.floor((region.x() - background.x()) * sx);
+        int top = (int) Math.floor((region.y() - background.y()) * sy);
+        int right = (int) Math.ceil((region.right() - background.x()) * sx);
+        int bottom = (int) Math.ceil((region.bottom() - background.y()) * sy);
+        long pixels = (long) (right - left) * (bottom - top);
+        if (left < 0 || top < 0 || right > image.getWidth() || bottom > image.getHeight()
+                || pixels <= 0 || pixels > blankPixelBudget) return false;
+        blankPixelBudget -= (int) pixels;
+        for (int y = top; y < bottom; y++) for (int x = left; x < right; x++) {
+            int[] sample = color(x, y);
+            for (int channel = 0; channel < 3; channel++) {
+                if (Math.abs(sample[channel] - paper[channel]) > 4) return false;
+            }
+        }
+        return true;
     }
 
     private boolean hasColouredMarks(double x, double y, double width, double height, double[][] plane) {

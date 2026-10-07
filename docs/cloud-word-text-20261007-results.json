@@ -1,0 +1,146 @@
+{
+  "parentRevision": "59dd1859cc912cc525aeee4cb125736e2f892b1c",
+  "jarSha256": "4da10130d003e94b841735167816f214ddb73f35135a6ab6c5b88e2aedfc6d5d",
+  "baselineActions": 7,
+  "finalActions": 8,
+  "baselineOcrTextMismatches": 6,
+  "finalOcrVisibleRunAndLineMatches": 7,
+  "nativeGoldenAndBaselineBytesMatch": true,
+  "recognitionCompletenessMeasured": false,
+  "scanQualityAccepted": false,
+  "syntheticAudits": {
+    "chinese": {
+      "frames": 67,
+      "lines": 9,
+      "characters": 110,
+      "exactVisibleRunAndLineMatch": true,
+      "recognitionCompletenessMeasured": false
+    },
+    "revenue-edited": {
+      "frames": 9,
+      "lines": 4,
+      "characters": 65,
+      "exactVisibleRunAndLineMatch": true,
+      "recognitionCompletenessMeasured": false
+    },
+    "revenue": {
+      "frames": 9,
+      "lines": 4,
+      "characters": 65,
+      "exactVisibleRunAndLineMatch": true,
+      "recognitionCompletenessMeasured": false
+    },
+    "review-edited": {
+      "frames": 9,
+      "lines": 4,
+      "characters": 62,
+      "exactVisibleRunAndLineMatch": true,
+      "recognitionCompletenessMeasured": false
+    },
+    "review": {
+      "frames": 9,
+      "lines": 4,
+      "characters": 62,
+      "exactVisibleRunAndLineMatch": true,
+      "recognitionCompletenessMeasured": false
+    }
+  },
+  "anonymousPrivateAudits": [
+    {
+      "frames": 2102,
+      "lines": 423,
+      "characters": 6273,
+      "exactVisibleRunAndLineMatch": true,
+      "recognitionCompletenessMeasured": false
+    },
+    {
+      "frames": 2102,
+      "lines": 423,
+      "characters": 6263,
+      "exactVisibleRunAndLineMatch": true,
+      "recognitionCompletenessMeasured": false
+    }
+  ],
+  "localJava": {
+    "total": {
+      "tests": 532,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 2
+    },
+    "modules": {
+      "docx-renderer": {
+        "tests": 44,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "layout-model": {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "ofd-parser": {
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1
+      },
+      "table-recognizer": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "task-service": {
+        "tests": 429,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1
+      },
+      "web-api": {
+        "tests": 28,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    }
+  },
+  "frontendTests": 22,
+  "classAndAssets": {
+    "applicationClasses": 237,
+    "changedClasses": [
+      "task-service/com/fuyue/formatconverter/task/DocxToTextConverter.class"
+    ],
+    "wordAndOfficeProducerClassesByteIdentical": true,
+    "frontendAssetsMatchDist": true,
+    "frontendAssetCount": 7
+  },
+  "resources": {
+    "baselineSeven": {
+      "wallSeconds": 57.60702328500338,
+      "userSeconds": 152.222349,
+      "systemSeconds": 12.633365,
+      "maxChildRssKiB": 360436
+    },
+    "finalSeven": {
+      "wallSeconds": 27.298230903004878,
+      "userSeconds": 80.137184,
+      "systemSeconds": 6.002841,
+      "maxChildRssKiB": 320964
+    },
+    "additionalUploadedWord": {
+      "wallSeconds": 12.206031721994805,
+      "userSeconds": 34.621986,
+      "systemSeconds": 2.8023059999999997,
+      "maxChildRssKiB": 317828
+    }
+  },
+  "unresolved": [
+    "Complex scan giant pseudo-words, ghosting and missing fields",
+    "Office PDF to TXT OCR_VISIBILITY_UNCERTAIN",
+    "Generic or rewritten textbox structures use the existing extraction fallback",
+    "Native macOS/Windows, Microsoft Word and concurrency acceptance unrun"
+  ]
+}

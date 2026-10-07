@@ -1,0 +1,10 @@
+{
+  "sourceRevision": "2fe947d156b34339735de3078dd047ec665e8267",
+  "hypothesis": "OFD page aggregation discards per-image enhancement, omission, conflict and partial-recovery warning semantics",
+  "fixBoundary": "Keep one weighted page OCR_APPLIED summary; retain supplemental warnings scoped to each successfully recognized image without OR-ing image flags onto the aggregate",
+  "controlledCases": ["accepted-incomplete single scan", "accepted-complete single scan", "same-page incomplete and complete scans", "low-confidence image hidden by page average"],
+  "http": "Before/after authenticated HTTP to independent JVM worker: single incomplete TXT/DOCX, single complete TXT, mixed same-page TXT/DOCX; DOCX actual LibreOffice PDF/TXT reopening. One bundled bilingual numeric OFD TXT/DOCX control per artifact.",
+  "invariants": ["text, numeric surfaces, confidence and original-coordinate boxes unchanged", "original scan pixels and editable Word frames/masks unchanged", "warning scope does not claim every image was enhanced/partial/incomplete", "existing failure/timeout and weighted-confidence contracts unchanged"],
+  "budget": {"ocrConcurrency": 1, "pageTimeoutSeconds": 120, "wholeHttpSecondsPerArtifact": 480},
+  "stop": "Retain failing-before evidence; stop on product regression. No PSM/angle sweep or repetition of completed cleanup cases. Native package acceptance remains unrun."
+}

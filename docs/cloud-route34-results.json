@@ -1,0 +1,425 @@
+{
+  "parentRevision": "4022840f961d2fe0d0d39c46593a3e238dd5ecd5",
+  "jarSha256": "6e0f7d94a2e0804074cc535c04a859e7f6c5fd8171cf94a21f9ba4b4a2434c6c",
+  "corpusManifestSha256": "0daeaff8ec0de0532cfab542cc25e1020bb2bd7065f1feca9bfed0363feb7bcf",
+  "controls": [
+    {
+      "id": "native-only",
+      "status": "SUCCESS",
+      "error": null,
+      "warnings": [],
+      "nativeCharacters": 53,
+      "requiredImages": 0,
+      "nativeOnlyHypotheticalText": "ROUTE CONTROL 2088\nRecord 00973\nAmount 128.75\nDate 2088-09-26\n",
+      "text": "ROUTE CONTROL 2088\nRecord 00973\nAmount 128.75\nDate 2088-09-26\n",
+      "rawTextExact": true,
+      "numericLexemesExact": true
+    },
+    {
+      "id": "complete-local-mask",
+      "status": "FAILED",
+      "error": "OCR_NO_NEW_TEXT",
+      "warnings": [],
+      "nativeCharacters": 53,
+      "requiredImages": 1,
+      "nativeOnlyHypotheticalText": "ROUTE CONTROL 2088\nRecord 00973\nAmount 128.75\nDate 2088-09-26\n",
+      "artifactProduced": false,
+      "qualityPassed": false
+    },
+    {
+      "id": "complete-full-mask",
+      "status": "SUCCESS",
+      "error": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页图片 1已使用本地 Tesseract OCR，平均置信度 92.4%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9242856622222223
+        },
+        {
+          "code": "OCR_OCCLUDED_TEXT_IGNORED",
+          "message": "PDF 第 1 页有 9 个底图 OCR 词被后绘制的不透明遮罩完整覆盖，未并入可见文字；其余 OCR 仍需复核。",
+          "pageNumber": 1,
+          "region": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 215.89999999999998,
+            "height": 279.4
+          },
+          "confidence": null
+        }
+      ],
+      "nativeCharacters": 53,
+      "requiredImages": 1,
+      "nativeOnlyHypotheticalText": "ROUTE CONTROL 2088\nRecord 00973\nAmount 128.75\nDate 2088-09-26\n",
+      "text": "ROUTE CONTROL 2088\nRecord 00973\nAmount 128.75\nDate 2088-09-26\n",
+      "rawTextExact": true,
+      "numericLexemesExact": true
+    },
+    {
+      "id": "partial-native",
+      "status": "SUCCESS",
+      "error": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页图片 1已使用本地 Tesseract OCR，平均置信度 92.4%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9242856622222223
+        },
+        {
+          "code": "OCR_OCCLUDED_TEXT_IGNORED",
+          "message": "PDF 第 1 页有 2 个底图 OCR 词被后绘制的不透明遮罩完整覆盖，未并入可见文字；其余 OCR 仍需复核。",
+          "pageNumber": 1,
+          "region": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 215.89999999999998,
+            "height": 279.4
+          },
+          "confidence": null
+        }
+      ],
+      "nativeCharacters": 39,
+      "requiredImages": 1,
+      "nativeOnlyHypotheticalText": "ROUTE CONTROL 2088\nRecord 00973\nAmount 128.75\n",
+      "text": "ROUTE CONTROL 2088\nRecord 00973\nAmount 128.75\nDate 2088-09-26\n",
+      "rawTextExact": true,
+      "numericLexemesExact": true
+    },
+    {
+      "id": "unrecognized-ink",
+      "status": "FAILED",
+      "error": "OCR_NO_NEW_TEXT",
+      "warnings": [],
+      "nativeCharacters": 53,
+      "requiredImages": 1,
+      "nativeOnlyHypotheticalText": "ROUTE CONTROL 2088\nRecord 00973\nAmount 128.75\nDate 2088-09-26\n",
+      "artifactProduced": false,
+      "qualityPassed": false
+    },
+    {
+      "id": "conflicting-id",
+      "status": "SUCCESS",
+      "error": null,
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页图片 1已使用本地 Tesseract OCR，平均置信度 92.4%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9239004611111112
+        },
+        {
+          "code": "OCR_OCCLUDED_TEXT_IGNORED",
+          "message": "PDF 第 1 页有 2 个底图 OCR 词被后绘制的不透明遮罩完整覆盖，未并入可见文字；其余 OCR 仍需复核。",
+          "pageNumber": 1,
+          "region": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 215.89999999999998,
+            "height": 279.4
+          },
+          "confidence": null
+        }
+      ],
+      "nativeCharacters": 53,
+      "requiredImages": 1,
+      "nativeOnlyHypotheticalText": "ROUTE CONTROL 2088\nRecord 00973\nAmount 128.75\nDate 2088-09-26\n",
+      "text": "ROUTE CONTROL 2088\nRecord 00973Record 00974\nAmount 128.75\nDate 2088-09-26\n",
+      "bothNumericSourcesPreserved": true,
+      "canonicalSingleValue": false
+    },
+    {
+      "id": "transparent-mask",
+      "status": "FAILED",
+      "error": "OCR_VISIBILITY_UNCERTAIN",
+      "warnings": [],
+      "nativeCharacters": 53,
+      "requiredImages": 1,
+      "nativeOnlyHypotheticalText": "ROUTE CONTROL 2088\nRecord 00973\nAmount 128.75\nDate 2088-09-26\n",
+      "artifactProduced": false,
+      "qualityPassed": false
+    }
+  ],
+  "savedFailures": [
+    {
+      "id": "white-text",
+      "error": "OCR_NO_NEW_TEXT",
+      "pdfSha256": "a9bc7d5a2b66101ec26f2a47cf918f99128874ec8638917dad150d0542f1adc8",
+      "nativeCharacters": 55,
+      "imageCoverage": [
+        {
+          "box": {
+            "x": 0.0,
+            "y": -0.017638889151728815,
+            "width": 215.89999999999998,
+            "height": 279.4
+          },
+          "pixelSha256": "82c82412c6e14814fe4c43cd19242e6f867a4c6a66efdac0ccbdd85f7df7a40c",
+          "nativeCharactersWithinImage": 55,
+          "darkPixels": 21688,
+          "occupiedNativeVerticalBands": 2,
+          "nativeVerticalSpanRatio": 0.3151514843256787,
+          "width": 2550,
+          "height": 3300
+        }
+      ],
+      "reusedHttp": true,
+      "ocrRerun": false
+    },
+    {
+      "id": "white-edited-text",
+      "error": "OCR_NO_NEW_TEXT",
+      "pdfSha256": "eb9c3324517ef69665d6f3908e566f574562725509c71ba2b975df9872b0a767",
+      "nativeCharacters": 54,
+      "imageCoverage": [
+        {
+          "box": {
+            "x": 0.0,
+            "y": -0.017638889151728815,
+            "width": 215.89999999999998,
+            "height": 279.4
+          },
+          "pixelSha256": "82c82412c6e14814fe4c43cd19242e6f867a4c6a66efdac0ccbdd85f7df7a40c",
+          "nativeCharactersWithinImage": 54,
+          "darkPixels": 21688,
+          "occupiedNativeVerticalBands": 2,
+          "nativeVerticalSpanRatio": 0.3151514843256787,
+          "width": 2550,
+          "height": 3300
+        }
+      ],
+      "reusedHttp": true,
+      "ocrRerun": false
+    },
+    {
+      "id": "gray-text",
+      "error": "OCR_NO_NEW_TEXT",
+      "pdfSha256": "18e0e481326bbdfbea8e507bf4fc8da5b6fb7cdefd453ca4640907c696f3fe09",
+      "nativeCharacters": 54,
+      "imageCoverage": [
+        {
+          "box": {
+            "x": 0.0,
+            "y": -0.017638889151728815,
+            "width": 215.89999999999998,
+            "height": 279.4
+          },
+          "pixelSha256": "3a58603a4894bc86d30b2da2e6e47040d4fb61a66067d3da022360d1ca5892f8",
+          "nativeCharactersWithinImage": 54,
+          "darkPixels": 21132,
+          "occupiedNativeVerticalBands": 2,
+          "nativeVerticalSpanRatio": 0.3151514843256787,
+          "width": 2550,
+          "height": 3300
+        }
+      ],
+      "reusedHttp": true,
+      "ocrRerun": false
+    },
+    {
+      "id": "gray-edited-text",
+      "error": "OCR_NO_NEW_TEXT",
+      "pdfSha256": "297bcbab6a19337e4f6db18851d889a13927b0ee486b67626acbcac883710368",
+      "nativeCharacters": 54,
+      "imageCoverage": [
+        {
+          "box": {
+            "x": 0.0,
+            "y": -0.017638889151728815,
+            "width": 215.89999999999998,
+            "height": 279.4
+          },
+          "pixelSha256": "3a58603a4894bc86d30b2da2e6e47040d4fb61a66067d3da022360d1ca5892f8",
+          "nativeCharactersWithinImage": 54,
+          "darkPixels": 21132,
+          "occupiedNativeVerticalBands": 2,
+          "nativeVerticalSpanRatio": 0.3151514843256787,
+          "width": 2550,
+          "height": 3300
+        }
+      ],
+      "reusedHttp": true,
+      "ocrRerun": false
+    },
+    {
+      "id": "split-text",
+      "error": "OCR_NO_NEW_TEXT",
+      "pdfSha256": "576af530016e9b1c528a3be68b840634906ec10bc727b921f392b97a49d74771",
+      "nativeCharacters": 54,
+      "imageCoverage": [
+        {
+          "box": {
+            "x": 0.0,
+            "y": -0.017638889151728815,
+            "width": 215.89999999999998,
+            "height": 279.4
+          },
+          "pixelSha256": "58425e8032f3cfb9a13728db54decbbb3f2ebb2cdc63e1b4f64b911e487aa0ad",
+          "nativeCharactersWithinImage": 54,
+          "darkPixels": 22195,
+          "occupiedNativeVerticalBands": 2,
+          "nativeVerticalSpanRatio": 0.3151514843256787,
+          "width": 2550,
+          "height": 3300
+        }
+      ],
+      "reusedHttp": true,
+      "ocrRerun": false
+    },
+    {
+      "id": "split-edited-text",
+      "error": "OCR_NO_NEW_TEXT",
+      "pdfSha256": "38735f11254002474fb0d5e9ad1443fd0defe34b009afafcfdb66b611d6de7fa",
+      "nativeCharacters": 54,
+      "imageCoverage": [
+        {
+          "box": {
+            "x": 0.0,
+            "y": -0.017638889151728815,
+            "width": 215.89999999999998,
+            "height": 279.4
+          },
+          "pixelSha256": "58425e8032f3cfb9a13728db54decbbb3f2ebb2cdc63e1b4f64b911e487aa0ad",
+          "nativeCharactersWithinImage": 54,
+          "darkPixels": 22195,
+          "occupiedNativeVerticalBands": 2,
+          "nativeVerticalSpanRatio": 0.3151514843256787,
+          "width": 2550,
+          "height": 3300
+        }
+      ],
+      "reusedHttp": true,
+      "ocrRerun": false
+    },
+    {
+      "id": "marked-text",
+      "error": "OCR_VISIBILITY_UNCERTAIN",
+      "pdfSha256": "bb515111e6b909603b200ea287df1f3076d44109687b0cf42d66f26ad1894a7c",
+      "nativeCharacters": 54,
+      "imageCoverage": [
+        {
+          "box": {
+            "x": 0.0,
+            "y": -0.017638889151728815,
+            "width": 215.89999999999998,
+            "height": 279.4
+          },
+          "pixelSha256": "c7aa35bca9aa90c66c636d7613ad88407fe034c076887f6e58c0b66c28f0294f",
+          "nativeCharactersWithinImage": 54,
+          "darkPixels": 21403,
+          "occupiedNativeVerticalBands": 2,
+          "nativeVerticalSpanRatio": 0.3151514843256787,
+          "width": 2550,
+          "height": 3300
+        }
+      ],
+      "reusedHttp": true,
+      "ocrRerun": false
+    },
+    {
+      "id": "original-text",
+      "error": "OCR_NO_NEW_TEXT",
+      "pdfSha256": "f021e3a2598357ef67892297fd2c8b7fbf81217e9a7e35dcf07833b54c4e5989",
+      "nativeCharacters": 51,
+      "imageCoverage": [
+        {
+          "box": {
+            "x": 0.0,
+            "y": -0.017638889151728815,
+            "width": 215.89999999999998,
+            "height": 279.4
+          },
+          "pixelSha256": "e3b5360d6fe9d4fb3176956b71cc53a13a2e983fda0000f9213403bc914ed219",
+          "nativeCharactersWithinImage": 51,
+          "darkPixels": 19495,
+          "occupiedNativeVerticalBands": 2,
+          "nativeVerticalSpanRatio": 0.2727272727272727,
+          "width": 2550,
+          "height": 3300
+        }
+      ],
+      "reusedHttp": true,
+      "ocrRerun": false
+    },
+    {
+      "id": "original-edited-text",
+      "error": "OCR_NO_NEW_TEXT",
+      "pdfSha256": "f538c1ac7a0261f93b442f47f38057b666c4d33b2eb2ab33ff60881e4c81888c",
+      "nativeCharacters": 51,
+      "imageCoverage": [
+        {
+          "box": {
+            "x": 0.0,
+            "y": -0.017638889151728815,
+            "width": 215.89999999999998,
+            "height": 279.4
+          },
+          "pixelSha256": "e3b5360d6fe9d4fb3176956b71cc53a13a2e983fda0000f9213403bc914ed219",
+          "nativeCharactersWithinImage": 51,
+          "darkPixels": 19495,
+          "occupiedNativeVerticalBands": 2,
+          "nativeVerticalSpanRatio": 0.2727272727272727,
+          "width": 2550,
+          "height": 3300
+        }
+      ],
+      "reusedHttp": true,
+      "ocrRerun": false
+    }
+  ],
+  "unrecognizedInk": {
+    "actualText": "MISSING 0063.10",
+    "fontPixels": 14,
+    "renderDpi": 300,
+    "cropPixelRegion": [
+      295,
+      1975,
+      425,
+      2005
+    ],
+    "darkPixels": 374,
+    "sourceAndVisibleCropPixelExact": true,
+    "outsideNativeBlocks": true,
+    "absentFromNativeOnlyExtraction": true,
+    "apiStrictlyRefused": true,
+    "proofIsDiagnosticNotAcceptanceAlgorithm": true
+  },
+  "nativeProbe": {
+    "rows": 16,
+    "ocrInvocations": 0,
+    "officeInvocations": 0,
+    "outputSha256": "2e9caab70b098e37a657313349bf0523f222affc7e108cd9e2aff12505e4bb3c"
+  },
+  "newHttp": 7,
+  "interfaceSuccess": 4,
+  "strictFailure": 3,
+  "reusedPriorHttpFailures": 9,
+  "workersAbsent": 7,
+  "ECHILD": true,
+  "newZombies": [],
+  "resources": {
+    "wallSeconds": 29.689011734000815,
+    "userSeconds": 76.506443,
+    "systemSeconds": 6.53881,
+    "maxChildRssKiB": 398928
+  },
+  "conclusion": "No separate explicit PDF OCR-augmentation route or wrong route selection proven. Existing native-only and fully hidden-raster no-ops are valid. Residual OCR duplicates cannot prove all visible raster ink is backed; tiny visible unmodeled text would be lost by blanket duplicate no-op. No safe production gate change adopted.",
+  "productionCodeChanged": false,
+  "sourceJarWordArtifactsUnchanged": true,
+  "originalOfdNoveltyAndVisibilityContractsUnchanged": true,
+  "helpers": {
+    "generate_route34.py": "b17fe045ad016c75d8071a0f3561a0e09ac0d5a3d99638efcafa3f2f047e803c",
+    "PdfRouteNativeProbe34.java": "f12606ea2a4377fff419819bc2c19274dd437ffc4e7d5bc36f263a79abbc65be",
+    "verify_route34.py": "ebb1cfe27d7b1660c794ac97523feca834beafe8f7ea555878695e8dd5341956",
+    "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf",
+    "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9"
+  },
+  "unchangedPriorArtifactHashesRechecked": 22,
+  "currentJarHashRechecked": true,
+  "sourceGateSha256": "341d7d75c7c21cf771725a66bee8aa8c4800bd61338c70a94c1543dee106f11c"
+}

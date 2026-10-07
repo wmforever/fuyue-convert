@@ -1,0 +1,1187 @@
+{
+  "parentRevision": "4c6217978aa264b4ddbcba7c99e502c8a606ff07",
+  "beforeJarSha256": "ac495004efdaba493bdd439bd815158ba5e52d7719cdead0119c8bc247748528",
+  "jarSha256": "6e0f7d94a2e0804074cc535c04a859e7f6c5fd8171cf94a21f9ba4b4a2434c6c",
+  "frozenManifestSha256": "ae7d21a2e24356a568546ae3f8b4a0d548704ff38383ad99e0b8424273d27daf",
+  "finalManifestSha256": "9a6aaa0d4721e6f083a196c028faf1a2fcb0b7de858e6558e8eaec004b39aa7c",
+  "cases": [
+    {
+      "id": "white",
+      "onlyMaskZIndexChanged": true,
+      "sourceScanPixelsExact": true,
+      "sourceMedia": [
+        "word/media/image1.png"
+      ],
+      "promotedMaskBoxesMm": [
+        [
+          25.250069444444442,
+          78.75940277777777,
+          41.80593055555555,
+          82.44593055555555
+        ],
+        [
+          43.11473611111111,
+          78.6747361111111,
+          62.80326388888888,
+          82.44593055555555
+        ]
+      ],
+      "editableText": "Amount 00062.35AUDIT CONTROL 2080Record 00793Date 2082-09-26",
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 92.3%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9229029422222221
+        }
+      ],
+      "onlyIntendedEditableValueChanged": true,
+      "outsideEditedWord": {
+        "exact": true,
+        "changedBounds": [
+          511,
+          929,
+          739,
+          970
+        ],
+        "remainingBounds": null,
+        "excludedPixelRegions": [
+          [
+            506,
+            922,
+            784,
+            999
+          ]
+        ]
+      },
+      "visibleAmountOcr": {
+        "text": "Amount -054.80\n",
+        "seconds": null,
+        "numbersExact": true,
+        "reusedPixelIdenticalCompletedOcr": true,
+        "cropPixels": [
+          296,
+          915,
+          744,
+          1000
+        ],
+        "cropSha256": "984301b300cbb4022685bea8d01f0ef5289e08ee9e3ac4d7a20e31b957d59e30",
+        "metrics": {
+          "text": "Amount -054.80\n",
+          "exact": true,
+          "rawCER": 0.0,
+          "normalizedMetrics": {
+            "expectedCharacters": 13,
+            "actualCharacters": 13,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 1,
+            "expectedNumbers": [
+              "054",
+              "80"
+            ],
+            "actualNumbers": [
+              "054",
+              "80"
+            ]
+          },
+          "numericLexemesExact": true
+        },
+        "cacheReuseSeconds": 0.001563698002428282
+      },
+      "officeApi": [
+        {
+          "stage": "office",
+          "beforeApi": {
+            "text": "AUDIT CONTROL 2080\nRecord 00793\nAmount 00062.35Amount 00062.35\nDate 2082-09-26\n",
+            "exact": false,
+            "rawCER": 0.234375,
+            "normalizedMetrics": {
+              "expectedCharacters": 55,
+              "actualCharacters": 69,
+              "editDistance": 14,
+              "cer": 0.2545454545454545,
+              "alignedCharacterRecall": 1.0,
+              "exactLines": 4,
+              "expectedNumbers": [
+                "2080",
+                "00793",
+                "00062",
+                "35",
+                "2082",
+                "09",
+                "26"
+              ],
+              "actualNumbers": [
+                "2080",
+                "00793",
+                "00062",
+                "35",
+                "00062",
+                "35",
+                "2082",
+                "09",
+                "26"
+              ]
+            },
+            "numericLexemesExact": false
+          },
+          "afterApi": {
+            "status": "FAILED",
+            "error": "OCR_NO_NEW_TEXT",
+            "downloadReady": false,
+            "text": null,
+            "rawCER": null,
+            "qualityPassed": false
+          },
+          "nativeText": "AUDIT CONTROL 2080\nRecord 00793\nDate 2082-09-26\nAmount 00062.35\n",
+          "nativeNumbersExact": true,
+          "outsidePromotedMasks": {
+            "exact": true,
+            "changedBounds": [
+              298,
+              929,
+              742,
+              974
+            ],
+            "remainingBounds": null,
+            "excludedPixelRegions": [
+              [
+                296,
+                928,
+                496,
+                976
+              ],
+              [
+                507,
+                927,
+                744,
+                976
+              ]
+            ]
+          }
+        },
+        {
+          "stage": "edited-office",
+          "beforeApi": {
+            "text": "AUDIT CONTROL 2080\nRecord 00793\nAmount 00062.35Amount -054.80\nDate 2082-09-26\n",
+            "exact": false,
+            "rawCER": 0.23809523809523808,
+            "normalizedMetrics": {
+              "expectedCharacters": 54,
+              "actualCharacters": 68,
+              "editDistance": 14,
+              "cer": 0.25925925925925924,
+              "alignedCharacterRecall": 1.0,
+              "exactLines": 4,
+              "expectedNumbers": [
+                "2080",
+                "00793",
+                "054",
+                "80",
+                "2082",
+                "09",
+                "26"
+              ],
+              "actualNumbers": [
+                "2080",
+                "00793",
+                "00062",
+                "35",
+                "054",
+                "80",
+                "2082",
+                "09",
+                "26"
+              ]
+            },
+            "numericLexemesExact": false
+          },
+          "afterApi": {
+            "status": "FAILED",
+            "error": "OCR_NO_NEW_TEXT",
+            "downloadReady": false,
+            "text": null,
+            "rawCER": null,
+            "qualityPassed": false
+          },
+          "nativeText": "AUDIT CONTROL 2080\nRecord 00793\nDate 2082-09-26\nAmount -054.80\n",
+          "nativeNumbersExact": true,
+          "outsidePromotedMasks": {
+            "exact": true,
+            "changedBounds": [
+              298,
+              929,
+              742,
+              974
+            ],
+            "remainingBounds": null,
+            "excludedPixelRegions": [
+              [
+                296,
+                928,
+                496,
+                976
+              ],
+              [
+                507,
+                927,
+                744,
+                976
+              ]
+            ]
+          }
+        }
+      ],
+      "wordMaskQualitySupported": true,
+      "apiQualitySupported": false,
+      "apiUnsupportedReason": "Strict OCR_NO_NEW_TEXT: remaining native-backed raster has no novel recognized text; completeness is not proven."
+    },
+    {
+      "id": "gray",
+      "onlyMaskZIndexChanged": true,
+      "sourceScanPixelsExact": true,
+      "sourceMedia": [
+        "word/media/image1.png"
+      ],
+      "promotedMaskBoxesMm": [
+        [
+          25.250069444444442,
+          78.75940277777777,
+          41.80593055555555,
+          82.44593055555555
+        ],
+        [
+          43.11473611111111,
+          78.6747361111111,
+          59.077930555555554,
+          82.44593055555555
+        ]
+      ],
+      "editableText": "Amount -071.20BALANCE CHECK 2081Record 00793Date 2082-09-26",
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 95.4%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9541394033333334
+        }
+      ],
+      "onlyIntendedEditableValueChanged": true,
+      "outsideEditedWord": {
+        "exact": true,
+        "changedBounds": [
+          511,
+          929,
+          710,
+          970
+        ],
+        "remainingBounds": null,
+        "excludedPixelRegions": [
+          [
+            506,
+            922,
+            741,
+            999
+          ]
+        ]
+      },
+      "visibleAmountOcr": {
+        "text": "Amount +604.70\n",
+        "seconds": 0.30933348500548163,
+        "numbersExact": true,
+        "reusedPixelIdenticalCompletedOcr": false,
+        "cropPixels": [
+          296,
+          915,
+          741,
+          1000
+        ],
+        "cropSha256": "7c7f128b28665644e9274f8e16056116b6ad09704fb97be9a1c78b50b5878b6d",
+        "metrics": {
+          "text": "Amount +604.70\n",
+          "exact": true,
+          "rawCER": 0.0,
+          "normalizedMetrics": {
+            "expectedCharacters": 13,
+            "actualCharacters": 13,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 1,
+            "expectedNumbers": [
+              "604",
+              "70"
+            ],
+            "actualNumbers": [
+              "604",
+              "70"
+            ]
+          },
+          "numericLexemesExact": true
+        },
+        "cacheReuseSeconds": null
+      },
+      "officeApi": [
+        {
+          "stage": "office",
+          "beforeApi": {
+            "text": "BALANCE CHECK 2081\nRecord 00793\nAmount -071.20Amount -071.20\nDate 2082-09-26\n",
+            "exact": false,
+            "rawCER": 0.2222222222222222,
+            "normalizedMetrics": {
+              "expectedCharacters": 54,
+              "actualCharacters": 67,
+              "editDistance": 13,
+              "cer": 0.24074074074074073,
+              "alignedCharacterRecall": 1.0,
+              "exactLines": 4,
+              "expectedNumbers": [
+                "2081",
+                "00793",
+                "071",
+                "20",
+                "2082",
+                "09",
+                "26"
+              ],
+              "actualNumbers": [
+                "2081",
+                "00793",
+                "071",
+                "20",
+                "071",
+                "20",
+                "2082",
+                "09",
+                "26"
+              ]
+            },
+            "numericLexemesExact": false
+          },
+          "afterApi": {
+            "status": "FAILED",
+            "error": "OCR_NO_NEW_TEXT",
+            "downloadReady": false,
+            "text": null,
+            "rawCER": null,
+            "qualityPassed": false
+          },
+          "nativeText": "BALANCE CHECK 2081\nRecord 00793\nDate 2082-09-26\nAmount -071.20\n",
+          "nativeNumbersExact": true,
+          "outsidePromotedMasks": {
+            "exact": true,
+            "changedBounds": [
+              298,
+              929,
+              696,
+              974
+            ],
+            "remainingBounds": null,
+            "excludedPixelRegions": [
+              [
+                296,
+                928,
+                496,
+                976
+              ],
+              [
+                507,
+                927,
+                700,
+                976
+              ]
+            ]
+          }
+        },
+        {
+          "stage": "edited-office",
+          "beforeApi": {
+            "text": "BALANCE CHECK 2081\nRecord 00793\nAmount -071.20Amount +604.70\nDate 2082-09-26\n",
+            "exact": false,
+            "rawCER": 0.2222222222222222,
+            "normalizedMetrics": {
+              "expectedCharacters": 54,
+              "actualCharacters": 67,
+              "editDistance": 13,
+              "cer": 0.24074074074074073,
+              "alignedCharacterRecall": 1.0,
+              "exactLines": 4,
+              "expectedNumbers": [
+                "2081",
+                "00793",
+                "604",
+                "70",
+                "2082",
+                "09",
+                "26"
+              ],
+              "actualNumbers": [
+                "2081",
+                "00793",
+                "071",
+                "20",
+                "604",
+                "70",
+                "2082",
+                "09",
+                "26"
+              ]
+            },
+            "numericLexemesExact": false
+          },
+          "afterApi": {
+            "status": "FAILED",
+            "error": "OCR_NO_NEW_TEXT",
+            "downloadReady": false,
+            "text": null,
+            "rawCER": null,
+            "qualityPassed": false
+          },
+          "nativeText": "BALANCE CHECK 2081\nRecord 00793\nDate 2082-09-26\nAmount +604.70\n",
+          "nativeNumbersExact": true,
+          "outsidePromotedMasks": {
+            "exact": true,
+            "changedBounds": [
+              298,
+              929,
+              696,
+              974
+            ],
+            "remainingBounds": null,
+            "excludedPixelRegions": [
+              [
+                296,
+                928,
+                496,
+                976
+              ],
+              [
+                507,
+                927,
+                700,
+                976
+              ]
+            ]
+          }
+        }
+      ],
+      "wordMaskQualitySupported": true,
+      "apiQualitySupported": false,
+      "apiUnsupportedReason": "Strict OCR_NO_NEW_TEXT: remaining native-backed raster has no novel recognized text; completeness is not proven."
+    },
+    {
+      "id": "split",
+      "onlyMaskZIndexChanged": true,
+      "sourceScanPixelsExact": true,
+      "sourceMedia": [
+        "word/media/image1.png"
+      ],
+      "promotedMaskBoxesMm": [
+        [
+          25.250069444444442,
+          78.75940277777777,
+          41.80593055555555,
+          82.44593055555555
+        ],
+        [
+          43.28406944444444,
+          78.6747361111111,
+          48.24059722222222,
+          82.36126388888889
+        ],
+        [
+          49.634069444444435,
+          78.6747361111111,
+          55.01393055555555,
+          82.44593055555555
+        ]
+      ],
+      "editableText": "Amount 12 34NUMERIC BOUNDARY 2082Record 00793Date 2082-09-26",
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.2%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.911541237
+        }
+      ],
+      "onlyIntendedEditableValueChanged": true,
+      "outsideEditedWord": {
+        "exact": true,
+        "changedBounds": [
+          511,
+          929,
+          568,
+          970
+        ],
+        "remainingBounds": null,
+        "excludedPixelRegions": [
+          [
+            506,
+            922,
+            610,
+            999
+          ]
+        ]
+      },
+      "visibleAmountOcr": {
+        "text": "Amount 56 34\n",
+        "seconds": 0.30829762299981667,
+        "numbersExact": true,
+        "reusedPixelIdenticalCompletedOcr": false,
+        "cropPixels": [
+          296,
+          915,
+          652,
+          1000
+        ],
+        "cropSha256": "82dd379720b56f91bdeaecace2506ee1899ba8c284e39e959d831b465a2e1828",
+        "metrics": {
+          "text": "Amount 56 34\n",
+          "exact": true,
+          "rawCER": 0.0,
+          "normalizedMetrics": {
+            "expectedCharacters": 10,
+            "actualCharacters": 10,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 1,
+            "expectedNumbers": [
+              "56",
+              "34"
+            ],
+            "actualNumbers": [
+              "56",
+              "34"
+            ]
+          },
+          "numericLexemesExact": true
+        },
+        "cacheReuseSeconds": null
+      },
+      "officeApi": [
+        {
+          "stage": "office",
+          "beforeApi": {
+            "text": "NUMERIC BOUNDARY 2082\nRecord 00793\nAmount 12 34Amount 12 34\nDate 2082-09-26\n",
+            "exact": false,
+            "rawCER": 0.1875,
+            "normalizedMetrics": {
+              "expectedCharacters": 54,
+              "actualCharacters": 64,
+              "editDistance": 10,
+              "cer": 0.18518518518518517,
+              "alignedCharacterRecall": 1.0,
+              "exactLines": 4,
+              "expectedNumbers": [
+                "2082",
+                "00793",
+                "12",
+                "34",
+                "2082",
+                "09",
+                "26"
+              ],
+              "actualNumbers": [
+                "2082",
+                "00793",
+                "12",
+                "34",
+                "12",
+                "34",
+                "2082",
+                "09",
+                "26"
+              ]
+            },
+            "numericLexemesExact": false
+          },
+          "afterApi": {
+            "status": "FAILED",
+            "error": "OCR_NO_NEW_TEXT",
+            "downloadReady": false,
+            "text": null,
+            "rawCER": null,
+            "qualityPassed": false
+          },
+          "nativeText": "NUMERIC BOUNDARY 2082\nRecord 00793\nDate 2082-09-26\nAmount 12 34\n",
+          "nativeNumbersExact": true,
+          "outsidePromotedMasks": {
+            "exact": true,
+            "changedBounds": [
+              298,
+              929,
+              648,
+              974
+            ],
+            "remainingBounds": null,
+            "excludedPixelRegions": [
+              [
+                296,
+                928,
+                496,
+                976
+              ],
+              [
+                509,
+                927,
+                572,
+                975
+              ],
+              [
+                584,
+                927,
+                652,
+                976
+              ]
+            ]
+          }
+        },
+        {
+          "stage": "edited-office",
+          "beforeApi": {
+            "text": "NUMERIC BOUNDARY 2082\nRecord 00793\nAmount 12 34Amount 56 34\nDate 2082-09-26\n",
+            "exact": false,
+            "rawCER": 0.1875,
+            "normalizedMetrics": {
+              "expectedCharacters": 54,
+              "actualCharacters": 64,
+              "editDistance": 10,
+              "cer": 0.18518518518518517,
+              "alignedCharacterRecall": 1.0,
+              "exactLines": 4,
+              "expectedNumbers": [
+                "2082",
+                "00793",
+                "56",
+                "34",
+                "2082",
+                "09",
+                "26"
+              ],
+              "actualNumbers": [
+                "2082",
+                "00793",
+                "12",
+                "34",
+                "56",
+                "34",
+                "2082",
+                "09",
+                "26"
+              ]
+            },
+            "numericLexemesExact": false
+          },
+          "afterApi": {
+            "status": "FAILED",
+            "error": "OCR_NO_NEW_TEXT",
+            "downloadReady": false,
+            "text": null,
+            "rawCER": null,
+            "qualityPassed": false
+          },
+          "nativeText": "NUMERIC BOUNDARY 2082\nRecord 00793\nDate 2082-09-26\nAmount 56 34\n",
+          "nativeNumbersExact": true,
+          "outsidePromotedMasks": {
+            "exact": true,
+            "changedBounds": [
+              298,
+              929,
+              648,
+              974
+            ],
+            "remainingBounds": null,
+            "excludedPixelRegions": [
+              [
+                296,
+                928,
+                496,
+                976
+              ],
+              [
+                509,
+                927,
+                572,
+                975
+              ],
+              [
+                584,
+                927,
+                652,
+                976
+              ]
+            ]
+          }
+        }
+      ],
+      "wordMaskQualitySupported": true,
+      "apiQualitySupported": false,
+      "apiUnsupportedReason": "Strict OCR_NO_NEW_TEXT: remaining native-backed raster has no novel recognized text; completeness is not proven."
+    },
+    {
+      "id": "conflict",
+      "onlyMaskZIndexChanged": true,
+      "sourceScanPixelsExact": true,
+      "sourceMedia": [
+        "word/media/image1.png"
+      ],
+      "promotedMaskBoxesMm": [],
+      "editableText": "Amount 127.50Amount 127.51LAYER CONFLICT 2083Record 00793Date 2082-09-26",
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.1%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9113594911111113
+        },
+        {
+          "code": "OCR_RECOGNITION_CONFLICT",
+          "message": "OFD 第 1 页图片 1 与重叠原生文字包含不同数字或数值符号；保留两层内容，未选择或替换数值，请对照原图复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": null
+        }
+      ],
+      "preservedBothConflictValues": true,
+      "conflictWarningPreserved": true,
+      "wordAllPartsExceptCoreExact": true,
+      "unsupportedCanonicalAmount": true
+    },
+    {
+      "id": "marked",
+      "onlyMaskZIndexChanged": true,
+      "sourceScanPixelsExact": true,
+      "sourceMedia": [
+        "word/media/image1.png"
+      ],
+      "promotedMaskBoxesMm": [
+        [
+          25.250069444444442,
+          78.75940277777777,
+          41.80593055555555,
+          82.44593055555555
+        ]
+      ],
+      "editableText": "Amount 86.40ANNOTATED AUDIT 2084Record 00793Date 2082-09-26",
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 90.6%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.90640286
+        }
+      ],
+      "officeApi": [
+        {
+          "stage": "office",
+          "beforeApi": {
+            "text": "ANNOTATED AUDIT 2084\nRecord 00793\nAmount 86.40\nAmount 86.40\nDate 2082-09-26\n",
+            "exact": false,
+            "rawCER": 0.20634920634920634,
+            "normalizedMetrics": {
+              "expectedCharacters": 54,
+              "actualCharacters": 65,
+              "editDistance": 11,
+              "cer": 0.2037037037037037,
+              "alignedCharacterRecall": 1.0,
+              "exactLines": 4,
+              "expectedNumbers": [
+                "2084",
+                "00793",
+                "86",
+                "40",
+                "2082",
+                "09",
+                "26"
+              ],
+              "actualNumbers": [
+                "2084",
+                "00793",
+                "86",
+                "40",
+                "86",
+                "40",
+                "2082",
+                "09",
+                "26"
+              ]
+            },
+            "numericLexemesExact": false
+          },
+          "afterApi": {
+            "status": "FAILED",
+            "error": "OCR_VISIBILITY_UNCERTAIN",
+            "downloadReady": false,
+            "text": null,
+            "rawCER": null,
+            "qualityPassed": false
+          },
+          "nativeText": "ANNOTATED AUDIT 2084\nRecord 00793\nDate 2082-09-26\nAmount 86.40\n",
+          "nativeNumbersExact": true,
+          "outsidePromotedMasks": {
+            "exact": true,
+            "changedBounds": [
+              298,
+              930,
+              494,
+              974
+            ],
+            "remainingBounds": null,
+            "excludedPixelRegions": [
+              [
+                296,
+                928,
+                496,
+                976
+              ]
+            ]
+          }
+        }
+      ],
+      "qualitySupported": false,
+      "originalMarkPreservedOutsideMasks": true,
+      "unsupportedReason": "Colored annotation blocks reliable per-word paper sampling; preserved scan can still produce duplicate text."
+    },
+    {
+      "id": "original",
+      "onlyMaskZIndexChanged": true,
+      "sourceScanPixelsExact": true,
+      "sourceMedia": [
+        "word/media/image1.png"
+      ],
+      "promotedMaskBoxesMm": [
+        [
+          25.250069444444442,
+          78.75940277777777,
+          41.80593055555555,
+          82.44593055555555
+        ],
+        [
+          43.11473611111111,
+          78.6747361111111,
+          57.55393055555555,
+          82.44593055555555
+        ]
+      ],
+      "editableText": "Amount 048.65DEDUP AUDIT 2076Record 00793Date 2076-10-14",
+      "warnings": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "OFD 第 1 页已使用本地 Tesseract OCR，平均置信度 91.5%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.915274928888889
+        }
+      ],
+      "onlyIntendedEditableValueChanged": true,
+      "outsideEditedWord": {
+        "exact": true,
+        "changedBounds": [
+          511,
+          929,
+          679,
+          970
+        ],
+        "remainingBounds": null,
+        "excludedPixelRegions": [
+          [
+            506,
+            922,
+            722,
+            999
+          ]
+        ]
+      },
+      "visibleAmountOcr": {
+        "text": "Amount 147.80\n",
+        "seconds": 0.30783154000528157,
+        "numbersExact": true,
+        "reusedPixelIdenticalCompletedOcr": false,
+        "cropPixels": [
+          296,
+          915,
+          722,
+          1000
+        ],
+        "cropSha256": "8b0cfb05d823cce0f471b8924266c403997e79cb0111c16d5fd9d40e69cb64e4",
+        "metrics": {
+          "text": "Amount 147.80\n",
+          "exact": true,
+          "rawCER": 0.0,
+          "normalizedMetrics": {
+            "expectedCharacters": 12,
+            "actualCharacters": 12,
+            "editDistance": 0,
+            "cer": 0.0,
+            "alignedCharacterRecall": 1.0,
+            "exactLines": 1,
+            "expectedNumbers": [
+              "147",
+              "80"
+            ],
+            "actualNumbers": [
+              "147",
+              "80"
+            ]
+          },
+          "numericLexemesExact": true
+        },
+        "cacheReuseSeconds": null
+      },
+      "officeApi": [
+        {
+          "stage": "office",
+          "beforeApi": {
+            "text": "DEDUP AUDIT 2076\nRecord 00793\nAmount 048.65Amount 048.65\nDate 2076-10-14\n",
+            "exact": false,
+            "rawCER": 0.21666666666666667,
+            "normalizedMetrics": {
+              "expectedCharacters": 51,
+              "actualCharacters": 63,
+              "editDistance": 12,
+              "cer": 0.23529411764705882,
+              "alignedCharacterRecall": 1.0,
+              "exactLines": 4,
+              "expectedNumbers": [
+                "2076",
+                "00793",
+                "048",
+                "65",
+                "2076",
+                "10",
+                "14"
+              ],
+              "actualNumbers": [
+                "2076",
+                "00793",
+                "048",
+                "65",
+                "048",
+                "65",
+                "2076",
+                "10",
+                "14"
+              ]
+            },
+            "numericLexemesExact": false
+          },
+          "afterApi": {
+            "status": "FAILED",
+            "error": "OCR_NO_NEW_TEXT",
+            "downloadReady": false,
+            "text": null,
+            "rawCER": null,
+            "qualityPassed": false
+          },
+          "nativeText": "DEDUP AUDIT 2076\nRecord 00793\nDate 2076-10-14\nAmount 048.65\n",
+          "nativeNumbersExact": true,
+          "outsidePromotedMasks": {
+            "exact": true,
+            "changedBounds": [
+              298,
+              929,
+              680,
+              974
+            ],
+            "remainingBounds": null,
+            "excludedPixelRegions": [
+              [
+                296,
+                928,
+                496,
+                976
+              ],
+              [
+                507,
+                927,
+                682,
+                976
+              ]
+            ]
+          }
+        },
+        {
+          "stage": "edited-office",
+          "beforeApi": {
+            "text": "DEDUP AUDIT 2076\nRecord 00793\nAmount 048.65Amount 147.80\nDate 2076-10-14\n",
+            "exact": false,
+            "rawCER": 0.21666666666666667,
+            "normalizedMetrics": {
+              "expectedCharacters": 51,
+              "actualCharacters": 63,
+              "editDistance": 12,
+              "cer": 0.23529411764705882,
+              "alignedCharacterRecall": 1.0,
+              "exactLines": 4,
+              "expectedNumbers": [
+                "2076",
+                "00793",
+                "147",
+                "80",
+                "2076",
+                "10",
+                "14"
+              ],
+              "actualNumbers": [
+                "2076",
+                "00793",
+                "048",
+                "65",
+                "147",
+                "80",
+                "2076",
+                "10",
+                "14"
+              ]
+            },
+            "numericLexemesExact": false
+          },
+          "afterApi": {
+            "status": "FAILED",
+            "error": "OCR_NO_NEW_TEXT",
+            "downloadReady": false,
+            "text": null,
+            "rawCER": null,
+            "qualityPassed": false
+          },
+          "nativeText": "DEDUP AUDIT 2076\nRecord 00793\nDate 2076-10-14\nAmount 147.80\n",
+          "nativeNumbersExact": true,
+          "outsidePromotedMasks": {
+            "exact": true,
+            "changedBounds": [
+              298,
+              929,
+              680,
+              974
+            ],
+            "remainingBounds": null,
+            "excludedPixelRegions": [
+              [
+                296,
+                928,
+                496,
+                976
+              ],
+              [
+                507,
+                927,
+                682,
+                976
+              ]
+            ]
+          }
+        }
+      ],
+      "wordMaskQualitySupported": true,
+      "apiQualitySupported": false,
+      "apiUnsupportedReason": "Strict OCR_NO_NEW_TEXT: remaining native-backed raster has no novel recognized text; completeness is not proven."
+    }
+  ],
+  "regressions": [
+    {
+      "id": "digit-extension",
+      "rawTextExact": true,
+      "numbersExact": true,
+      "conflictWarningPreserved": true
+    },
+    {
+      "id": "negative-sign",
+      "rawTextExact": true,
+      "numbersExact": true,
+      "conflictWarningPreserved": true
+    },
+    {
+      "id": "decimal-conflict",
+      "rawTextExact": true,
+      "numbersExact": true,
+      "conflictWarningPreserved": true
+    },
+    {
+      "id": "one-digit-conflict",
+      "rawTextExact": true,
+      "numbersExact": true,
+      "conflictWarningPreserved": true
+    },
+    {
+      "id": "masked-edited",
+      "rawTextExact": true,
+      "numbersExact": true,
+      "conflictWarningPreserved": false
+    },
+    {
+      "id": "boundary-reserve",
+      "rawTextExact": true,
+      "numbersExact": true,
+      "conflictWarningPreserved": false
+    }
+  ],
+  "httpBefore": 20,
+  "httpCandidate": 31,
+  "httpAfter": 31,
+  "existingOriginalWordOverlayFailuresFixed": 2,
+  "independentWordOverlayFailuresFixed": 6,
+  "exactWordOfficeVisibleAmountOutcomes": 8,
+  "exactWordOfficeApiOutcomes": 0,
+  "interfaceSuccessAfter": 22,
+  "boundedStrictFailuresAfter": 9,
+  "unsupported": [
+    "8 supported Word masks have strict PDF→TXT OCR_NO_NEW_TEXT/no artifact; completeness gate unchanged",
+    "same-position native/OCR conflict retains both values and warning",
+    "marked paper retains uncertain raster and strict OCR_VISIBILITY_UNCERTAIN/no artifact"
+  ],
+  "workersAbsent": 82,
+  "newZombies": [],
+  "ECHILD": true,
+  "pixelDpi": 300,
+  "pixelBoundaryAllowance": 2,
+  "renderLibrary": "1.26.6",
+  "resources": {
+    "before": {
+      "wallSeconds": 81.07628376300272,
+      "userSeconds": 195.346754,
+      "systemSeconds": 17.703728,
+      "maxChildRssKiB": 394492
+    },
+    "candidate": {
+      "wallSeconds": 107.52274533599848,
+      "userSeconds": 257.61368899999997,
+      "systemSeconds": 22.132105,
+      "maxChildRssKiB": 404968
+    },
+    "after": {
+      "wallSeconds": 112.64299244600261,
+      "userSeconds": 271.301994,
+      "systemSeconds": 24.954762,
+      "maxChildRssKiB": 409688
+    }
+  },
+  "helpers": {
+    "generate_mixed_masks33.py": "093513f70eba49788daaafccf95d9d5ad922c4a7dc9a933de973c16ce3b159ce",
+    "generate_mixed_masks33_final.py": "804d6e62b0322cdd94c7fc964592af6767867f0e3bed7c6e447843447a36667f",
+    "verify_mixed_masks33.py": "ab62fba8058d973148fd9b8e4a1f9a74fa3bd065dd5de74f0d25ab01286f6b67",
+    "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf",
+    "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9",
+    "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85"
+  },
+  "originalSparseOcrNotRerun": true,
+  "nativeInstallersNotRun": true,
+  "common20RequestSeconds": {
+    "before": 74.97376245003397,
+    "final": 71.1194997690036,
+    "differentSuccessSemantics": true
+  },
+  "helperHistory": {
+    "candidate": "31 requests preserved; over-strict native offset and source zOrder guard excluded real OFD, so no improvement claimed",
+    "verification": "Initial amount crop ended at source mask extent and clipped visible final zero in gray; corrected ROI to include emitted editable box. White pixel-identical successful OCR reused; gray corrected crop and split/original measured once. No HTTP rerun after final artifact acceptance.",
+    "postVerification": "Added derived raw CER/cache-time/common-request fields and rechecked existing receipts/artifact hashes; no OCR/API rerun."
+  }
+}

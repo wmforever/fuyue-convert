@@ -1,0 +1,11 @@
+{
+  "parent": "da34d5cbb18e14d8b6c21858c540500908e1431a",
+  "goal": "Consolidated latest Linux review acceptance; no speculative tuning",
+  "sources": 2,
+  "httpBudget": 20,
+  "manifestSha256": "35636dc45d0412d67a97d40b9ee36db3fac2138b7b11551ab704a68960e6d106",
+  "sourceBuild": "Fresh frontend build; clean Maven with explicit app-home and Office; classify one optional signed-OFD skip separately",
+  "runtime": "Use copied exact-manifest bundled OCR runtime from final review app, no system OCR substitution",
+  "crossFeatureInspection": "OCR-enabled registry mixes native/tagged PDF, raster PDF/OFD, editable Word and Office roundtrips. Check visible/numeric inventory and immutable scans after these interfaces compose. Fix only actual reproduction.",
+  "limits": "20 small contracts; suite480s, each120s, request30s, teardown15s. No old matrix rerun, native installer/Word claim, release, merge or external upload."
+}

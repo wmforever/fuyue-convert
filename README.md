@@ -56,7 +56,7 @@ Lite 的 Office 高保真路线会使用电脑上已有的 LibreOffice；Full �
 | PDF 压缩/水印 | beta | 保真优先 | 压缩支持无损、均衡和强力三级策略，先预览源 PDF，完成后再逐页预览真实压缩结果；水印支持中英文文字、不透明度、角度、颜色、位置、平铺和页码范围，并提供本地实时效果预览。修改已提交的设置后会明确要求重新生成，避免把旧结果当成新设置下载。两者均拒绝修改带数字签名的 PDF。 |
 | PDF 合并/拆分 | stable | 保真优先 | 合并按上传顺序输出单个 PDF，可切换检查每个源文件并在重排后保持预览绑定；拆分按页输出编号连续的 ZIP，可逐页确认选择范围并在提交前阻止越界页码。两类操作都会重写 PDF；检测到数字签名时返回 `PDF_SIGNATURE_PRESENT`，不生成签名失效的结果。 |
 | PNG/JPG -> PDF | stable | 版式优先 | PNG、JPG、JPEG 可混合上传，按列表顺序合并为一个多页 PDF。支持原始尺寸、A4 自动方向/纵向/横向和 0-50 mm 页边距，等比居中且不裁切。逐张读取 PNG pHYs、JPEG JFIF/EXIF DPI 与 EXIF 方向，透明 PNG 保留透明合成；无可信 DPI 时按 96 DPI 并警告。网页端可预览源图、调整页序，转换完成后逐页展示真实 PDF 结果。 |
-| PNG/JPG -> TXT/DOCX | experimental/按需 | OCR 提取 | 后续运行包默认内置固定 Tesseract 与中英文模型，源码运行可显式配置系统引擎。TXT 输出识别文字，DOCX 将坐标文字映射到 `DocumentModel` 后生成真实可编辑文本；两者均返回页级置信度和 OCR 警告；低置信度图片可自动尝试灰底/阴影与对比度增强，保守选择结果并保留源图与坐标。 |
+| PNG/JPG -> TXT/DOCX | experimental/按需 | OCR 提取 | 后续运行包默认内置固定 Tesseract 与中英文模型，源码运行可显式配置系统引擎。TXT 输出识别文字，DOCX 将坐标文字映射到 `DocumentModel` 后生成真实可编辑文本；两者均返回页级置信度和 OCR 警告；低置信度图片可自动尝试灰底/阴影与对比度增强，保守选择结果并保留源图与坐标。仅 TXT 可尝试受限小角度校正，可靠数字冲突保留原数字并提示复核；Word 暂不启用校正。 |
 | WPS/ET/DPS/UOF -> OOXML | experimental | 兼容优先 | 依赖 LibreOffice 对国产格式的导入能力；UOF 直接转换为可编辑 DOCX，分页和对象位置可能发生变化。 |
 | DOCX -> UOF | experimental | 兼容优先 | LibreOffice 可用时调用明确的 `UOF text` 导出过滤器写入真实 UOF XML，并验证 UOF 根元素；已覆盖正文和表格文字的 LibreOffice 往返打开。 |
 

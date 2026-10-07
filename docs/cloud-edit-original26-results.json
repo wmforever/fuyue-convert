@@ -1,0 +1,233 @@
+{
+  "originalWordSha256": "571f4f3931dedace7f0efbdcac8771b2f5df6f8cbdde92f4f0390384bd7c81d0",
+  "unchangedGeometryAndScanBytes": true,
+  "unchangedPixelsOutsideSampledMasks": true,
+  "rows": [
+    {
+      "stage": "before",
+      "pdfSha256": "aa59b4d6f4fc87c676f85f57a3e9e965155eea3c345aac9f8f3af50b18589287",
+      "nativeText": "REVIEW RECORD 2036\nRecord 00842\nAmount 128.75\nDate 2036-04-19\n",
+      "paintOrder": [
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-image",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ],
+      "pageOcr": {
+        "text": "REVEEXMWWRECOFRIUD2036\n\nRecord 00842\n\nArmaountt 123.49\n\nDate 2036-04-19\n",
+        "metrics": {
+          "expectedCharacters": 53,
+          "actualCharacters": 62,
+          "editDistance": 13,
+          "cer": 0.24528301886792453,
+          "alignedCharacterRecall": 0.9245283018867925,
+          "exactLines": 2,
+          "expectedNumbers": [
+            "2036",
+            "00842",
+            "128",
+            "75",
+            "2036",
+            "04",
+            "19"
+          ],
+          "actualNumbers": [
+            "2036",
+            "00842",
+            "123",
+            "49",
+            "2036",
+            "04",
+            "19"
+          ]
+        },
+        "numericLexemesExact": false
+      },
+      "amountOcr": {
+        "text": "123.39\n",
+        "metrics": {
+          "expectedCharacters": 6,
+          "actualCharacters": 6,
+          "editDistance": 3,
+          "cer": 0.5,
+          "alignedCharacterRecall": 0.5,
+          "exactLines": 0,
+          "expectedNumbers": [
+            "128",
+            "75"
+          ],
+          "actualNumbers": [
+            "123",
+            "39"
+          ]
+        },
+        "numericLexemesExact": false
+      },
+      "apiText": {
+        "text": "REVIEWRECORDREVIEW RECORD 20362036\nRecord 00842\nAmount 127.50Amount 128.75\nDate 2036-04-19\n",
+        "metrics": {
+          "expectedCharacters": 53,
+          "actualCharacters": 81,
+          "editDistance": 28,
+          "cer": 0.5283018867924528,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 4,
+          "expectedNumbers": [
+            "2036",
+            "00842",
+            "128",
+            "75",
+            "2036",
+            "04",
+            "19"
+          ],
+          "actualNumbers": [
+            "20362036",
+            "00842",
+            "127",
+            "50",
+            "128",
+            "75",
+            "2036",
+            "04",
+            "19"
+          ]
+        },
+        "numericLexemesExact": false
+      }
+    },
+    {
+      "stage": "after",
+      "pdfSha256": "104d0a70cb5e0f3af54b1667f41251e48b9b66bd5546775d34620b1d229d7add",
+      "nativeText": "REVIEW RECORD 2036\nRecord 00842\nAmount 128.75\nDate 2036-04-19\n",
+      "paintOrder": [
+        "fill-image",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-path",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text",
+        "fill-text"
+      ],
+      "pageOcr": {
+        "text": "REVIEWRECORD2036\n\nRecord 00842\n\nAmount 128.75\n\nDate 2036-04-19\n",
+        "metrics": {
+          "expectedCharacters": 53,
+          "actualCharacters": 53,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 4,
+          "expectedNumbers": [
+            "2036",
+            "00842",
+            "128",
+            "75",
+            "2036",
+            "04",
+            "19"
+          ],
+          "actualNumbers": [
+            "2036",
+            "00842",
+            "128",
+            "75",
+            "2036",
+            "04",
+            "19"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "amountOcr": {
+        "text": "128.75\n",
+        "metrics": {
+          "expectedCharacters": 6,
+          "actualCharacters": 6,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "128",
+            "75"
+          ],
+          "actualNumbers": [
+            "128",
+            "75"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "apiText": {
+        "text": "REVIEWRECORDREVIEW RECORD 20362036\nRecord 00842\nAmount 127.50Amount 128.75\nDate 2036-04-19\n",
+        "metrics": {
+          "expectedCharacters": 53,
+          "actualCharacters": 81,
+          "editDistance": 28,
+          "cer": 0.5283018867924528,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 4,
+          "expectedNumbers": [
+            "2036",
+            "00842",
+            "128",
+            "75",
+            "2036",
+            "04",
+            "19"
+          ],
+          "actualNumbers": [
+            "20362036",
+            "00842",
+            "127",
+            "50",
+            "128",
+            "75",
+            "2036",
+            "04",
+            "19"
+          ]
+        },
+        "numericLexemesExact": false
+      }
+    }
+  ]
+}

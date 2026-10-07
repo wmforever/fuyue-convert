@@ -1,0 +1,64 @@
+{
+  "jarSha256": "260552d34b5882946bc24520b869752cbb0946b63dee57fa67e01e2d1614b7be",
+  "candidateJarSha256": "7568722fb399a143be6c8c2378a93cb841136300cfefd03b43f2b34623d8d3d6",
+  "classesChanged": [
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OcrMask.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OcrAppearance.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$1.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$FixedItem.class"
+  ],
+  "nestedClassProof": [
+    {
+      "name": "OcrMask",
+      "codeAndSignaturesExact": true,
+      "disassemblySha256": "cbfdf9fff0525279bfd2dedd2921bc357901c5d0034c666e1daa8c6036d1dd2b",
+      "classSha256": {
+        "candidate": "0020e5e9bdb5637fab2b22997c7aa50b8e326d1b77bcac005bb83d545de39e06",
+        "final": "9b8e69260f1fba59cd920fadaeaf2dd561b2a4c85b378cb72a04a7fe25c306d0"
+      }
+    },
+    {
+      "name": "OcrAppearance",
+      "codeAndSignaturesExact": true,
+      "disassemblySha256": "e5cfd26390c9bf707f30ba5cfd9e1fbb63ea4296feddf4128cd1da9b6ba7e9d7",
+      "classSha256": {
+        "candidate": "b31293d1cd633fa47546e37a4bf368e7979b180efb15efd25e6417bf587ea839",
+        "final": "6f42493ffa5fe452f44f9f72dd8203f60ce7b4be50f23f3b338d6cc593ad782b"
+      }
+    },
+    {
+      "name": "1",
+      "codeAndSignaturesExact": true,
+      "disassemblySha256": "1b35ebc68fe80621f7fb7b09bf420cba85a859e4be603d59d142f6261008840e",
+      "classSha256": {
+        "candidate": "366f5d94bada795bd67489962f95e42a73fca6ce24079df5f42c7e2f6cad519f",
+        "final": "1f552a5f18ade1b5a0be6bc833e34f4a0aef8362612a1744c3e61999c78b4d86"
+      }
+    },
+    {
+      "name": "FixedItem",
+      "codeAndSignaturesExact": true,
+      "disassemblySha256": "0d39c5d10515a5628520af1c9d4c1a92e52c9f2729b32704189ab1ab901461eb",
+      "classSha256": {
+        "candidate": "b2d1c3e5b29ea8d62d6f01290a47c9ac9ff7e8c5cae4432d2cea72d422084ebc",
+        "final": "d449aa7cc0135a383bd6a69b9b6e837629da820143b07e5fcb9561e1332178a6"
+      }
+    }
+  ],
+  "sixWordControlsPartsExceptCoreExact": true,
+  "originalUneditedAndEditedOfficePixelsAndNativeBoxesExact": true,
+  "fourAmountApiOutputsByteExact": true,
+  "httpRequests": 12,
+  "allWorkersExited": true,
+  "ECHILD": true,
+  "newZombies": [],
+  "resources": {
+    "wallSeconds": 50.43273696699907,
+    "userSeconds": 133.13062200000002,
+    "systemSeconds": 10.979399,
+    "maxChildRssKiB": 354948
+  },
+  "manifestSha256": "9326d5ac700d5909c956859346610d65a98505ff08c7a5881ed2c0d09d30753c",
+  "helperSha256": "f11f70d62560b2220b38ba87502e1909a8e4e214d2704333eca36a6a00424573"
+}

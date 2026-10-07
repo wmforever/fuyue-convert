@@ -52,6 +52,64 @@ import static org.junit.jupiter.api.Assertions.*;
 class ConversionTaskServiceTest {
     @TempDir Path temp;
 
+    @Test void acceptsUtf16TextAndCsvUploadsThroughTheTaskBoundary() throws Exception {
+        var config = new TaskServiceConfig(temp.resolve("utf16-upload"), 1, 4,
+                Duration.ofSeconds(15), Duration.ofHours(1), ParseLimits.defaults());
+        try (var service = new ConversionTaskService(config,
+                List.of(new TextToDocxConverter(), new CsvToXlsxConverter()))) {
+            for (var charset : List.of(StandardCharsets.UTF_16LE, StandardCharsets.UTF_16BE)) {
+                boolean little = charset == StandardCharsets.UTF_16LE;
+                for (boolean csv : List.of(false, true)) {
+                    String text = csv ? "编号,金额\r\n00042,-0017.50\r\n" : "中文 REVIEW 00042\n金额 -0017.50\f第二页 +0035.00";
+                    byte[] bytes = text.getBytes(charset);
+                    byte[] payload = new byte[bytes.length + 2];
+                    payload[0] = (byte) (little ? 0xFF : 0xFE);
+                    payload[1] = (byte) (little ? 0xFE : 0xFF);
+                    System.arraycopy(bytes, 0, payload, 2, bytes.length);
+                    var created = service.createTask(List.of(new UploadPayload(csv ? "records.csv" : "pages.txt",
+                            csv ? "text/csv" : "text/plain", payload.length, () -> new ByteArrayInputStream(payload))),
+                            csv ? DocumentFormat.XLSX : DocumentFormat.DOCX);
+                    var finished = await(service, created.taskId());
+                    assertEquals(TaskStatus.SUCCESS, finished.status(), finished.errorMessage());
+                    Path output = service.download(created.taskId()).path();
+                    if (csv) {
+                        try (var workbook = new XSSFWorkbook(Files.newInputStream(output))) {
+                            var row = workbook.getSheetAt(0).getRow(1);
+                            assertEquals("00042", row.getCell(0).getStringCellValue());
+                            assertEquals("-0017.50", row.getCell(1).getStringCellValue());
+                        }
+                    } else {
+                        try (var document = new XWPFDocument(Files.newInputStream(output))) {
+                            String actual = document.getParagraphs().stream().map(p -> p.getText()).reduce("", String::concat);
+                            assertTrue(actual.contains("中文 REVIEW 00042"));
+                            assertTrue(actual.contains("-0017.50"));
+                            assertTrue(actual.contains("第二页 +0035.00"));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test void utf16BomDoesNotPermitDecodedNulOrTruncatedBinaryUploads() throws Exception {
+        var config = new TaskServiceConfig(temp.resolve("utf16-invalid"), 1, 2,
+                Duration.ofSeconds(5), Duration.ofHours(1), ParseLimits.defaults());
+        try (var service = new ConversionTaskService(config,
+                List.of(new TextToDocxConverter(), new CsvToXlsxConverter()))) {
+            for (String extension : List.of("txt", "csv")) {
+                for (byte[] payload : List.of(new byte[] {(byte) 0xFF, (byte) 0xFE, 0, 0},
+                        new byte[] {(byte) 0xFE, (byte) 0xFF, 0, 0},
+                        new byte[] {(byte) 0xFF, (byte) 0xFE, 0x41},
+                        new byte[] {(byte) 0xFE, (byte) 0xFF, 0x41}, new byte[] {0x41, 0, 0x42})) {
+                    assertThrows(IllegalArgumentException.class, () -> service.createTask(
+                            List.of(new UploadPayload("binary." + extension, payload.length, () -> new ByteArrayInputStream(payload))),
+                            extension.equals("txt") ? DocumentFormat.DOCX : DocumentFormat.XLSX));
+                    assertTrue(service.listTasks(50).isEmpty(), "Invalid upload must not publish a task");
+                }
+            }
+        }
+    }
+
     @Test void invalidOfdIsRejectedBeforeTaskCreation() throws Exception {
         TaskServiceConfig config = new TaskServiceConfig(temp, 1, 2, Duration.ofSeconds(5), Duration.ofHours(1), ParseLimits.defaults());
         try (ConversionTaskService service = new ConversionTaskService(config, new SafeOfdExtractor(), new OfdrwParser(),
@@ -1094,6 +1152,36 @@ class ConversionTaskServiceTest {
             assertEquals(1, calls.get(), "deadline must be checked before launching the second file converter");
             assertEquals(1, failed.files().size());
             assertEquals("CONVERSION_TIMEOUT", failed.files().get(0).errorCode());
+        }
+    }
+
+    @Test void converterLocalTimeoutDoesNotConsumeRemainingBatchBudget() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        TextToDocxConverter delegate = new TextToDocxConverter();
+        FileConverter localTimeout = new FileConverter() {
+            @Override public ConversionRoute route() { return delegate.route(); }
+            @Override public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                                      ParseLimits limits, ConversionProgress progress) throws Exception {
+                if (calls.getAndIncrement() == 0) throw new java.util.concurrent.TimeoutException("converter-local timeout");
+                return delegate.convert(input, workDir, outputPath, limits, progress);
+            }
+        };
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("local-timeout-data"), 1, 2,
+                Duration.ofSeconds(5), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] text = "remaining file 2026".getBytes(StandardCharsets.UTF_8);
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(localTimeout))) {
+            TaskSnapshot created = service.createTask(List.of(
+                    new UploadPayload("first.txt", "text/plain", text.length, () -> new ByteArrayInputStream(text)),
+                    new UploadPayload("second.txt", "text/plain", text.length, () -> new ByteArrayInputStream(text))
+            ), DocumentFormat.DOCX);
+            TaskSnapshot result = await(service, created.taskId());
+            assertEquals(TaskStatus.SUCCESS, result.status());
+            assertEquals(2, calls.get());
+            assertEquals(2, result.files().size());
+            assertEquals("CONVERSION_TIMEOUT", result.files().get(0).errorCode());
+            assertFalse(result.files().get(0).success());
+            assertTrue(result.files().get(1).success());
+            assertTrue(result.warnings().stream().anyMatch(w -> w.code() == com.fuyue.formatconverter.model.WarningCode.PARTIAL_BATCH_OUTPUT));
         }
     }
 

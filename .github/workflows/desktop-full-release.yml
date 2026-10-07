@@ -6,7 +6,7 @@ on:
       release_tag:
         description: Existing release tag to receive the three Full installers
         required: true
-        default: v0.1.5
+        default: v0.1.7
         type: string
 
 permissions:
@@ -106,6 +106,8 @@ jobs:
 
             $Executable = Join-Path $InstallDir "Fuyue Convert.exe"
             $AppProcess = Start-Process $Executable -ArgumentList "--remote-debugging-port=9227" -PassThru
+            node scripts/smoke-conversion.mjs 9227 test\fixtures\ocr-smoke.png --route=png-to-txt "--source-label=PNG 图片" "--target-label=纯文本 TXT"
+            if ($LASTEXITCODE -ne 0) { throw "Installed Full bundled OCR conversion smoke failed" }
             node scripts/smoke-conversion.mjs 9227 $Docx --route=docx-to-pdf "--source-label=Word DOCX" "--target-label=PDF" --close-app
             $SmokeExit = $LASTEXITCODE
             if ($SmokeExit -ne 0) {
@@ -256,6 +258,8 @@ jobs:
           executable="$installed_app/Contents/MacOS/Fuyue Convert"
           "$executable" --remote-debugging-port=9227 >"$RUNNER_TEMP/fuyue-full-$PACKAGE_ARCH.log" 2>&1 &
           app_pid=$!
+          node scripts/smoke-conversion.mjs 9227 test/fixtures/ocr-smoke.png \
+            --route=png-to-txt '--source-label=PNG 图片' '--target-label=纯文本 TXT'
           node scripts/smoke-conversion.mjs 9227 "$smoke_root/smoke.docx" \
             --route=docx-to-pdf '--source-label=Word DOCX' '--target-label=PDF' --close-app
           for attempt in {1..240}; do

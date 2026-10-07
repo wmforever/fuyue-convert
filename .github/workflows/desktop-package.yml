@@ -1,0 +1,321 @@
+name: Build desktop Full artifacts
+
+# Build installers without publishing a Release or changing a tag.
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/desktop-package.yml]
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Native installer platforms
+        required: true
+        default: macos
+        type: choice
+        options: [macos, windows, all]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-package-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TEMURIN_VERSION: "17.0.20+101"
+  TEMURIN_RUNTIME_VERSION: "17.0.20.1"
+
+jobs:
+  package_windows:
+    name: Package Windows x64 Full
+    timeout-minutes: 45
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      (inputs.platform == 'windows' || inputs.platform == 'all')
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout build source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Verify checked out commit and version
+        shell: pwsh
+        env:
+          BUILD_SHA: ${{ github.sha }}
+        run: |
+          $Version = (Get-Content desktop\package.json -Raw | ConvertFrom-Json).version
+          if ((git rev-parse HEAD) -ne $env:BUILD_SHA) { throw "Source SHA mismatch" }
+          Write-Output "Build $Version from $env:BUILD_SHA"
+
+      - name: Set up pinned Temurin 17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.TEMURIN_VERSION }}
+          architecture: x64
+          java-package: jdk
+          check-latest: false
+          verify-signature: true
+          cache: maven
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Install, check, and package Full
+        working-directory: desktop
+        shell: pwsh
+        env:
+          FORMAT_CONVERTER_BUNDLE_OCR: "true"
+          FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME: "true"
+          FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION: ${{ env.TEMURIN_RUNTIME_VERSION }}
+        run: |
+          node ..\scripts\check-local-only-files.mjs
+          if ($LASTEXITCODE -ne 0) { throw "Privacy check failed" }
+          npm ci --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { throw "Dependency installation failed" }
+          npm run check
+          if ($LASTEXITCODE -ne 0) { throw "Desktop source check failed" }
+          npm test
+          if ($LASTEXITCODE -ne 0) { throw "Desktop tests failed" }
+          npm run dist:win:full
+          if ($LASTEXITCODE -ne 0) { throw "Full packaging failed" }
+          npm run verify:package -- --public-full --require-installer
+          if ($LASTEXITCODE -ne 0) { throw "Full package verification failed" }
+
+      - name: Install and run real bundled-Office conversion
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $Version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $Installer = Resolve-Path "release\Fuyue-Convert-$Version-win-x64-Full.exe"
+          $InstallDir = Join-Path $env:LOCALAPPDATA "Programs\Fuyue Convert"
+          $AppProcess = $null
+          try {
+            $Install = Start-Process $Installer -ArgumentList "/S" -Wait -PassThru
+            if ($Install.ExitCode -ne 0) { throw "Full installer failed: $($Install.ExitCode)" }
+            node scripts/verify-packaged.mjs (Join-Path $InstallDir "resources") --public-full
+            if ($LASTEXITCODE -ne 0) { throw "Installed Full payload verification failed" }
+
+            $SmokeRoot = Join-Path $env:RUNNER_TEMP "fuyue-full-office-smoke"
+            New-Item $SmokeRoot -ItemType Directory -Force | Out-Null
+            $PackageRoot = Join-Path $SmokeRoot "synthetic-docx"
+            New-Item (Join-Path $PackageRoot "_rels") -ItemType Directory -Force | Out-Null
+            New-Item (Join-Path $PackageRoot "word") -ItemType Directory -Force | Out-Null
+            $Utf8 = [System.Text.UTF8Encoding]::new($false)
+            $ContentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>'
+            $Relationships = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'
+            $Document = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>Fuyue Convert Full edition smoke test</w:t></w:r></w:p><w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr></w:body></w:document>'
+            [IO.File]::WriteAllText((Join-Path $PackageRoot "[Content_Types].xml"), $ContentTypes, $Utf8)
+            [IO.File]::WriteAllText((Join-Path $PackageRoot "_rels\.rels"), $Relationships, $Utf8)
+            [IO.File]::WriteAllText((Join-Path $PackageRoot "word\document.xml"), $Document, $Utf8)
+            $Docx = Join-Path $SmokeRoot "smoke.docx"
+            [IO.Compression.ZipFile]::CreateFromDirectory($PackageRoot, $Docx)
+            if (-not (Test-Path $Docx)) { throw "Synthetic smoke DOCX was not created" }
+
+            $Executable = Join-Path $InstallDir "Fuyue Convert.exe"
+            $AppProcess = Start-Process $Executable -ArgumentList "--remote-debugging-port=9227" -PassThru
+            node scripts/smoke-conversion.mjs 9227 test\fixtures\ocr-smoke.png --route=png-to-txt "--source-label=PNG 图片" "--target-label=纯文本 TXT"
+            if ($LASTEXITCODE -ne 0) { throw "Installed Full bundled OCR conversion smoke failed" }
+            node scripts/smoke-conversion.mjs 9227 $Docx --route=docx-to-pdf "--source-label=Word DOCX" "--target-label=PDF" --close-app
+            $SmokeExit = $LASTEXITCODE
+            if ($SmokeExit -ne 0) {
+              Write-Host "Bundled Office process diagnostics:"
+              Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+                $_.Name -like "soffice*" -or $_.Name -eq "soffice.bin"
+              } | Select-Object ProcessId, ParentProcessId, Name, ExecutablePath, CommandLine | Format-List
+              $TaskRoot = Join-Path $env:APPDATA "Fuyue Convert\data\tasks"
+              if (Test-Path $TaskRoot) {
+                Write-Host "Bundled Office task diagnostics:"
+                Get-ChildItem $TaskRoot -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
+                  $_.Name -in @("libreoffice.log", "worker.log", "worker-response.json", "manifest.json")
+                } | ForEach-Object {
+                  Write-Host "--- $($_.FullName)"
+                  Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
+                }
+              }
+              throw "Bundled Office DOCX to PDF smoke failed"
+            }
+            if (-not $AppProcess.WaitForExit(60000)) { throw "Full desktop app did not exit" }
+          } finally {
+            if ($AppProcess -and -not $AppProcess.HasExited) { Stop-Process -Id $AppProcess.Id -Force -ErrorAction SilentlyContinue }
+            Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+              $_.ExecutablePath -and $_.ExecutablePath.StartsWith($InstallDir, [StringComparison]::OrdinalIgnoreCase)
+            } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+            $Uninstaller = Get-ChildItem $InstallDir -Filter "Uninstall*.exe" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($Uninstaller) {
+              $Uninstall = Start-Process $Uninstaller.FullName -ArgumentList "/S" -Wait -PassThru
+              if ($Uninstall.ExitCode -ne 0) { throw "Full uninstaller failed: $($Uninstall.ExitCode)" }
+            }
+          }
+
+      - name: Record installer checksum and source commit
+        working-directory: desktop
+        shell: pwsh
+        run: node scripts/write-build-info.mjs win32 x64
+
+      - name: Upload Windows Full installer and build identity
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: fuyue-convert-Windows-x64-Full-${{ github.sha }}
+          path: |
+            desktop/release/Fuyue-Convert-*-win-x64-Full.exe
+            desktop/release/BUILD-INFO.json
+            desktop/release/SHA256SUMS
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+  package_macos:
+    name: Package macOS ${{ matrix.label }} Full
+    timeout-minutes: 45
+    if: >-
+      github.event_name == 'push' ||
+      inputs.platform == 'macos' || inputs.platform == 'all'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15-intel
+            arch: x64
+            java_arch: x64
+            machine_arch: x86_64
+            label: Intel
+            suffix: macOS-Intel-Full
+          - runner: macos-15
+            arch: arm64
+            java_arch: aarch64
+            machine_arch: arm64
+            label: Apple-Silicon
+            suffix: macOS-Apple-Silicon-Full
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Checkout build source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Verify native runner and checked out commit
+        env:
+          EXPECTED_ARCH: ${{ matrix.machine_arch }}
+          BUILD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = "$EXPECTED_ARCH"
+          version="$(node -p "require('./desktop/package.json').version")"
+          test "$(git rev-parse HEAD)" = "$BUILD_SHA"
+          echo "Build $version from $BUILD_SHA"
+
+      - name: Set up pinned Temurin 17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.TEMURIN_VERSION }}
+          architecture: ${{ matrix.java_arch }}
+          java-package: jdk
+          check-latest: false
+          verify-signature: true
+          cache: maven
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Install, check, and package Full
+        working-directory: desktop
+        env:
+          FORMAT_CONVERTER_BUNDLE_OCR: "true"
+          FORMAT_CONVERTER_REQUIRE_TEMURIN_RUNTIME: "true"
+          FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION: ${{ env.TEMURIN_RUNTIME_VERSION }}
+        run: |
+          set -euo pipefail
+          node ../scripts/check-local-only-files.mjs
+          npm ci --no-audit --no-fund
+          npm run check
+          npm test
+          npm run dist:mac:full
+
+      - name: Install DMG and run real bundled-Office conversion
+        working-directory: desktop
+        env:
+          PACKAGE_ARCH: ${{ matrix.arch }}
+          ARTIFACT_SUFFIX: ${{ matrix.suffix }}
+        run: |
+          set -euo pipefail
+          dmg="$(find release -maxdepth 1 -name "Fuyue-Convert-*-$ARTIFACT_SUFFIX.dmg" -print -quit)"
+          test -n "$dmg"
+          mount_point="$RUNNER_TEMP/fuyue-full-dmg-$PACKAGE_ARCH"
+          install_root="$RUNNER_TEMP/fuyue-full-installed-$PACKAGE_ARCH"
+          installed_app="$install_root/Fuyue Convert.app"
+          mkdir -p "$mount_point" "$install_root"
+          attached=false
+          app_pid=""
+          cleanup() {
+            set +e
+            if [ -n "$app_pid" ]; then kill "$app_pid" 2>/dev/null; fi
+            pkill -f "$installed_app/" 2>/dev/null || true
+            if [ "$attached" = true ]; then hdiutil detach "$mount_point" -force >/dev/null 2>&1; fi
+            rm -rf "$mount_point" "$install_root"
+          }
+          trap cleanup EXIT
+          hdiutil attach "$dmg" -readonly -nobrowse -mountpoint "$mount_point"
+          attached=true
+          ditto "$mount_point/Fuyue Convert.app" "$installed_app"
+          hdiutil detach "$mount_point"
+          attached=false
+
+          resources="$installed_app/Contents/Resources"
+          node scripts/verify-packaged.mjs "$resources" --public-full --arch="$PACKAGE_ARCH"
+          office="$resources/backend/app/libreoffice/LibreOffice.app/Contents/MacOS/soffice"
+          smoke_root="$RUNNER_TEMP/fuyue-full-office-$PACKAGE_ARCH"
+          mkdir -p "$smoke_root/profile"
+          "$office" "-env:UserInstallation=file://$smoke_root/profile" --headless \
+            --convert-to docx --outdir "$smoke_root" test/fixtures/smoke.txt
+          test -f "$smoke_root/smoke.docx"
+
+          executable="$installed_app/Contents/MacOS/Fuyue Convert"
+          "$executable" --remote-debugging-port=9227 >"$RUNNER_TEMP/fuyue-full-$PACKAGE_ARCH.log" 2>&1 &
+          app_pid=$!
+          node scripts/smoke-conversion.mjs 9227 test/fixtures/ocr-smoke.png \
+            --route=png-to-txt '--source-label=PNG 图片' '--target-label=纯文本 TXT'
+          node scripts/smoke-conversion.mjs 9227 "$smoke_root/smoke.docx" \
+            --route=docx-to-pdf '--source-label=Word DOCX' '--target-label=PDF' --close-app
+          for attempt in {1..240}; do
+            if ! kill -0 "$app_pid" 2>/dev/null; then break; fi
+            sleep 0.25
+          done
+          if kill -0 "$app_pid" 2>/dev/null; then cat "$RUNNER_TEMP/fuyue-full-$PACKAGE_ARCH.log"; exit 1; fi
+          wait "$app_pid"
+          app_pid=""
+          sleep 2
+          residual_pids="$(ps -axo pid=,comm= | awk -v prefix="$installed_app/" '
+            { pid=$1; sub(/^[[:space:]]*[0-9]+[[:space:]]+/, "", $0)
+              if (index($0, prefix) == 1) print pid }')"
+          if [ -n "$residual_pids" ]; then
+            echo "Installed application left residual processes: $residual_pids"
+            exit 1
+          fi
+
+      - name: Record installer checksum and source commit
+        working-directory: desktop
+        env:
+          PACKAGE_ARCH: ${{ matrix.arch }}
+        run: node scripts/write-build-info.mjs darwin "$PACKAGE_ARCH"
+
+      - name: Upload macOS Full installer and build identity
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: fuyue-convert-macOS-${{ matrix.arch }}-Full-${{ github.sha }}
+          path: |
+            desktop/release/Fuyue-Convert-*-${{ matrix.suffix }}.dmg
+            desktop/release/BUILD-INFO.json
+            desktop/release/SHA256SUMS
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14

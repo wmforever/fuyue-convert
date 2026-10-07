@@ -1,0 +1,12 @@
+{
+  "parentRevision": "98b0ad77144a405f12bd4e5363c3342baa47cea3",
+  "baselineJarSha256": "70cb1d5ab5bda5756116a61cfc14480e6aa2c98a9bc33fca744028af05468b0e",
+  "scope": "One finite born-digital PDF to editable Word content/layout batch; no OCR/deskew or arbitrary Word rotation experiment",
+  "corpus": ["English continuous paragraph across pages", "Chinese continuous paragraph across pages", "Bilingual two-page header/footer control", "Bilingual wide-gutter columns with spanning headings", "Bilingual narrow-gutter columns with spanning headings", "Bilingual ruled table with signed decimals, dates and zero-padded IDs"],
+  "truth": "Freeze text, logical order, source positions and font hashes before production HTTP; PyMuPDF creates PDFs independently of application PDFBox",
+  "measurement": "Six PDF to DOCX to actual Office PDF to TXT chains (18 contracts) per immutable artifact; final two DOCX edits plus Office PDF/TXT (four extra contracts). No iteration18 matrix repeats.",
+  "limits": {"httpContractSeconds":120,"suiteSeconds":480,"teardownSeconds":15,"maximumPrimaryHttpContracts":40},
+  "checks": ["Independent text/numeric completeness and order", "real editable paragraphs/frames/cells", "source and Office page/rendered geometry", "original numeric surfaces and known layout controls", "all registered new process identities absent and no new global zombies"],
+  "adoption": "Choose only an independently reproduced material defect and minimal safe fix. Preserve conservative ambiguity boundaries. If no safe fix, retain bounded findings without manufactured changes.",
+  "excluded": ["Native Microsoft Word or installers", "New OCR/native accuracy or previous419-test rerun claim", "Threshold/angle sweep", "Parallel writers", "Merge/release/Mac/Library"]
+}

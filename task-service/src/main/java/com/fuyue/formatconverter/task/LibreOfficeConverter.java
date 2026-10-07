@@ -54,7 +54,29 @@ public final class LibreOfficeConverter implements FileConverter {
         validateStandardOfficePackage(input.path());
         Files.createDirectories(workDir);
         Path outDir = Files.createTempDirectory(workDir, "office-output-");
-        Path profileDir = Files.createTempDirectory(workDir, "office-profile-");
+        boolean windows = System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
+        // LibreOffice adds long extension-registry paths below its profile.
+        // Keep Windows profiles out of the deeply nested isolated-worker cwd,
+        // but inside the managed task output so forced cancellation still cleans them.
+        Path profileRoot = windows ? outputPath.toAbsolutePath().getParent() : workDir;
+        Files.createDirectories(profileRoot);
+        Path profileDir = Files.createTempDirectory(profileRoot, windows ? "p-" : "office-profile-");
+        try {
+            return convertWithProfile(input, workDir, outputPath, limits, progress, outDir, profileDir);
+        } finally {
+            if (windows) {
+                try (var paths = Files.walk(profileDir)) {
+                    for (Path path : paths.sorted(java.util.Comparator.reverseOrder()).toList()) Files.deleteIfExists(path);
+                } catch (IOException error) {
+                    log.warn("Could not clean temporary Office profile; retained inside managed task output");
+                }
+            }
+        }
+    }
+
+    private ConversionOutput convertWithProfile(ConversionInput input, Path workDir, Path outputPath,
+                                                ParseLimits limits, ConversionProgress progress,
+                                                Path outDir, Path profileDir) throws Exception {
         Path officeInput = route.sourceFormat() == DocumentFormat.XLSX && route.targetFormat() == DocumentFormat.PDF
                 ? SpreadsheetPdfPreparation.prepare(input.path(), workDir, input.options(), limits) : input.path();
         progress.update(TaskStage.RENDERING, 25);

@@ -1,0 +1,1355 @@
+{
+  "parentRevision": "7d4d97d8319598bbc08e674c38223c50fa6181bc",
+  "jarSha256": "73b2aada867097614e5ed3bae08a840a8a232b313c8595075086c5c5254dc597",
+  "productionBuildInputSha256": "8c0313636afba2fc18ad2db414e3952de7c5a38050aadfd83f9355faa3d7acd9",
+  "productionChanged": false,
+  "fullBuildRerun": false,
+  "oldHttpOrOfficeMatricesRerun": false,
+  "conclusion": "strict refusal is justified by partially exposed source glyph ink and an unmasked full word;no new coordinate/coverage implementation defect proven;no gate relaxation",
+  "pdfs": [
+    {
+      "id": "1-zh-positive-edited-office",
+      "pdfSha256": "2851a6680af302f70bf6fea395d313d520b067ab201cdc7a6b46ec53f53aa37d",
+      "embeddedImageMaxEdge": 1600,
+      "imageBox": {
+        "x": 0.0,
+        "y": -0.017448547047873336,
+        "width": 169.33333333333331,
+        "height": 143.9333333333333
+      },
+      "unsupported": false,
+      "uncertainBounds": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "operators": 405,
+      "covers": 16,
+      "diagnosticPixelsExamined": 114973,
+      "filterSuccess": false,
+      "firstTrigger": "opaqueDoesNotContainWholeWord",
+      "words": [
+        {
+          "text": "长",
+          "sourceBox": {
+            "x": 13.758333333333333,
+            "y": 13.000051452952123,
+            "width": 7.196666666666666,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            39.0,
+            359.13999999910595,
+            20.400000000000002,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "金额",
+          "sourceBox": {
+            "x": 23.28333333333333,
+            "y": 13.000051452952123,
+            "width": 6.244166666666667,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            66.0,
+            359.13999999910595,
+            17.700000000000003,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "编辑",
+          "sourceBox": {
+            "x": 30.26833333333333,
+            "y": 13.000051452952123,
+            "width": 8.889999999999999,
+            "height": 4.3391666666666655
+          },
+          "pdfBox": [
+            85.8,
+            358.83999999910594,
+            25.2,
+            12.299999999999997
+          ],
+          "insideImageClip": true,
+          "touchOpaque": false,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": false,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 1908,
+          "sourceInkPixelsNotFullyCovered": 3604,
+          "sourceInkOutsidePixelBounds": [
+            357.0,
+            153.0,
+            106.0,
+            52.0
+          ]
+        },
+        {
+          "text": "核验",
+          "sourceBox": {
+            "x": 40.004999999999995,
+            "y": 13.000051452952123,
+            "width": 6.455833333333333,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            113.39999999999999,
+            359.13999999910595,
+            18.3,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": false,
+          "trigger": "opaqueDoesNotContainWholeWord",
+          "sourceWhitePixelsOutsideOpaque": 25,
+          "sourceInkPixelsNotFullyCovered": 77,
+          "sourceInkOutsidePixelBounds": [
+            472.0,
+            153.0,
+            2.0,
+            47.0
+          ]
+        },
+        {
+          "text": "“097",
+          "sourceBox": {
+            "x": 48.36583333333333,
+            "y": 12.788384786285457,
+            "width": 9.948333333333332,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            137.1,
+            361.83999999910594,
+            28.2,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "记录",
+          "sourceBox": {
+            "x": 13.758333333333333,
+            "y": 35.01338478628546,
+            "width": 11.112499999999997,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            39.0,
+            296.7399999991059,
+            31.499999999999996,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "编号",
+          "sourceBox": {
+            "x": 24.764999999999997,
+            "y": 34.37838478628546,
+            "width": 9.313333333333333,
+            "height": 5.926666666666666
+          },
+          "pdfBox": [
+            70.2,
+            293.7399999991059,
+            26.4,
+            16.8
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": false,
+          "trigger": "opaqueDoesNotContainWholeWord",
+          "sourceWhitePixelsOutsideOpaque": 36,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "00783",
+          "sourceBox": {
+            "x": 34.07833333333333,
+            "y": 34.80171811961879,
+            "width": 12.699999999999998,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            96.60000000000001,
+            299.4399999991059,
+            35.99999999999999,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "金额",
+          "sourceBox": {
+            "x": 13.864166666666666,
+            "y": 57.026718119618785,
+            "width": 8.889999999999999,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            39.300000000000004,
+            234.33999999910594,
+            25.2,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "048.65",
+          "sourceBox": {
+            "x": 24.55333333333333,
+            "y": 56.81505145295212,
+            "width": 14.181666666666665,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            69.6,
+            237.03999999910593,
+            40.199999999999996,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "日",
+          "sourceBox": {
+            "x": 14.393333333333333,
+            "y": 85.81338478628544,
+            "width": 8.254999999999999,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            40.800000000000004,
+            152.73999999910598,
+            23.4,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "期",
+          "sourceBox": {
+            "x": 21.166666666666664,
+            "y": 85.17838478628545,
+            "width": 3.8099999999999996,
+            "height": 5.503333333333332
+          },
+          "pdfBox": [
+            60.0,
+            150.93999999910596,
+            10.8,
+            15.599999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": false,
+          "trigger": "opaqueDoesNotContainWholeWord",
+          "sourceWhitePixelsOutsideOpaque": 108,
+          "sourceInkPixelsNotFullyCovered": 4,
+          "sourceInkOutsidePixelBounds": [
+            250.0,
+            1008.0,
+            2.0,
+            5.0
+          ]
+        },
+        {
+          "text": "2097-11-06",
+          "sourceBox": {
+            "x": 24.659166666666664,
+            "y": 85.60171811961878,
+            "width": 23.389166666666664,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            69.9,
+            155.43999999910596,
+            66.3,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "保留",
+          "sourceBox": {
+            "x": 13.758333333333333,
+            "y": 112.90671811961877,
+            "width": 27.939999999999994,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            39.0,
+            75.93999999910596,
+            79.19999999999999,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "相",
+          "sourceBox": {
+            "x": 25.18833333333333,
+            "y": 112.27171811961877,
+            "width": 4.656666666666666,
+            "height": 6.7733333333333325
+          },
+          "pdfBox": [
+            71.39999999999999,
+            70.53999999910599,
+            13.2,
+            19.2
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 81,
+          "sourceInkPixelsNotFullyCovered": 2,
+          "sourceInkOutsidePixelBounds": [
+            297.0,
+            1387.0,
+            1.0,
+            4.0
+          ]
+        },
+        {
+          "text": "邻",
+          "sourceBox": {
+            "x": 29.844999999999995,
+            "y": 112.27171811961877,
+            "width": 5.503333333333333,
+            "height": 6.7733333333333325
+          },
+          "pdfBox": [
+            84.6,
+            70.53999999910599,
+            15.6,
+            19.2
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": false,
+          "trigger": "opaqueDoesNotContainWholeWord",
+          "sourceWhitePixelsOutsideOpaque": 1650,
+          "sourceInkPixelsNotFullyCovered": 63,
+          "sourceInkOutsidePixelBounds": [
+            360.0,
+            1328.0,
+            55.0,
+            64.0
+          ]
+        },
+        {
+          "text": "文字",
+          "sourceBox": {
+            "x": 35.34833333333333,
+            "y": 112.27171811961877,
+            "width": 7.196666666666666,
+            "height": 6.7733333333333325
+          },
+          "pdfBox": [
+            100.2,
+            70.53999999910599,
+            20.400000000000002,
+            19.2
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": false,
+          "trigger": "opaqueDoesNotContainWholeWord",
+          "sourceWhitePixelsOutsideOpaque": 246,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "21.40",
+          "sourceBox": {
+            "x": 43.60333333333333,
+            "y": 112.6950514529521,
+            "width": 11.429999999999998,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            123.60000000000001,
+            78.63999999910601,
+            32.4,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        }
+      ]
+    },
+    {
+      "id": "2-zh-positive-edited-office",
+      "pdfSha256": "a62d67553046faac667b3e7ad84314438b3658a4564bbdf089107dc6bd18f456",
+      "embeddedImageMaxEdge": 1600,
+      "imageBox": {
+        "x": 0.0,
+        "y": -0.017448547047873336,
+        "width": 169.33333333333331,
+        "height": 143.9333333333333
+      },
+      "unsupported": false,
+      "uncertainBounds": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "operators": 415,
+      "covers": 16,
+      "diagnosticPixelsExamined": 114973,
+      "filterSuccess": false,
+      "firstTrigger": "opaqueDoesNotContainWholeWord",
+      "words": [
+        {
+          "text": "长",
+          "sourceBox": {
+            "x": 13.758333333333333,
+            "y": 13.000051452952123,
+            "width": 7.196666666666666,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            39.0,
+            359.13999999910595,
+            20.400000000000002,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "金额",
+          "sourceBox": {
+            "x": 23.28333333333333,
+            "y": 13.000051452952123,
+            "width": 6.244166666666667,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            66.0,
+            359.13999999910595,
+            17.700000000000003,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "编辑",
+          "sourceBox": {
+            "x": 30.26833333333333,
+            "y": 13.000051452952123,
+            "width": 8.889999999999999,
+            "height": 4.3391666666666655
+          },
+          "pdfBox": [
+            85.8,
+            358.83999999910594,
+            25.2,
+            12.299999999999997
+          ],
+          "insideImageClip": true,
+          "touchOpaque": false,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": false,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 1908,
+          "sourceInkPixelsNotFullyCovered": 3604,
+          "sourceInkOutsidePixelBounds": [
+            357.0,
+            153.0,
+            106.0,
+            52.0
+          ]
+        },
+        {
+          "text": "核验",
+          "sourceBox": {
+            "x": 40.004999999999995,
+            "y": 13.000051452952123,
+            "width": 6.455833333333333,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            113.39999999999999,
+            359.13999999910595,
+            18.3,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": false,
+          "trigger": "opaqueDoesNotContainWholeWord",
+          "sourceWhitePixelsOutsideOpaque": 25,
+          "sourceInkPixelsNotFullyCovered": 77,
+          "sourceInkOutsidePixelBounds": [
+            472.0,
+            153.0,
+            2.0,
+            47.0
+          ]
+        },
+        {
+          "text": "“097",
+          "sourceBox": {
+            "x": 48.36583333333333,
+            "y": 12.788384786285457,
+            "width": 9.948333333333332,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            137.1,
+            361.83999999910594,
+            28.2,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "记录",
+          "sourceBox": {
+            "x": 13.758333333333333,
+            "y": 35.01338478628546,
+            "width": 11.112499999999997,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            39.0,
+            296.7399999991059,
+            31.499999999999996,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "编号",
+          "sourceBox": {
+            "x": 24.764999999999997,
+            "y": 34.37838478628546,
+            "width": 9.313333333333333,
+            "height": 5.926666666666666
+          },
+          "pdfBox": [
+            70.2,
+            293.7399999991059,
+            26.4,
+            16.8
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": false,
+          "trigger": "opaqueDoesNotContainWholeWord",
+          "sourceWhitePixelsOutsideOpaque": 36,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "00783",
+          "sourceBox": {
+            "x": 34.07833333333333,
+            "y": 34.80171811961879,
+            "width": 12.699999999999998,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            96.60000000000001,
+            299.4399999991059,
+            35.99999999999999,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "金额",
+          "sourceBox": {
+            "x": 13.864166666666666,
+            "y": 57.026718119618785,
+            "width": 8.889999999999999,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            39.300000000000004,
+            234.33999999910594,
+            25.2,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "048.65",
+          "sourceBox": {
+            "x": 24.55333333333333,
+            "y": 56.81505145295212,
+            "width": 14.181666666666665,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            69.6,
+            237.03999999910593,
+            40.199999999999996,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "日",
+          "sourceBox": {
+            "x": 14.393333333333333,
+            "y": 85.81338478628544,
+            "width": 8.254999999999999,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            40.800000000000004,
+            152.73999999910598,
+            23.4,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "期",
+          "sourceBox": {
+            "x": 21.166666666666664,
+            "y": 85.17838478628545,
+            "width": 3.8099999999999996,
+            "height": 5.503333333333332
+          },
+          "pdfBox": [
+            60.0,
+            150.93999999910596,
+            10.8,
+            15.599999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": false,
+          "trigger": "opaqueDoesNotContainWholeWord",
+          "sourceWhitePixelsOutsideOpaque": 108,
+          "sourceInkPixelsNotFullyCovered": 4,
+          "sourceInkOutsidePixelBounds": [
+            250.0,
+            1008.0,
+            2.0,
+            5.0
+          ]
+        },
+        {
+          "text": "2097-11-06",
+          "sourceBox": {
+            "x": 24.659166666666664,
+            "y": 85.60171811961878,
+            "width": 23.389166666666664,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            69.9,
+            155.43999999910596,
+            66.3,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "保留",
+          "sourceBox": {
+            "x": 13.758333333333333,
+            "y": 112.90671811961877,
+            "width": 27.939999999999994,
+            "height": 4.2333333333333325
+          },
+          "pdfBox": [
+            39.0,
+            75.93999999910596,
+            79.19999999999999,
+            11.999999999999998
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "相",
+          "sourceBox": {
+            "x": 25.18833333333333,
+            "y": 112.27171811961877,
+            "width": 4.656666666666666,
+            "height": 6.7733333333333325
+          },
+          "pdfBox": [
+            71.39999999999999,
+            70.53999999910599,
+            13.2,
+            19.2
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 81,
+          "sourceInkPixelsNotFullyCovered": 2,
+          "sourceInkOutsidePixelBounds": [
+            297.0,
+            1387.0,
+            1.0,
+            4.0
+          ]
+        },
+        {
+          "text": "邻",
+          "sourceBox": {
+            "x": 29.844999999999995,
+            "y": 112.27171811961877,
+            "width": 5.503333333333333,
+            "height": 6.7733333333333325
+          },
+          "pdfBox": [
+            84.6,
+            70.53999999910599,
+            15.6,
+            19.2
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": false,
+          "trigger": "opaqueDoesNotContainWholeWord",
+          "sourceWhitePixelsOutsideOpaque": 1650,
+          "sourceInkPixelsNotFullyCovered": 63,
+          "sourceInkOutsidePixelBounds": [
+            360.0,
+            1328.0,
+            55.0,
+            64.0
+          ]
+        },
+        {
+          "text": "文字",
+          "sourceBox": {
+            "x": 35.34833333333333,
+            "y": 112.27171811961877,
+            "width": 7.196666666666666,
+            "height": 6.7733333333333325
+          },
+          "pdfBox": [
+            100.2,
+            70.53999999910599,
+            20.400000000000002,
+            19.2
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": false,
+          "trigger": "opaqueDoesNotContainWholeWord",
+          "sourceWhitePixelsOutsideOpaque": 246,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "21.40",
+          "sourceBox": {
+            "x": 43.60333333333333,
+            "y": 112.6950514529521,
+            "width": 11.429999999999998,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            123.60000000000001,
+            78.63999999910601,
+            32.4,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        }
+      ]
+    },
+    {
+      "id": "3-en-positive-edited-office",
+      "pdfSha256": "13bc7dd85a56306e91006ce919d96af1bdf9851c85ef45bc99005fc9d9824cef",
+      "embeddedImageMaxEdge": 1600,
+      "imageBox": {
+        "x": 0.0,
+        "y": -0.017448547047873336,
+        "width": 169.33333333333331,
+        "height": 143.9333333333333
+      },
+      "unsupported": false,
+      "uncertainBounds": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "operators": 321,
+      "covers": 12,
+      "diagnosticPixelsExamined": 83532,
+      "filterSuccess": true,
+      "firstTrigger": null,
+      "words": [
+        {
+          "text": "LONG",
+          "sourceBox": {
+            "x": 13.969999999999997,
+            "y": 12.788384786285457,
+            "width": 12.699999999999998,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            39.599999999999994,
+            361.83999999910594,
+            35.99999999999999,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "EDIT",
+          "sourceBox": {
+            "x": 28.68083333333333,
+            "y": 12.894218119618792,
+            "width": 10.371666666666664,
+            "height": 3.280833333333333
+          },
+          "pdfBox": [
+            81.3,
+            362.13999999910595,
+            29.399999999999995,
+            9.299999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "REVIEW",
+          "sourceBox": {
+            "x": 40.63999999999999,
+            "y": 12.894218119618792,
+            "width": 18.309166666666666,
+            "height": 3.280833333333333
+          },
+          "pdfBox": [
+            115.19999999999999,
+            362.13999999910595,
+            51.900000000000006,
+            9.299999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 40,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "2097",
+          "sourceBox": {
+            "x": 60.64249999999999,
+            "y": 12.788384786285457,
+            "width": 9.948333333333332,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            171.89999999999998,
+            361.83999999910594,
+            28.2,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "Record",
+          "sourceBox": {
+            "x": 13.969999999999997,
+            "y": 34.695884786285454,
+            "width": 14.499166666666666,
+            "height": 3.5983333333333327
+          },
+          "pdfBox": [
+            39.599999999999994,
+            299.4399999991059,
+            41.1,
+            10.2
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "00783",
+          "sourceBox": {
+            "x": 30.26833333333333,
+            "y": 34.80171811961879,
+            "width": 12.911666666666665,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            85.8,
+            299.4399999991059,
+            36.6,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "Amount",
+          "sourceBox": {
+            "x": 13.546666666666665,
+            "y": 56.92088478628545,
+            "width": 16.298333333333332,
+            "height": 3.3866666666666663
+          },
+          "pdfBox": [
+            38.4,
+            237.03999999910596,
+            46.2,
+            9.6
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "048.65",
+          "sourceBox": {
+            "x": 31.432499999999994,
+            "y": 56.81505145295212,
+            "width": 14.075833333333332,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            89.1,
+            237.03999999910593,
+            39.9,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "Date",
+          "sourceBox": {
+            "x": 13.969999999999997,
+            "y": 85.70755145295212,
+            "width": 9.419166666666666,
+            "height": 3.3866666666666663
+          },
+          "pdfBox": [
+            39.599999999999994,
+            155.43999999910594,
+            26.7,
+            9.6
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "2097-11-06",
+          "sourceBox": {
+            "x": 25.082499999999996,
+            "y": 85.60171811961878,
+            "width": 23.494999999999994,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            71.1,
+            155.43999999910596,
+            66.6,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "Control",
+          "sourceBox": {
+            "x": 13.758333333333333,
+            "y": 112.58921811961878,
+            "width": 14.816666666666665,
+            "height": 3.5983333333333327
+          },
+          "pdfBox": [
+            39.0,
+            78.63999999910595,
+            42.0,
+            10.2
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        },
+        {
+          "text": "21.40",
+          "sourceBox": {
+            "x": 30.374166666666664,
+            "y": 112.6950514529521,
+            "width": 11.429999999999998,
+            "height": 3.4924999999999993
+          },
+          "pdfBox": [
+            86.1,
+            78.63999999910601,
+            32.4,
+            9.899999999999999
+          ],
+          "insideImageClip": true,
+          "touchOpaque": true,
+          "touchUncertain": false,
+          "opaqueContainsWholeWord": true,
+          "trigger": null,
+          "sourceWhitePixelsOutsideOpaque": 0,
+          "sourceInkPixelsNotFullyCovered": 0,
+          "sourceInkOutsidePixelBounds": null
+        }
+      ]
+    }
+  ],
+  "firstWord": "核验",
+  "firstSourceInkPixelsNotFullyCovered": 77,
+  "diagnosticResidualNonWhite": 74,
+  "diagnosticResidualDark": 23,
+  "unmaskedWholeWord": "编辑",
+  "diagnosticUnmaskedDark": 2211,
+  "whiteGapOnlyWords": [
+    "编号",
+    "文字"
+  ],
+  "whiteGapDoesNotJustifyBlanketAcceptance": true,
+  "allSourceWordsInsideImageClip": true,
+  "imageAxisGeometryMatches": true,
+  "oldAmount04865FullyCovered": true,
+  "currentChinesePdfNativeLongAmount": "123456789012.65",
+  "priorChineseHttpFailuresReused": 3,
+  "currentChineseHttpFailureReused": "OCR_VISIBILITY_UNCERTAIN",
+  "acceptedEnglishVisibilityControl": true,
+  "sourceRecognitionCallsAccepted": 2,
+  "initialFailedDiagnosticSourceRecognitionCalls": 1,
+  "totalNewSourceRecognitionCalls": 3,
+  "sourceTsvFilesObserved": 3,
+  "httpNew": 0,
+  "officeNew": 0,
+  "diagnosticProjections": 2,
+  "projectionIsNotActualFinalPage": true,
+  "initialHelperFailure": "wrong2600edge(firstsource2000px) and colliding before/after filenames;oneunused source call;receipt/data retained;fixed helper reads actual1600constant and caches image",
+  "nextDifferentHighValueQuestion": {
+    "problem": "1600px embedded-image normalization changes a visible heading2097 into“097 despite unchanged source and correct native heading;test numeric fidelity/resource tradeoff independently of visibility",
+    "sourceWidth": 2000,
+    "normalizedWidth": 1600,
+    "expected": "2097",
+    "observedFullSize": "2097",
+    "observedNormalized": "“097",
+    "confidenceFullSize": 89.328804,
+    "confidenceNormalized": 83.97271,
+    "fullSizeTsvSha256": "5d7ff4cc14b4ece8650fde3f6ab693ef907987b1113dc6f491ec4dfcc0e19492",
+    "normalizedTsvSha256": "aa3654f522ced778e5ba10b90af9c34e44c2118ef14b8979d681bd8e6955ee2b",
+    "observationFromCachedDiagnosticNotApiAcceptance": true,
+    "proposedScope": "freeze a small independent bilingual mixed-PDF numeric corpus at several font sizes;compare exact number surfaces/CER/completeness,time/RSS under existing pixel/time bounds;no fixed-size or confidence-only relaxation"
+  },
+  "helperSha256": {
+    "PdfVisibilityTriggerProbe37.java": "37dae276750694af2813e36617eada3138811c0a4bed8c29b3756e10f4f96bc4",
+    "PdfCoverResidualRender37.java": "65c7c20530bf2a7a080235e8f35e28abd78f020d218960461f7721bdb635e45e",
+    "verify_visibility37.py": "39b834e36eabc452c73077d307914e0d90ef9e8840263cc68b1306adbb1f80ec",
+    "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9"
+  },
+  "receipts": [
+    {
+      "path": "qa-samples/work/iteration37-compile-fixed.receipt.json",
+      "sha256": "6a0fe512df8d1773b7a464c0fec0f50b3f0c803e976f40eae17396875694ab3e",
+      "rootExitCode": 0,
+      "ECHILD": true,
+      "registeredIdentitiesAbsent": 1
+    },
+    {
+      "path": "qa-samples/work/iteration37-compile.receipt.json",
+      "sha256": "7975fa6003941d740ac3427f09b7542a76dd6b976f2cded945ef02767ae9584a",
+      "rootExitCode": 0,
+      "ECHILD": true,
+      "registeredIdentitiesAbsent": 1
+    },
+    {
+      "path": "qa-samples/work/iteration37-projection-compile.receipt.json",
+      "sha256": "498ca8ac75f87a10739d993cba979b162a65879e3654ddb680a218edcef0d76f",
+      "rootExitCode": 0,
+      "ECHILD": true,
+      "registeredIdentitiesAbsent": 1
+    },
+    {
+      "path": "qa-samples/work/iteration37-projection.receipt.json",
+      "sha256": "f66be63ea7a8fef3281cdb7a710f92fe1851222a4796d9fa236c516c97038efb",
+      "rootExitCode": 0,
+      "ECHILD": true,
+      "registeredIdentitiesAbsent": 1
+    },
+    {
+      "path": "qa-samples/work/iteration37-trace-fixed.receipt.json",
+      "sha256": "72c2a75091a95eff41bc709b35842374e2b054e2170ac8350f5c37842fa986b4",
+      "rootExitCode": 0,
+      "ECHILD": true,
+      "registeredIdentitiesAbsent": 5
+    },
+    {
+      "path": "qa-samples/work/iteration37-trace.receipt.json",
+      "sha256": "80631b667619513e1c0c16f51dc0705b94d791478360b248bf9cb0d4e31dd895",
+      "rootExitCode": 1,
+      "ECHILD": true,
+      "registeredIdentitiesAbsent": 3
+    },
+    {
+      "path": "qa-samples/work/iteration37-verify-fixed.receipt.json",
+      "sha256": "226d7a2ea0bf5517c8f9e749915ab91276cce93b55111a9f61ba918dd57bdb1f",
+      "rootExitCode": 0,
+      "ECHILD": true,
+      "registeredIdentitiesAbsent": 1
+    },
+    {
+      "path": "qa-samples/work/iteration37-verify.receipt.json",
+      "sha256": "13bea3c9746b56c322efe2d8f75ee019974c98a9a0f879a014b283a5a39e2788",
+      "rootExitCode": 1,
+      "ECHILD": true,
+      "registeredIdentitiesAbsent": 1
+    }
+  ],
+  "reusedTests": {
+    "tests": 502,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "reusedBundledTests": 10,
+  "reusedRuntimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+  "nativePackagesAndMicrosoftWordUnrun": true,
+  "newParallelWriter": false
+}

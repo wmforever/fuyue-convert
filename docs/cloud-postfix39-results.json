@@ -1,0 +1,1522 @@
+{
+  "parentRevision": "841bc848844458fba909f3d015743cf891ab28b8",
+  "status": "validated terminal-sign protection;preexisting omission",
+  "productionFix": "preserve five existing sign codepoints only at terminal numeric field suffix;keep separators and original source layers;warn without choosing numeric truth",
+  "scope": "terminal fields only:after sign only whitespace or existing currency/accounting/unit closing markers;no sign borrowed from another logical line",
+  "falseDuplicatesCorrected": 7,
+  "newOFDControls": 12,
+  "newJavaPairs": 30,
+  "javaProductionCallsAfter": 90,
+  "oldJavaProductionCallsAfter": 39,
+  "httpBefore": 12,
+  "httpAfter": 27,
+  "httpSuccessBefore": 12,
+  "httpSuccessAfter": 27,
+  "totalWorkersAbsent": 39,
+  "newZombies": [],
+  "ECHILD": true,
+  "cases": [
+    {
+      "id": "post-minus",
+      "nativeValue": "Amount 048.65-",
+      "rasterValue": "Amount 048.65",
+      "beforeText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65-\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "afterText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65Amount 048.65-\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "expectedLiteralSourceUnion": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65Amount 048.65-\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "sourceConflictHasNoCanonicalValue": true,
+      "falseDuplicateCorrected": true,
+      "beforeConflictWarning": false,
+      "afterConflictWarning": true,
+      "recognitionAndOriginalCoordinatesExact": true,
+      "sourceImagesAndNativeLayerExact": true,
+      "contentCharacters": 92,
+      "charErrorsBefore": 12,
+      "charErrorsAfter": 0,
+      "CERBefore": 0.13043478260869565,
+      "CERAfter": 0.0,
+      "secondsBefore": 3.4880083850002848,
+      "secondsAfter": 3.927166027002386
+    },
+    {
+      "id": "post-space-minus",
+      "nativeValue": "Amount 048.65 -",
+      "rasterValue": "Amount 048.65",
+      "beforeText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65 -\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "afterText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65Amount 048.65 -\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "expectedLiteralSourceUnion": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65Amount 048.65 -\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "sourceConflictHasNoCanonicalValue": true,
+      "falseDuplicateCorrected": true,
+      "beforeConflictWarning": false,
+      "afterConflictWarning": true,
+      "recognitionAndOriginalCoordinatesExact": true,
+      "sourceImagesAndNativeLayerExact": true,
+      "contentCharacters": 92,
+      "charErrorsBefore": 12,
+      "charErrorsAfter": 0,
+      "CERBefore": 0.13043478260869565,
+      "CERAfter": 0.0,
+      "secondsBefore": 3.182972988994152,
+      "secondsAfter": 3.3802939229935873
+    },
+    {
+      "id": "post-unicode-minus",
+      "nativeValue": "Amount 048.65−",
+      "rasterValue": "Amount 048.65",
+      "beforeText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65−\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "afterText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65Amount 048.65−\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "expectedLiteralSourceUnion": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65Amount 048.65−\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "sourceConflictHasNoCanonicalValue": true,
+      "falseDuplicateCorrected": true,
+      "beforeConflictWarning": false,
+      "afterConflictWarning": true,
+      "recognitionAndOriginalCoordinatesExact": true,
+      "sourceImagesAndNativeLayerExact": true,
+      "contentCharacters": 92,
+      "charErrorsBefore": 12,
+      "charErrorsAfter": 0,
+      "CERBefore": 0.13043478260869565,
+      "CERAfter": 0.0,
+      "secondsBefore": 3.6133732739981497,
+      "secondsAfter": 3.276344555997639
+    },
+    {
+      "id": "post-plus",
+      "nativeValue": "Amount 048.65+",
+      "rasterValue": "Amount 048.65",
+      "beforeText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65+\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "afterText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65Amount 048.65+\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "expectedLiteralSourceUnion": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65Amount 048.65+\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "sourceConflictHasNoCanonicalValue": true,
+      "falseDuplicateCorrected": true,
+      "beforeConflictWarning": false,
+      "afterConflictWarning": true,
+      "recognitionAndOriginalCoordinatesExact": true,
+      "sourceImagesAndNativeLayerExact": true,
+      "contentCharacters": 92,
+      "charErrorsBefore": 12,
+      "charErrorsAfter": 0,
+      "CERBefore": 0.13043478260869565,
+      "CERAfter": 0.0,
+      "secondsBefore": 3.348807936999947,
+      "secondsAfter": 3.139339346998895
+    },
+    {
+      "id": "post-space-plus",
+      "nativeValue": "Amount 048.65 +",
+      "rasterValue": "Amount 048.65",
+      "beforeText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65 +\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "afterText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65Amount 048.65 +\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "expectedLiteralSourceUnion": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65Amount 048.65 +\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "sourceConflictHasNoCanonicalValue": true,
+      "falseDuplicateCorrected": true,
+      "beforeConflictWarning": false,
+      "afterConflictWarning": true,
+      "recognitionAndOriginalCoordinatesExact": true,
+      "sourceImagesAndNativeLayerExact": true,
+      "contentCharacters": 92,
+      "charErrorsBefore": 12,
+      "charErrorsAfter": 0,
+      "CERBefore": 0.13043478260869565,
+      "CERAfter": 0.0,
+      "secondsBefore": 3.0475890160014387,
+      "secondsAfter": 3.2255219430007855
+    },
+    {
+      "id": "post-unicode-space-minus",
+      "nativeValue": "Amount 048.65 −",
+      "rasterValue": "Amount 048.65",
+      "beforeText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65 −\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "afterText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65Amount 048.65 −\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "expectedLiteralSourceUnion": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65Amount 048.65 −\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "sourceConflictHasNoCanonicalValue": true,
+      "falseDuplicateCorrected": true,
+      "beforeConflictWarning": false,
+      "afterConflictWarning": true,
+      "recognitionAndOriginalCoordinatesExact": true,
+      "sourceImagesAndNativeLayerExact": true,
+      "contentCharacters": 92,
+      "charErrorsBefore": 12,
+      "charErrorsAfter": 0,
+      "CERBefore": 0.13043478260869565,
+      "CERAfter": 0.0,
+      "secondsBefore": 3.1451139710043208,
+      "secondsAfter": 3.240780457002984
+    },
+    {
+      "id": "post-accounting",
+      "nativeValue": "Amount (048.65-)",
+      "rasterValue": "Amount (048.65)",
+      "beforeText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount (048.65)Amount (048.65-)\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "afterText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount (048.65)Amount (048.65-)\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "expectedLiteralSourceUnion": "POSTFIX AUDIT 2093\nRecord 00864\nAmount (048.65)Amount (048.65-)\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "sourceConflictHasNoCanonicalValue": true,
+      "falseDuplicateCorrected": false,
+      "beforeConflictWarning": true,
+      "afterConflictWarning": true,
+      "recognitionAndOriginalCoordinatesExact": true,
+      "sourceImagesAndNativeLayerExact": true,
+      "contentCharacters": 96,
+      "charErrorsBefore": 0,
+      "charErrorsAfter": 0,
+      "CERBefore": 0.0,
+      "CERAfter": 0.0,
+      "secondsBefore": 3.3490565920001245,
+      "secondsAfter": 3.5056596720023663
+    },
+    {
+      "id": "post-currency",
+      "nativeValue": "Amount $048.65-",
+      "rasterValue": "Amount $048.65",
+      "beforeText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount $048.65-\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "afterText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount $048.65Amount $048.65-\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "expectedLiteralSourceUnion": "POSTFIX AUDIT 2093\nRecord 00864\nAmount $048.65Amount $048.65-\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "sourceConflictHasNoCanonicalValue": true,
+      "falseDuplicateCorrected": true,
+      "beforeConflictWarning": false,
+      "afterConflictWarning": true,
+      "recognitionAndOriginalCoordinatesExact": true,
+      "sourceImagesAndNativeLayerExact": true,
+      "contentCharacters": 94,
+      "charErrorsBefore": 13,
+      "charErrorsAfter": 0,
+      "CERBefore": 0.13829787234042554,
+      "CERAfter": 0.0,
+      "secondsBefore": 2.818675891998282,
+      "secondsAfter": 3.438211199005309
+    },
+    {
+      "id": "range-compact",
+      "nativeValue": "Range 048.65-049.65",
+      "rasterValue": "Range 048.65-049.65",
+      "beforeText": "POSTFIX AUDIT 2093\nRecord 00864\nRange 048.65-049.65\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "afterText": "POSTFIX AUDIT 2093\nRecord 00864\nRange 048.65-049.65\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "expectedLiteralSourceUnion": "POSTFIX AUDIT 2093\nRecord 00864\nRange 048.65-049.65\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "sourceConflictHasNoCanonicalValue": false,
+      "falseDuplicateCorrected": false,
+      "beforeConflictWarning": false,
+      "afterConflictWarning": false,
+      "recognitionAndOriginalCoordinatesExact": true,
+      "sourceImagesAndNativeLayerExact": true,
+      "contentCharacters": 85,
+      "charErrorsBefore": 0,
+      "charErrorsAfter": 0,
+      "CERBefore": 0.0,
+      "CERAfter": 0.0,
+      "secondsBefore": 3.217773976997705,
+      "secondsAfter": 3.5416883590005455
+    },
+    {
+      "id": "range-spaced",
+      "nativeValue": "Range 048.65 - 049.65",
+      "rasterValue": "Range 048.65 - 049.65",
+      "beforeText": "POSTFIX AUDIT 2093\nRecord 00864\nRange 048.65 - 049.65\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "afterText": "POSTFIX AUDIT 2093\nRecord 00864\nRange 048.65 - 049.65\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "expectedLiteralSourceUnion": "POSTFIX AUDIT 2093\nRecord 00864\nRange 048.65 - 049.65\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "sourceConflictHasNoCanonicalValue": false,
+      "falseDuplicateCorrected": false,
+      "beforeConflictWarning": false,
+      "afterConflictWarning": false,
+      "recognitionAndOriginalCoordinatesExact": true,
+      "sourceImagesAndNativeLayerExact": true,
+      "contentCharacters": 85,
+      "charErrorsBefore": 0,
+      "charErrorsAfter": 0,
+      "CERBefore": 0.0,
+      "CERAfter": 0.0,
+      "secondsBefore": 2.9018186699977377,
+      "secondsAfter": 3.449402382997505
+    },
+    {
+      "id": "inline-list",
+      "nativeValue": "Amount 048.65 - NOTE",
+      "rasterValue": "Amount 048.65 NOTE",
+      "beforeText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65 - NOTE\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "afterText": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65 - NOTE\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "expectedLiteralSourceUnion": "POSTFIX AUDIT 2093\nRecord 00864\nAmount 048.65 - NOTE\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "sourceConflictHasNoCanonicalValue": false,
+      "falseDuplicateCorrected": false,
+      "beforeConflictWarning": false,
+      "afterConflictWarning": false,
+      "recognitionAndOriginalCoordinatesExact": true,
+      "sourceImagesAndNativeLayerExact": true,
+      "contentCharacters": 84,
+      "charErrorsBefore": 0,
+      "charErrorsAfter": 0,
+      "CERBefore": 0.0,
+      "CERAfter": 0.0,
+      "secondsBefore": 3.34871560800093,
+      "secondsAfter": 3.395817944998271
+    },
+    {
+      "id": "separate-field",
+      "nativeValue": "Values 048.65 | -049.65",
+      "rasterValue": "Values 048.65 | -049.65",
+      "beforeText": "POSTFIX AUDIT 2093\nRecord 00864\nValues 048.65 | -049.65\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "afterText": "POSTFIX AUDIT 2093\nRecord 00864\nValues 048.65 | -049.65\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "expectedLiteralSourceUnion": "POSTFIX AUDIT 2093\nRecord 00864\nValues 048.65 | -049.65\nDate 2093-09-17\nINDEPENDENT NOVEL FOOTER 2093\n",
+      "sourceConflictHasNoCanonicalValue": false,
+      "falseDuplicateCorrected": false,
+      "beforeConflictWarning": false,
+      "afterConflictWarning": false,
+      "recognitionAndOriginalCoordinatesExact": true,
+      "sourceImagesAndNativeLayerExact": true,
+      "contentCharacters": 87,
+      "charErrorsBefore": 0,
+      "charErrorsAfter": 0,
+      "CERBefore": 0.0,
+      "CERAfter": 0.0,
+      "secondsBefore": 3.2235411290021148,
+      "secondsAfter": 2.8481600930026616
+    }
+  ],
+  "oldRegressions": [
+    {
+      "action": "accounting-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "158b8b99231a62c302ae080ff273030dbbf000db6684d03260de612f3c548357"
+    },
+    {
+      "action": "percent-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "44f897d07c1d30c876bece8145cf22419a302bd4407a67b0afa28b95197863b3"
+    },
+    {
+      "action": "per-mille-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "3930164089a704be99e6d02958a3d9d5c9999f52c182112c501d20088bcb551c"
+    },
+    {
+      "action": "dollar-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "7233f55f19980e43848e03e064deb93f9e7576ff9a09147e51eba49d0efe6d12"
+    },
+    {
+      "action": "euro-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "dac1298b1b68d334d3b18b3754008be0520cfa152555d5eb8753792e33f92998"
+    },
+    {
+      "action": "currency-accounting-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "03092cedb23730f598364560f0e86737493e3a0541d57d72a6f730b887a79aab"
+    },
+    {
+      "action": "space-after-sign-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "d5563b1a2c359318f50063c4b3771c7140721b8e42545d9b931b40274a12c5e5"
+    },
+    {
+      "action": "ordinary-punctuation-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "67e9b5c50ef80a316a588b1739b0e7a058b3ffd76c968cd427b6ab206d2714a3"
+    },
+    {
+      "action": "id-extension-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "a355acb0d856ebb9a75ae192fb2363bfc6787de656a463ceea8e65ca41bc990d"
+    },
+    {
+      "action": "digit-extension-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "3c06d710399f8a5191c4579e10bd5ee74cb7679a56d8f82305549fabed11af15"
+    },
+    {
+      "action": "negative-sign-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "80fac634301b383534c9c37c28c5b654c9423e0268ef35a61a10b7501c49e68d"
+    },
+    {
+      "action": "decimal-conflict-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "eb8aaf8a8c050ee763492c38df5d2c1a8367d0dccffec7b39f2f3738fad2b6f9"
+    },
+    {
+      "action": "one-digit-conflict-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "4eeb65ba0f92eab9213eb20f6fe78083bf9727bfa90399f8c61af2ebf29391ab"
+    },
+    {
+      "action": "masked-edited-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "b5dcfb3261569803219b830b9fcc6c6519de747b6d4600fe3c4824cd8bae5ef5"
+    },
+    {
+      "action": "boundary-reserve-text",
+      "acceptedOutputByteExact": true,
+      "sha256": "5cfcedea55a106f625c85e825db2df44f61a5ff485dd661c2bd06abb612188e4"
+    }
+  ],
+  "old15DownloadsByteExact": true,
+  "beforeJava": {
+    "rows": [
+      {
+        "id": "post-minus",
+        "native": "Amount 048.65-",
+        "ocr": "Amount 048.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "post-space-minus",
+        "native": "Amount 048.65 -",
+        "ocr": "Amount 048.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "post-unicode-minus",
+        "native": "Amount 048.65−",
+        "ocr": "Amount 048.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "post-plus",
+        "native": "Amount 048.65+",
+        "ocr": "Amount 048.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "post-space-plus",
+        "native": "Amount 048.65 +",
+        "ocr": "Amount 048.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "post-unicode-space-minus",
+        "native": "Amount 048.65 −",
+        "ocr": "Amount 048.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "post-accounting",
+        "native": "Amount (048.65-)",
+        "ocr": "Amount (048.65)",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "(048.65"
+        ],
+        "ocrTokens": [
+          "(048.65)"
+        ]
+      },
+      {
+        "id": "post-currency",
+        "native": "Amount $048.65-",
+        "ocr": "Amount $048.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "$048.65"
+        ],
+        "ocrTokens": [
+          "$048.65"
+        ]
+      },
+      {
+        "id": "range-compact",
+        "native": "Range 048.65-049.65",
+        "ocr": "Range 048.65-049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65-049.65"
+        ],
+        "ocrTokens": [
+          "048.65-049.65"
+        ]
+      },
+      {
+        "id": "range-spaced",
+        "native": "Range 048.65 - 049.65",
+        "ocr": "Range 048.65 - 049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65",
+          "-049.65"
+        ],
+        "ocrTokens": [
+          "048.65",
+          "-049.65"
+        ]
+      },
+      {
+        "id": "inline-list",
+        "native": "Amount 048.65 - NOTE",
+        "ocr": "Amount 048.65 NOTE",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "separate-field",
+        "native": "Values 048.65 | -049.65",
+        "ocr": "Values 048.65 | -049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65",
+          "-049.65"
+        ],
+        "ocrTokens": [
+          "048.65",
+          "-049.65"
+        ]
+      },
+      {
+        "id": "fullwidth-post-minus",
+        "native": "Amount 048.65－",
+        "ocr": "Amount 048.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "fullwidth-post-plus",
+        "native": "Amount 048.65＋",
+        "ocr": "Amount 048.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "same-post-space",
+        "native": "Amount 048.65 -",
+        "ocr": "Amount 048.65-",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "same-unicode-post-space",
+        "native": "Amount 048.65 −",
+        "ocr": "Amount 048.65−",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "literal-post-sign",
+        "native": "Amount 048.65−",
+        "ocr": "Amount 048.65-",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "currency-after-post",
+        "native": "Amount 048.65$-",
+        "ocr": "Amount 048.65$",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65$"
+        ],
+        "ocrTokens": [
+          "048.65$"
+        ]
+      },
+      {
+        "id": "currency-after-sign",
+        "native": "Amount 048.65-€",
+        "ocr": "Amount 048.65€",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65€"
+        ]
+      },
+      {
+        "id": "same-range-label",
+        "native": "Range: 048.65-049.65",
+        "ocr": "Range 048.65-049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65-049.65"
+        ],
+        "ocrTokens": [
+          "048.65-049.65"
+        ]
+      },
+      {
+        "id": "same-spaced-range-label",
+        "native": "Range: 048.65 - 049.65",
+        "ocr": "Range 048.65 - 049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65",
+          "-049.65"
+        ],
+        "ocrTokens": [
+          "048.65",
+          "-049.65"
+        ]
+      },
+      {
+        "id": "same-plus-field-space",
+        "native": "Values 048.65 + 049.65",
+        "ocr": "Values 048.65 +049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65",
+          "+049.65"
+        ],
+        "ocrTokens": [
+          "048.65",
+          "+049.65"
+        ]
+      },
+      {
+        "id": "line-list",
+        "native": "Amount 048.65\n- NOTE",
+        "ocr": "Amount 048.65 NOTE",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "line-range",
+        "native": "Range 048.65\n- 049.65",
+        "ocr": "Range 048.65 - 049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65",
+          "-049.65"
+        ],
+        "ocrTokens": [
+          "048.65",
+          "-049.65"
+        ]
+      },
+      {
+        "id": "field-negative-different",
+        "native": "Values 048.65 | -049.65",
+        "ocr": "Values 048.65 | 049.65",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65",
+          "-049.65"
+        ],
+        "ocrTokens": [
+          "048.65",
+          "049.65"
+        ]
+      },
+      {
+        "id": "accounting-old",
+        "native": "Amount 048.65",
+        "ocr": "Amount (048.65)",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "(048.65)"
+        ]
+      },
+      {
+        "id": "percent-old",
+        "native": "Rate 10",
+        "ocr": "Rate 10%",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "10"
+        ],
+        "ocrTokens": [
+          "10%"
+        ]
+      },
+      {
+        "id": "id-zero-old",
+        "native": "Record 00793",
+        "ocr": "Record 0793",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "00793"
+        ],
+        "ocrTokens": [
+          "0793"
+        ]
+      },
+      {
+        "id": "separate-old",
+        "native": "Values 12 34",
+        "ocr": "Values 1234",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "12",
+          "34"
+        ],
+        "ocrTokens": [
+          "1234"
+        ]
+      },
+      {
+        "id": "ordinary-old",
+        "native": "Invoice No. 2093",
+        "ocr": "Invoice No 2093",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "2093"
+        ],
+        "ocrTokens": [
+          "2093"
+        ]
+      }
+    ],
+    "recognitionInvocations": 0,
+    "productionMatcherCalls": 90
+  },
+  "afterJava": {
+    "productionMatcherCalls": 90,
+    "rows": [
+      {
+        "id": "post-minus",
+        "native": "Amount 048.65-",
+        "ocr": "Amount 048.65",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65-"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "post-space-minus",
+        "native": "Amount 048.65 -",
+        "ocr": "Amount 048.65",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65-"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "post-unicode-minus",
+        "native": "Amount 048.65−",
+        "ocr": "Amount 048.65",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65−"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "post-plus",
+        "native": "Amount 048.65+",
+        "ocr": "Amount 048.65",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65+"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "post-space-plus",
+        "native": "Amount 048.65 +",
+        "ocr": "Amount 048.65",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65+"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "post-unicode-space-minus",
+        "native": "Amount 048.65 −",
+        "ocr": "Amount 048.65",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65−"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "post-accounting",
+        "native": "Amount (048.65-)",
+        "ocr": "Amount (048.65)",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "(048.65-)"
+        ],
+        "ocrTokens": [
+          "(048.65)"
+        ]
+      },
+      {
+        "id": "post-currency",
+        "native": "Amount $048.65-",
+        "ocr": "Amount $048.65",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "$048.65-"
+        ],
+        "ocrTokens": [
+          "$048.65"
+        ]
+      },
+      {
+        "id": "range-compact",
+        "native": "Range 048.65-049.65",
+        "ocr": "Range 048.65-049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65-049.65"
+        ],
+        "ocrTokens": [
+          "048.65-049.65"
+        ]
+      },
+      {
+        "id": "range-spaced",
+        "native": "Range 048.65 - 049.65",
+        "ocr": "Range 048.65 - 049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65",
+          "-049.65"
+        ],
+        "ocrTokens": [
+          "048.65",
+          "-049.65"
+        ]
+      },
+      {
+        "id": "inline-list",
+        "native": "Amount 048.65 - NOTE",
+        "ocr": "Amount 048.65 NOTE",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "separate-field",
+        "native": "Values 048.65 | -049.65",
+        "ocr": "Values 048.65 | -049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65",
+          "-049.65"
+        ],
+        "ocrTokens": [
+          "048.65",
+          "-049.65"
+        ]
+      },
+      {
+        "id": "fullwidth-post-minus",
+        "native": "Amount 048.65－",
+        "ocr": "Amount 048.65",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65－"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "fullwidth-post-plus",
+        "native": "Amount 048.65＋",
+        "ocr": "Amount 048.65",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65＋"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "same-post-space",
+        "native": "Amount 048.65 -",
+        "ocr": "Amount 048.65-",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65-"
+        ],
+        "ocrTokens": [
+          "048.65-"
+        ]
+      },
+      {
+        "id": "same-unicode-post-space",
+        "native": "Amount 048.65 −",
+        "ocr": "Amount 048.65−",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65−"
+        ],
+        "ocrTokens": [
+          "048.65−"
+        ]
+      },
+      {
+        "id": "literal-post-sign",
+        "native": "Amount 048.65−",
+        "ocr": "Amount 048.65-",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65−"
+        ],
+        "ocrTokens": [
+          "048.65-"
+        ]
+      },
+      {
+        "id": "currency-after-post",
+        "native": "Amount 048.65$-",
+        "ocr": "Amount 048.65$",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65$-"
+        ],
+        "ocrTokens": [
+          "048.65$"
+        ]
+      },
+      {
+        "id": "currency-after-sign",
+        "native": "Amount 048.65-€",
+        "ocr": "Amount 048.65€",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65-€"
+        ],
+        "ocrTokens": [
+          "048.65€"
+        ]
+      },
+      {
+        "id": "same-range-label",
+        "native": "Range: 048.65-049.65",
+        "ocr": "Range 048.65-049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65-049.65"
+        ],
+        "ocrTokens": [
+          "048.65-049.65"
+        ]
+      },
+      {
+        "id": "same-spaced-range-label",
+        "native": "Range: 048.65 - 049.65",
+        "ocr": "Range 048.65 - 049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65",
+          "-049.65"
+        ],
+        "ocrTokens": [
+          "048.65",
+          "-049.65"
+        ]
+      },
+      {
+        "id": "same-plus-field-space",
+        "native": "Values 048.65 + 049.65",
+        "ocr": "Values 048.65 +049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65",
+          "+049.65"
+        ],
+        "ocrTokens": [
+          "048.65",
+          "+049.65"
+        ]
+      },
+      {
+        "id": "line-list",
+        "native": "Amount 048.65\n- NOTE",
+        "ocr": "Amount 048.65 NOTE",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "048.65"
+        ]
+      },
+      {
+        "id": "line-range",
+        "native": "Range 048.65\n- 049.65",
+        "ocr": "Range 048.65 - 049.65",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "048.65",
+          "-049.65"
+        ],
+        "ocrTokens": [
+          "048.65",
+          "-049.65"
+        ]
+      },
+      {
+        "id": "field-negative-different",
+        "native": "Values 048.65 | -049.65",
+        "ocr": "Values 048.65 | 049.65",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65",
+          "-049.65"
+        ],
+        "ocrTokens": [
+          "048.65",
+          "049.65"
+        ]
+      },
+      {
+        "id": "accounting-old",
+        "native": "Amount 048.65",
+        "ocr": "Amount (048.65)",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "048.65"
+        ],
+        "ocrTokens": [
+          "(048.65)"
+        ]
+      },
+      {
+        "id": "percent-old",
+        "native": "Rate 10",
+        "ocr": "Rate 10%",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "10"
+        ],
+        "ocrTokens": [
+          "10%"
+        ]
+      },
+      {
+        "id": "id-zero-old",
+        "native": "Record 00793",
+        "ocr": "Record 0793",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "00793"
+        ],
+        "ocrTokens": [
+          "0793"
+        ]
+      },
+      {
+        "id": "separate-old",
+        "native": "Values 12 34",
+        "ocr": "Values 1234",
+        "duplicate": false,
+        "reverseDuplicate": false,
+        "numericConflict": true,
+        "nativeTokens": [
+          "12",
+          "34"
+        ],
+        "ocrTokens": [
+          "1234"
+        ]
+      },
+      {
+        "id": "ordinary-old",
+        "native": "Invoice No. 2093",
+        "ocr": "Invoice No 2093",
+        "duplicate": true,
+        "reverseDuplicate": true,
+        "numericConflict": false,
+        "nativeTokens": [
+          "2093"
+        ],
+        "ocrTokens": [
+          "2093"
+        ]
+      }
+    ],
+    "recognitionInvocations": 0
+  },
+  "all12RecognitionModelsTsvConfidenceSourceCoordinatesByteExact": true,
+  "replayExtraOcrInvocations": 0,
+  "aggregateTruthCharacters": 1083,
+  "aggregateCharErrorsBefore": 85,
+  "aggregateCharErrorsAfter": 0,
+  "aggregateCERBefore": 0.07848568790397045,
+  "aggregateCERAfter": 0,
+  "cerDefinition": "literal native/OCR source union using existing geometry;case/punctuation/signs retained;only whitespace removed;not canonical financial truth",
+  "jarSha256": "7f5fb6f3471e9e9f8a0c5c64145fe3df0c229d7cbedb1e452c3d47c24ff6200c",
+  "beforeJarSha256": "73b2aada867097614e5ed3bae08a840a8a232b313c8595075086c5c5254dc597",
+  "buildInputSha256": "71dece79a08a2ab9cad6b2daaff703f9ae1ba2a00fd676e2e0be74017f19d7a3",
+  "applicationClassCount": 232,
+  "changedClasses": [
+    "BOOT-INF/lib/task-service-0.1.5.jar/com/fuyue/formatconverter/task/OcrTextDeduplicator.class"
+  ],
+  "other231ClassesAndAllApplicationResourcesByteExact": true,
+  "rendererAndOcrEngineByteExact": true,
+  "focusedTests": 15,
+  "fullSuite": {
+    "tests": 505,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "skips": [
+    {
+      "className": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+      "name": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning",
+      "skipped": true
+    }
+  ],
+  "bundledTests": [
+    {
+      "className": "com.fuyue.formatconverter.task.OcrDeskewTest",
+      "name": "bundledEngineRecoversMissingLinesWithSourceGeometryAndReviewWarnings",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.PdfToImageConverterTest",
+      "name": "discoversBundledPopplerFromAppHome",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.ForkedFileConverterTest",
+      "name": "retainsAutoDiscoveredBundledOcrWhenTheWorkerChangesItsWorkingDirectory",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "discoversBundledRuntimeFromPackagedApplicationRoot",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "validBundledRuntimeAutoEnablesWithoutHostInstallation",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "explicitFalseDisablesEvenAValidBundledRuntime",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.BundledOcrRuntimeIntegrationTest",
+      "name": "bundledBinaryModelsAndLibrariesRunWithoutSystemDiscovery",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractPngInputTest",
+      "name": "bundledPngEngineRecognizesRealJpegText",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+      "name": "bundledEngineRecoversShadedLowContrastPrintedText",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+      "name": "bundledEngineRecoversChineseFaintTextWithDigitsAndPunctuation",
+      "skipped": false
+    }
+  ],
+  "runtimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+  "runtimePayloadFilesReverified": 12,
+  "runtimeManifest": {
+    "schemaVersion": 1,
+    "platform": "linux",
+    "arch": "x64",
+    "policySha256": "54c6ae7291fc983cb7b946bc0b90832ec4b589d493fef01b5f974a0ab26d8735",
+    "components": [
+      {
+        "id": "zlib",
+        "version": "1.3.1",
+        "source": "https://codeload.github.com/madler/zlib/tar.gz/v1.3.1",
+        "sourceSha256": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c",
+        "spdx": "Zlib"
+      },
+      {
+        "id": "libpng",
+        "version": "1.6.57",
+        "source": "https://codeload.github.com/pnggroup/libpng/tar.gz/v1.6.57",
+        "sourceSha256": "4cbb7b0746edc1683c9581b373365e955133b7f1243f171b7d1535b4415dfedb",
+        "spdx": "libpng-2.0"
+      },
+      {
+        "id": "leptonica",
+        "version": "1.87.0",
+        "source": "https://codeload.github.com/DanBloomberg/leptonica/tar.gz/1.87.0",
+        "sourceSha256": "fa2b40c5caea96d1bb93a97486262aed8731b69ce25a84a6bf5d25323e33f631",
+        "spdx": "BSD-2-Clause"
+      },
+      {
+        "id": "tesseract",
+        "version": "5.5.2",
+        "source": "https://codeload.github.com/tesseract-ocr/tesseract/tar.gz/5.5.2",
+        "sourceSha256": "6235ea0dae45ea137f59c09320406f5888383741924d98855bd2ce0d16b54f21",
+        "spdx": "Apache-2.0"
+      }
+    ],
+    "models": [
+      {
+        "name": "eng",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/eng.traineddata",
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      {
+        "name": "chi_sim",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim.traineddata",
+        "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+      },
+      {
+        "name": "chi_sim_vert",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim_vert.traineddata",
+        "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+      },
+      {
+        "name": "osd",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/osd.traineddata",
+        "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+      }
+    ],
+    "files": [
+      {
+        "path": "bin/tesseract",
+        "size": 6678328,
+        "sha256": "90730922627269352568d54e788c7e42fd2e1783e03795d75560efa385de1489"
+      },
+      {
+        "path": "licenses/OCR-SOURCE-POLICY.json",
+        "size": 4186,
+        "sha256": "1ea79f27bafb87a8692d2b37d0ab2f3cb2236f228d6e76eedf7aa6b40dacf808"
+      },
+      {
+        "path": "licenses/leptonica.txt",
+        "size": 1521,
+        "sha256": "87829abb5bbb00b55a107365da89e9a33f86c4250169e5a1e5588505be7d5806"
+      },
+      {
+        "path": "licenses/libpng.txt",
+        "size": 5345,
+        "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+      },
+      {
+        "path": "licenses/tessdata.txt",
+        "size": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      {
+        "path": "licenses/tesseract.txt",
+        "size": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      {
+        "path": "licenses/zlib.txt",
+        "size": 1002,
+        "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+      },
+      {
+        "path": "tessdata/chi_sim.traineddata",
+        "size": 2469156,
+        "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+      },
+      {
+        "path": "tessdata/chi_sim_vert.traineddata",
+        "size": 1927902,
+        "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+      },
+      {
+        "path": "tessdata/configs/tsv",
+        "size": 22,
+        "sha256": "59d079bb75d8b3d7c839a3564580cb559e362c93a9d70f234e421c0c3e767e04"
+      },
+      {
+        "path": "tessdata/eng.traineddata",
+        "size": 4113088,
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      {
+        "path": "tessdata/osd.traineddata",
+        "size": 10562727,
+        "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+      }
+    ]
+  },
+  "versions": {
+    "java": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nopenjdk version \"17.0.16\" 2025-07-15\nOpenJDK Runtime Environment Temurin-17.0.16+8 (build 17.0.16+8)\nOpenJDK 64-Bit Server VM Temurin-17.0.16+8 (build 17.0.16+8, mixed mode, sharing)",
+    "maven": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nApache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)\nMaven home: /workspace/fuyue-env/tools/apache-maven-3.9.11\nJava version: 17.0.16, vendor: Eclipse Adoptium, runtime: /workspace/fuyue-env/tools/jdk-17.0.16+8\nDefault locale: en, platform encoding: UTF-8\nOS name: \"linux\", version: \"6.18.44\", arch: \"amd64\", family: \"unix\"",
+    "node": "v22.17.0",
+    "ocr": "tesseract 5.5.2\n leptonica-1.87.0\n  libpng 1.6.57 : zlib 1.3.1\n Found AVX512BW\n Found AVX512F\n Found AVX512VNNI\n Found AVX2\n Found AVX\n Found FMA\n Found SSE4.1",
+    "office": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "pymupdf": "1.26.6",
+    "linux": "6.18.44"
+  },
+  "fonts": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+  "sourceFontSha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+  "sourceFontVersion": "LiberationSans2.1.5 hash same as accepted35/36",
+  "pillowVersion": "12.3.0",
+  "resources": {
+    "before": {
+      "wallSeconds": 44.41238304099534,
+      "userSeconds": 102.208123,
+      "systemSeconds": 9.346891,
+      "maxChildRssKiB": 351396
+    },
+    "after": {
+      "wallSeconds": 91.18080182799895,
+      "userSeconds": 208.78509,
+      "systemSeconds": 18.931206,
+      "maxChildRssKiB": 348096
+    }
+  },
+  "noRecognitionAccuracyOrSpeedupClaim": true,
+  "noTimeoutRetryPixelChanges": true,
+  "noScalingVisibilityExperimentRerun": true,
+  "newWordOfficeMatrixUnrun": true,
+  "unrun": [
+    "nonterminal post-sign followed by additional inline text remains deliberately ambiguous",
+    "newWordOffice visual/edit matrix;renderer byteexact and fullsuite covers prior guards",
+    "nativeMacWindows/MicrosoftWord/optional signedOFDfixture",
+    "scaling38 andvisibility37 experiments ended;not repeated"
+  ],
+  "remaining": [
+    "canonical source financial conflict must be reviewed;both layers retained",
+    "original sparseOFD/mixedAPI strictvisibility/adjacentlongedit/perMille/smallglyph andmetadata limits persist"
+  ],
+  "helpers": {
+    "generate_postfix39.py": "b36ee50858027a978cdd5945cc630fedd7a342a86a11256406cd6f48085cb2ad",
+    "prepare_postfix39.py": "efc177538664ed94a274d3defba6bfe98c86add37952b0aec127832fb51d3af1",
+    "OcrPostfixProbe39.java": "b4e0abbd2fa72211b22c2dc4aa3b23ff8d7c15b7af5eb0301173289a9d10e514",
+    "verify_postfix39.py": "2e4479e345b23560168442c30476b216ed99d02bf5259baa083696ec45d29ee0",
+    "OcrCapturedLexemeReplay35.java": "3dc7da00183d7a2719242dff43545a4bad6b4a262c67ff5a34f488b23f2e8a26",
+    "capture_numeric_http35.py": "6bfce56a96fff01ea419f7e4ac16b66b16630d7ca014fcad0766d7ab2d5c90a9",
+    "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf",
+    "qa_process_guard.py": "15cef869549ab74d369a4920c7d973456114ab4a1c92b91ab955e0a4c5b6b4e9",
+    "qa_http_deadline.py": "8eb0c7cb5e14257e27f21c0d930e06dc39a0a9a78461f505769439ec50a44a85"
+  },
+  "replayCoverage": {
+    "before": 12,
+    "after": 25,
+    "newControlsAll12Replayed": true,
+    "oldRegressionAliasesSkipped": [
+      "boundary-reserve",
+      "masked-edited"
+    ],
+    "reason": "existing replay helper accepts id.ofd only;two action IDs alias other filenames;all15 downloaded regression outputs independently byte-exact"
+  },
+  "fontsRetainedFromAccepted35": {
+    "source": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+      "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+      "version": "LiberationSans2.1.5",
+      "license": "SIL-OFL-1.1"
+    },
+    "bundled": [
+      {
+        "path": "task-service/src/main/resources/fonts/LiberationSans-Regular.ttf",
+        "sha256": "76d04c18ea243f426b7de1f3ad208e927008f961dc5945e5aad352d0dfde8ee8",
+        "license": "SIL-OFL-1.1",
+        "version": [
+          "Version 2.1.5"
+        ]
+      },
+      {
+        "path": "task-service/src/main/resources/fonts/DroidSansFallback.ttf",
+        "sha256": "21b96a0377f067833a93af3082eb28d4ffab7a8cd46bfd513286f1d64b7b0949",
+        "license": "Apache-2.0",
+        "version": [
+          "Version 2.55b"
+        ]
+      }
+    ]
+  }
+}

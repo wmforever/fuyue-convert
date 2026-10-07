@@ -170,8 +170,26 @@ class PoiDocxRendererTest {
         try (ZipFile archive = new ZipFile(output.toFile())) {
             String xml = new String(archive.getInputStream(archive.getEntry("word/document.xml")).readAllBytes());
             assertTrue(xml.contains("可编辑 OCR 文字"));
-            assertTrue(imageShape(xml, "scan-background").contains("z-index:-251658752"));
-            assertTrue(imageShape(xml, "page-background").contains("z-index:-251658752"));
+            for (String name : List.of("scan-background", "page-background")) {
+                var factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+                factory.setNamespaceAware(true);
+                var document = factory.newDocumentBuilder().parse(new java.io.ByteArrayInputStream(
+                        xml.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+                var anchors = document.getElementsByTagNameNS(
+                        "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing", "anchor");
+                org.w3c.dom.Element background = null;
+                for (int index = 0; index < anchors.getLength(); index++) {
+                    var candidate = (org.w3c.dom.Element) anchors.item(index);
+                    var properties = candidate.getElementsByTagNameNS(
+                            "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing", "docPr");
+                    if (name.equals(((org.w3c.dom.Element) properties.item(0)).getAttribute("name"))) background = candidate;
+                }
+                assertNotNull(background, "missing scan drawing: " + name);
+                assertEquals("1", background.getAttribute("behindDoc"));
+                assertEquals("0", background.getAttribute("relativeHeight"));
+                assertEquals(1, background.getElementsByTagNameNS(
+                        "http://schemas.openxmlformats.org/drawingml/2006/picture", "pic").getLength());
+            }
             assertFalse(imageShape(xml, "ordinary-photo").contains("z-index:-"));
             assertTrue(imageShape(xml, "ordinary-photo").contains("z-index:1"),
                     "普通图片继续使用原有的正层级钳制语义");

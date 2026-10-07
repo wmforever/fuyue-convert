@@ -1,0 +1,15 @@
+{
+  "frozenBeforeNewOcr": true,
+  "sourceRevision": "54adeb5233b32d5f7e0b1ccddf2332e64f7add46",
+  "seed": 140042026,
+  "scope": "One finite enhanced PSM6 quality diagnostic; production PSM3 stays unchanged",
+  "cases": ["en-serif-shadow", "zh-sans-shadow", "en-mono-shadow", "zh-serif-shadow", "blank-shadow", "noise-shadow", "en-numeric-upright-mild-shadow", "zh-numeric-upright-mild-shadow", "en-columns-aligned-mild-shadow", "en-ruled-mild-shadow"],
+  "comparison": ["original PSM3", "actual Java contrast-enhanced PSM3", "same enhanced pixels PSM6"],
+  "reuse": "Six original PSM3 and five no-DPI enhanced PSM3 TSVs from iteration11, with exact image/TSV hashes and original measured resource records; never rerun completed variants",
+  "newRunLimits": {"maximumCliRuns": 18, "serialConcurrency": 1, "perCommandSeconds": 120, "wholeDiagnosticSeconds": 1200, "cliAddressSpaceBytes": 1073741824, "maximumObservedPeakRssKiBForAdoption": 262144},
+  "actualSelection": "Call current preferEnhanced and OcrPartialRecovery.select with unchanged .35 minimum/.05 gain, original geometry validation, numeric boundaries/order, source identities, layout/budget/deadline limits. Apply actual production retry eligibility. PSM6 is hypothetical only after existing PSM3 full/partial rejection, with the remaining original120s budget.",
+  "requiredBenefit": "At least one unresolved EN-serif/ZH-sans page must adopt PSM6 through actual unchanged gates, recover at least20 aligned truth characters, reduce CER and increase aligned recall vs actual existing PSM3 selection",
+  "requiredSafety": ["No conditional selected-text CER/recall/numeric regression on any control", "No blank/noise selected text", "All candidate coordinates inside original physical bounds; enhancement preserves dimensions and has no geometric resampling", "Every partial selection retains exact original block objects", "Reliable numeric surfaces and boundaries remain protected by actual full/partial selectors", "Unchanged original total120s budget, including both candidates, and measured resource ceiling", "No confidence-only/truth-driven candidate selection, threshold relaxation, digit replacement, global PSM change or renewed angle/threshold sweep"],
+  "stop": "Any failed command/timeout/resource violation retains raw results and stops missing work. No qualifying shadow benefit or any unsafe control means negative report, no production implementation. A promising safe result still requires a narrowly justified retry and actual bundled HTTP/worker/artifact regression before implementation publication.",
+  "logs": "Exclusive per-case/per-variant directories; separate stdout/stderr, TSV and command JSON; retained compile/prepare/evaluate failures; never overwrite runs"
+}

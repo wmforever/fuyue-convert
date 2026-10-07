@@ -1,0 +1,151 @@
+{
+  "candidateRevision": "096f0eda722c626e9680268846979c19c9ee054f",
+  "candidateCi": {
+    "run": 37207251967,
+    "officeJob": 111450914787,
+    "status": "failed dark-paper white-text visibility on LibreOffice 24.2.7; original assertions retained"
+  },
+  "finalJarSha256": "f4960b0dc8789f3865101bdbb86a4c797bd1e4bd016b91f373db916db61c9871",
+  "finalManifestSha256": "7995eb7bd1d54fe59523fc0b42352818eec9cc2bacf1c41b4ddce9f11d73eea9",
+  "httpContracts": 11,
+  "workersAbsent": 11,
+  "ECHILD": true,
+  "newZombies": [],
+  "historicalZombiesUnchanged": 17,
+  "resources": {
+    "wallSeconds": 40.81308134600113,
+    "userSeconds": 114.283439,
+    "systemSeconds": 8.460624,
+    "maxChildRssKiB": 349248
+  },
+  "lightPaperWordPayloads": [
+    {
+      "case": "decimal",
+      "candidateSha256": "07e0f01c5fac19b23f8d07b605af03b0bdc2893e23e2a10322124da91f7ca868",
+      "finalSha256": "05993385283def73c9a2cce036e9b6d6b6add0d1b84aeb6321f8d8725848defc",
+      "allSubstantivePartsExact": true,
+      "partHashes": {
+        "[Content_Types].xml": "6f1161520563939c687492a2498f35ef134c23846d51d0aa51655a46283f5e48",
+        "_rels/.rels": "179a6399b53edc5000919404469042d58957b99dc44235a15f41f352d25ad9de",
+        "docProps/app.xml": "1a275cdfaf02b0fc41605591e189662b55442b628d6331d1424e09d2c6159d3b",
+        "docProps/core.xml": "26457cbb12c7f5ddf3fa6f6b4deb093b8f6d96c18a54798e4f6758dafe7c5819",
+        "word/document.xml": "bb2144da239f0fb9d4163a6954e5d16c173e438578bb3cdc92c9e5a9f50ceaab",
+        "word/_rels/document.xml.rels": "61b8d294efb2fedc9ccc450be8e9551bdb78849154b41221c12c7cc7b333b914",
+        "word/media/image1.png": "c952fdc3fa0012a82b60dec6ac860a10294c69a497c8b803bdcb306f0c2af96e",
+        "word/settings.xml": "762cebffa24d386e74d722989490c1c24c11c4aeac9dff7688bc22d1af81a2d2"
+      }
+    },
+    {
+      "case": "negative",
+      "candidateSha256": "5e1b5205e023e9ff30e25e54619e7f770e2fc76ab230dee15f7bb5a8f46b9418",
+      "finalSha256": "28f7b3a0f67d3c831bcecd84b96829430796c7df0719b5bf4cdfac44004a8b01",
+      "allSubstantivePartsExact": true,
+      "partHashes": {
+        "[Content_Types].xml": "6f1161520563939c687492a2498f35ef134c23846d51d0aa51655a46283f5e48",
+        "_rels/.rels": "179a6399b53edc5000919404469042d58957b99dc44235a15f41f352d25ad9de",
+        "docProps/app.xml": "1a275cdfaf02b0fc41605591e189662b55442b628d6331d1424e09d2c6159d3b",
+        "docProps/core.xml": "26457cbb12c7f5ddf3fa6f6b4deb093b8f6d96c18a54798e4f6758dafe7c5819",
+        "word/document.xml": "a50db1371e5f7ec8e1e17347555e24253acfa94f10d8c8a54c7dc1b04be9bcad",
+        "word/_rels/document.xml.rels": "61b8d294efb2fedc9ccc450be8e9551bdb78849154b41221c12c7cc7b333b914",
+        "word/media/image1.png": "ce51b7c24deea7dcfdc979abf9c48204a648e3851e1a8c82745329b00f450cec",
+        "word/settings.xml": "762cebffa24d386e74d722989490c1c24c11c4aeac9dff7688bc22d1af81a2d2"
+      }
+    },
+    {
+      "case": "leading-zero",
+      "candidateSha256": "d6e31b521809141df781398e9b3431793414ad190d72c4d2ee5ef7ef6a4d11a1",
+      "finalSha256": "e80df6af687a9db2fef92ccb75c9e47f1283e33c5d4b96be7a0bbfcc00815ae0",
+      "allSubstantivePartsExact": true,
+      "partHashes": {
+        "[Content_Types].xml": "6f1161520563939c687492a2498f35ef134c23846d51d0aa51655a46283f5e48",
+        "_rels/.rels": "179a6399b53edc5000919404469042d58957b99dc44235a15f41f352d25ad9de",
+        "docProps/app.xml": "1a275cdfaf02b0fc41605591e189662b55442b628d6331d1424e09d2c6159d3b",
+        "docProps/core.xml": "26457cbb12c7f5ddf3fa6f6b4deb093b8f6d96c18a54798e4f6758dafe7c5819",
+        "word/document.xml": "b732b611863de46c579b505fa886ef48795ae7446a00b5bc7dd79955068d1fe6",
+        "word/_rels/document.xml.rels": "61b8d294efb2fedc9ccc450be8e9551bdb78849154b41221c12c7cc7b333b914",
+        "word/media/image1.png": "dd3f094ced45a61625bab7dc019344ecb7a05b43be19688643676c2915e0d2b7",
+        "word/settings.xml": "762cebffa24d386e74d722989490c1c24c11c4aeac9dff7688bc22d1af81a2d2"
+      }
+    },
+    {
+      "case": "shorter-gray",
+      "candidateSha256": "4e9f700546217b9b41376e8b797b522926c9f3949c7a4da5331535131a85057c",
+      "finalSha256": "c563228c7f384d16262b9ac1ce5b4cc67063fe2297077b53536ac6c0725f3ed0",
+      "allSubstantivePartsExact": true,
+      "partHashes": {
+        "[Content_Types].xml": "6f1161520563939c687492a2498f35ef134c23846d51d0aa51655a46283f5e48",
+        "_rels/.rels": "179a6399b53edc5000919404469042d58957b99dc44235a15f41f352d25ad9de",
+        "docProps/app.xml": "1a275cdfaf02b0fc41605591e189662b55442b628d6331d1424e09d2c6159d3b",
+        "docProps/core.xml": "26457cbb12c7f5ddf3fa6f6b4deb093b8f6d96c18a54798e4f6758dafe7c5819",
+        "word/document.xml": "ae125d898f5b6981d86e0a0b7e749879cd8370dcaec8127130b6199b8c7e3ca3",
+        "word/_rels/document.xml.rels": "61b8d294efb2fedc9ccc450be8e9551bdb78849154b41221c12c7cc7b333b914",
+        "word/media/image1.png": "fb965f777c3582aa3b115e235d6394021f57269f1c765e497a87ff1c1aed29a5",
+        "word/settings.xml": "762cebffa24d386e74d722989490c1c24c11c4aeac9dff7688bc22d1af81a2d2"
+      }
+    },
+    {
+      "case": "longer-gray",
+      "candidateSha256": "4512c99ac70aac4f25a6b02eff17ba68e2e8a23455dfa40192d9056ae1e7d68e",
+      "finalSha256": "9b8f89acd10a68c6e0563c32dac1655c83a56df940de9a72dd362d258294e6d2",
+      "allSubstantivePartsExact": true,
+      "partHashes": {
+        "[Content_Types].xml": "6f1161520563939c687492a2498f35ef134c23846d51d0aa51655a46283f5e48",
+        "_rels/.rels": "179a6399b53edc5000919404469042d58957b99dc44235a15f41f352d25ad9de",
+        "docProps/app.xml": "1a275cdfaf02b0fc41605591e189662b55442b628d6331d1424e09d2c6159d3b",
+        "docProps/core.xml": "26457cbb12c7f5ddf3fa6f6b4deb093b8f6d96c18a54798e4f6758dafe7c5819",
+        "word/document.xml": "e16c734f580fc6a866313391d7000a4ad4d7d3407d89b0c9d8f741ef3c7d31c1",
+        "word/_rels/document.xml.rels": "61b8d294efb2fedc9ccc450be8e9551bdb78849154b41221c12c7cc7b333b914",
+        "word/media/image1.png": "bb20eb3e963971b7a6d25a2614782b19b25f535f0375d3fb07ac7b093f98f9da",
+        "word/settings.xml": "762cebffa24d386e74d722989490c1c24c11c4aeac9dff7688bc22d1af81a2d2"
+      }
+    },
+    {
+      "case": "shadow",
+      "candidateSha256": "35826ba746260fc7bfce4af76711cdbf2b70b662b758bbb03ffbaabc356aac67",
+      "finalSha256": "9e6e47b1c1280c606d346f97482b28d5ad27d230e94972724d11959578cda413",
+      "allSubstantivePartsExact": true,
+      "partHashes": {
+        "[Content_Types].xml": "6f1161520563939c687492a2498f35ef134c23846d51d0aa51655a46283f5e48",
+        "_rels/.rels": "179a6399b53edc5000919404469042d58957b99dc44235a15f41f352d25ad9de",
+        "docProps/app.xml": "1a275cdfaf02b0fc41605591e189662b55442b628d6331d1424e09d2c6159d3b",
+        "docProps/core.xml": "26457cbb12c7f5ddf3fa6f6b4deb093b8f6d96c18a54798e4f6758dafe7c5819",
+        "word/document.xml": "c4016114f3b6256d647ef5c5fd650879d9826b15eb373a86c48fd14843bf3d99",
+        "word/_rels/document.xml.rels": "61b8d294efb2fedc9ccc450be8e9551bdb78849154b41221c12c7cc7b333b914",
+        "word/media/image1.png": "446a75b8de668a18febd0eccc2de8d5e51827087121ccb99b72375d92f070b0c",
+        "word/settings.xml": "762cebffa24d386e74d722989490c1c24c11c4aeac9dff7688bc22d1af81a2d2"
+      }
+    },
+    {
+      "case": "uncertain",
+      "candidateSha256": "f7727c3442d1e9256e2241aeefd809febe3d1300e60d54f642b288176164365d",
+      "finalSha256": "2279ccc2894f84f36d632c5795e58d155b76f38035a1061f64a4aa342f0bc044",
+      "allSubstantivePartsExact": true,
+      "partHashes": {
+        "[Content_Types].xml": "6f1161520563939c687492a2498f35ef134c23846d51d0aa51655a46283f5e48",
+        "_rels/.rels": "179a6399b53edc5000919404469042d58957b99dc44235a15f41f352d25ad9de",
+        "docProps/app.xml": "1a275cdfaf02b0fc41605591e189662b55442b628d6331d1424e09d2c6159d3b",
+        "docProps/core.xml": "26457cbb12c7f5ddf3fa6f6b4deb093b8f6d96c18a54798e4f6758dafe7c5819",
+        "word/document.xml": "dc38ac74c1591fc42fb8597d91f5fd97d728ac389d617e68b9a2a82d882d609f",
+        "word/_rels/document.xml.rels": "61b8d294efb2fedc9ccc450be8e9551bdb78849154b41221c12c7cc7b333b914",
+        "word/media/image1.png": "0453d5e45fdd9b568e7ab35ba80bd97f85bd95e3c7bf33d9df3e66dcf2f76f41",
+        "word/settings.xml": "762cebffa24d386e74d722989490c1c24c11c4aeac9dff7688bc22d1af81a2d2"
+      }
+    }
+  ],
+  "originalRegression": [
+    {
+      "artifact": "original-office-result.pdf",
+      "candidateSha256": "12b1ba1ed3098f54bccf35f6ffaee56a9c8773078248422a7506311f9d0e5cac",
+      "finalSha256": "3f7371547e273ac27eb3c223232feda959876bc77245a0fe7a7ff0c5fe4dda22",
+      "visible300DpiPixelsAndNativeWordBoxesExact": true
+    },
+    {
+      "artifact": "original-edited-office-result.pdf",
+      "candidateSha256": "104d0a70cb5e0f3af54b1667f41251e48b9b66bd5546775d34620b1d229d7add",
+      "finalSha256": "ea58c03d0ad977f2ff397c281e237fbfff1409f325496784fef7e2978fbbebeb",
+      "visible300DpiPixelsAndNativeWordBoxesExact": true
+    }
+  ],
+  "originalApiTextBytesUnchangedStillIncorrect": true,
+  "qualification": "Seven existing light-paper Office/OCR measurements transfer through exact substantive DOCX parts. Original full chain rerun on final JAR; Office pixels and native boxes exact. No final seven-case Office matrix rerun."
+}

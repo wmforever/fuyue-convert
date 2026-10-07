@@ -1,0 +1,888 @@
+{
+  "jarSha256": "7568722fb399a143be6c8c2378a93cb841136300cfefd03b43f2b34623d8d3d6",
+  "manifestSha256": "52142f7647785330e5e3f3508610cb0af36a38144033b6da00dd7cf1aace8986",
+  "rows": [
+    {
+      "case": "original",
+      "onlyTransparentNumericWidthsChanged": [
+        {
+          "text": "2041",
+          "beforeWidthPt": 38.807,
+          "afterWidthPt": 65.023
+        },
+        {
+          "text": "00571",
+          "beforeWidthPt": 46.95,
+          "afterWidthPt": 73.726
+        },
+        {
+          "text": "7.50",
+          "beforeWidthPt": 35.371,
+          "afterWidthPt": 62.0
+        },
+        {
+          "text": "38.25",
+          "beforeWidthPt": 43.305,
+          "afterWidthPt": 69.967
+        }
+      ],
+      "originalImageMasksFontsCoordinatesExact": true,
+      "uneditedOfficePixelsAndNativeBoxesExact": true,
+      "beforeNative": {
+        "text": "EDIT REVIEW 2041\nRecord 00571\nAmount 187.5\n0\nDate 2041-08-23\nControl 38.25\n",
+        "metrics": {
+          "expectedCharacters": 63,
+          "actualCharacters": 63,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 5,
+          "expectedNumbers": [
+            "2041",
+            "00571",
+            "187",
+            "50",
+            "2041",
+            "08",
+            "23",
+            "38",
+            "25"
+          ],
+          "actualNumbers": [
+            "2041",
+            "00571",
+            "187",
+            "5",
+            "0",
+            "2041",
+            "08",
+            "23",
+            "38",
+            "25"
+          ]
+        },
+        "numericLexemesExact": false
+      },
+      "beforeVisibleAmount": {
+        "text": "187.5\n0\n",
+        "seconds": 0.32613923200551653,
+        "numericLexemesExact": false,
+        "metrics": {
+          "expectedCharacters": 6,
+          "actualCharacters": 6,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "187",
+            "50"
+          ],
+          "actualNumbers": [
+            "187",
+            "5",
+            "0"
+          ]
+        }
+      },
+      "beforeApi": {
+        "text": "EDIT REVIEW2041\nRecord 00571\nAmount 187.5\n0\nDate 2041-08-23\nControl 38.25\n",
+        "metrics": {
+          "expectedCharacters": 63,
+          "actualCharacters": 63,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 5,
+          "expectedNumbers": [
+            "2041",
+            "00571",
+            "187",
+            "50",
+            "2041",
+            "08",
+            "23",
+            "38",
+            "25"
+          ],
+          "actualNumbers": [
+            "2041",
+            "00571",
+            "187",
+            "5",
+            "0",
+            "2041",
+            "08",
+            "23",
+            "38",
+            "25"
+          ]
+        },
+        "numericLexemesExact": false
+      },
+      "afterNative": {
+        "text": "EDIT REVIEW 2041\nRecord 00571\nAmount 187.50\nDate 2041-08-23\nControl 38.25\n",
+        "metrics": {
+          "expectedCharacters": 63,
+          "actualCharacters": 63,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 5,
+          "expectedNumbers": [
+            "2041",
+            "00571",
+            "187",
+            "50",
+            "2041",
+            "08",
+            "23",
+            "38",
+            "25"
+          ],
+          "actualNumbers": [
+            "2041",
+            "00571",
+            "187",
+            "50",
+            "2041",
+            "08",
+            "23",
+            "38",
+            "25"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "afterVisibleAmount": {
+        "text": "187.50\n",
+        "seconds": 0.3058077770037926,
+        "numericLexemesExact": true,
+        "metrics": {
+          "expectedCharacters": 6,
+          "actualCharacters": 6,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "187",
+            "50"
+          ],
+          "actualNumbers": [
+            "187",
+            "50"
+          ]
+        }
+      },
+      "afterApi": {
+        "text": "EDIT REVIEW2041\nRecord 00571\nAmount 187.50\nDate 2041-08-23\nControl 38.25\n",
+        "metrics": {
+          "expectedCharacters": 63,
+          "actualCharacters": 63,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 5,
+          "expectedNumbers": [
+            "2041",
+            "00571",
+            "187",
+            "50",
+            "2041",
+            "08",
+            "23",
+            "38",
+            "25"
+          ],
+          "actualNumbers": [
+            "2041",
+            "00571",
+            "187",
+            "50",
+            "2041",
+            "08",
+            "23",
+            "38",
+            "25"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "editedPixelsOutsideAmountUnchanged": true
+    },
+    {
+      "case": "white",
+      "onlyTransparentNumericWidthsChanged": [
+        {
+          "text": "2053",
+          "beforeWidthPt": 39.51,
+          "afterWidthPt": 66.286
+        },
+        {
+          "text": "00621",
+          "beforeWidthPt": 46.95,
+          "afterWidthPt": 73.726
+        },
+        {
+          "text": "4.10",
+          "beforeWidthPt": 35.851,
+          "afterWidthPt": 62.48
+        },
+        {
+          "text": "32.45",
+          "beforeWidthPt": 43.305,
+          "afterWidthPt": 69.967
+        }
+      ],
+      "originalImageMasksFontsCoordinatesExact": true,
+      "uneditedOfficePixelsAndNativeBoxesExact": true,
+      "beforeNative": {
+        "text": "EDIT RESERV\nE \n2053\nRecord 00621\nAmount 541.8\n0\nDate 2053-07-16\nControl 32.45\n",
+        "metrics": {
+          "expectedCharacters": 64,
+          "actualCharacters": 64,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 5,
+          "expectedNumbers": [
+            "2053",
+            "00621",
+            "541",
+            "80",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ],
+          "actualNumbers": [
+            "2053",
+            "00621",
+            "541",
+            "8",
+            "0",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ]
+        },
+        "numericLexemesExact": false
+      },
+      "beforeVisibleAmount": {
+        "text": "541.8\n0\n",
+        "seconds": 0.2760288270001183,
+        "numericLexemesExact": false,
+        "metrics": {
+          "expectedCharacters": 6,
+          "actualCharacters": 6,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "541",
+            "80"
+          ],
+          "actualNumbers": [
+            "541",
+            "8",
+            "0"
+          ]
+        }
+      },
+      "beforeApi": {
+        "text": "EDIT RESERV2053\nE\nRecord 00621\nAmount 541.8\n0\nDate 2053-07-16\nControl 32.45\n",
+        "metrics": {
+          "expectedCharacters": 64,
+          "actualCharacters": 64,
+          "editDistance": 2,
+          "cer": 0.03125,
+          "alignedCharacterRecall": 0.984375,
+          "exactLines": 4,
+          "expectedNumbers": [
+            "2053",
+            "00621",
+            "541",
+            "80",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ],
+          "actualNumbers": [
+            "2053",
+            "00621",
+            "541",
+            "8",
+            "0",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ]
+        },
+        "numericLexemesExact": false
+      },
+      "afterNative": {
+        "text": "EDIT RESERV\nE \n2053\nRecord 00621\nAmount 541.80\nDate 2053-07-16\nControl 32.45\n",
+        "metrics": {
+          "expectedCharacters": 64,
+          "actualCharacters": 64,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 5,
+          "expectedNumbers": [
+            "2053",
+            "00621",
+            "541",
+            "80",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ],
+          "actualNumbers": [
+            "2053",
+            "00621",
+            "541",
+            "80",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "afterVisibleAmount": {
+        "text": "541.80\n",
+        "seconds": 0.30600322400277946,
+        "numericLexemesExact": true,
+        "metrics": {
+          "expectedCharacters": 6,
+          "actualCharacters": 6,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "541",
+            "80"
+          ],
+          "actualNumbers": [
+            "541",
+            "80"
+          ]
+        }
+      },
+      "afterApi": {
+        "text": "EDIT RESERV2053\nE\nRecord 00621\nAmount 541.80\nDate 2053-07-16\nControl 32.45\n",
+        "metrics": {
+          "expectedCharacters": 64,
+          "actualCharacters": 64,
+          "editDistance": 2,
+          "cer": 0.03125,
+          "alignedCharacterRecall": 0.984375,
+          "exactLines": 4,
+          "expectedNumbers": [
+            "2053",
+            "00621",
+            "541",
+            "80",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ],
+          "actualNumbers": [
+            "2053",
+            "00621",
+            "541",
+            "80",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "editedPixelsOutsideAmountUnchanged": true
+    },
+    {
+      "case": "negative",
+      "onlyTransparentNumericWidthsChanged": [
+        {
+          "text": "2053",
+          "beforeWidthPt": 39.51,
+          "afterWidthPt": 66.286
+        },
+        {
+          "text": "00621",
+          "beforeWidthPt": 46.95,
+          "afterWidthPt": 73.726
+        },
+        {
+          "text": "-6.20",
+          "beforeWidthPt": 40.171,
+          "afterWidthPt": 66.8
+        },
+        {
+          "text": "32.45",
+          "beforeWidthPt": 43.305,
+          "afterWidthPt": 69.967
+        }
+      ],
+      "originalImageMasksFontsCoordinatesExact": true,
+      "uneditedOfficePixelsAndNativeBoxesExact": true,
+      "beforeNative": {
+        "text": "EDIT RESERV\nE \n2053\nRecord 00621\nAmount -346.7\n0\nDate 2053-07-16\nControl 32.45\n",
+        "metrics": {
+          "expectedCharacters": 65,
+          "actualCharacters": 65,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 5,
+          "expectedNumbers": [
+            "2053",
+            "00621",
+            "346",
+            "70",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ],
+          "actualNumbers": [
+            "2053",
+            "00621",
+            "346",
+            "7",
+            "0",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ]
+        },
+        "numericLexemesExact": false
+      },
+      "beforeVisibleAmount": {
+        "text": "-346.7\n0\n",
+        "seconds": 0.30585728699952597,
+        "numericLexemesExact": false,
+        "metrics": {
+          "expectedCharacters": 7,
+          "actualCharacters": 7,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "346",
+            "70"
+          ],
+          "actualNumbers": [
+            "346",
+            "7",
+            "0"
+          ]
+        }
+      },
+      "beforeApi": {
+        "text": "EDIT RESERV2053\nE\nRecord 00621\nAmount -346.7\n0\nDate 2053-07-16\nControl 32.45\n",
+        "metrics": {
+          "expectedCharacters": 65,
+          "actualCharacters": 65,
+          "editDistance": 2,
+          "cer": 0.03076923076923077,
+          "alignedCharacterRecall": 0.9846153846153847,
+          "exactLines": 4,
+          "expectedNumbers": [
+            "2053",
+            "00621",
+            "346",
+            "70",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ],
+          "actualNumbers": [
+            "2053",
+            "00621",
+            "346",
+            "7",
+            "0",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ]
+        },
+        "numericLexemesExact": false
+      },
+      "afterNative": {
+        "text": "EDIT RESERV\nE \n2053\nRecord 00621\nAmount -346.70\nDate 2053-07-16\nControl 32.45\n",
+        "metrics": {
+          "expectedCharacters": 65,
+          "actualCharacters": 65,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 5,
+          "expectedNumbers": [
+            "2053",
+            "00621",
+            "346",
+            "70",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ],
+          "actualNumbers": [
+            "2053",
+            "00621",
+            "346",
+            "70",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "afterVisibleAmount": {
+        "text": "-346.70\n",
+        "seconds": 0.30579032199602807,
+        "numericLexemesExact": true,
+        "metrics": {
+          "expectedCharacters": 7,
+          "actualCharacters": 7,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "346",
+            "70"
+          ],
+          "actualNumbers": [
+            "346",
+            "70"
+          ]
+        }
+      },
+      "afterApi": {
+        "text": "EDIT RESERV2053\nE\nRecord 00621\nAmount -346.70\nDate 2053-07-16\nControl 32.45\n",
+        "metrics": {
+          "expectedCharacters": 65,
+          "actualCharacters": 65,
+          "editDistance": 2,
+          "cer": 0.03076923076923077,
+          "alignedCharacterRecall": 0.9846153846153847,
+          "exactLines": 4,
+          "expectedNumbers": [
+            "2053",
+            "00621",
+            "346",
+            "70",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ],
+          "actualNumbers": [
+            "2053",
+            "00621",
+            "346",
+            "70",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "editedPixelsOutsideAmountUnchanged": true
+    },
+    {
+      "case": "zeros",
+      "onlyTransparentNumericWidthsChanged": [
+        {
+          "text": "2053",
+          "beforeWidthPt": 39.51,
+          "afterWidthPt": 66.286
+        },
+        {
+          "text": "00621",
+          "beforeWidthPt": 46.95,
+          "afterWidthPt": 73.726
+        },
+        {
+          "text": "004.90",
+          "beforeWidthPt": 50.731,
+          "afterWidthPt": 77.36
+        },
+        {
+          "text": "32.45",
+          "beforeWidthPt": 43.305,
+          "afterWidthPt": 69.967
+        }
+      ],
+      "originalImageMasksFontsCoordinatesExact": true,
+      "uneditedOfficePixelsAndNativeBoxesExact": true,
+      "beforeNative": {
+        "text": "EDIT RESERV\nE \n2053\nRecord 00621\nAmount 00034.9\n0\nDate 2053-07-16\nControl 32.45\n",
+        "metrics": {
+          "expectedCharacters": 66,
+          "actualCharacters": 66,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 5,
+          "expectedNumbers": [
+            "2053",
+            "00621",
+            "00034",
+            "90",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ],
+          "actualNumbers": [
+            "2053",
+            "00621",
+            "00034",
+            "9",
+            "0",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ]
+        },
+        "numericLexemesExact": false
+      },
+      "beforeVisibleAmount": {
+        "text": "00034.9\n0\n",
+        "seconds": 0.35608075000345707,
+        "numericLexemesExact": false,
+        "metrics": {
+          "expectedCharacters": 8,
+          "actualCharacters": 8,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00034",
+            "90"
+          ],
+          "actualNumbers": [
+            "00034",
+            "9",
+            "0"
+          ]
+        }
+      },
+      "beforeApi": {
+        "text": "EDIT RESERV2053\nE\nRecord 00621\nAmount 00034.9\n0\nDate 2053-07-16\nControl 32.45\n",
+        "metrics": {
+          "expectedCharacters": 66,
+          "actualCharacters": 66,
+          "editDistance": 2,
+          "cer": 0.030303030303030304,
+          "alignedCharacterRecall": 0.9848484848484849,
+          "exactLines": 4,
+          "expectedNumbers": [
+            "2053",
+            "00621",
+            "00034",
+            "90",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ],
+          "actualNumbers": [
+            "2053",
+            "00621",
+            "00034",
+            "9",
+            "0",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ]
+        },
+        "numericLexemesExact": false
+      },
+      "afterNative": {
+        "text": "EDIT RESERV\nE \n2053\nRecord 00621\nAmount 00034.90\nDate 2053-07-16\nControl 32.45\n",
+        "metrics": {
+          "expectedCharacters": 66,
+          "actualCharacters": 66,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 5,
+          "expectedNumbers": [
+            "2053",
+            "00621",
+            "00034",
+            "90",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ],
+          "actualNumbers": [
+            "2053",
+            "00621",
+            "00034",
+            "90",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "afterVisibleAmount": {
+        "text": "00034.90\n",
+        "seconds": 0.3081223240005784,
+        "numericLexemesExact": true,
+        "metrics": {
+          "expectedCharacters": 8,
+          "actualCharacters": 8,
+          "editDistance": 0,
+          "cer": 0.0,
+          "alignedCharacterRecall": 1.0,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00034",
+            "90"
+          ],
+          "actualNumbers": [
+            "00034",
+            "90"
+          ]
+        }
+      },
+      "afterApi": {
+        "text": "EDIT RESERV2053\nE\nRecord 00621\nAmount 00034.90\nDate 2053-07-16\nControl 32.45\n",
+        "metrics": {
+          "expectedCharacters": 66,
+          "actualCharacters": 66,
+          "editDistance": 2,
+          "cer": 0.030303030303030304,
+          "alignedCharacterRecall": 0.9848484848484849,
+          "exactLines": 4,
+          "expectedNumbers": [
+            "2053",
+            "00621",
+            "00034",
+            "90",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ],
+          "actualNumbers": [
+            "2053",
+            "00621",
+            "00034",
+            "90",
+            "2053",
+            "07",
+            "16",
+            "32",
+            "45"
+          ]
+        },
+        "numericLexemesExact": true
+      },
+      "editedPixelsOutsideAmountUnchanged": true
+    },
+    {
+      "case": "blocked",
+      "onlyTransparentNumericWidthsChanged": [
+        {
+          "text": "2053",
+          "beforeWidthPt": 39.51,
+          "afterWidthPt": 66.286
+        },
+        {
+          "text": "00621",
+          "beforeWidthPt": 46.95,
+          "afterWidthPt": 73.726
+        },
+        {
+          "text": "32.45",
+          "beforeWidthPt": 43.305,
+          "afterWidthPt": 69.967
+        }
+      ],
+      "originalImageMasksFontsCoordinatesExact": true,
+      "uneditedOfficePixelsAndNativeBoxesExact": true,
+      "blockedAmountWidthUnchanged": true
+    }
+  ],
+  "darkWordPartsExceptCoreExact": true,
+  "resources": {
+    "before": {
+      "wallSeconds": 57.09842507199937,
+      "userSeconds": 149.968456,
+      "systemSeconds": 12.186148999999999,
+      "maxChildRssKiB": 344644
+    },
+    "after": {
+      "wallSeconds": 59.997944021000876,
+      "userSeconds": 155.734521,
+      "systemSeconds": 13.892756,
+      "maxChildRssKiB": 342904
+    }
+  },
+  "httpRequests": 19,
+  "allWorkersExited": true,
+  "newZombies": [],
+  "helperSha256": {
+    "verify_wrap_iteration28.py": "0d06ee0779471d86efc3fedb68041bc35e470fa4882f86151801dbaed15c4357",
+    "generate_wrap_iteration28.py": "e61b42b396ba962b5f8ed61f63f275518d9856bee46993802728ae7fbdc907b9",
+    "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf"
+  }
+}

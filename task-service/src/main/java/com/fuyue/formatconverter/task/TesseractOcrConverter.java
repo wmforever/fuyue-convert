@@ -75,16 +75,24 @@ public final class TesseractOcrConverter implements FileConverter {
         progress.update(TaskStage.PARSING, 15);
         OcrImageNormalizer.Prepared prepared = OcrImageNormalizer.prepare(input.path(), sourceFormat,
                 workDir.resolve("normalized"));
+        long started = System.nanoTime();
         RecognitionResult recognized = recognizeLayoutResult(prepared.path(), workDir, 1,
-                new Rect(0d, 0d, prepared.width(), prepared.height()), limits);
+                new Rect(0d, 0d, prepared.width(), prepared.height()), limits, true);
         requireUsableResult(recognized, "图片");
         progress.update(TaskStage.RENDERING, 75);
-        String text = recognized.blocks().stream().map(TextBlock::text)
+        var ordered = OcrReadingOrder.arrange(recognized.blocks(), prepared.width(), started + settings.timeout().toNanos());
+        String text = ordered.lines().stream()
                 .reduce((left, right) -> left + System.lineSeparator() + right).orElse("");
         Files.writeString(outputPath, text + (text.isEmpty() ? "" : System.lineSeparator()), StandardCharsets.UTF_8);
         ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "Tesseract OCR");
         progress.update(TaskStage.PACKAGING, 90);
         List<ConversionWarning> warnings = new ArrayList<>(warningsFor(recognized, 1, "图片"));
+        if (ordered.adjusted()) warnings.add(ConversionWarning.of(WarningCode.OCR_READING_ORDER_ADJUSTED,
+                "根据稳定空白分栏及受限同行片段调整 TXT 阅读顺序；原词、数字和坐标未改变，歧义版面仍需人工复核。", 1));
+        if (ordered.multipleColumns()) warnings.add(ConversionWarning.of(WarningCode.OCR_READING_ORDER_UNCERTAIN,
+                ordered.adjusted()
+                    ? "检测到多个显著空栏，仅重组满足严格对齐条件的三栏短片段；复杂阅读顺序及原识别遗漏仍需按原图人工复核。"
+                    : "检测到多个显著空栏，可能是三栏以上或表格；未执行双栏重排，保留引擎顺序，仍可能混行，请按原图人工复核。", 1));
         if (prepared.orientationApplied()) {
             warnings.add(ConversionWarning.of(WarningCode.EXIF_ORIENTATION_APPLIED,
                     "OCR 前已应用 EXIF Orientation=" + prepared.metadata().orientation() + "。", 1));
@@ -101,6 +109,13 @@ public final class TesseractOcrConverter implements FileConverter {
 
     RecognitionResult recognizeLayoutResult(Path image, Path workDir, int pageNumber,
                                              Rect physicalBox, ParseLimits limits) throws Exception {
+        return recognizeLayoutResult(image, workDir, pageNumber, physicalBox, limits, false);
+    }
+
+    // General-angle editable text is not reliably reopened by the cloud Office runtime.
+    // Enable optional deskew for text extraction only until Word geometry is accepted.
+    RecognitionResult recognizeLayoutResult(Path image, Path workDir, int pageNumber,
+                                             Rect physicalBox, ParseLimits limits, boolean allowDeskew) throws Exception {
         Files.createDirectories(workDir);
         ConversionGuards.requireImageBounds(image, limits);
         ImageDimensions dimensions = dimensions(image);
@@ -113,13 +128,38 @@ public final class TesseractOcrConverter implements FileConverter {
             BufferedImage pixels = ImageIO.read(engineImage.toFile());
             if (pixels == null) return result;
             try {
-                if (result.blocks().isEmpty() || result.confidence() < settings.warningConfidence()) {
+                result = retryRuledGrid(result, pixels, workDir, pageNumber, physicalBox, limits, started);
+                if (result.ruledGridRecovery()) return result;
+                boolean recoveryEligible = result.blocks().isEmpty() || result.confidence() < settings.warningConfidence();
+                boolean uncoveredShadedInk = false;
+                if (!recoveryEligible && "3".equals(pageSegmentationMode())
+                        && remainingTime(started).compareTo(Duration.ofSeconds(1)) > 0) {
+                    uncoveredShadedInk = OcrCoverageProbe.hasUncoveredShadedInk(pixels, result.blocks(), physicalBox,
+                            started + settings.timeout().toNanos());
+                    // Above 95%, the unchanged five-point gain cannot be met.
+                    // Still expose unresolved coverage; confidence is not completeness.
+                    recoveryEligible = uncoveredShadedInk && result.confidence() <= .95;
+                }
+                if (recoveryEligible) {
                     result = retryEnhanced(result, pixels, workDir, pageNumber, physicalBox, dimensions, limits, started);
                 }
+                if (result.partialRecovery()) return result;
+                if (allowDeskew) result = retryDeskew(result, pixels, workDir, pageNumber, physicalBox, dimensions, limits, started);
+                if (result.deskewDegrees() != 0 || result.partialRecovery()) return result;
                 // The original pixels, rather than enhanced pixels, remain the geometry authority.
-                return new RecognitionResult(result.blocks().stream()
-                        .map(block -> OcrWordGeometryRefiner.refine(block, pixels, physicalBox)).toList(),
-                        result.confidence(), result.wordCount(), result.imageEnhanced());
+                var refined = result.blocks().stream()
+                        .map(block -> OcrWordGeometryRefiner.refine(block, pixels, physicalBox)).toList();
+                boolean possibleTextOmission = uncoveredShadedInk && !result.imageEnhanced();
+                // Adopting a better candidate is not evidence that all shaded ink is covered.
+                // Recheck its final source-space boxes without adding a retry or a new deadline.
+                if (result.imageEnhanced() && "3".equals(pageSegmentationMode())
+                        && remainingTime(started).compareTo(Duration.ofSeconds(1)) > 0) {
+                    possibleTextOmission = OcrCoverageProbe.hasUncoveredShadedInk(pixels, refined, physicalBox,
+                            started + settings.timeout().toNanos());
+                }
+                return new RecognitionResult(refined,
+                        result.confidence(), result.wordCount(), result.imageEnhanced(), result.deskewDegrees(),
+                        result.conflicts(), possibleTextOmission);
             } finally { pixels.flush(); }
         } finally {
             if (!engineImage.equals(image)) {
@@ -131,17 +171,53 @@ public final class TesseractOcrConverter implements FileConverter {
     private RecognitionResult recognizeOnce(Path image, Path workDir, int pageNumber, Rect physicalBox,
                                              ImageDimensions dimensions, ParseLimits limits, String name,
                                              Duration timeout) throws Exception {
+        return recognizeOnce(image, workDir, pageNumber, physicalBox, dimensions, limits, name, timeout, pageSegmentationMode());
+    }
+
+    private RecognitionResult recognizeOnce(Path image, Path workDir, int pageNumber, Rect physicalBox,
+                                             ImageDimensions dimensions, ParseLimits limits, String name,
+                                             Duration timeout, String segmentation) throws Exception {
         Path base = workDir.resolve(name);
         List<String> command = new ArrayList<>(List.of(settings.binary().toString(), image.toString(), base.toString()));
         if (settings.tessdataDirectory() != null) {
             command.add("--tessdata-dir");
             command.add(settings.tessdataDirectory().toString());
         }
-        command.addAll(List.of("-l", settings.languages(), "--psm", pageSegmentationMode(), "tsv"));
+        command.addAll(List.of("-l", settings.languages(), "--psm", segmentation, "tsv"));
         runTesseract(command, workDir.resolve(name + ".log"), "Tesseract OCR 第 " + pageNumber + " 页", timeout);
         Path tsv = Path.of(base + ".tsv");
         ConversionGuards.requireOutputFile(tsv, limits, "Tesseract OCR TSV");
         return parseTsv(tsv, pageNumber, physicalBox, dimensions, limits);
+    }
+
+    private RecognitionResult retryRuledGrid(RecognitionResult original, BufferedImage pixels, Path workDir,
+            int pageNumber, Rect physical, ParseLimits limits, long started) throws Exception {
+        if (!"3".equals(pageSegmentationMode()) || remainingTime(started).compareTo(Duration.ofSeconds(1)) <= 0) return original;
+        long deadline = started + settings.timeout().toNanos();
+        var grid = OcrRuledGrid.detectForRecovery(pixels, physical, original,
+                Math.min(deadline, System.nanoTime() + 500_000_000L));
+        if (!OcrRuledGrid.eligible(grid, original) || !originalGeometryStable(original, pixels, physical, deadline)) return original;
+        List<RecognitionResult> cells = new ArrayList<>();
+        int index = 0;
+        for (var cell : grid.cells()) {
+            if (remainingTime(started).compareTo(Duration.ofSeconds(1)) <= 0) return original;
+            Path crop = Files.createTempFile(workDir, "tesseract-grid-", ".png");
+            try {
+                // Only crop inside proven continuous rules; no resampling, ink removal or source mutation.
+                if (!ImageIO.write(pixels.getSubimage(cell.x(), cell.y(), cell.width(), cell.height()), "png", crop.toFile())) return original;
+                Duration remaining = remainingTime(started);
+                if (remaining.compareTo(Duration.ofSeconds(1)) <= 0) return original;
+                cells.add(recognizeOnce(crop, workDir, pageNumber, cell.box(), new ImageDimensions(cell.width(), cell.height()),
+                        limits, "tesseract-grid-p%d-c%d".formatted(pageNumber, ++index), remaining, "6"));
+            } catch (ConversionFailureException failure) {
+                if ("OCR_TIMEOUT".equals(failure.code())) throw failure;
+                return original;
+            } catch (IOException ignored) {
+                return original;
+            } finally { Files.deleteIfExists(crop); }
+        }
+        var selected = OcrRuledGrid.select(grid, original, cells, settings.minimumConfidence(), deadline);
+        return selected.wordCount() <= limits.maxEntries() ? selected : original;
     }
 
     private RecognitionResult retryEnhanced(RecognitionResult original, BufferedImage pixels, Path workDir,
@@ -158,9 +234,14 @@ public final class TesseractOcrConverter implements FileConverter {
             if (remaining.compareTo(Duration.ofSeconds(1)) <= 0) return original;
             RecognitionResult candidate = recognizeOnce(temporary, workDir, pageNumber, physicalBox, dimensions,
                     limits, "tesseract-enhanced-page-%04d".formatted(pageNumber), remaining);
-            return preferEnhanced(original, candidate, settings.minimumConfidence())
-                    ? new RecognitionResult(candidate.blocks(), candidate.confidence(), candidate.wordCount(), true)
-                    : original;
+            if (preferEnhanced(original, candidate, settings.minimumConfidence())) {
+                return new RecognitionResult(candidate.blocks(), candidate.confidence(), candidate.wordCount(), true);
+            }
+            long deadline = started + settings.timeout().toNanos();
+            var partial = OcrPartialRecovery.select(original, candidate, physicalBox, settings.minimumConfidence(),
+                    .05, true, 0, deadline);
+            return partial.partialRecovery() && !originalGeometryStable(original, pixels, physicalBox, deadline)
+                    ? original : partial;
         } catch (IOException ignored) {
             // Optional recovery must not turn a usable original recognition into a failed task.
             return original;
@@ -172,8 +253,51 @@ public final class TesseractOcrConverter implements FileConverter {
         }
     }
 
+    private RecognitionResult retryDeskew(RecognitionResult original, BufferedImage pixels, Path workDir,
+                                         int pageNumber, Rect physicalBox, ImageDimensions dimensions,
+                                         ParseLimits limits, long started) throws Exception {
+        double sx = physicalBox.width() / dimensions.width(), sy = physicalBox.height() / dimensions.height();
+        if (!"3".equals(pageSegmentationMode()) || sx <= 0 || sy <= 0 || Math.abs(sx / sy - 1) > .01
+                || remainingTime(started).compareTo(Duration.ofSeconds(1)) <= 0) return original;
+        long deadline = started + settings.timeout().toNanos();
+        // Staggered upright columns can imitate a tilted full-page baseline.
+        // If the original already meets all strict aligned-fragment bounds,
+        // retain its words/geometry rather than rotate the whole page.
+        var columns = OcrReadingOrder.arrange(original.blocks(), physicalBox.width(), deadline);
+        if (columns.fragmentedColumnsValidated()) return original;
+        try (var prepared = OcrDeskew.prepare(pixels, settings.maxImagePixels(), deadline)) {
+            if (prepared == null) return original;
+            Path temporary = Files.createTempFile(workDir, "tesseract-deskew-%04d-".formatted(pageNumber), ".png");
+            try {
+                if (!ImageIO.write(prepared.image(), "png", temporary.toFile())) return original;
+                Duration remaining = remainingTime(started);
+                if (remaining.compareTo(Duration.ofSeconds(1)) <= 0) return original;
+                var size = new ImageDimensions(prepared.image().getWidth(), prepared.image().getHeight());
+                var candidate = recognizeOnce(temporary, workDir, pageNumber,
+                        new Rect(0, 0, size.width() * sx, size.height() * sy), size, limits,
+                        "tesseract-deskew-page-%04d".formatted(pageNumber), remaining);
+                var selected = OcrDeskewSelection.select(original, candidate, prepared, physicalBox,
+                        dimensions.width(), dimensions.height(), settings.minimumConfidence(), deadline);
+                return selected.partialRecovery() && !originalGeometryStable(original, pixels, physicalBox, deadline)
+                        ? original : selected;
+            } finally { Files.deleteIfExists(temporary); }
+        } catch (IOException ignored) {
+            return original; // Optional recovery cannot discard a usable original result.
+        }
+    }
+
     private Duration remainingTime(long started) {
         return settings.timeout().minusNanos(System.nanoTime() - started);
+    }
+
+    private static boolean originalGeometryStable(RecognitionResult original, BufferedImage pixels,
+                                                   Rect physical, long deadline) {
+        // The unchanged fallback normally refines some Chinese word boxes. A partial
+        // result must also preserve that API/Word geometry, not merely raw TSV boxes.
+        for (var block : original.blocks()) {
+            if (System.nanoTime() >= deadline || OcrWordGeometryRefiner.refine(block, pixels, physical) != block) return false;
+        }
+        return System.nanoTime() < deadline;
     }
 
     static boolean preferEnhanced(RecognitionResult original, RecognitionResult candidate, double minimumConfidence) {
@@ -183,10 +307,23 @@ public final class TesseractOcrConverter implements FileConverter {
         if (next.isEmpty() || next.codePointCount(0, next.length())
                 < previous.codePointCount(0, previous.length()) * 0.90) return false;
         String reliableCandidate = reliableText(joinedText(candidate));
+        String numericCandidate = joinedText(candidate).toLowerCase(Locale.ROOT);
         int offset = 0;
+        int numericOffset = 0;
         for (TextBlock block : original.blocks()) {
             for (TextBlock.OcrWord word : block.ocrWords()) {
                 if (word.confidence() < 0.85) continue;
+                if (word.text().codePoints().anyMatch(Character::isDigit)) {
+                    // Numeric surfaces retain grouping whitespace and punctuation;
+                    // stripping these can merge independent amounts or lose signs/units.
+                    String numeric = word.text().toLowerCase(Locale.ROOT);
+                    int numberMatch = numericCandidate.indexOf(numeric, numericOffset);
+                    while (numberMatch >= 0 && numericBoundaryChanged(numericCandidate, numeric, numberMatch)) {
+                        numberMatch = numericCandidate.indexOf(numeric, numberMatch + 1);
+                    }
+                    if (numberMatch < 0) return false;
+                    numericOffset = numberMatch + numeric.length();
+                }
                 String reliable = reliableText(word.text());
                 if (reliable.isEmpty()) continue;
                 int match = reliableCandidate.indexOf(reliable, offset);
@@ -209,11 +346,17 @@ public final class TesseractOcrConverter implements FileConverter {
     }
 
     private static boolean numericBoundaryChanged(String candidate, String reliable, int start) {
+        if (reliable.codePoints().noneMatch(Character::isDigit)) return false;
         int end = start + reliable.length();
-        return Character.isDigit(reliable.codePointAt(0)) && start > 0
-                && Character.isDigit(candidate.codePointBefore(start))
-                || Character.isDigit(reliable.codePointBefore(reliable.length())) && end < candidate.length()
-                && Character.isDigit(candidate.codePointAt(end));
+        return numericContinuation(reliable.codePointAt(0)) && start > 0
+                && numericContinuation(candidate.codePointBefore(start))
+                || numericContinuation(reliable.codePointBefore(reliable.length())) && end < candidate.length()
+                && numericContinuation(candidate.codePointAt(end));
+    }
+
+    private static boolean numericContinuation(int codePoint) {
+        return Character.isDigit(codePoint) || Character.getType(codePoint) == Character.CURRENCY_SYMBOL
+                || ".,:/−－-+＋，．：／٫٬'’%％‰‱()（）".indexOf(codePoint) >= 0;
     }
 
     private static String reliableText(String text) {
@@ -392,9 +535,33 @@ public final class TesseractOcrConverter implements FileConverter {
         warnings.add(ConversionWarning.withConfidence(WarningCode.OCR_APPLIED,
                 scope + "已使用本地 Tesseract OCR，平均置信度 " + percent(result.confidence()) + "，结果必须人工复核。",
                 pageNumber, null, result.confidence()));
+        if (result.deskewDegrees() != 0) {
+            warnings.add(ConversionWarning.of(WarningCode.OCR_DESKEW_APPLIED,
+                    scope + "采用倾斜校正候选（" + String.format(Locale.ROOT, "%.2f", result.deskewDegrees())
+                            + (result.partialRecovery()
+                            ? "°）中的分离新行；全部原识别行及原词框保留，仅新词框逆变换到原图坐标，仍需复核遗漏。"
+                            : "°）；词框已逆变换到原图坐标，仍需复核内容完整性。"), pageNumber));
+        }
+        for (String conflict : result.conflicts()) {
+            warnings.add(ConversionWarning.of(WarningCode.OCR_RECOGNITION_CONFLICT, scope + conflict, pageNumber));
+        }
         if (result.imageEnhanced()) {
             warnings.add(ConversionWarning.of(WarningCode.OCR_IMAGE_ENHANCED,
-                    scope + "低置信度识别后采用了灰底/阴影归一化与对比度增强结果；原图和坐标未改变，仍需人工复核。", pageNumber));
+                    scope + (result.partialRecovery()
+                            ? "仅补充了增强候选中严格分离的新行，全部原识别行及原词框保留；混合置信度包括原词，不能证明内容完整。"
+                            : "采用了灰底/阴影归一化与对比度增强结果；原图和坐标未改变，仍需人工复核内容完整性。"), pageNumber));
+        }
+        if (result.possibleTextOmission()) {
+            warnings.add(ConversionWarning.of(WarningCode.OCR_POSSIBLE_TEXT_OMISSION,
+                    scope + (result.ruledGridRecovery()
+                            ? "框线内分格识别已恢复部分文字，原跨框低置信候选另有记录；原数字逐字核对，仍可能存在漏字或新误识别，请对照保留的原扫描复核。"
+                            : result.partialRecovery()
+                            ? "原识别区域保留，未采用其替换候选，仅补充了严格分离的新行；仍可能漏字或保留原误识别，混合置信度不能证明内容完整，请对照原图复核。"
+                            : result.imageEnhanced()
+                            ? "采用增强候选后，原图阴影字迹覆盖探测仍发现多个未覆盖区域，可能漏识别或包含非文字图形；"
+                            + "平均置信度不能证明内容完整，请对照原图复核。"
+                            : "阴影字迹覆盖探测仍发现多个未覆盖区域，可能漏识别或包含非文字图形；"
+                            + "未采用不满足保守条件的候选，平均置信度不能证明内容完整，请对照原图复核。"), pageNumber));
         }
         if (result.confidence() < settings.warningConfidence()) {
             warnings.add(ConversionWarning.withConfidence(WarningCode.OCR_LOW_CONFIDENCE,
@@ -800,13 +967,30 @@ public final class TesseractOcrConverter implements FileConverter {
         }
     }
 
-    record RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced) {
-        RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount) {
-            this(blocks, confidence, wordCount, false);
+    record RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
+                             double deskewDegrees, List<String> conflicts, boolean possibleTextOmission, boolean partialRecovery,
+                             boolean ruledGridRecovery) {
+        RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
+                          double deskewDegrees, List<String> conflicts, boolean possibleTextOmission, boolean partialRecovery) {
+            this(blocks, confidence, wordCount, imageEnhanced, deskewDegrees, conflicts, possibleTextOmission, partialRecovery, false);
         }
-
+        RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
+                          double deskewDegrees, List<String> conflicts, boolean possibleTextOmission) {
+            this(blocks, confidence, wordCount, imageEnhanced, deskewDegrees, conflicts, possibleTextOmission, false);
+        }
+        RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
+                          double deskewDegrees, List<String> conflicts) {
+            this(blocks, confidence, wordCount, imageEnhanced, deskewDegrees, conflicts, false);
+        }
+        RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount) {
+            this(blocks, confidence, wordCount, false, 0, List.of());
+        }
+        RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced) {
+            this(blocks, confidence, wordCount, imageEnhanced, 0, List.of());
+        }
         RecognitionResult {
             blocks = blocks == null ? List.of() : List.copyOf(blocks);
+            conflicts = conflicts == null ? List.of() : List.copyOf(conflicts);
         }
     }
 
@@ -837,7 +1021,7 @@ public final class TesseractOcrConverter implements FileConverter {
         int height() { return Math.max(1, bottom - top); }
     }
 
-    private static boolean wordSeparator(int previous, int next) {
+    static boolean wordSeparator(int previous, int next) {
         return !(eastAsian(previous) && eastAsian(next));
     }
 

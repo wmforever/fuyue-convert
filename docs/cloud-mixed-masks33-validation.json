@@ -1,0 +1,279 @@
+{
+  "tests": {
+    "tests": 496,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "skips": [
+    {
+      "className": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+      "name": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning",
+      "skipped": true
+    }
+  ],
+  "bundledTests": [
+    {
+      "className": "com.fuyue.formatconverter.task.OcrDeskewTest",
+      "name": "bundledEngineRecoversMissingLinesWithSourceGeometryAndReviewWarnings",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.PdfToImageConverterTest",
+      "name": "discoversBundledPopplerFromAppHome",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.ForkedFileConverterTest",
+      "name": "retainsAutoDiscoveredBundledOcrWhenTheWorkerChangesItsWorkingDirectory",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "discoversBundledRuntimeFromPackagedApplicationRoot",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "validBundledRuntimeAutoEnablesWithoutHostInstallation",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractCapabilityTest",
+      "name": "explicitFalseDisablesEvenAValidBundledRuntime",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.BundledOcrRuntimeIntegrationTest",
+      "name": "bundledBinaryModelsAndLibrariesRunWithoutSystemDiscovery",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.TesseractPngInputTest",
+      "name": "bundledPngEngineRecognizesRealJpegText",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+      "name": "bundledEngineRecoversShadedLowContrastPrintedText",
+      "skipped": false
+    },
+    {
+      "className": "com.fuyue.formatconverter.task.OcrContrastEnhancementTest",
+      "name": "bundledEngineRecoversChineseFaintTextWithDigitsAndPunctuation",
+      "skipped": false
+    }
+  ],
+  "changedClasses": [
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OcrMask.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$OcrAppearance.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$1.class",
+    "BOOT-INF/lib/docx-renderer-0.1.5.jar/com/fuyue/formatconverter/docx/FixedLayoutDocxRenderer$FixedItem.class"
+  ],
+  "allOther227ApplicationClassesByteExact": true,
+  "allOtherApplicationResourcesByteExact": true,
+  "frontendRebuiltFilesMatchPackaged": {
+    "app-icon.svg": "5bf05198f99e53b7fabf0fbfd25577c9aca004a6b1ea6f7e901457fe89db2568",
+    "index.html": "a9767e4111073749ff7c178800d9c7c3786b05ea9094c8b37334a3a696097a24",
+    "assets/pdf-CPbOiMa_.js": "fa75f2d6b363ee4a3386e4bf1d3f104c8dce5eef2be79159be1d253e1f4e323a",
+    "assets/pdf.worker.min-CMqTMPr3.js": "73568c62796be3043a57aad8bb5027f9602bae4b54bbea029b0a3af80c5b7166",
+    "assets/pdf.worker.min-r-TJsTTt.mjs": "c964e291707ad492e6e90ff7f4f352b75e05ea2734c3dd3a80b94983b1b7ce3d",
+    "assets/index-J-Vb5Aua.css": "084b610dc78c0213ec817bcb26aeff3dccd2c4d7fce88514a85ab56395e43366",
+    "assets/index-BiUc2Ubb.js": "4d62648a0d61aabdbd47f5a66c6df465acfef075355f3eb0d2e5fc142a6b61b1"
+  },
+  "buildReceipt": {
+    "path": "qa-samples/work/iteration33-final-build.receipt.json",
+    "sha256": "32ae086553507eeb28bbd4115064d048fda7bbb2a88915759bff776733162ba7",
+    "rootExitCode": 0,
+    "ECHILD": true,
+    "registeredIdentitiesAbsent": 294
+  },
+  "provenance": {
+    "buildInputSha256": "da4cdd3ad198252de69fb197ad4820ee1094d13ae5e139f22f3eae5c25e9670d",
+    "parentRevision": "4c6217978aa264b4ddbcba7c99e502c8a606ff07",
+    "workingTreeDirtyAtBuildStart": true,
+    "jarSha256": "6e0f7d94a2e0804074cc535c04a859e7f6c5fd8171cf94a21f9ba4b4a2434c6c",
+    "applicationClassCount": 232,
+    "applicationClassSha256": "e830cf61d44b066daa86bac28c16c7ba71b6f7483144a4d8f01efa6838426bfd",
+    "packagedClassesMatchTargets": true
+  },
+  "versionsObservedInAcceptedParent": {
+    "java": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nopenjdk version \"17.0.16\" 2025-07-15\nOpenJDK Runtime Environment Temurin-17.0.16+8 (build 17.0.16+8)\nOpenJDK 64-Bit Server VM Temurin-17.0.16+8 (build 17.0.16+8, mixed mode, sharing)",
+    "maven": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nApache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)\nMaven home: /workspace/fuyue-env/tools/apache-maven-3.9.11\nJava version: 17.0.16, vendor: Eclipse Adoptium, runtime: /workspace/fuyue-env/tools/jdk-17.0.16+8\nDefault locale: en, platform encoding: UTF-8\nOS name: \"linux\", version: \"6.18.44\", arch: \"amd64\", family: \"unix\"",
+    "node": "v22.17.0",
+    "ocr": "tesseract 5.5.2\n leptonica-1.87.0\n  libpng 1.6.57 : zlib 1.3.1\n Found AVX512BW\n Found AVX512F\n Found AVX512VNNI\n Found AVX2\n Found AVX\n Found FMA\n Found SSE4.1",
+    "office": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "pymupdf": "1.26.6",
+    "linux": "6.18.44"
+  },
+  "pdfbox": "3.0.8",
+  "ofdrw": "2.3.9",
+  "runtimeManifestSha256": "a47f5cd9bc9671c87c00b71f45966a07d276923f5fe819fbe70bd889392fdce5",
+  "runtimeFilesReverified": 12,
+  "runtimeManifest": {
+    "schemaVersion": 1,
+    "platform": "linux",
+    "arch": "x64",
+    "policySha256": "54c6ae7291fc983cb7b946bc0b90832ec4b589d493fef01b5f974a0ab26d8735",
+    "components": [
+      {
+        "id": "zlib",
+        "version": "1.3.1",
+        "source": "https://codeload.github.com/madler/zlib/tar.gz/v1.3.1",
+        "sourceSha256": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c",
+        "spdx": "Zlib"
+      },
+      {
+        "id": "libpng",
+        "version": "1.6.57",
+        "source": "https://codeload.github.com/pnggroup/libpng/tar.gz/v1.6.57",
+        "sourceSha256": "4cbb7b0746edc1683c9581b373365e955133b7f1243f171b7d1535b4415dfedb",
+        "spdx": "libpng-2.0"
+      },
+      {
+        "id": "leptonica",
+        "version": "1.87.0",
+        "source": "https://codeload.github.com/DanBloomberg/leptonica/tar.gz/1.87.0",
+        "sourceSha256": "fa2b40c5caea96d1bb93a97486262aed8731b69ce25a84a6bf5d25323e33f631",
+        "spdx": "BSD-2-Clause"
+      },
+      {
+        "id": "tesseract",
+        "version": "5.5.2",
+        "source": "https://codeload.github.com/tesseract-ocr/tesseract/tar.gz/5.5.2",
+        "sourceSha256": "6235ea0dae45ea137f59c09320406f5888383741924d98855bd2ce0d16b54f21",
+        "spdx": "Apache-2.0"
+      }
+    ],
+    "models": [
+      {
+        "name": "eng",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/eng.traineddata",
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      {
+        "name": "chi_sim",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim.traineddata",
+        "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+      },
+      {
+        "name": "chi_sim_vert",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim_vert.traineddata",
+        "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+      },
+      {
+        "name": "osd",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/osd.traineddata",
+        "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+      }
+    ],
+    "files": [
+      {
+        "path": "bin/tesseract",
+        "size": 6678328,
+        "sha256": "90730922627269352568d54e788c7e42fd2e1783e03795d75560efa385de1489"
+      },
+      {
+        "path": "licenses/OCR-SOURCE-POLICY.json",
+        "size": 4186,
+        "sha256": "1ea79f27bafb87a8692d2b37d0ab2f3cb2236f228d6e76eedf7aa6b40dacf808"
+      },
+      {
+        "path": "licenses/leptonica.txt",
+        "size": 1521,
+        "sha256": "87829abb5bbb00b55a107365da89e9a33f86c4250169e5a1e5588505be7d5806"
+      },
+      {
+        "path": "licenses/libpng.txt",
+        "size": 5345,
+        "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+      },
+      {
+        "path": "licenses/tessdata.txt",
+        "size": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      {
+        "path": "licenses/tesseract.txt",
+        "size": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      {
+        "path": "licenses/zlib.txt",
+        "size": 1002,
+        "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+      },
+      {
+        "path": "tessdata/chi_sim.traineddata",
+        "size": 2469156,
+        "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730"
+      },
+      {
+        "path": "tessdata/chi_sim_vert.traineddata",
+        "size": 1927902,
+        "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da"
+      },
+      {
+        "path": "tessdata/configs/tsv",
+        "size": 22,
+        "sha256": "59d079bb75d8b3d7c839a3564580cb559e362c93a9d70f234e421c0c3e767e04"
+      },
+      {
+        "path": "tessdata/eng.traineddata",
+        "size": 4113088,
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      {
+        "path": "tessdata/osd.traineddata",
+        "size": 10562727,
+        "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+      }
+    ]
+  },
+  "fonts": {
+    "source": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+      "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+      "version": "LiberationSans2.1.5",
+      "license": "SIL-OFL-1.1"
+    },
+    "bundled": [
+      {
+        "path": "task-service/src/main/resources/fonts/LiberationSans-Regular.ttf",
+        "sha256": "76d04c18ea243f426b7de1f3ad208e927008f961dc5945e5aad352d0dfde8ee8",
+        "license": "SIL-OFL-1.1",
+        "version": [
+          "Version 2.1.5"
+        ]
+      },
+      {
+        "path": "task-service/src/main/resources/fonts/DroidSansFallback.ttf",
+        "sha256": "21b96a0377f067833a93af3082eb28d4ffab7a8cd46bfd513286f1d64b7b0949",
+        "license": "Apache-2.0",
+        "version": [
+          "Version 2.55b"
+        ]
+      }
+    ]
+  },
+  "currentFontHashes": {
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+    "/workspace/fuyue-convert/task-service/src/main/resources/fonts/LiberationSans-Regular.ttf": "76d04c18ea243f426b7de1f3ad208e927008f961dc5945e5aad352d0dfde8ee8",
+    "/workspace/fuyue-convert/task-service/src/main/resources/fonts/DroidSansFallback.ttf": "21b96a0377f067833a93af3082eb28d4ffab7a8cd46bfd513286f1d64b7b0949"
+  },
+  "nativeMacWindowsInstallersUnrun": true,
+  "MicrosoftWordUnrun": true,
+  "helperSha256": "0c769c8a42f4a031748151248d7977286d08a9ad43ba82c43011ce5ca8a5d1dc",
+  "versionsObservedNow": {
+    "java": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nopenjdk version \"17.0.16\" 2025-07-15\nOpenJDK Runtime Environment Temurin-17.0.16+8 (build 17.0.16+8)\nOpenJDK 64-Bit Server VM Temurin-17.0.16+8 (build 17.0.16+8, mixed mode, sharing)",
+    "maven": "Picked up JAVA_TOOL_OPTIONS: -Djava.awt.headless=true\nApache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)\nMaven home: /workspace/fuyue-env/tools/apache-maven-3.9.11\nJava version: 17.0.16, vendor: Eclipse Adoptium, runtime: /workspace/fuyue-env/tools/jdk-17.0.16+8\nDefault locale: en, platform encoding: UTF-8\nOS name: \"linux\", version: \"6.18.44\", arch: \"amd64\", family: \"unix\"",
+    "node": "v22.17.0",
+    "ocr": "tesseract 5.5.2\n leptonica-1.87.0\n  libpng 1.6.57 : zlib 1.3.1\n Found AVX512BW\n Found AVX512F\n Found AVX512VNNI\n Found AVX2\n Found AVX\n Found FMA\n Found SSE4.1",
+    "office": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "pymupdf": "1.26.6",
+    "linux": "6.18.44"
+  }
+}

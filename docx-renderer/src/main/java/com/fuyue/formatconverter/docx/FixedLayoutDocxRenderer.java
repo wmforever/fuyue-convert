@@ -27,6 +27,7 @@ final class FixedLayoutDocxRenderer {
     private static final java.awt.font.FontRenderContext OCR_FONT_CONTEXT =
             new java.awt.font.FontRenderContext(null, true, true);
     private static final java.awt.Font OCR_CJK_FONT = loadOcrCjkFont();
+    private static final java.awt.Font OCR_LATIN_COMPATIBLE_FONT = loadOcrLatinCompatibleFont();
     private int shapeSequence = 1;
 
     /**
@@ -36,20 +37,45 @@ final class FixedLayoutDocxRenderer {
      */
     void renderOverlays(XWPFDocument docx, XWPFParagraph anchor, PageModel page,
                         List<TextBlock> fallbackTexts) throws Exception {
+        renderOverlays(docx, anchor, page, fallbackTexts, Map.of());
+    }
+
+    void renderOverlays(XWPFDocument docx, XWPFParagraph anchor, PageModel page,
+                        List<TextBlock> fallbackTexts, Map<TextBlock, XWPFParagraph> textAnchors) throws Exception {
         page.lines().stream().filter(line -> !insideAnyTable(line, page.tables()))
                 .sorted(Comparator.comparingInt(LineElement::zOrder))
                 .forEach(line -> unchecked(() -> addLine(anchor, line)));
         page.images().stream().sorted(Comparator.comparingInt(ImageBlock::zOrder))
                 .forEach(image -> unchecked(() -> addImage(docx, anchor, image)));
-        Map<TextBlock.OcrWord, ColorValue> ocrColors = addOcrMasks(anchor, page, fallbackTexts);
-        fallbackReadingOrder(page, fallbackTexts).stream()
-                .filter(text -> !text.text().isEmpty())
-                .forEach(text -> unchecked(() -> addTextBox(docx, anchor, text, ocrColors)));
+        OcrAppearance ocrColors = addOcrMasks(anchor, page, fallbackTexts);
+        // A heading separates independent layout regions. Sorting their union
+        // can erase each region's valid gutter when columns shift horizontally.
+        Map<XWPFParagraph, List<TextBlock>> regions = new java.util.LinkedHashMap<>();
+        for (var text : fallbackTexts) regions.computeIfAbsent(textAnchors.getOrDefault(text, anchor),
+                ignored -> new ArrayList<>()).add(text);
+        for (var region : regions.entrySet()) {
+            for (var text : fallbackReadingOrder(page, region.getValue())) {
+                if (!text.text().isEmpty()) addTextBox(docx, region.getKey(), text, ocrColors);
+            }
+        }
     }
 
     private List<TextBlock> fallbackReadingOrder(PageModel page, List<TextBlock> texts) {
         List<TextBlock> sourceOrder = texts.stream()
                 .sorted(Comparator.comparingInt(TextBlock::zOrder)).toList();
+        // OCR has already supplied a reading sequence. A second gutter split
+        // can interleave recognized columns when a heading bridges them.
+        // Preserve that sequence, including uncertain words, without changing
+        // their positions, layering, masks, or source scans.
+        // Independent scan regions can each restart their local line ordinals.
+        // Multiple backgrounds or duplicate ordinals are not one recognized
+        // page sequence; retain the existing geometry policy instead of weaving
+        // local sequences together or assuming image append order is intent.
+        if (sourceOrder.stream().allMatch(block -> !block.ocrWords().isEmpty())
+                && page.images().stream().filter(this::isOcrBackground).limit(2).count() <= 1
+                && sourceOrder.stream().mapToInt(TextBlock::zOrder).distinct().count() == sourceOrder.size()) {
+            return sourceOrder;
+        }
         // Keep uncertain combinations in their existing order. Coordinates and
         // z-index remain unchanged even when plain, disjoint columns are ordered
         // for reading and copying the text from Word.
@@ -121,7 +147,7 @@ final class FixedLayoutDocxRenderer {
         List<TextBlock> sourceTexts = page.textBlocks().isEmpty()
                 ? page.paragraphs().stream().flatMap(paragraph -> paragraph.runs().stream()).toList()
                 : page.textBlocks();
-        Map<TextBlock.OcrWord, ColorValue> ocrColors = addOcrMasks(anchor, page, sourceTexts);
+        OcrAppearance ocrColors = addOcrMasks(anchor, page, sourceTexts);
         page.lines().stream().filter(line -> !insideAnyTable(line, page.tables()))
                 .forEach(line -> items.add(new FixedItem(line.zOrder(), line, null, null, null)));
         page.images().forEach(image -> items.add(new FixedItem(image.zOrder(), null, image, null, null)));
@@ -153,7 +179,7 @@ final class FixedLayoutDocxRenderer {
     }
 
     private void addTextBox(XWPFDocument docx, XWPFParagraph anchor, TextBlock block,
-                            Map<TextBlock.OcrWord, ColorValue> ocrColors) throws Exception {
+                            OcrAppearance ocrColors) throws Exception {
         if (!block.ocrWords().isEmpty()) {
             addOcrTextBoxes(docx, anchor, block, ocrColors);
             return;
@@ -162,8 +188,13 @@ final class FixedLayoutDocxRenderer {
     }
 
     private void addTextBox(XWPFDocument docx, XWPFParagraph anchor, TextBlock block, boolean ocr) throws Exception {
+        addTextBox(docx, anchor, block, ocr, 0d);
+    }
+
+    private void addTextBox(XWPFDocument docx, XWPFParagraph anchor, TextBlock block, boolean ocr, double extraWidth) throws Exception {
         double topInsetMm = Math.max(0, block.textOffsetYmm() - block.style().sizePt() * 25.4d / 72d * 0.86d);
-        Rect textBox = tolerantTextBox(block);
+        Rect originalBox = tolerantTextBox(block);
+        Rect textBox = new Rect(originalBox.x(), originalBox.y(), originalBox.width() + extraWidth, originalBox.height());
         double rotation = block.transform().rotationDegrees();
         String textFlow = "";
         if (Math.abs(Math.abs(rotation) - 90d) < 0.01d) {
@@ -209,9 +240,25 @@ final class FixedLayoutDocxRenderer {
         appendShape(anchor, xml);
     }
 
-    private Map<TextBlock.OcrWord, ColorValue> addOcrMasks(XWPFParagraph anchor, PageModel page, List<TextBlock> texts) {
+    private OcrAppearance addOcrMasks(XWPFParagraph anchor, PageModel page, List<TextBlock> texts) {
         Map<TextBlock.OcrWord, ColorValue> colors = new IdentityHashMap<>();
-        if (texts.stream().allMatch(block -> block.ocrWords().isEmpty())) return colors;
+        Map<TextBlock.OcrWord, Double> numericRightEdges = new IdentityHashMap<>();
+        List<OcrMask> masks = new ArrayList<>();
+        if (texts.stream().allMatch(block -> block.ocrWords().isEmpty())) return new OcrAppearance(colors, numericRightEdges);
+        // LibreOffice paints negative VML shapes before a DrawingML scan anchor,
+        // regardless of XML order. On a scan-only page, put sampled word masks
+        // in front of that image and below the editable OCR boxes. A mixed page
+        // needs a separate, conservative collision check against native body
+        // text, including paragraphs absent from the fixed overlay list.
+        boolean scanOnly = page.images().size() == 1 && page.lines().isEmpty() && page.tables().isEmpty()
+                && texts.stream().allMatch(block -> !block.ocrWords().isEmpty())
+                && page.textBlocks().stream().allMatch(block -> !block.ocrWords().isEmpty())
+                && page.paragraphs().stream().flatMap(paragraph -> paragraph.runs().stream())
+                        .allMatch(block -> !block.ocrWords().isEmpty());
+        // Neighbor checks are quadratic in the word count; this optional edit
+        // reserve is deliberately limited to sparse pages (at most 512² checks).
+        boolean reserveEligible = scanOnly && texts.stream().mapToLong(block -> block.ocrWords().size()).sum() <= 512;
+        List<Rect> nativeProtection = scanOnly ? null : mixedNativeProtection(page, texts);
         for (ImageBlock background : page.images()) {
             if (!isOcrBackground(background)) continue;
             // Decode one background at a time, rather than retaining all scan images on a page.
@@ -225,23 +272,173 @@ final class FixedLayoutDocxRenderer {
                     double right = Math.min(word.box().right() + 0.15d, background.box().right());
                     double bottom = Math.min(word.box().bottom() + 0.15d, background.box().bottom());
                     if (right <= x || bottom <= y) continue;
-                    List<OcrBackgroundMaskSampler.Fill> fills = sampler.fills(new Rect(x, y, right - x, bottom - y));
+                    Rect maskBox = new Rect(x, y, right - x, bottom - y);
+                    List<OcrBackgroundMaskSampler.Fill> fills = sampler.fills(maskBox);
                     if (fills.isEmpty()) continue;
+                    boolean mixedForeground = nativeProtection != null && word.confidence() >= .85d
+                            && block.zOrder() >= 1 && Transform2D.IDENTITY.equals(block.transform())
+                            && word.box().x() >= background.box().x() && word.box().right() <= background.box().right()
+                            && word.box().y() >= background.box().y() && word.box().bottom() <= background.box().bottom()
+                            && lightNeutralPaper(fills)
+                            && nativeProtection.stream().noneMatch(box -> box.intersectionArea(maskBox) > 0d);
+                    boolean lightDecimal = scanOnly && word.confidence() >= .85d
+                            && word.text().matches("[+-]?[0-9]{1,12}\\.[0-9]{1,6}")
+                            && Transform2D.IDENTITY.equals(block.transform())
+                            && word.box().width() < page.physicalBox().width() / 4d
+                            && word.box().height() < page.physicalBox().height() / 12d
+                            && word.box().x() >= background.box().x() && word.box().right() <= background.box().right()
+                            && word.box().y() >= background.box().y() && word.box().bottom() <= background.box().bottom()
+                            && lightNeutralPaper(fills);
                     for (OcrBackgroundMaskSampler.Fill fill : fills) {
-                        String xml = "<v:rect xmlns:v=\"urn:schemas-microsoft-com:vml\" id=\""
-                                + attr(shapeId("ocr-mask", block.id())) + "\" style=\""
-                                + attr(positionStyle(fill.box(), BEHIND_TEXT_Z_INDEX + 1, 0, true))
-                                + "\" filled=\"t\" fillcolor=\"#" + fill.color() + "\" stroked=\"f\"/>";
-                        unchecked(() -> appendShape(anchor, xml));
+                        // White screenshot letters must not move independently
+                        // sampled, reliable light-paper prose behind the scan.
+                        // Numeric and dark-paper words retain their existing policy.
+                        boolean boundedLightWord = scanOnly && word.confidence() >= .85d
+                                && word.text().codePoints().noneMatch(Character::isDigit)
+                                && Transform2D.IDENTITY.equals(block.transform())
+                                && word.box().width() < page.physicalBox().width() / 4d
+                                && word.box().height() < page.physicalBox().height() / 12d
+                                && word.box().x() >= background.box().x() && word.box().right() <= background.box().right()
+                                && word.box().y() >= background.box().y() && word.box().bottom() <= background.box().bottom()
+                                && lightNeutralPaper(fills);
+                        masks.add(new OcrMask(block.id(), fill, mixedForeground, lightDecimal, boundedLightWord));
                     }
                     colors.put(word, ocrForeground(fills, block.style().color()));
+                    // Reserve only a bounded, pixel-checked blank region for a
+                    // last numeric word. The transparent box grows; masks and
+                    // source coordinates do not. Dense/annotated pages fall back.
+                    if (reserveEligible && fills.size() == 1 && word.confidence() >= .85d
+                            && Math.abs(block.transform().rotationDegrees()) < .01d && !block.transform().hasSkew(.001d)
+                            && block.ocrWords().get(block.ocrWords().size() - 1) == word
+                            && word.text().matches("[+-]?[0-9]{1,12}(?:\\.[0-9]{1,6})?")) {
+                        double edge = Math.min(Math.min(background.box().right(), page.physicalBox().right()) - .5d,
+                                word.box().right() + Math.min(15d, word.box().height() * 4.5d));
+                        double left = word.box().right() + .2d;
+                        double top = word.box().y() - word.box().height() * .5d;
+                        if (edge > left && top >= background.box().y()) {
+                            Rect reserve = new Rect(left, top, edge - left, word.box().height() * 2.1d);
+                            boolean overlaps = texts.stream().flatMap(t -> t.ocrWords().stream())
+                                    .anyMatch(other -> other != word && reserve.intersectionArea(other.box()) > 0d);
+                            if (!overlaps && sampler.uniformLightPaper(reserve, fills.get(0).color())) {
+                                numericRightEdges.put(word, edge);
+                                // Longer edits may need more than the original short reserve.
+                                // Inspect only the additional bounded strip; if it contains
+                                // unknown ink, a neighbor, or exceeds the same pixel budget,
+                                // retain the already verified short reserve.
+                                double extendedEdge = Math.min(Math.min(background.box().right(), page.physicalBox().right()) - .5d,
+                                        word.box().right() + Math.min(25d, word.box().height() * 8d));
+                                if (extendedEdge > edge) {
+                                    Rect extension = new Rect(edge, top, extendedEdge - edge, reserve.height());
+                                    boolean neighbor = texts.stream().flatMap(t -> t.ocrWords().stream())
+                                            .anyMatch(other -> other != word && extension.intersectionArea(other.box()) > 0d);
+                                    if (!neighbor && sampler.uniformLightPaper(extension, fills.get(0).color())) {
+                                        numericRightEdges.put(word, extendedEdge);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             } catch (IOException | IllegalArgumentException ignored) {
                 // Optional background estimation cannot justify an uninformed white cover.
             }
         }
-        return colors;
+        // LibreOffice 24.2's dark-paper regression fails with foreground masks
+        // even though 26.8 renders the same white OCR letters. Keep the entire
+        // page on its validated old layering if any sampled word needs white
+        // foreground. The narrow decimal exception below retains all white-word
+        // masks on that old policy and does not enable edit reserves.
+        boolean foregroundMasks = scanOnly && colors.values().stream()
+                .noneMatch(color -> ColorValue.WHITE.equals(color));
+        // A broad, uncertain grid-sized word can sample a black rule as paper.
+        // Retain its white text and old mask policy, while independently proven
+        // light-paper decimal masks cover their own original scan ink. Never
+        // promote white-letter masks or grant numeric edit reserves on this path.
+        boolean anomalousDarkWord = scanOnly && colors.entrySet().stream().anyMatch(entry ->
+                ColorValue.WHITE.equals(entry.getValue()) && entry.getKey().confidence() < .35d
+                        && entry.getKey().box().width() >= page.physicalBox().width() / 2d
+                        && entry.getKey().box().height() >= page.physicalBox().height() / 10d);
+        if (!foregroundMasks) numericRightEdges.clear();
+        for (OcrMask mask : masks) {
+            var fill = mask.fill();
+            String xml = "<v:rect xmlns:v=\"urn:schemas-microsoft-com:vml\" id=\""
+                    + attr(shapeId("ocr-mask", mask.blockId())) + "\" style=\""
+                    + attr(positionStyle(fill.box(), foregroundMasks || mask.mixedForeground()
+                            || anomalousDarkWord && mask.lightDecimal() || mask.boundedLightWord()
+                            ? 1 : BEHIND_TEXT_Z_INDEX + 1, 0, true))
+                    + "\" filled=\"t\" fillcolor=\"#" + fill.color() + "\" stroked=\"f\"/>";
+            unchecked(() -> appendShape(anchor, xml));
+        }
+        return new OcrAppearance(colors, numericRightEdges);
     }
+
+    /** Bounded support for sparse, disjoint native/OCR pages; ambiguous layouts retain their scan. */
+    private List<Rect> mixedNativeProtection(PageModel page, List<TextBlock> texts) {
+        if (page.images().size() != 1 || !isOcrBackground(page.images().get(0))
+                || !page.lines().isEmpty() || !page.tables().isEmpty()
+                || page.textBlocks().size() > 512 || page.paragraphs().size() > 512 || texts.size() > 512
+                || texts.stream().mapToLong(block -> block.ocrWords().size()).sum() > 512) return null;
+        Map<TextBlock, Boolean> blocks = new IdentityHashMap<>();
+        page.textBlocks().forEach(block -> blocks.put(block, true));
+        texts.forEach(block -> blocks.put(block, true));
+        List<Rect> protectedBoxes = new ArrayList<>();
+        int references = page.textBlocks().size() + texts.size();
+        try {
+            for (ParagraphModel paragraph : page.paragraphs()) {
+                if (paragraph.flow() != null || (references += paragraph.runs().size()) > 1536) return null;
+                double padding = 0d;
+                for (TextBlock block : paragraph.runs()) {
+                    blocks.put(block, true);
+                    if (!block.text().isEmpty() && block.ocrWords().isEmpty()) {
+                        padding = Math.max(padding, nativePadding(block));
+                    }
+                }
+                if (padding > 0d) protectedBoxes.add(expandNativeBox(paragraph.box(), padding));
+            }
+            for (TextBlock block : blocks.keySet()) {
+                if (!block.text().isEmpty() && block.ocrWords().isEmpty()) {
+                    protectedBoxes.add(expandNativeBox(block.box(), nativePadding(block)));
+                }
+            }
+        } catch (IllegalArgumentException exception) {
+            return null;
+        }
+        // At most 512 words × 512 protected regions. Do not promote any mask on
+        // a dense page or a page whose native geometry cannot be trusted.
+        return protectedBoxes.isEmpty() || protectedBoxes.size() > 512 ? null : protectedBoxes;
+    }
+
+    private double nativePadding(TextBlock block) {
+        if (!Transform2D.IDENTITY.equals(block.transform()) || !Double.isFinite(block.style().sizePt())
+                || !Double.isFinite(block.textOffsetXmm()) || !Double.isFinite(block.textOffsetYmm())
+                || block.textOffsetXmm() > block.box().width() || block.textOffsetYmm() > block.box().height()
+                || !Double.isFinite(block.baselineY()) || block.baselineY() < block.box().y()
+                || block.baselineY() > block.box().bottom()) {
+            throw new IllegalArgumentException("Uncertain native text geometry");
+        }
+        // Body text may move within its paragraph; protect two font heights
+        // around both source runs and their containing native paragraphs.
+        return block.style().sizePt() * 25.4d / 72d * 2d;
+    }
+
+    private Rect expandNativeBox(Rect box, double padding) {
+        return new Rect(box.x() - padding, box.y() - padding,
+                box.width() + padding * 2d, box.height() + padding * 2d);
+    }
+
+    private boolean lightNeutralPaper(List<OcrBackgroundMaskSampler.Fill> fills) {
+        return fills.stream().allMatch(fill -> {
+            int rgb = Integer.parseInt(fill.color(), 16);
+            int r = (rgb >>> 16) & 255, g = (rgb >>> 8) & 255, b = rgb & 255;
+            int minimum = Math.min(r, Math.min(g, b)), maximum = Math.max(r, Math.max(g, b));
+            return minimum >= 180 && maximum - minimum <= 8;
+        });
+    }
+
+    private record OcrMask(String blockId, OcrBackgroundMaskSampler.Fill fill,
+                           boolean mixedForeground, boolean lightDecimal, boolean boundedLightWord) { }
+    private record OcrAppearance(Map<TextBlock.OcrWord, ColorValue> colors,
+                                 Map<TextBlock.OcrWord, Double> numericRightEdges) { }
 
     private ColorValue ocrForeground(List<OcrBackgroundMaskSampler.Fill> fills, ColorValue original) {
         double brightness = 0, area = 0;
@@ -256,7 +453,7 @@ final class FixedLayoutDocxRenderer {
 
     /** Position each recognized word separately so unknown content in the gaps stays exposed. */
     private void addOcrTextBoxes(XWPFDocument docx, XWPFParagraph anchor, TextBlock line,
-                                 Map<TextBlock.OcrWord, ColorValue> ocrColors) throws Exception {
+                                 OcrAppearance ocrColors) throws Exception {
         List<Double> fontSizes = new ArrayList<>();
         for (TextBlock.OcrWord word : line.ocrWords()) {
             if (word.text().codePoints().noneMatch(Character::isLetterOrDigit)) continue;
@@ -288,15 +485,91 @@ final class FixedLayoutDocxRenderer {
             Rect box = new Rect(Math.max(0d, word.box().x() - bearingMm), top,
                     word.box().width(), Math.max(line.box().height(), fontMm * 1.3d));
             TextBlock positioned = new TextBlock(line.id() + "-word-" + index, line.pageNumber(), box,
-                    value, line.baselineY(), new FontStyle("Arial", sizePt, false, false, ocrColors.getOrDefault(word, line.style().color())),
-                    line.zOrder(), 0, 0, List.of(), new Transform2D(ratio, 0, 0, 1, 0, 0));
-            addTextBox(docx, anchor, positioned, true);
+                    value, line.baselineY(), new FontStyle("Arial", sizePt, false, false, ocrColors.colors().getOrDefault(word, line.style().color())),
+                    Math.max(1, line.zOrder()), 0, 0, List.of(), new Transform2D(ratio, 0, 0, 1, 0, 0));
+            if (Math.abs(line.transform().rotationDegrees()) < .01d && !line.transform().hasSkew(.001d)) {
+                double wrappingWidth = tolerantTextBox(positioned).width();
+                double availableWidth = wrappingWidth;
+                if (index + 1 < line.ocrWords().size()) {
+                    TextBlock.OcrWord next = line.ocrWords().get(index + 1);
+                    availableWidth = latinWordWidthBeforeNext(word, next, ocrFont(next.text()), sizePt,
+                            box, availableWidth);
+                }
+                double fitted = latinWordScale(word, font, OCR_LATIN_COMPATIBLE_FONT, sizePt, ratio,
+                        wrappingWidth, availableWidth);
+                if (fitted != ratio) positioned = new TextBlock(positioned.id(), positioned.pageNumber(),
+                        positioned.box(), positioned.text(), positioned.baselineY(), positioned.style(), positioned.zOrder(),
+                        positioned.textOffsetXmm(), positioned.textOffsetYmm(), positioned.advancesMm(),
+                        new Transform2D(fitted, 0, 0, 1, 0, 0));
+            }
+            double extraWidth = Math.max(0d,
+                    ocrColors.numericRightEdges().getOrDefault(word, 0d) - tolerantTextBox(positioned).right());
+            addTextBox(docx, anchor, positioned, true, extraWidth);
         }
     }
 
     private java.awt.Font ocrFont(String text) {
         return DocxFontSupport.containsCjkText(text) && OCR_CJK_FONT != null
                 ? OCR_CJK_FONT : new java.awt.Font("Arial", java.awt.Font.PLAIN, 100);
+    }
+
+    /** The transparent wrapping allowance must not consume a reliable neighboring word's gap. */
+    static double latinWordWidthBeforeNext(TextBlock.OcrWord word, TextBlock.OcrWord next,
+                                          java.awt.Font nextFont, double sizePt, Rect positioned,
+                                          double defaultWidth) {
+        double gap = next.box().x() - word.box().right();
+        if (gap <= 0d || next.confidence() < .85d
+                || next.box().y() >= word.box().bottom() || next.box().bottom() <= word.box().y()) {
+            return defaultWidth;
+        }
+        var glyphs = nextFont.deriveFont(100f).createGlyphVector(OCR_FONT_CONTEXT, next.text()).getVisualBounds();
+        double ratio = next.box().width() * 72d / 25.4d / Math.max(1d, glyphs.getWidth() * sizePt / 100d);
+        ratio = Math.max(.6d, Math.min(1.4d, ratio));
+        double bearing = glyphs.getX() * sizePt / 100d * 25.4d / 72d * ratio;
+        double nextLeft = Math.max(0d, next.box().x() - bearing);
+        double available = nextLeft - positioned.x() - gap * .5d;
+        // Ambiguous/overlapping geometry retains the established fallback.
+        return available > 0d ? Math.min(defaultWidth, available) : defaultWidth;
+    }
+
+    /** Correct only a proven width overflow when Java silently substitutes Dialog for Arial. */
+    static double latinWordScale(TextBlock.OcrWord word, java.awt.Font measuredFont,
+                                 java.awt.Font compatibleFont, double sizePt, double original,
+                                 double wrappingWidthMm, double neighborWidthMm) {
+        double established = latinWordScale(word, measuredFont, compatibleFont, sizePt, original, wrappingWidthMm);
+        if (neighborWidthMm >= wrappingWidthMm) return established;
+        // Failure to prove a tighter fit must never undo the established fix.
+        return Math.min(established,
+                latinWordScale(word, measuredFont, compatibleFont, sizePt, original, neighborWidthMm));
+    }
+
+    static double latinWordScale(TextBlock.OcrWord word, java.awt.Font measuredFont,
+                                 java.awt.Font compatibleFont, double sizePt, double original, double boxWidthMm) {
+        if (compatibleFont == null || !"Dialog".equals(measuredFont.getFamily())
+                || word.confidence() < .85d || !word.text().matches("[A-Za-z]{3,32}")) return original;
+        // Match the actual half-point font size and integer OOXML percentage.
+        float emittedSize = (float) (Math.max(2, Math.round(sizePt * 2d)) / 2d);
+        var glyphs = compatibleFont.deriveFont(emittedSize).createGlyphVector(OCR_FONT_CONTEXT, word.text());
+        double advance = glyphs.getGlyphPosition(glyphs.getNumGlyphs()).getX();
+        double availablePt = boxWidthMm * 72d / 25.4d;
+        if (advance * Math.round(original * 100d) / 100d <= availablePt) return original;
+        var actualInk = compatibleFont.deriveFont(100f).createGlyphVector(OCR_FONT_CONTEXT, word.text()).getVisualBounds();
+        var measuredInk = measuredFont.deriveFont(100f).createGlyphVector(OCR_FONT_CONTEXT, word.text()).getVisualBounds();
+        if (actualInk.getWidth() <= 1d || measuredInk.getWidth() <= 1d) return original;
+        double fitted = original * measuredInk.getWidth() / actualInk.getWidth();
+        // Only contract the wrongly overestimated Latin scale. Source box,
+        // bearing, masks, line size, numeric words and edit reserves stay intact.
+        if (!Double.isFinite(fitted) || fitted < .6d || fitted >= original
+                || advance * Math.round(fitted * 100d) / 100d > availablePt) return original;
+        return fitted;
+    }
+
+    private static java.awt.Font loadOcrLatinCompatibleFont() {
+        java.awt.Font system = new java.awt.Font("Liberation Sans", java.awt.Font.PLAIN, 100);
+        if ("Liberation Sans".equals(system.getFamily())) return system;
+        try (var input = FixedLayoutDocxRenderer.class.getResourceAsStream("/fonts/LiberationSans-Regular.ttf")) {
+            return input == null ? null : java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, input).deriveFont(100f);
+        } catch (Exception ignored) { return null; }
     }
 
     private static java.awt.Font loadOcrCjkFont() {
@@ -353,6 +626,10 @@ final class FixedLayoutDocxRenderer {
     private void addImage(XWPFDocument docx, XWPFParagraph anchor, ImageBlock image) throws Exception {
         if (image.data().length == 0) return;
         String relationId = docx.addPictureData(image.data(), pictureType(image.mimeType()));
+        if (isOcrBackground(image)) {
+            addScanBackground(anchor, image, relationId);
+            return;
+        }
         String position = isOcrBackground(image)
                 ? positionStyle(image.box(), BEHIND_TEXT_Z_INDEX, 0, true)
                 : positionStyle(image.box(), image.zOrder());
@@ -363,6 +640,34 @@ final class FixedLayoutDocxRenderer {
                 "<v:imagedata r:id=\"" + attr(relationId) + "\" title=\"" + attr(image.id()) + "\"/>" +
                 "</v:shape>";
         appendShape(anchor, xml);
+    }
+
+    private void addScanBackground(XWPFParagraph anchor, ImageBlock image, String relationId) throws Exception {
+        Rect box = image.box();
+        long x = Math.round(box.x() * 36000), y = Math.round(box.y() * 36000);
+        long width = Math.max(1, Math.round(box.width() * 36000));
+        long height = Math.max(1, Math.round(box.height() * 36000));
+        int id = shapeSequence++;
+        String xml = "<wp:anchor xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" "
+                + "xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" "
+                + "xmlns:pic=\"http://schemas.openxmlformats.org/drawingml/2006/picture\" "
+                + "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" "
+                + "distT=\"0\" distB=\"0\" distL=\"0\" distR=\"0\" simplePos=\"0\" relativeHeight=\"0\" "
+                + "behindDoc=\"1\" locked=\"0\" layoutInCell=\"1\" allowOverlap=\"1\">"
+                + "<wp:simplePos x=\"0\" y=\"0\"/><wp:positionH relativeFrom=\"page\"><wp:posOffset>" + x
+                + "</wp:posOffset></wp:positionH><wp:positionV relativeFrom=\"page\"><wp:posOffset>" + y
+                + "</wp:posOffset></wp:positionV><wp:extent cx=\"" + width + "\" cy=\"" + height + "\"/>"
+                + "<wp:effectExtent l=\"0\" t=\"0\" r=\"0\" b=\"0\"/><wp:wrapNone/>"
+                + "<wp:docPr id=\"" + id + "\" name=\"" + attr(image.id()) + "\"/>"
+                + "<wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect=\"1\"/></wp:cNvGraphicFramePr>"
+                + "<a:graphic><a:graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/picture\">"
+                + "<pic:pic><pic:nvPicPr><pic:cNvPr id=\"" + id + "\" name=\"" + attr(image.id())
+                + "\"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed=\"" + attr(relationId)
+                + "\"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm>"
+                + "<a:off x=\"0\" y=\"0\"/><a:ext cx=\"" + width + "\" cy=\"" + height
+                + "\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom></pic:spPr>"
+                + "</pic:pic></a:graphicData></a:graphic></wp:anchor>";
+        copyInto(anchor.createRun().getCTR().addNewDrawing(), XmlObject.Factory.parse(xml));
     }
 
     private boolean isOcrBackground(ImageBlock image) {

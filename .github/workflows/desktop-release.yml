@@ -148,6 +148,8 @@ jobs:
             $Executable = Join-Path $InstallDir "Fuyue Convert.exe"
             if (-not (Test-Path $Executable)) { throw "Installed desktop executable not found" }
             $AppProcess = Start-Process -FilePath $Executable -ArgumentList "--remote-debugging-port=9227" -PassThru
+            node scripts/smoke-conversion.mjs 9227 test\fixtures\ocr-smoke.png --route=png-to-txt "--source-label=PNG 图片" "--target-label=纯文本 TXT"
+            if ($LASTEXITCODE -ne 0) { throw "Installed bundled OCR conversion smoke test failed" }
             node scripts/smoke-conversion.mjs 9227 test\fixtures\smoke.txt --close-app
             if ($LASTEXITCODE -ne 0) { throw "Installed desktop conversion smoke test failed" }
             if (-not $AppProcess.WaitForExit(45000)) { throw "Desktop application did not exit gracefully" }
@@ -387,6 +389,11 @@ jobs:
 
           "$executable" --remote-debugging-port=9227 >"$RUNNER_TEMP/fuyue-$PACKAGE_ARCH.log" 2>&1 &
           application_pid=$!
+          if ! node scripts/smoke-conversion.mjs 9227 test/fixtures/ocr-smoke.png \
+            --route=png-to-txt '--source-label=PNG 图片' '--target-label=纯文本 TXT'; then
+            cat "$RUNNER_TEMP/fuyue-$PACKAGE_ARCH.log" >&2
+            exit 1
+          fi
           if ! node scripts/smoke-conversion.mjs 9227 test/fixtures/smoke.txt --close-app; then
             cat "$RUNNER_TEMP/fuyue-$PACKAGE_ARCH.log" >&2
             exit 1
@@ -526,6 +533,10 @@ jobs:
             echo
             echo '> 当前 macOS 安装包采用 ad-hoc 签名且尚未经过 Apple 公证，首次打开会被 Gatekeeper 拦截。请在“系统设置 → 隐私与安全”中确认“仍要打开”。'
             echo
+            echo '## 内置 OCR'
+            echo
+            echo '三个平台均内置 Tesseract 5.5.2、简体中文、中文竖排、英文及方向检测模型，无需单独安装 OCR。发布前校验引擎和模型哈希、实际中英文识别，以及安装后的 PNG→TXT 转换。'
+            echo
             echo '## 内置 Java 运行时源码'
             echo
             echo '三个 Lite 安装包内置 Eclipse Temurin 17.0.20.1+1 的裁剪运行时。对应 OpenJDK 源码可从 [Adoptium 官方 Release](https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jdk-sources_17.0.20.1_1.tar.gz) 获取，SHA-256：`21e2a065d244ab048e737f21af5d1fc74daaeb6707de36477ead8db1dca71214`。'
@@ -548,12 +559,30 @@ jobs:
             echo "Refusing to publish anything except the three approved installers" >&2
             exit 1
           fi
-          gh release create "$GITHUB_REF_NAME" "${installers[@]}" \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "$GITHUB_REF_NAME" \
-            --verify-tag \
-            --generate-notes \
-            --notes "$(cat release-checksums.md)"
+          tag_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$GITHUB_REF_NAME" --jq '.object.sha')"
+          if [ "$tag_sha" != "$GITHUB_SHA" ]; then
+            echo "Release tag no longer matches the approved source" >&2
+            exit 1
+          fi
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            # A same-version rebuild may only replace the three audited Lite
+            # assets. Refuse to mix a rebuild with existing Full binaries.
+            mapfile -t existing < <(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+              --json assets,isDraft,isPrerelease \
+              --jq 'if .isDraft or .isPrerelease then error("release is not final") else .assets[].name end' | LC_ALL=C sort)
+            mapfile -t expected < <(find release-assets -maxdepth 1 -type f -printf '%f\n' | LC_ALL=C sort)
+            diff -u <(printf '%s\n' "${expected[@]}") <(printf '%s\n' "${existing[@]}")
+            gh release upload "$GITHUB_REF_NAME" "${installers[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+              --title "$GITHUB_REF_NAME" --notes-file release-checksums.md
+          else
+            gh release create "$GITHUB_REF_NAME" "${installers[@]}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$GITHUB_REF_NAME" \
+              --verify-tag \
+              --generate-notes \
+              --notes "$(cat release-checksums.md)"
+          fi
 
       - name: Verify published asset allowlist
         env:

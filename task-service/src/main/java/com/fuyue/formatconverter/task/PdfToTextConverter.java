@@ -42,18 +42,17 @@ public final class PdfToTextConverter implements FileConverter {
     public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
         progress.update(TaskStage.PARSING, 30);
-        var parsed = ocr == null
-                ? parser.parseForTextExtraction(input.path(), input.displayName(), limits)
-                : parser.parseForTextExtractionOcr(input.path(), input.displayName(), limits);
+        var sections = new PdfTextSectionOrder();
+        var parsed = parser.parseForTextSections(input.path(), input.displayName(), limits, ocr != null, sections);
         if (ocr != null) {
-            parsed = ocr.recognizeMissingPages(input.path(), parsed, workDir.resolve("pdf-ocr"), limits, progress);
+            parsed = ocr.recognizeMissingPagesForText(input.path(), parsed, workDir.resolve("pdf-ocr"), limits, progress);
         }
         progress.update(TaskStage.RECOGNIZING, 60);
         var pages = parsed.pages().stream().map(analyzer::analyze).toList();
         List<ConversionWarning> warnings = new ArrayList<>(parsed.warnings());
         pages.forEach(page -> warnings.addAll(page.warnings()));
         progress.update(TaskStage.RENDERING, 80);
-        Files.writeString(outputPath, OfdToTextConverter.text(pages), StandardCharsets.UTF_8);
+        Files.writeString(outputPath, sections.text(pages), StandardCharsets.UTF_8);
         ConversionGuards.requireOutputFile(outputPath, limits, "PDF 转 TXT");
         return new ConversionOutput(outputPath, input.displayName().replaceFirst("(?i)\\.pdf$", ".txt"),
                 parsed.sourcePageCount(), warnings);

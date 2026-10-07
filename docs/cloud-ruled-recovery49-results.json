@@ -1,0 +1,766 @@
+{
+  "parentRevision": "dba208c52659ff1d941f91f7528a47cf629d9ddd",
+  "jarSha256": "323f1e37939a0908962add69ac86a3ce2aeb206cffc25ebe7e41b930f46d947f",
+  "productionFingerprint": "e631cbff290d2d59a52d49421dedd8bedc6303371cd4c5a604843303873f11de",
+  "applicationClassCount": 237,
+  "recoveryJarSha256": "dca1d5f11efe34e1b815feebbc256734e8eb42fb969c189430bb4fc35066cf73",
+  "recoveryFingerprint": "47928baefd585b297836a5ff49c03226d3602ff6f8d7073f67307b8658559e0f",
+  "helperSha256": "cbbe92cbfc5337de00969017bf77882df350abe9e1511663a516a44b0634ad29",
+  "actualHttpContracts": 10,
+  "actualSuccesses": 10,
+  "reusedWordOfficeArtifacts": 6,
+  "finalTxtOnlyContracts": 2,
+  "allWorkersGone": true,
+  "ECHILD": true,
+  "newOwnZombies": 0,
+  "cases": [
+    {
+      "case": "ruled",
+      "beforeWord": {
+        "expectedCharacters": 104,
+        "actualCharacters": 60,
+        "editDistance": 49,
+        "cer": 0.47115384615384615,
+        "alignedCharacterRecall": 0.5288461538461539,
+        "exactLines": 1,
+        "expectedNumbers": [
+          "00783",
+          "01936",
+          "2093",
+          "12",
+          "04",
+          "042",
+          "70",
+          "03872",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "07744",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ],
+        "actualNumbers": [
+          "00783",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ]
+      },
+      "afterWord": {
+        "expectedCharacters": 104,
+        "actualCharacters": 104,
+        "editDistance": 1,
+        "cer": 0.009615384615384616,
+        "alignedCharacterRecall": 0.9903846153846154,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "00783",
+          "01936",
+          "2093",
+          "12",
+          "04",
+          "042",
+          "70",
+          "03872",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "07744",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ],
+        "actualNumbers": [
+          "00783",
+          "1",
+          "01936",
+          "2093",
+          "12",
+          "04",
+          "042",
+          "70",
+          "03872",
+          "2093",
+          "12",
+          "05",
+          "0085",
+          "40",
+          "07744",
+          "2093",
+          "12",
+          "06",
+          "0170",
+          "80"
+        ]
+      },
+      "beforeNumericFields": 4,
+      "afterNumericFields": 9,
+      "totalNumericFields": 9,
+      "wordText": "扫描\n台\n账 \nScan \nledger \n00783\n编号 \n1D\n日\n期 \nDate\n金额 \nAmount\n01936\n2093-12-04\n-042.70\n03872\n2093-12-05\n+0085.40\n07744\n2093-12-06\n0170.80",
+      "editableFrames": 22,
+      "logicalTables": 0,
+      "outOfPageFrames": 0,
+      "sourceImage": {
+        "part": "word/media/image1.png",
+        "pixels": [
+          2880,
+          1440
+        ],
+        "sha256": "e1cbec05e7e8ad6266fb65ec7dbbb3ed35a07bdc98b48c71495be436b0218d1a"
+      },
+      "sourceImageByteExact": true,
+      "existingNumericWordGeometry": [
+        {
+          "value": "2093-12-05",
+          "beforeFramePt": [
+            243.983,
+            190.046,
+            102.82,
+            23.771
+          ],
+          "afterFramePt": [
+            243.983,
+            190.046,
+            102.82,
+            23.771
+          ],
+          "originalOcrWordBoxExact": true
+        },
+        {
+          "value": "+0085.40",
+          "beforeFramePt": [
+            456.358,
+            190.046,
+            85.578,
+            23.771
+          ],
+          "afterFramePt": [
+            456.358,
+            190.058,
+            142.029,
+            23.641
+          ],
+          "originalOcrWordBoxExact": true
+        },
+        {
+          "value": "2093-12-06",
+          "beforeFramePt": [
+            243.981,
+            244.046,
+            103.337,
+            23.771
+          ],
+          "afterFramePt": [
+            243.981,
+            244.046,
+            103.337,
+            23.771
+          ],
+          "originalOcrWordBoxExact": true
+        },
+        {
+          "value": "0170.80",
+          "beforeFramePt": [
+            456.371,
+            244.046,
+            75.589,
+            23.771
+          ],
+          "afterFramePt": [
+            456.371,
+            244.058,
+            132.657,
+            23.641
+          ],
+          "originalOcrWordBoxExact": true
+        }
+      ],
+      "warningMessages": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页已使用本地 Tesseract OCR，平均置信度 92.9%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.928850045
+        },
+        {
+          "code": "OCR_RECOGNITION_CONFLICT",
+          "message": "PDF 第 1 页完整框线内分格重新识别并补回文字；全部已有数字逐字核对。原全页跨框低置信候选记录：Ce | ee | ee。原扫描保留，分格结果和遗漏仍需人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": null
+        },
+        {
+          "code": "OCR_POSSIBLE_TEXT_OMISSION",
+          "message": "PDF 第 1 页框线内分格识别已恢复部分文字，原跨框低置信候选另有记录；原数字逐字核对，仍可能存在漏字或新误识别，请对照保留的原扫描复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": null
+        }
+      ],
+      "pdfs": [
+        {
+          "kind": "office",
+          "sha256": "04827127124aa7d91133c4c072ab7b977d8c83e666ab1c6428dd5c691b3a450e",
+          "renderSha256": "1db942e2b5e30d92f3025f908ab340708bd4ba63b916c472fba9e93d13e4e3e2",
+          "text": "扫描台账 Scan ledger 00783\n编号 1D\n日期 Date\n金额 Amount\n01936\n2093-12-04\n-042.70\n03872\n2093-12-05\n+0085.40\n07744\n2093-12-06\n0170.80\n",
+          "pages": 1,
+          "allNineFieldsExactlyOnce": true
+        },
+        {
+          "kind": "edited-office",
+          "sha256": "5f2d96632a795e2c4458bd5849118c72aa9313e768f48ccdb960d65cb8312d8f",
+          "renderSha256": "9bcee5f9b8d4bb8b119c59377156f361b05e0e0194c6f9ff12416c7efa572b21",
+          "text": "扫描台账 Scan ledger 00783\n编号 1D\n日期 Date\n金额 Amount\n01936\n2093-12-04\n-042.70\n03872\n2093-12-05\n+0085.40\n07744\n2093-12-06\n0180.80\n",
+          "pages": 1,
+          "allNineFieldsExactlyOnce": true
+        }
+      ],
+      "editChangedPixels": 522,
+      "editDifferenceBoxPixels": [
+        1322,
+        683,
+        1344,
+        719
+      ],
+      "allOtherRenderPixelsExact": true,
+      "api": {
+        "text": "扫描台账 Scan ledger 00783\n编号 1D\t日期 Date\t金额 Amount\n01936\t2093-12-04\t-042.70\n03872\t2093-12-05\t+0085.40\n07744\t2093-12-06\t0180.80\n",
+        "beforeOrderMetrics": {
+          "expectedCharacters": 104,
+          "actualCharacters": 104,
+          "editDistance": 49,
+          "cer": 0.47115384615384615,
+          "alignedCharacterRecall": 0.6153846153846154,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00783",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "07744",
+            "2093",
+            "12",
+            "06",
+            "0180",
+            "80"
+          ],
+          "actualNumbers": [
+            "00783",
+            "1",
+            "01936",
+            "03872",
+            "07744",
+            "2093",
+            "12",
+            "04",
+            "2093",
+            "12",
+            "05",
+            "2093",
+            "12",
+            "06",
+            "042",
+            "70",
+            "0085",
+            "40",
+            "0180",
+            "80"
+          ]
+        },
+        "metrics": {
+          "expectedCharacters": 104,
+          "actualCharacters": 104,
+          "editDistance": 1,
+          "cer": 0.009615384615384616,
+          "alignedCharacterRecall": 0.9903846153846154,
+          "exactLines": 4,
+          "expectedNumbers": [
+            "00783",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "07744",
+            "2093",
+            "12",
+            "06",
+            "0180",
+            "80"
+          ],
+          "actualNumbers": [
+            "00783",
+            "1",
+            "01936",
+            "2093",
+            "12",
+            "04",
+            "042",
+            "70",
+            "03872",
+            "2093",
+            "12",
+            "05",
+            "0085",
+            "40",
+            "07744",
+            "2093",
+            "12",
+            "06",
+            "0180",
+            "80"
+          ]
+        },
+        "rowAssociationsPreserved": true,
+        "allNineFieldsExactlyOnce": true,
+        "oldValueAbsent": true,
+        "extraOcrInvocations": 0
+      }
+    },
+    {
+      "case": "independent",
+      "beforeWord": {
+        "expectedCharacters": 106,
+        "actualCharacters": 61,
+        "editDistance": 49,
+        "cer": 0.46226415094339623,
+        "alignedCharacterRecall": 0.5377358490566038,
+        "exactLines": 1,
+        "expectedNumbers": [
+          "00917",
+          "01429",
+          "2096",
+          "07",
+          "18",
+          "031",
+          "60",
+          "02858",
+          "2096",
+          "07",
+          "19",
+          "0063",
+          "20",
+          "05716",
+          "2096",
+          "07",
+          "20",
+          "0126",
+          "40"
+        ],
+        "actualNumbers": [
+          "00917",
+          "2096",
+          "07",
+          "19",
+          "0063",
+          "20",
+          "2096",
+          "07",
+          "20",
+          "0126",
+          "40"
+        ]
+      },
+      "afterWord": {
+        "expectedCharacters": 106,
+        "actualCharacters": 106,
+        "editDistance": 1,
+        "cer": 0.009433962264150943,
+        "alignedCharacterRecall": 0.9905660377358491,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "00917",
+          "01429",
+          "2096",
+          "07",
+          "18",
+          "031",
+          "60",
+          "02858",
+          "2096",
+          "07",
+          "19",
+          "0063",
+          "20",
+          "05716",
+          "2096",
+          "07",
+          "20",
+          "0126",
+          "40"
+        ],
+        "actualNumbers": [
+          "00917",
+          "1",
+          "01429",
+          "2096",
+          "07",
+          "18",
+          "031",
+          "60",
+          "02858",
+          "2096",
+          "07",
+          "19",
+          "0063",
+          "20",
+          "05716",
+          "2096",
+          "07",
+          "20",
+          "0126",
+          "40"
+        ]
+      },
+      "beforeNumericFields": 4,
+      "afterNumericFields": 9,
+      "totalNumericFields": 9,
+      "wordText": "复核\n明细 \nAudit \nentries \n00917\n编号 \n1D\n日\n期 \nDate\n金额 \nAmount\n01429\n2096-07-18\n-031.60\n02858\n2096-07-19\n+0063.20\n05716\n2096-07-20\n0126.40",
+      "editableFrames": 21,
+      "logicalTables": 0,
+      "outOfPageFrames": 0,
+      "sourceImage": {
+        "part": "word/media/image1.png",
+        "pixels": [
+          2880,
+          1440
+        ],
+        "sha256": "960faf3ac81e585b1cee9c4047977abbd9b0357b13fe18740a94935cd23f9763"
+      },
+      "sourceImageByteExact": true,
+      "existingNumericWordGeometry": [
+        {
+          "value": "2096-07-19",
+          "beforeFramePt": [
+            241.824,
+            189.326,
+            102.82,
+            23.771
+          ],
+          "afterFramePt": [
+            241.824,
+            189.326,
+            102.82,
+            23.771
+          ],
+          "originalOcrWordBoxExact": true
+        },
+        {
+          "value": "+0063.20",
+          "beforeFramePt": [
+            464.277,
+            189.326,
+            85.578,
+            23.771
+          ],
+          "afterFramePt": [
+            464.277,
+            189.338,
+            142.029,
+            23.641
+          ],
+          "originalOcrWordBoxExact": true
+        },
+        {
+          "value": "2096-07-20",
+          "beforeFramePt": [
+            241.824,
+            241.685,
+            101.487,
+            23.347
+          ],
+          "afterFramePt": [
+            241.824,
+            241.685,
+            101.487,
+            23.347
+          ],
+          "originalOcrWordBoxExact": true
+        },
+        {
+          "value": "0126.40",
+          "beforeFramePt": [
+            464.29,
+            241.685,
+            75.327,
+            23.347
+          ],
+          "afterFramePt": [
+            464.29,
+            241.697,
+            132.656,
+            23.219
+          ],
+          "originalOcrWordBoxExact": true
+        }
+      ],
+      "warningMessages": [
+        {
+          "code": "OCR_APPLIED",
+          "message": "PDF 第 1 页已使用本地 Tesseract OCR，平均置信度 93.8%，结果必须人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": 0.9382401100000001
+        },
+        {
+          "code": "OCR_RECOGNITION_CONFLICT",
+          "message": "PDF 第 1 页完整框线内分格重新识别并补回文字；全部已有数字逐字核对。原全页跨框低置信候选记录：CL | [Le。原扫描保留，分格结果和遗漏仍需人工复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": null
+        },
+        {
+          "code": "OCR_POSSIBLE_TEXT_OMISSION",
+          "message": "PDF 第 1 页框线内分格识别已恢复部分文字，原跨框低置信候选另有记录；原数字逐字核对，仍可能存在漏字或新误识别，请对照保留的原扫描复核。",
+          "pageNumber": 1,
+          "region": null,
+          "confidence": null
+        }
+      ],
+      "pdfs": [
+        {
+          "kind": "office",
+          "sha256": "9c393c9c6d535499542c52c4562a3d5a09bfb2273c0f00773cceb83ab3243645",
+          "renderSha256": "c3c5e9d428851f5ba3a9a3b0a5f26313b101ff5875b646feec12dfbe497aaa34",
+          "text": "复核明细 Audit entries 00917\n编号 1D\n日期 Date\n金额 Amount\n01429\n2096-07-18\n-031.60\n02858\n2096-07-19\n+0063.20\n05716\n2096-07-20\n0126.40\n",
+          "pages": 1,
+          "allNineFieldsExactlyOnce": true
+        },
+        {
+          "kind": "edited-office",
+          "sha256": "1bea64e273811a9b8983bfbe769cdff0975300594192ff34383eb1094efa5774",
+          "renderSha256": "38035c3a9ed7aba83d2217b583d6afd81155e3f22b1c13ac46c8019b96e58eb1",
+          "text": "复核明细 Audit entries 00917\n编号 1D\n日期 Date\n金额 Amount\n01429\n2096-07-18\n-031.60\n02858\n2096-07-19\n+0063.20\n05716\n2096-07-20\n0136.40\n",
+          "pages": 1,
+          "allNineFieldsExactlyOnce": true
+        }
+      ],
+      "editChangedPixels": 354,
+      "editDifferenceBoxPixels": [
+        1344,
+        676,
+        1368,
+        712
+      ],
+      "allOtherRenderPixelsExact": true,
+      "api": {
+        "text": "复核明细 Audit entries 00917\n编号 1D\t日期 Date\t金额 Amount\n01429\t2096-07-18\t-031.60\n02858\t2096-07-19\t+0063.20\n05716\t2096-07-20\t0136.40\n",
+        "beforeOrderMetrics": {
+          "expectedCharacters": 106,
+          "actualCharacters": 106,
+          "editDistance": 52,
+          "cer": 0.49056603773584906,
+          "alignedCharacterRecall": 0.5566037735849056,
+          "exactLines": 1,
+          "expectedNumbers": [
+            "00917",
+            "01429",
+            "2096",
+            "07",
+            "18",
+            "031",
+            "60",
+            "02858",
+            "2096",
+            "07",
+            "19",
+            "0063",
+            "20",
+            "05716",
+            "2096",
+            "07",
+            "20",
+            "0136",
+            "40"
+          ],
+          "actualNumbers": [
+            "00917",
+            "1",
+            "01429",
+            "02858",
+            "05716",
+            "2096",
+            "07",
+            "18",
+            "2096",
+            "07",
+            "19",
+            "2096",
+            "07",
+            "20",
+            "031",
+            "60",
+            "0063",
+            "20",
+            "0136",
+            "40"
+          ]
+        },
+        "metrics": {
+          "expectedCharacters": 106,
+          "actualCharacters": 106,
+          "editDistance": 1,
+          "cer": 0.009433962264150943,
+          "alignedCharacterRecall": 0.9905660377358491,
+          "exactLines": 4,
+          "expectedNumbers": [
+            "00917",
+            "01429",
+            "2096",
+            "07",
+            "18",
+            "031",
+            "60",
+            "02858",
+            "2096",
+            "07",
+            "19",
+            "0063",
+            "20",
+            "05716",
+            "2096",
+            "07",
+            "20",
+            "0136",
+            "40"
+          ],
+          "actualNumbers": [
+            "00917",
+            "1",
+            "01429",
+            "2096",
+            "07",
+            "18",
+            "031",
+            "60",
+            "02858",
+            "2096",
+            "07",
+            "19",
+            "0063",
+            "20",
+            "05716",
+            "2096",
+            "07",
+            "20",
+            "0136",
+            "40"
+          ]
+        },
+        "rowAssociationsPreserved": true,
+        "allNineFieldsExactlyOnce": true,
+        "oldValueAbsent": true,
+        "extraOcrInvocations": 0
+      }
+    }
+  ],
+  "resources": {
+    "wallSeconds": 37.76431084300566,
+    "userSeconds": 85.259014,
+    "systemSeconds": 7.638438,
+    "maxChildRssKiB": 371424
+  },
+  "finalTxtResources": {
+    "wallSeconds": 11.657784313007141,
+    "userSeconds": 30.388842,
+    "systemSeconds": 2.7319009999999997,
+    "maxChildRssKiB": 340716
+  },
+  "negativeControls": [
+    {
+      "source": "qa-samples/work/iteration49-geometry/columns.png",
+      "milliseconds": 175.193822,
+      "gridRejected": true,
+      "extraOcrInvocations": 0,
+      "width": 2880,
+      "sha256": "ae9c399ff5f5e9a334cd4024db42b6f837ba0de955fff1e63cd46ad3ac6c4d17",
+      "height": 1440,
+      "sourcePixelsExact": true
+    },
+    {
+      "source": "qa-samples/work/iteration47-renderer/baseline/dark-source.png",
+      "milliseconds": 230.519258,
+      "gridRejected": true,
+      "extraOcrInvocations": 0,
+      "width": 3749,
+      "sha256": "d055b22675ae4658aa591455bf52266425ed0c9173aa4cdf53a10dcf234f8820",
+      "height": 2500,
+      "sourcePixelsExact": true
+    },
+    {
+      "source": "qa-samples/work/iteration47-renderer/baseline/ordinary-source.png",
+      "milliseconds": 13.003089,
+      "gridRejected": true,
+      "extraOcrInvocations": 0,
+      "width": 1200,
+      "sha256": "2c543c41a7e67f32b054d050e94e478180a66448446af7bd4f24ebb32cf0be2d",
+      "height": 600,
+      "sourcePixelsExact": true
+    }
+  ],
+  "unknownPixels": {
+    "oldRenderSha256": "a82de3d8ca5fad2bb76aa2252a92adb11c7726a719460d048fecd9cc4499f68e",
+    "newRenderSha256": "1db942e2b5e30d92f3025f908ab340708bd4ba63b916c472fba9e93d13e4e3e2",
+    "changedPixels": 76049,
+    "outsideOriginalAndRecoveredWordMaskAreasChanged": 0,
+    "comparedUncoveredPixels": 1124170,
+    "paddingPixels": 3,
+    "sourceScanByteExact": true
+  },
+  "finalBuild": {
+    "counts": {
+      "tests": 520,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "skips": [
+      {
+        "suite": "com.fuyue.formatconverter.parser.OfdrwParserSignatureTest",
+        "test": "skipsEmbeddedOfdSignatureAppearanceWithExplicitWarning"
+      }
+    ]
+  },
+  "earlier48PdfUnchangedAndStillOutsideAcceptance": true,
+  "partialVisibilityGuardsUnchanged": true,
+  "remaining": [
+    "ID header recognition I/1 ambiguity",
+    "original48 already-damaged PDF not retroactively repaired",
+    "editable text frames; no logical Word table",
+    "dark/colored/broken/merged grids and uncertain numeric candidates retain original",
+    "native macOS/Windows packages unrun"
+  ]
+}

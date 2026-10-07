@@ -1,0 +1,411 @@
+{
+  "seed": 120142026,
+  "provenance": "Independent public synthetic sparse true-tilt supplement frozen before production edits, after dense32 native controls failed strict qualification",
+  "license": "Apache-2.0 generated text/code; separate SIL-OFL-1.1 fonts",
+  "fonts": {
+    "mono": {
+      "path": "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+      "sha256": "5883330d94debd992952cd8f0571b225f478c2d797d3f36c7521b0a5c9bde0f2",
+      "versions": [
+        "Version 2.1.5"
+      ],
+      "license": "SIL-OFL-1.1",
+      "source": "https://github.com/liberationfonts/liberation-fonts"
+    }
+  },
+  "versions": {
+    "Pillow": "12.3.0"
+  },
+  "parentManifestSha256": "d3bc5e7ac0beb0777ea19332b218f84498ecc22f183ead6f841de15c8b645195",
+  "generatorSha256": "fd9d07a22feef3ed21e2ac2095cb1ac08f524d82f67a7871671f8eb10f9cf752",
+  "limits": [
+    "Bounded follow-on selected for geometry coverage; not a random population or deskew guarantee"
+  ],
+  "cases": [
+    {
+      "file": "mono32-sparse-angle+0.00.png",
+      "sha256": "19f78b9d5031682180ba13639ebfaa94694673e0286ab100087c35e0ab4065ef",
+      "expectedLines": [
+        "Larch keeps lot351",
+        "Larch keeps lot352",
+        "Larch keeps lot353",
+        "Alder keeps lot361",
+        "Alder keeps lot362",
+        "Alder keeps lot363",
+        "Aspen keeps lot371",
+        "Aspen keeps lot372",
+        "Aspen keeps lot373"
+      ],
+      "font": "mono",
+      "fontSize": 32,
+      "layout": "three-columns",
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        3,
+        3
+      ],
+      "rowStep": 280,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "file": "mono32-sparse-angle-1.10.png",
+      "sha256": "335256f384626a7761fa5387c209317eb27c3a27d5476df86008a7a2b5b08983",
+      "expectedLines": [
+        "Larch keeps lot351",
+        "Larch keeps lot352",
+        "Larch keeps lot353",
+        "Alder keeps lot361",
+        "Alder keeps lot362",
+        "Alder keeps lot363",
+        "Aspen keeps lot371",
+        "Aspen keeps lot372",
+        "Aspen keeps lot373"
+      ],
+      "font": "mono",
+      "fontSize": 32,
+      "layout": "three-columns",
+      "sourceSkewDegrees": -1.1,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        3,
+        3
+      ],
+      "rowStep": 280,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "file": "mono32-sparse-angle+1.10.png",
+      "sha256": "82fb1e86bb5bfa5a125c9056d365a4146fa6563f19d36d05a94d60896c71b889",
+      "expectedLines": [
+        "Larch keeps lot351",
+        "Larch keeps lot352",
+        "Larch keeps lot353",
+        "Alder keeps lot361",
+        "Alder keeps lot362",
+        "Alder keeps lot363",
+        "Aspen keeps lot371",
+        "Aspen keeps lot372",
+        "Aspen keeps lot373"
+      ],
+      "font": "mono",
+      "fontSize": 32,
+      "layout": "three-columns",
+      "sourceSkewDegrees": 1.1,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        3,
+        3
+      ],
+      "rowStep": 280,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "file": "mono32-sparse-angle-1.60.png",
+      "sha256": "cd155ba50cb712ea65f8e0351670bfaee0a235f9e565aaa463ef69963fa66583",
+      "expectedLines": [
+        "Larch keeps lot351",
+        "Larch keeps lot352",
+        "Larch keeps lot353",
+        "Alder keeps lot361",
+        "Alder keeps lot362",
+        "Alder keeps lot363",
+        "Aspen keeps lot371",
+        "Aspen keeps lot372",
+        "Aspen keeps lot373"
+      ],
+      "font": "mono",
+      "fontSize": 32,
+      "layout": "three-columns",
+      "sourceSkewDegrees": -1.6,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        3,
+        3
+      ],
+      "rowStep": 280,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "file": "mono44-sparse-angle+0.00.png",
+      "sha256": "bab4e07773b32ee7ba20aef590fd1cc957d0adb4d120d50e4bebf6e655b33f6c",
+      "expectedLines": [
+        "Larch keeps lot351",
+        "Larch keeps lot352",
+        "Larch keeps lot353",
+        "Alder keeps lot361",
+        "Alder keeps lot362",
+        "Alder keeps lot363",
+        "Aspen keeps lot371",
+        "Aspen keeps lot372",
+        "Aspen keeps lot373"
+      ],
+      "font": "mono",
+      "fontSize": 44,
+      "layout": "three-columns",
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        3,
+        3
+      ],
+      "rowStep": 280,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "file": "mono44-sparse-angle-1.10.png",
+      "sha256": "5f4ad6d534f997812f19bc8463750be01882f6e005fd356a5d200b278df10feb",
+      "expectedLines": [
+        "Larch keeps lot351",
+        "Larch keeps lot352",
+        "Larch keeps lot353",
+        "Alder keeps lot361",
+        "Alder keeps lot362",
+        "Alder keeps lot363",
+        "Aspen keeps lot371",
+        "Aspen keeps lot372",
+        "Aspen keeps lot373"
+      ],
+      "font": "mono",
+      "fontSize": 44,
+      "layout": "three-columns",
+      "sourceSkewDegrees": -1.1,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        3,
+        3
+      ],
+      "rowStep": 280,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "file": "mono44-sparse-angle+1.10.png",
+      "sha256": "742a19b4f2a5675950836521ed7ee25514d383971acc2d0ab88a3bb107fb7491",
+      "expectedLines": [
+        "Larch keeps lot351",
+        "Larch keeps lot352",
+        "Larch keeps lot353",
+        "Alder keeps lot361",
+        "Alder keeps lot362",
+        "Alder keeps lot363",
+        "Aspen keeps lot371",
+        "Aspen keeps lot372",
+        "Aspen keeps lot373"
+      ],
+      "font": "mono",
+      "fontSize": 44,
+      "layout": "three-columns",
+      "sourceSkewDegrees": 1.1,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        3,
+        3
+      ],
+      "rowStep": 280,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "file": "mono44-sparse-angle-1.60.png",
+      "sha256": "d9086d176a429970b4e1ff568e3ed63d62fdc12a196e2806b30384816bbfac58",
+      "expectedLines": [
+        "Larch keeps lot351",
+        "Larch keeps lot352",
+        "Larch keeps lot353",
+        "Alder keeps lot361",
+        "Alder keeps lot362",
+        "Alder keeps lot363",
+        "Aspen keeps lot371",
+        "Aspen keeps lot372",
+        "Aspen keeps lot373"
+      ],
+      "font": "mono",
+      "fontSize": 44,
+      "layout": "three-columns",
+      "sourceSkewDegrees": -1.6,
+      "dpi": 300,
+      "rowCounts": [
+        3,
+        3,
+        3
+      ],
+      "rowStep": 280,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "file": "mono52-sparse-angle+0.00.png",
+      "sha256": "5869cb8102e610b6dce75e68755523adfd1494428373835c259272d87cd1704d",
+      "expectedLines": [
+        "Larch keeps lot351",
+        "Larch keeps lot352",
+        "Larch keeps lot353",
+        "Larch keeps lot354",
+        "Alder keeps lot361",
+        "Alder keeps lot362",
+        "Alder keeps lot363",
+        "Alder keeps lot364",
+        "Aspen keeps lot371",
+        "Aspen keeps lot372",
+        "Aspen keeps lot373",
+        "Aspen keeps lot374"
+      ],
+      "font": "mono",
+      "fontSize": 52,
+      "layout": "three-columns",
+      "sourceSkewDegrees": 0,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        4,
+        4
+      ],
+      "rowStep": 280,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "file": "mono52-sparse-angle-1.10.png",
+      "sha256": "9525fcfab387830ae2e4727e21238d824634cd8deb5d2401e7faf07c5a935be5",
+      "expectedLines": [
+        "Larch keeps lot351",
+        "Larch keeps lot352",
+        "Larch keeps lot353",
+        "Larch keeps lot354",
+        "Alder keeps lot361",
+        "Alder keeps lot362",
+        "Alder keeps lot363",
+        "Alder keeps lot364",
+        "Aspen keeps lot371",
+        "Aspen keeps lot372",
+        "Aspen keeps lot373",
+        "Aspen keeps lot374"
+      ],
+      "font": "mono",
+      "fontSize": 52,
+      "layout": "three-columns",
+      "sourceSkewDegrees": -1.1,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        4,
+        4
+      ],
+      "rowStep": 280,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "file": "mono52-sparse-angle+1.10.png",
+      "sha256": "8c6c52370fa40c95b1f70aa87eb6fafc4f3f60dcc6a7157e3cf962c62748be26",
+      "expectedLines": [
+        "Larch keeps lot351",
+        "Larch keeps lot352",
+        "Larch keeps lot353",
+        "Larch keeps lot354",
+        "Alder keeps lot361",
+        "Alder keeps lot362",
+        "Alder keeps lot363",
+        "Alder keeps lot364",
+        "Aspen keeps lot371",
+        "Aspen keeps lot372",
+        "Aspen keeps lot373",
+        "Aspen keeps lot374"
+      ],
+      "font": "mono",
+      "fontSize": 52,
+      "layout": "three-columns",
+      "sourceSkewDegrees": 1.1,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        4,
+        4
+      ],
+      "rowStep": 280,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "file": "mono52-sparse-angle-1.60.png",
+      "sha256": "57923ca905feb396b7eb390ffa5aa44d56e001b61ac75565e5d3d49fa6e0567a",
+      "expectedLines": [
+        "Larch keeps lot351",
+        "Larch keeps lot352",
+        "Larch keeps lot353",
+        "Larch keeps lot354",
+        "Alder keeps lot361",
+        "Alder keeps lot362",
+        "Alder keeps lot363",
+        "Alder keeps lot364",
+        "Aspen keeps lot371",
+        "Aspen keeps lot372",
+        "Aspen keeps lot373",
+        "Aspen keeps lot374"
+      ],
+      "font": "mono",
+      "fontSize": 52,
+      "layout": "three-columns",
+      "sourceSkewDegrees": -1.6,
+      "dpi": 300,
+      "rowCounts": [
+        4,
+        4,
+        4
+      ],
+      "rowStep": 280,
+      "columnStagger": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "containerCases": []
+}

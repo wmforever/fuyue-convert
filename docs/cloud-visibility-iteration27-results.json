@@ -1,0 +1,1020 @@
+{
+  "parentRevision": "6d163a92806253a2a2895c2dee7088d0e4fd3bba",
+  "jarSha256": "84558b3f3e9c70cde80e54f6a9bebbd650b3959b16d966dbf1c25ecc362b7041",
+  "manifestSha256": "e17d91657512f50b0f0d9ae781281e6439c274a428f79ec8aeefcac5ffec492d",
+  "rows": [
+    {
+      "case": "decimal-edited-office",
+      "before": {
+        "expectedCharacters": 62,
+        "actualCharacters": 113,
+        "editDistance": 51,
+        "cer": 0.8225806451612904,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "849",
+          "35",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "2047",
+          "00963",
+          "842",
+          "60",
+          "849",
+          "35",
+          "2047",
+          "03",
+          "182047",
+          "03",
+          "18",
+          "26",
+          "8526",
+          "85"
+        ]
+      },
+      "after": {
+        "expectedCharacters": 62,
+        "actualCharacters": 62,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "849",
+          "35",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "00963",
+          "849",
+          "35",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ]
+      },
+      "beforeText": "API REVIEW 2047API REVIEW2047\nRecord 00963\nAmount 842.60Amount 849.35\nDate Date 2047-03-182047-03-18\nControl Control 26.8526.85\n",
+      "afterText": "API REVIEW2047\nRecord 00963\nAmount 849.35\nDate 2047-03-18\nControl 26.85\n",
+      "numericLexemesExact": true
+    },
+    {
+      "case": "decimal-office",
+      "before": {
+        "expectedCharacters": 62,
+        "actualCharacters": 113,
+        "editDistance": 51,
+        "cer": 0.8225806451612904,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "842",
+          "60",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "2047",
+          "00963",
+          "842",
+          "60",
+          "842",
+          "60",
+          "2047",
+          "03",
+          "182047",
+          "03",
+          "18",
+          "26",
+          "8526",
+          "85"
+        ]
+      },
+      "after": {
+        "expectedCharacters": 62,
+        "actualCharacters": 62,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "842",
+          "60",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "00963",
+          "842",
+          "60",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ]
+      },
+      "beforeText": "API REVIEW 2047API REVIEW2047\nRecord 00963\nAmount 842.60Amount 842.60\nDate Date 2047-03-182047-03-18\nControl Control 26.8526.85\n",
+      "afterText": "API REVIEW2047\nRecord 00963\nAmount 842.60\nDate 2047-03-18\nControl 26.85\n",
+      "numericLexemesExact": true
+    },
+    {
+      "case": "negative-edited-office",
+      "before": {
+        "expectedCharacters": 62,
+        "actualCharacters": 113,
+        "editDistance": 51,
+        "cer": 0.8225806451612904,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "78",
+          "90",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "2047",
+          "00963",
+          "73",
+          "40",
+          "78",
+          "90",
+          "2047",
+          "03",
+          "182047",
+          "03",
+          "18",
+          "26",
+          "8526",
+          "85"
+        ]
+      },
+      "after": {
+        "expectedCharacters": 62,
+        "actualCharacters": 62,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "78",
+          "90",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "00963",
+          "78",
+          "90",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ]
+      },
+      "beforeText": "API REVIEW 2047API REVIEW2047\nRecord 00963\nAmount -73.40Amount -78.90\nDate Date 2047-03-182047-03-18\nControl Control 26.8526.85\n",
+      "afterText": "API REVIEW2047\nRecord 00963\nAmount -78.90\nDate 2047-03-18\nControl 26.85\n",
+      "numericLexemesExact": true
+    },
+    {
+      "case": "negative-office",
+      "before": {
+        "expectedCharacters": 62,
+        "actualCharacters": 113,
+        "editDistance": 51,
+        "cer": 0.8225806451612904,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "73",
+          "40",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "2047",
+          "00963",
+          "73",
+          "40",
+          "73",
+          "40",
+          "2047",
+          "03",
+          "182047",
+          "03",
+          "18",
+          "26",
+          "8526",
+          "85"
+        ]
+      },
+      "after": {
+        "expectedCharacters": 62,
+        "actualCharacters": 62,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "73",
+          "40",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "00963",
+          "73",
+          "40",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ]
+      },
+      "beforeText": "API REVIEW 2047API REVIEW2047\nRecord 00963\nAmount -73.40Amount -73.40\nDate Date 2047-03-182047-03-18\nControl Control 26.8526.85\n",
+      "afterText": "API REVIEW2047\nRecord 00963\nAmount -73.40\nDate 2047-03-18\nControl 26.85\n",
+      "numericLexemesExact": true
+    },
+    {
+      "case": "leading-zero-edited-office",
+      "before": {
+        "expectedCharacters": 64,
+        "actualCharacters": 117,
+        "editDistance": 53,
+        "cer": 0.828125,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "00089",
+          "70",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "2047",
+          "00963",
+          "00085",
+          "20",
+          "00089",
+          "70",
+          "2047",
+          "03",
+          "182047",
+          "03",
+          "18",
+          "26",
+          "8526",
+          "85"
+        ]
+      },
+      "after": {
+        "expectedCharacters": 64,
+        "actualCharacters": 64,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "00089",
+          "70",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "00963",
+          "00089",
+          "70",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ]
+      },
+      "beforeText": "API REVIEW 2047API REVIEW2047\nRecord 00963\nAmount 00085.20Amount 00089.70\nDate Date 2047-03-182047-03-18\nControl Control 26.8526.85\n",
+      "afterText": "API REVIEW2047\nRecord 00963\nAmount 00089.70\nDate 2047-03-18\nControl 26.85\n",
+      "numericLexemesExact": true
+    },
+    {
+      "case": "leading-zero-office",
+      "before": {
+        "expectedCharacters": 64,
+        "actualCharacters": 117,
+        "editDistance": 53,
+        "cer": 0.828125,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "00085",
+          "20",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "2047",
+          "00963",
+          "00085",
+          "20",
+          "00085",
+          "20",
+          "2047",
+          "03",
+          "182047",
+          "03",
+          "18",
+          "26",
+          "8526",
+          "85"
+        ]
+      },
+      "after": {
+        "expectedCharacters": 64,
+        "actualCharacters": 64,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "00085",
+          "20",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "00963",
+          "00085",
+          "20",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ]
+      },
+      "beforeText": "API REVIEW 2047API REVIEW2047\nRecord 00963\nAmount 00085.20Amount 00085.20\nDate Date 2047-03-182047-03-18\nControl Control 26.8526.85\n",
+      "afterText": "API REVIEW2047\nRecord 00963\nAmount 00085.20\nDate 2047-03-18\nControl 26.85\n",
+      "numericLexemesExact": true
+    },
+    {
+      "case": "gray-edited-office",
+      "before": {
+        "expectedCharacters": 61,
+        "actualCharacters": 111,
+        "editDistance": 50,
+        "cer": 0.819672131147541,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "94",
+          "50",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "2047",
+          "00963",
+          "93",
+          "00",
+          "94",
+          "50",
+          "2047",
+          "03",
+          "182047",
+          "03",
+          "18",
+          "26",
+          "8526",
+          "85"
+        ]
+      },
+      "after": {
+        "expectedCharacters": 61,
+        "actualCharacters": 61,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "94",
+          "50",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "00963",
+          "94",
+          "50",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ]
+      },
+      "beforeText": "API REVIEW 2047API REVIEW2047\nRecord 00963\nAmount 93.00Amount 94.50\nDate Date 2047-03-182047-03-18\nControl Control 26.8526.85\n",
+      "afterText": "API REVIEW2047\nRecord 00963\nAmount 94.50\nDate 2047-03-18\nControl 26.85\n",
+      "numericLexemesExact": true
+    },
+    {
+      "case": "gray-office",
+      "before": {
+        "expectedCharacters": 61,
+        "actualCharacters": 111,
+        "editDistance": 50,
+        "cer": 0.819672131147541,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "93",
+          "00",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "2047",
+          "00963",
+          "93",
+          "00",
+          "93",
+          "00",
+          "2047",
+          "03",
+          "182047",
+          "03",
+          "18",
+          "26",
+          "8526",
+          "85"
+        ]
+      },
+      "after": {
+        "expectedCharacters": 61,
+        "actualCharacters": 61,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "93",
+          "00",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "00963",
+          "93",
+          "00",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ]
+      },
+      "beforeText": "API REVIEW 2047API REVIEW2047\nRecord 00963\nAmount 93.00Amount 93.00\nDate Date 2047-03-182047-03-18\nControl Control 26.8526.85\n",
+      "afterText": "API REVIEW2047\nRecord 00963\nAmount 93.00\nDate 2047-03-18\nControl 26.85\n",
+      "numericLexemesExact": true
+    },
+    {
+      "case": "dark-edited-office",
+      "before": {
+        "expectedCharacters": 61,
+        "actualCharacters": 61,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "69",
+          "70",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "00963",
+          "69",
+          "70",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ]
+      },
+      "after": {
+        "expectedCharacters": 61,
+        "actualCharacters": 61,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "69",
+          "70",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "00963",
+          "69",
+          "70",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ]
+      },
+      "beforeText": "API REVIEW2047\nRecord 00963\nAmount 69.70\nDate 2047-03-18\nControl 26.85\n",
+      "afterText": "API REVIEW2047\nRecord 00963\nAmount 69.70\nDate 2047-03-18\nControl 26.85\n",
+      "numericLexemesExact": true
+    },
+    {
+      "case": "dark-office",
+      "before": {
+        "expectedCharacters": 61,
+        "actualCharacters": 61,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "64",
+          "20",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "00963",
+          "64",
+          "20",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ]
+      },
+      "after": {
+        "expectedCharacters": 61,
+        "actualCharacters": 61,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 5,
+        "expectedNumbers": [
+          "2047",
+          "00963",
+          "64",
+          "20",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ],
+        "actualNumbers": [
+          "2047",
+          "00963",
+          "64",
+          "20",
+          "2047",
+          "03",
+          "18",
+          "26",
+          "85"
+        ]
+      },
+      "beforeText": "API REVIEW2047\nRecord 00963\nAmount 64.20\nDate 2047-03-18\nControl 26.85\n",
+      "afterText": "API REVIEW2047\nRecord 00963\nAmount 64.20\nDate 2047-03-18\nControl 26.85\n",
+      "numericLexemesExact": true
+    },
+    {
+      "case": "original-127.50-to-128.75",
+      "before": {
+        "expectedCharacters": 53,
+        "actualCharacters": 81,
+        "editDistance": 28,
+        "cer": 0.5283018867924528,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "20362036",
+          "00842",
+          "127",
+          "50",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "after": {
+        "expectedCharacters": 53,
+        "actualCharacters": 53,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "128",
+          "75",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "beforeText": "REVIEWRECORDREVIEW RECORD 20362036\nRecord 00842\nAmount 127.50Amount 128.75\nDate 2036-04-19\n",
+      "afterText": "REVIEWRECORD2036\nRecord 00842\nAmount 128.75\nDate 2036-04-19\n",
+      "numericLexemesExact": true
+    }
+  ],
+  "expectedFailedNoDownload": [
+    "control-partial",
+    "control-transparent"
+  ],
+  "unrelatedScanControlsByteExact": true,
+  "fullyHiddenScanReplacedByVisibleNativeOnly": true,
+  "wordProofs": [
+    {
+      "case": "decimal",
+      "allPartsExceptCoreTimestampsExact": true,
+      "originalImageAndEditableTextExact": true
+    },
+    {
+      "case": "gray",
+      "allPartsExceptCoreTimestampsExact": true,
+      "originalImageAndEditableTextExact": true
+    },
+    {
+      "case": "dark",
+      "allPartsExceptCoreTimestampsExact": true,
+      "originalImageAndEditableTextExact": true
+    }
+  ],
+  "originalOffice300DpiPixelsAndNativeWordBoxesExact": true,
+  "processProof": {
+    "workers": 20,
+    "allExited": true,
+    "ECHILD": true,
+    "newZombies": []
+  },
+  "resources": {
+    "beforeMoney": {
+      "wallSeconds": 67.6866141060018,
+      "userSeconds": 179.87627600000002,
+      "systemSeconds": 14.123683,
+      "maxChildRssKiB": 345020
+    },
+    "beforeControls": {
+      "wallSeconds": 29.937997729000926,
+      "userSeconds": 83.671902,
+      "systemSeconds": 6.125949,
+      "maxChildRssKiB": 293424
+    },
+    "after": {
+      "wallSeconds": 62.73792476000381,
+      "userSeconds": 167.21145099999998,
+      "systemSeconds": 12.80962,
+      "maxChildRssKiB": 345192
+    }
+  },
+  "pairedEditedPdfToTxtTimings": [
+    {
+      "case": "decimal",
+      "beforeSeconds": 2.713587763006217,
+      "afterSeconds": 2.8881615309946937
+    },
+    {
+      "case": "negative",
+      "beforeSeconds": 2.052268373001425,
+      "afterSeconds": 2.156392886994581
+    },
+    {
+      "case": "leading-zero",
+      "beforeSeconds": 2.693359953998879,
+      "afterSeconds": 2.698465206005494
+    },
+    {
+      "case": "gray",
+      "beforeSeconds": 2.4688457810043474,
+      "afterSeconds": 2.3543526459980058
+    },
+    {
+      "case": "dark",
+      "beforeSeconds": 1.5998424780045752,
+      "afterSeconds": 2.2517880130035337
+    }
+  ],
+  "timings": [
+    {
+      "case": "decimal-edited-office",
+      "seconds": 2.8881615309946937,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED",
+        "OCR_OCCLUDED_TEXT_IGNORED"
+      ]
+    },
+    {
+      "case": "decimal-office",
+      "seconds": 2.7002185310047935,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED",
+        "OCR_OCCLUDED_TEXT_IGNORED"
+      ]
+    },
+    {
+      "case": "decimal-word",
+      "seconds": 4.0209724539963645,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED"
+      ]
+    },
+    {
+      "case": "negative-edited-office",
+      "seconds": 2.156392886994581,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED",
+        "OCR_OCCLUDED_TEXT_IGNORED"
+      ]
+    },
+    {
+      "case": "negative-office",
+      "seconds": 2.516707552000298,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED",
+        "OCR_OCCLUDED_TEXT_IGNORED"
+      ]
+    },
+    {
+      "case": "leading-zero-edited-office",
+      "seconds": 2.698465206005494,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED",
+        "OCR_OCCLUDED_TEXT_IGNORED"
+      ]
+    },
+    {
+      "case": "leading-zero-office",
+      "seconds": 2.534418340997945,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED",
+        "OCR_OCCLUDED_TEXT_IGNORED"
+      ]
+    },
+    {
+      "case": "gray-edited-office",
+      "seconds": 2.3543526459980058,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED",
+        "OCR_OCCLUDED_TEXT_IGNORED"
+      ]
+    },
+    {
+      "case": "gray-office",
+      "seconds": 2.1820736349982326,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED",
+        "OCR_OCCLUDED_TEXT_IGNORED"
+      ]
+    },
+    {
+      "case": "gray-word",
+      "seconds": 3.3228361279980163,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED"
+      ]
+    },
+    {
+      "case": "dark-edited-office",
+      "seconds": 2.2517880130035337,
+      "status": "SUCCESS",
+      "warningCodes": []
+    },
+    {
+      "case": "dark-office",
+      "seconds": 2.713910610000312,
+      "status": "SUCCESS",
+      "warningCodes": []
+    },
+    {
+      "case": "dark-word",
+      "seconds": 6.594926566001959,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED"
+      ]
+    },
+    {
+      "case": "control-ordinary",
+      "seconds": 2.7181359179958235,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED"
+      ]
+    },
+    {
+      "case": "control-before-image",
+      "seconds": 2.8969952409970574,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED"
+      ]
+    },
+    {
+      "case": "control-partial",
+      "seconds": 2.445379068994953,
+      "status": "FAILED",
+      "warningCodes": []
+    },
+    {
+      "case": "control-transparent",
+      "seconds": 2.9885585869997158,
+      "status": "FAILED",
+      "warningCodes": []
+    },
+    {
+      "case": "control-opaque",
+      "seconds": 2.308307186998718,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED",
+        "OCR_OCCLUDED_TEXT_IGNORED"
+      ]
+    },
+    {
+      "case": "original-office",
+      "seconds": 3.0460158530040644,
+      "status": "SUCCESS",
+      "warningCodes": []
+    },
+    {
+      "case": "original-text",
+      "seconds": 2.0198895420035115,
+      "status": "SUCCESS",
+      "warningCodes": [
+        "OCR_APPLIED",
+        "OCR_OCCLUDED_TEXT_IGNORED"
+      ]
+    }
+  ],
+  "helperSha256": {
+    "verify_visibility_iteration27.py": "fa6d908ef43ae076250ecf26de9f0d7989c6914117e8f907cfec29d4a539a43a",
+    "generate_visibility_iteration27.py": "61ac53ab19adcd55c8588a225aeac5e3e5267448212163a13521bd6e183b5e22",
+    "generate_edit_iteration27.py": "1014650107147ccd174994e0a2c3d4cfa5092dc2882ac259a6d8e6b5c489f3e7",
+    "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf"
+  }
+}

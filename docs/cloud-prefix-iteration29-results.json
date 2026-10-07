@@ -1,0 +1,255 @@
+{
+  "jarSha256": "eb46974700a79e276ad2831be3c8006e60d4bca556a0a7697cb4787ca58ecf09",
+  "manifestSha256": "e79f3ba5a80f8119e7758c6744f4f7d9fd364181fa2596d766194108b3b3171f",
+  "rows": [
+    {
+      "case": "original-txt",
+      "status": "FAILED",
+      "errorCode": "OCR_NO_NEW_TEXT",
+      "seconds": 2.361018901996431,
+      "downloadReady": false
+    },
+    {
+      "case": "original-word",
+      "status": "FAILED",
+      "errorCode": "OCR_NO_NEW_TEXT",
+      "seconds": 2.259561113998643,
+      "downloadReady": false
+    },
+    {
+      "case": "alias-native-only-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 1.3277241789983236,
+      "downloadReady": true,
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 127.50\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "numericLexemesExact": true,
+      "canonicalBaselineByteExact": true
+    },
+    {
+      "case": "alias-image-only-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 2.666456148996076,
+      "downloadReady": true,
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 127.50\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "numericLexemesExact": true,
+      "canonicalBaselineByteExact": true
+    },
+    {
+      "case": "alias-missing-native-amount-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 2.408236150004086,
+      "downloadReady": true,
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 127.50\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "numericLexemesExact": true,
+      "canonicalBaselineByteExact": true
+    },
+    {
+      "case": "canonical-native-only-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 1.5504198849957902,
+      "downloadReady": true,
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 127.50\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "numericLexemesExact": true,
+      "canonicalBaselineByteExact": true
+    },
+    {
+      "case": "canonical-image-only-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 2.1654637829997228,
+      "downloadReady": true,
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 127.50\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "numericLexemesExact": true,
+      "canonicalBaselineByteExact": true
+    },
+    {
+      "case": "canonical-missing-native-amount-txt",
+      "status": "SUCCESS",
+      "errorCode": null,
+      "seconds": 2.796159270001226,
+      "downloadReady": true,
+      "text": "审核记录 REVIEW RECORD 2036\n编号 Record 00842\n金额 Amount 127.50\n日期 Date 2036-04-19\n",
+      "metrics": {
+        "expectedCharacters": 63,
+        "actualCharacters": 63,
+        "editDistance": 0,
+        "cer": 0.0,
+        "alignedCharacterRecall": 1.0,
+        "exactLines": 4,
+        "expectedNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ],
+        "actualNumbers": [
+          "2036",
+          "00842",
+          "127",
+          "50",
+          "2036",
+          "04",
+          "19"
+        ]
+      },
+      "numericLexemesExact": true,
+      "canonicalBaselineByteExact": true
+    }
+  ],
+  "prefixOnlyInputChangesProven": true,
+  "threeAliasOutputsBeforeEmptyAfterComplete": true,
+  "canonicalControlsByteExact": true,
+  "originalSparseCompletenessGateRetained": true,
+  "allWorkersExited": true,
+  "ECHILD": true,
+  "newZombies": [],
+  "resources": {
+    "wallSeconds": 22.765335689000494,
+    "userSeconds": 61.347334,
+    "systemSeconds": 5.128015,
+    "maxChildRssKiB": 297932
+  },
+  "helperSha256": {
+    "validate_sparse_prefix29.py": "129332fbde7f39e6aeea1958bbfa43547b01330aab490fd5383b687dd4ddb616",
+    "verify_sparse_ofd29.py": "205cee840904e1b0660f8f963e84454ce340b740b84bc80d53ea5319f1502086",
+    "control_sparse_prefix29.py": "c0a2a266821ef0332fc256aebf36cdf81f88343ace3e1227128f9ddf767f6c36",
+    "run_edit_iteration26.py": "75bd07e7e3314f134c53f020ca84cff9da338dd830a009dff4030f2dc16f4ddf"
+  }
+}
