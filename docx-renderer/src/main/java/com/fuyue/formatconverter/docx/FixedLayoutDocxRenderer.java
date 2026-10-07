@@ -244,7 +244,9 @@ final class FixedLayoutDocxRenderer {
         Map<TextBlock.OcrWord, ColorValue> colors = new IdentityHashMap<>();
         Map<TextBlock.OcrWord, Double> numericRightEdges = new IdentityHashMap<>();
         List<OcrMask> masks = new ArrayList<>();
-        if (texts.stream().allMatch(block -> block.ocrWords().isEmpty())) return new OcrAppearance(colors, numericRightEdges);
+        double inkHeightLimit = ocrInkHeightLimit(texts);
+        double unreliableFontLimit = ocrUnreliableFontLimit(texts);
+        if (texts.stream().allMatch(block -> block.ocrWords().isEmpty())) return new OcrAppearance(colors, numericRightEdges, inkHeightLimit, unreliableFontLimit);
         // LibreOffice paints negative VML shapes before a DrawingML scan anchor,
         // regardless of XML order. On a scan-only page, put sampled word masks
         // in front of that image and below the editable OCR boxes. A mixed page
@@ -275,6 +277,15 @@ final class FixedLayoutDocxRenderer {
                     Rect maskBox = new Rect(x, y, right - x, bottom - y);
                     List<OcrBackgroundMaskSampler.Fill> fills = sampler.fills(maskBox);
                     if (fills.isEmpty()) continue;
+                    // A grid-sized low-confidence word cannot justify erasing
+                    // the underlying table or unknown fields. Keep its editable
+                    // prediction, but leave that source region exposed.
+                    if (scanOnly && anomalousWord(word, inkHeightLimit) && fills.stream().allMatch(fill -> {
+                        int rgb = Integer.parseInt(fill.color(), 16);
+                        int r = rgb >> 16 & 255, g = rgb >> 8 & 255, b = rgb & 255;
+                        return Math.min(r, Math.min(g, b)) >= 110
+                                && Math.max(r, Math.max(g, b)) - Math.min(r, Math.min(g, b)) <= 24;
+                    })) continue;
                     boolean mixedForeground = nativeProtection != null && word.confidence() >= .85d
                             && block.zOrder() >= 1 && Transform2D.IDENTITY.equals(block.transform())
                             && word.box().x() >= background.box().x() && word.box().right() <= background.box().right()
@@ -348,8 +359,7 @@ final class FixedLayoutDocxRenderer {
         // page on its validated old layering if any sampled word needs white
         // foreground. The narrow decimal exception below retains all white-word
         // masks on that old policy and does not enable edit reserves.
-        boolean foregroundMasks = scanOnly && colors.values().stream()
-                .noneMatch(color -> ColorValue.WHITE.equals(color));
+        boolean foregroundMasks = scanOnly && colors.values().stream().noneMatch(ColorValue.WHITE::equals);
         // A broad, uncertain grid-sized word can sample a black rule as paper.
         // Retain its white text and old mask policy, while independently proven
         // light-paper decimal masks cover their own original scan ink. Never
@@ -369,7 +379,34 @@ final class FixedLayoutDocxRenderer {
                     + "\" filled=\"t\" fillcolor=\"#" + fill.color() + "\" stroked=\"f\"/>";
             unchecked(() -> appendShape(anchor, xml));
         }
-        return new OcrAppearance(colors, numericRightEdges);
+        return new OcrAppearance(colors, numericRightEdges, inkHeightLimit, unreliableFontLimit);
+    }
+
+    private boolean anomalousWord(TextBlock.OcrWord word, double inkHeightLimit) {
+        return word.confidence() < .85d && (word.box().height() > inkHeightLimit * .75d
+                || word.box().width() > Math.max(1, word.text().codePointCount(0, word.text().length()))
+                    * word.box().height() * 3d);
+    }
+
+    private double ocrUnreliableFontLimit(List<TextBlock> texts) {
+        double[] sizes = texts.stream().flatMap(block -> block.ocrWords().stream())
+                .filter(word -> word.confidence() >= .85d && word.text().codePoints().anyMatch(Character::isLetterOrDigit))
+                .mapToDouble(word -> {
+                    var glyph = ocrFont(word.text()).deriveFont(100f).createGlyphVector(OCR_FONT_CONTEXT, word.text()).getVisualBounds();
+                    return Math.min(word.box().height() * 72d / 25.4d * 100d / Math.max(10d, glyph.getHeight()),
+                            word.box().width() * 72d / 25.4d * 100d / Math.max(1d, glyph.getWidth()) / .6d);
+                }).sorted().toArray();
+        return sizes.length < 20 ? Double.POSITIVE_INFINITY : Math.max(5d, sizes[sizes.length / 2]);
+    }
+
+    private double ocrInkHeightLimit(List<TextBlock> texts) {
+        double[] heights = texts.stream().flatMap(block -> block.ocrWords().stream())
+                .filter(word -> word.confidence() >= .85d && word.box().height() > 0
+                        && word.text().codePoints().anyMatch(Character::isLetterOrDigit))
+                .mapToDouble(word -> word.box().height()).sorted().toArray();
+        // A populated scan supplies a robust scale. Sparse title pages have no
+        // body-text evidence and must retain their original large typography.
+        return heights.length < 20 ? Double.POSITIVE_INFINITY : heights[heights.length / 2] * 2d;
     }
 
     /** Bounded support for sparse, disjoint native/OCR pages; ambiguous layouts retain their scan. */
@@ -438,7 +475,8 @@ final class FixedLayoutDocxRenderer {
     private record OcrMask(String blockId, OcrBackgroundMaskSampler.Fill fill,
                            boolean mixedForeground, boolean lightDecimal, boolean boundedLightWord) { }
     private record OcrAppearance(Map<TextBlock.OcrWord, ColorValue> colors,
-                                 Map<TextBlock.OcrWord, Double> numericRightEdges) { }
+                                 Map<TextBlock.OcrWord, Double> numericRightEdges, double inkHeightLimit,
+                                 double unreliableFontLimit) { }
 
     private ColorValue ocrForeground(List<OcrBackgroundMaskSampler.Fill> fills, ColorValue original) {
         double brightness = 0, area = 0;
@@ -455,11 +493,21 @@ final class FixedLayoutDocxRenderer {
     private void addOcrTextBoxes(XWPFDocument docx, XWPFParagraph anchor, TextBlock line,
                                  OcrAppearance ocrColors) throws Exception {
         List<Double> fontSizes = new ArrayList<>();
+        double[] heights = line.ocrWords().stream()
+                .filter(word -> word.text().codePoints().anyMatch(Character::isLetterOrDigit))
+                .mapToDouble(word -> word.box().height()).sorted().toArray();
+        double heightLimit = Math.min(ocrColors.inkHeightLimit(), heights.length == 0
+                ? Double.POSITIVE_INFINITY : heights[heights.length / 2] * 2d);
         for (TextBlock.OcrWord word : line.ocrWords()) {
             if (word.text().codePoints().noneMatch(Character::isLetterOrDigit)) continue;
             java.awt.Font font = ocrFont(word.text()).deriveFont(100f);
             double glyphHeight = font.createGlyphVector(OCR_FONT_CONTEXT, word.text()).getVisualBounds().getHeight();
-            if (glyphHeight > 10d) fontSizes.add(word.box().height() * 72d / 25.4d * 100d / glyphHeight);
+            if (glyphHeight > 10d) {
+                var glyphs = font.createGlyphVector(OCR_FONT_CONTEXT, word.text()).getVisualBounds();
+                double byHeight = Math.min(word.box().height(), heightLimit) * 72d / 25.4d * 100d / glyphHeight;
+                double byWidth = word.box().width() * 72d / 25.4d * 100d / Math.max(1d, glyphs.getWidth());
+                fontSizes.add(Math.min(byHeight, byWidth / .6d));
+            }
         }
         fontSizes.sort(Double::compareTo);
         double sizePt = Math.max(5d, Math.min(72d, fontSizes.isEmpty() ? line.style().sizePt()
@@ -478,24 +526,34 @@ final class FixedLayoutDocxRenderer {
             offset = end;
             java.awt.Font font = ocrFont(word.text()).deriveFont(100f);
             java.awt.geom.Rectangle2D glyphs = font.createGlyphVector(OCR_FONT_CONTEXT, word.text()).getVisualBounds();
-            double inkWidthPt = glyphs.getWidth() * sizePt / 100d;
+            double wordSizePt = word.text().codePoints().noneMatch(Character::isLetterOrDigit) ? sizePt
+                    : Math.max(5d, Math.min(sizePt,
+                    Math.min(Math.min(word.box().height(), heightLimit) * 72d / 25.4d * 100d / Math.max(10d, glyphs.getHeight()),
+                            word.box().width() * 72d / 25.4d * 100d / Math.max(1d, glyphs.getWidth()) / .6d)));
+            if (anomalousWord(word, ocrColors.inkHeightLimit())) wordSizePt = Math.min(wordSizePt, ocrColors.unreliableFontLimit());
+            double wordFontMm = wordSizePt * 25.4d / 72d;
+            // Tesseract can label fragments from different table rows as a single line.
+            // Do not pull a lower word up to the union's top edge.
+            double wordTop = word.box().y() - line.box().y() > fontMm * .5d
+                    ? Math.max(0d, word.box().y() - wordFontMm * .12d) : top;
+            double inkWidthPt = glyphs.getWidth() * wordSizePt / 100d;
             double ratio = word.box().width() * 72d / 25.4d / Math.max(1d, inkWidthPt);
             ratio = Math.max(0.6d, Math.min(1.4d, ratio));
-            double bearingMm = glyphs.getX() * sizePt / 100d * 25.4d / 72d * ratio;
-            Rect box = new Rect(Math.max(0d, word.box().x() - bearingMm), top,
-                    word.box().width(), Math.max(line.box().height(), fontMm * 1.3d));
+            double bearingMm = glyphs.getX() * wordSizePt / 100d * 25.4d / 72d * ratio;
+            Rect box = new Rect(Math.max(0d, word.box().x() - bearingMm), wordTop,
+                    word.box().width(), Math.max(word.box().height(), wordFontMm * 1.3d));
             TextBlock positioned = new TextBlock(line.id() + "-word-" + index, line.pageNumber(), box,
-                    value, line.baselineY(), new FontStyle("Arial", sizePt, false, false, ocrColors.colors().getOrDefault(word, line.style().color())),
+                    value, line.baselineY(), new FontStyle("Arial", wordSizePt, false, false, ocrColors.colors().getOrDefault(word, line.style().color())),
                     Math.max(1, line.zOrder()), 0, 0, List.of(), new Transform2D(ratio, 0, 0, 1, 0, 0));
             if (Math.abs(line.transform().rotationDegrees()) < .01d && !line.transform().hasSkew(.001d)) {
                 double wrappingWidth = tolerantTextBox(positioned).width();
                 double availableWidth = wrappingWidth;
                 if (index + 1 < line.ocrWords().size()) {
                     TextBlock.OcrWord next = line.ocrWords().get(index + 1);
-                    availableWidth = latinWordWidthBeforeNext(word, next, ocrFont(next.text()), sizePt,
+                    availableWidth = latinWordWidthBeforeNext(word, next, ocrFont(next.text()), wordSizePt,
                             box, availableWidth);
                 }
-                double fitted = latinWordScale(word, font, OCR_LATIN_COMPATIBLE_FONT, sizePt, ratio,
+                double fitted = latinWordScale(word, font, OCR_LATIN_COMPATIBLE_FONT, wordSizePt, ratio,
                         wrappingWidth, availableWidth);
                 if (fitted != ratio) positioned = new TextBlock(positioned.id(), positioned.pageNumber(),
                         positioned.box(), positioned.text(), positioned.baselineY(), positioned.style(), positioned.zOrder(),

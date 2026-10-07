@@ -23,17 +23,20 @@ final class PdfOcrSupport {
     private static final float OCR_DPI = 300f;
     private static final int EMBEDDED_IMAGE_OCR_MAX_EDGE = 1600;
     private final TesseractOcrConverter ocr;
+    private final RapidOcrLayoutEngine rapid;
     private final String unavailableCode;
     private final String unavailableMessage;
 
     PdfOcrSupport(TesseractOcrConverter.Settings settings) {
         this.ocr = new TesseractOcrConverter(DocumentFormat.PNG, settings);
+        this.rapid = RapidOcrLayoutEngine.configured(settings);
         this.unavailableCode = null;
         this.unavailableMessage = null;
     }
 
     PdfOcrSupport(TesseractOcrConverter.Capability capability) {
         this.ocr = capability.available() ? new TesseractOcrConverter(DocumentFormat.PNG, capability.settings()) : null;
+        this.rapid = capability.available() ? RapidOcrLayoutEngine.configured(capability.settings()) : null;
         this.unavailableCode = capability.errorCode();
         this.unavailableMessage = capability.message();
     }
@@ -41,6 +44,19 @@ final class PdfOcrSupport {
     DocumentModel recognizeMissingPages(Path source, DocumentModel parsed, Path workDir,
                                         ParseLimits limits, ConversionProgress progress) throws Exception {
         return recognizeMissingPages(source, parsed, workDir, limits, progress, false);
+    }
+
+    String engineName() { return rapid == null ? "Tesseract" : "RapidOCR"; }
+    boolean usesRapid() { return rapid != null; }
+
+    private TesseractOcrConverter.RecognitionResult recognize(Path image, Path workDir, int page,
+            com.fuyue.formatconverter.model.Rect physical, ParseLimits limits) throws Exception {
+        return rapid == null ? ocr.recognizeLayoutResult(image, workDir, page, physical, limits)
+                : rapid.recognize(image, workDir, page, physical, limits);
+    }
+
+    private List<ConversionWarning> warningsFor(TesseractOcrConverter.RecognitionResult result, int page, String scope) {
+        return rapid == null ? ocr.warningsFor(result, page, scope) : rapid.warnings(result, page, scope);
     }
 
     DocumentModel recognizeMissingPagesForText(Path source, DocumentModel parsed, Path workDir,
@@ -105,12 +121,12 @@ final class PdfOcrSupport {
                     throw new java.io.IOException("无法写入 PDF OCR 页面图片");
                 }
                 ConversionGuards.requireTotalSize(List.of(image), limits, "PDF OCR 页面图片");
-                TesseractOcrConverter.RecognitionResult recognized = ocr.recognizeLayoutResult(
+                TesseractOcrConverter.RecognitionResult recognized = recognize(
                         image, workDir.resolve("page-%04d".formatted(page.pageNumber())), page.pageNumber(),
                         page.physicalBox(), limits);
                 ocr.requireUsableResult(recognized, "PDF 第 " + page.pageNumber() + " 页");
                 List<ConversionWarning> warnings = withoutOcrRequired(page.warnings());
-                warnings.addAll(ocr.warningsFor(recognized, page.pageNumber(),
+                warnings.addAll(warningsFor(recognized, page.pageNumber(),
                         "PDF 第 " + page.pageNumber() + " 页"));
                 ImageBlock renderedPage = new ImageBlock(
                         "pdf-p%d-rendered-background".formatted(page.pageNumber()),
@@ -120,7 +136,7 @@ final class PdfOcrSupport {
                         List.of(renderedPage), List.of(), List.of(), warnings));
             }
         }
-        return new DocumentModel(parsed.sourceName(), parsed.parserName() + (ocr == null ? "" : " + Tesseract"),
+        return new DocumentModel(parsed.sourceName(), parsed.parserName() + (ocr == null ? "" : " + " + engineName()),
                 parsed.sourcePageCount(), pages, documentWarnings);
     }
 
@@ -144,7 +160,7 @@ final class PdfOcrSupport {
                         workDir.resolve("pdf-image-ocr-%04d-%03d-small.png".formatted(page.pageNumber(), imageIndex)),
                         EMBEDDED_IMAGE_OCR_MAX_EDGE);
                 ocr.requireImageWithinOcrLimit(prepared);
-                TesseractOcrConverter.RecognitionResult recognized = ocr.recognizeLayoutResult(prepared,
+                TesseractOcrConverter.RecognitionResult recognized = recognize(prepared,
                         workDir.resolve("image-%04d-%03d".formatted(page.pageNumber(), imageIndex)),
                         page.pageNumber(), image.box(), limits);
                 ocr.requireUsableResult(recognized,
@@ -161,7 +177,7 @@ final class PdfOcrSupport {
                 for (TextBlock block : beyondNative) {
                     if (!OcrTextDeduplicator.duplicates(block, texts)) texts.add(block);
                 }
-                warnings.addAll(ocr.warningsFor(recognized, page.pageNumber(),
+                warnings.addAll(warningsFor(recognized, page.pageNumber(),
                         "PDF 第 " + page.pageNumber() + " 页图片 " + imageIndex));
                 if (visible.hiddenWords() > 0) warnings.add(new ConversionWarning(
                         WarningCode.OCR_OCCLUDED_TEXT_IGNORED,

@@ -2,6 +2,7 @@ package com.fuyue.formatconverter.task;
 
 import com.fuyue.formatconverter.docx.DocxRenderer;
 import com.fuyue.formatconverter.docx.PoiDocxRenderer;
+import com.fuyue.formatconverter.docx.OcrOverlaySafety;
 import com.fuyue.formatconverter.model.ConversionWarning;
 import com.fuyue.formatconverter.model.DocumentModel;
 import com.fuyue.formatconverter.model.PageModel;
@@ -18,6 +19,7 @@ public final class PdfToDocxConverter implements FileConverter {
     private final PageLayoutAnalyzer analyzer;
     private final DocxRenderer renderer;
     private final PdfOcrSupport ocr;
+    private final boolean safeOverlays;
     private final ConversionRoute route;
 
     public PdfToDocxConverter() {
@@ -34,11 +36,13 @@ public final class PdfToDocxConverter implements FileConverter {
         this.analyzer = java.util.Objects.requireNonNull(analyzer, "analyzer");
         this.renderer = java.util.Objects.requireNonNull(renderer, "renderer");
         this.ocr = ocr;
+        this.safeOverlays = Boolean.getBoolean("formatconverter.ocr.safe-overlays") || ocr != null && ocr.usesRapid();
         this.route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.DOCX,
                 ocr == null ? "将文字型 PDF 转换为可编辑 Word，恢复基础段落、有线规则表格、明显双栏布局、页面尺寸和方向；明确的连续纯正文可跨页续接。"
-                        : "恢复 PDF 真实文字和明确的连续正文，并以本地 Tesseract 叠加可编辑文字，同时保留扫描源图防止漏内容。",
+                        : safeOverlays ? "实验保真模式：仅叠加可安全替换的可编辑文字，不可靠区域保留扫描图并提示不可编辑。"
+                        : "恢复 PDF 真实文字和明确的连续正文，并以本地 " + ocr.engineName() + " 叠加可编辑文字，同时保留扫描源图防止漏内容。",
                 QualityLevel.BETA, ConversionStrategy.EDITABLE,
-                ocr == null ? List.of() : List.of("tesseract"),
+                ocr == null ? List.of() : List.of(ocr.engineName().toLowerCase(java.util.Locale.ROOT)),
                 List.of(ocr == null ? "扫描型 PDF 需要 OCR" : "OCR 页保留扫描图层且文字必须人工复核",
                         "明显双栏使用可编辑定位文本框；窄栏沟、混合阅读顺序、复杂表格、矢量图形及图片仍需更多样本验证"));
     }
@@ -58,7 +62,8 @@ public final class PdfToDocxConverter implements FileConverter {
         progress.update(TaskStage.RECOGNIZING, 50);
         List<ConversionWarning> warnings = new ArrayList<>(parsed.warnings());
         PdfParagraphReconstructor paragraphs = new PdfParagraphReconstructor();
-        List<PageModel> pages = parsed.pages().stream().map(analyzer::analyze).map(paragraphs::reconstruct).toList();
+        List<PageModel> pages = parsed.pages().stream().map(page -> safeOverlays ? OcrOverlaySafety.prepare(page) : page)
+                .map(analyzer::analyze).map(paragraphs::reconstruct).toList();
         pages.forEach(page -> {
             warnings.addAll(page.warnings());
             if (page.textBlocks().stream().anyMatch(block -> {

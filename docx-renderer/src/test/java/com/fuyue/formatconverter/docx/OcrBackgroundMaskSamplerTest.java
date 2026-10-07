@@ -78,6 +78,57 @@ class OcrBackgroundMaskSamplerTest {
         }
     }
 
+    @Test void blueBlackScanFringeIsInkWhileSaturatedBlueAndRedRemainProtected() throws Exception {
+        for (Color ink : List.of(new Color(25, 20, 115), new Color(0, 0, 180),
+                new Color(10, 10, 160), new Color(130, 15, 20), Color.RED)) {
+            BufferedImage pixels = image(Color.WHITE);
+            var g = pixels.createGraphics(); g.setColor(ink);
+            g.fillRect(105, 130, 14, 25);
+            if (ink.getBlue() == 115) { g.setColor(Color.BLACK); g.fillRect(107, 132, 10, 21); }
+            g.dispose();
+            try (var sampler = OcrBackgroundMaskSampler.open(source(pixels))) {
+                assertEquals(ink.getBlue() == 115, !sampler.fills(WORD).isEmpty(), ink.toString());
+            }
+        }
+    }
+
+    @Test void lightCompressionFringeRequiresNearbyBlackInk() throws Exception {
+        for (boolean hasInk : List.of(true, false)) {
+            BufferedImage pixels = image(Color.WHITE);
+            var g = pixels.createGraphics();
+            g.setColor(new Color(250, 255, 210)); g.fillRect(105, 130, 14, 25);
+            g.setColor(new Color(189, 179, 240)); g.fillRect(145, 130, 14, 25);
+            if (hasInk) { g.setColor(Color.BLACK); g.fillRect(107, 132, 10, 21); g.fillRect(147, 132, 10, 21); }
+            g.dispose();
+            try (var sampler = OcrBackgroundMaskSampler.open(source(pixels))) {
+                assertEquals(hasInk, !sampler.fills(WORD).isEmpty());
+            }
+        }
+    }
+
+    @Test void textCoversCannotEraseLongSourceDiagramRulesButCellInteriorRemainsEditable() throws Exception {
+        for (boolean horizontal : List.of(true, false)) {
+            BufferedImage pixels = image(Color.WHITE);
+            var g = pixels.createGraphics(); g.setColor(Color.BLACK);
+            if (horizontal) g.fillRect(40, 145, 340, 2); else g.fillRect(180, 40, 2, 300);
+            g.dispose();
+            try (var sampler = OcrBackgroundMaskSampler.open(source(pixels))) {
+                assertTrue(sampler.fills(WORD).isEmpty());
+                assertFalse(sampler.fills(new Rect(35, 35, 6, 4)).isEmpty());
+            }
+        }
+    }
+
+    @Test void preservesRuleWhereTextHidesItsSideMarginsAndCompressionLeavesShortGaps() throws Exception {
+        BufferedImage pixels = image(Color.WHITE);
+        var g = pixels.createGraphics(); g.setColor(Color.BLACK);
+        g.fillRect(180, 40, 2, 300); g.fillRect(169, 137, 24, 18);
+        g.setColor(Color.WHITE); g.fillRect(180, 118, 2, 2); g.dispose();
+        try (var sampler = OcrBackgroundMaskSampler.open(source(pixels))) {
+            assertTrue(sampler.fills(WORD).isEmpty());
+        }
+    }
+
     @Test void skipsTexturedAndAbruptlyChangingPaperInsteadOfCoveringItWhite() throws Exception {
         BufferedImage pixels = new BufferedImage(500, 400, BufferedImage.TYPE_INT_RGB);
         for (int y = 0; y < 400; y++) for (int x = 0; x < 500; x++) {
@@ -92,6 +143,20 @@ class OcrBackgroundMaskSamplerTest {
     @Test void cannotGuessPaperWhenTheWordCoversTheWholeImage() throws Exception {
         try (var sampler = OcrBackgroundMaskSampler.open(source(image(Color.WHITE)))) {
             assertTrue(sampler.fills(PAGE).isEmpty());
+        }
+    }
+
+    @Test void crowdedNeighborInkAtSidesDoesNotPreventCleanWhiteWordMask() throws Exception {
+        BufferedImage pixels = image(Color.WHITE);
+        var g = pixels.createGraphics(); g.setColor(Color.BLACK);
+        // Neighbor ink is outside the word's horizontal bounds; top/bottom
+        // samples still establish paper without enlarging the erase region.
+        g.fillRect(98, 126, 2, 34); g.fillRect(275, 126, 2, 8); g.dispose();
+        try (var sampler = OcrBackgroundMaskSampler.open(source(pixels))) {
+            var fills = sampler.fills(WORD);
+            assertEquals(1, fills.size());
+            assertEquals(WORD, fills.get(0).box());
+            assertEquals("FFFFFF", fills.get(0).color());
         }
     }
 

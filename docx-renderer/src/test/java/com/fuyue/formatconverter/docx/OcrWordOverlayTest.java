@@ -24,6 +24,66 @@ class OcrWordOverlayTest {
     private static final String VML = "urn:schemas-microsoft-com:vml";
     private static final String WORD = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 
+    @Test void unreliableTallTableWordDoesNotEnlargeReliableWordsOrPullLowerRowUp() throws Exception {
+        TextBlock line = ocr(List.of(
+                new TextBlock.OcrWord(new Rect(20, 30, 10, 4), "DATA", .98),
+                new TextBlock.OcrWord(new Rect(35, 30, 4, 25), "i", .1),
+                new TextBlock.OcrWord(new Rect(20, 48, 10, 4), "NEXT", .98)), "DATA i NEXT");
+        try (XWPFDocument docx = new XWPFDocument(Files.newInputStream(render(List.of(line), List.of())))) {
+            var xml = xml(docx);
+            var boxes = elements(xml, VML, "rect").stream()
+                    .filter(e -> e.getElementsByTagNameNS(WORD, "txbxContent").getLength() > 0).toList();
+            assertEquals(3, boxes.size());
+            for (var size : elements(xml, WORD, "sz")) {
+                assertTrue(Integer.parseInt(size.getAttributeNS(WORD, "val")) < 50,
+                        "low-confidence tall rule must not produce a giant font");
+            }
+            assertEquals(18, mm(boxes.get(2).getAttribute("style"), "margin-top")
+                    - mm(boxes.get(0).getAttribute("style"), "margin-top"), .1);
+            assertEquals("DATA i NEXT", elements(xml, WORD, "t").stream()
+                    .map(Element::getTextContent).reduce("", String::concat));
+        }
+    }
+
+    @Test void densePageCapsGridSizedWordWithoutShrinkingSparseTitles() throws Exception {
+        BufferedImage image = new BufferedImage(500, 500, BufferedImage.TYPE_INT_RGB);
+        var g = image.createGraphics(); g.setColor(java.awt.Color.WHITE); g.fillRect(0, 0, 500, 500);
+        g.setColor(java.awt.Color.BLACK); g.fillRect(200, 200, 200, 100); g.dispose();
+        var bytes = new ByteArrayOutputStream(); ImageIO.write(image, "png", bytes); image.flush();
+        TextBlock line = ocr(List.of(new TextBlock.OcrWord(new Rect(10, 10, 15, 24), "本", .98)), "本");
+        List<TextBlock> lines = new ArrayList<>(); lines.add(line);
+        for (int i = 0; i < 20; i++) lines.add(ocr(List.of(new TextBlock.OcrWord(
+                new Rect(10, 40 + i * 2, 15, 4), "BODY", .98)), "BODY"));
+        ImageBlock scan = new ImageBlock("scan", 1, new Rect(0, 0, 100, 100), "image/png",
+                bytes.toByteArray(), "OCR_SCAN_BACKGROUND", 0);
+        int denseSize;
+        try (XWPFDocument docx = new XWPFDocument(Files.newInputStream(render(lines, List.of(scan))))) {
+            denseSize = Integer.parseInt(elements(xml(docx), WORD, "sz").get(0).getAttributeNS(WORD, "val"));
+            assertTrue(denseSize < 60);
+        }
+        try (XWPFDocument docx = new XWPFDocument(Files.newInputStream(render(List.of(line), List.of(scan))))) {
+            int sparseSize = Integer.parseInt(elements(xml(docx), WORD, "sz").get(0).getAttributeNS(WORD, "val"));
+            assertTrue(sparseSize > denseSize);
+        }
+    }
+
+    @Test void unreliableGridSizedPredictionStaysEditableButDoesNotCoverUnknownFields() throws Exception {
+        List<TextBlock> lines = new ArrayList<>();
+        lines.add(ocr(List.of(new TextBlock.OcrWord(new Rect(5, 5, 40, 7), "ORR", .1)), "ORR"));
+        for (int i = 0; i < 20; i++) lines.add(ocr(List.of(new TextBlock.OcrWord(
+                new Rect(50, 30 + i * 2, 15, 4), "BODY", .98)), "BODY"));
+        ImageBlock scan = mixedBackground(255, 255, 255);
+        try (var docx = new XWPFDocument(Files.newInputStream(render(lines, List.of(scan))))) {
+            var xml = xml(docx);
+            assertEquals(20, masks(xml).size(), "The broad untrusted prediction must not erase source fields");
+            var sizes = elements(xml, WORD, "sz");
+            assertTrue(Integer.parseInt(sizes.get(0).getAttributeNS(WORD, "val"))
+                    <= Integer.parseInt(sizes.get(1).getAttributeNS(WORD, "val")));
+            assertEquals("ORR", elements(xml, WORD, "t").get(0).getTextContent());
+            assertArrayEquals(scan.data(), docx.getAllPictures().get(0).getData());
+        }
+    }
+
     @Test void preservesSourceBytesAndUnknownWordGapsWhileRenderingOneEditableCopy() throws Exception {
         byte[] original = png();
         List<TextBlock.OcrWord> words = List.of(new TextBlock.OcrWord(new Rect(20, 30, 12, 4), "LEFT", .98),

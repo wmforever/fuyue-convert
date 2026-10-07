@@ -1,0 +1,5 @@
+# Optional isolated test/runtime environment; not installed into system Python.
+rapidocr==3.9.2
+onnxruntime==1.23.2
+opencv-python==5.0.0.93
+numpy==2.5.3

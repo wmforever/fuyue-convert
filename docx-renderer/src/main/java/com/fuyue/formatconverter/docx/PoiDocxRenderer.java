@@ -20,10 +20,12 @@ public final class PoiDocxRenderer implements DocxRenderer {
             try (XWPFDocument docx = new XWPFDocument()) {
                 if (document.pages().isEmpty()) throw new IOException("文档没有可渲染页面");
                 boolean conflict = hasWarning(document, WarningCode.OCR_RECOGNITION_CONFLICT);
-                if (conflict || hasWarning(document, WarningCode.OCR_APPLIED)) {
+                boolean retained = hasWarning(document, WarningCode.OCR_REGION_RETAINED_AS_IMAGE);
+                if (retained || conflict || hasWarning(document, WarningCode.OCR_APPLIED)) {
                     var properties = docx.getProperties().getCoreProperties();
                     properties.setSubjectProperty(conflict ? "OCR 数值冲突：需人工核对" : "OCR 扫描文字：需人工核对");
-                    properties.setDescription("保留原始扫描及可编辑文字。扫描像素不会随文字编辑变化，同位置内容可能叠印；"
+                    properties.setDescription((retained ? "部分 OCR 区域无法安全替换，已保留为原始扫描图；这些区域不可直接编辑。" : "")
+                            + "保留原始扫描及可编辑文字。扫描像素不会随文字编辑变化，同位置内容可能叠印；"
                             + "可编辑不等于数值可靠或文字清晰可见，请对照原图人工核对。"
                             + (conflict ? "检测到不同数值或符号，保留两层原文，未选择或规范化其中任何来源。" : ""));
                 }
