@@ -130,6 +130,10 @@ public final class TesseractOcrConverter implements FileConverter {
             try {
                 result = retryRuledGrid(result, pixels, workDir, pageNumber, physicalBox, limits, started);
                 if (result.ruledGridRecovery()) return result;
+                if (Boolean.getBoolean("formatconverter.ocr.table-line-recovery")) {
+                    result = retryTableLines(result, pixels, workDir, pageNumber, physicalBox, limits, started);
+                    if (result.tableLineRecovery()) return result;
+                }
                 boolean recoveryEligible = result.blocks().isEmpty() || result.confidence() < settings.warningConfidence();
                 boolean uncoveredShadedInk = false;
                 if (!recoveryEligible && "3".equals(pageSegmentationMode())
@@ -218,6 +222,34 @@ public final class TesseractOcrConverter implements FileConverter {
         }
         var selected = OcrRuledGrid.select(grid, original, cells, settings.minimumConfidence(), deadline);
         return selected.wordCount() <= limits.maxEntries() ? selected : original;
+    }
+
+    private RecognitionResult retryTableLines(RecognitionResult original, BufferedImage pixels, Path workDir,
+            int pageNumber, Rect physical, ParseLimits limits, long started) throws Exception {
+        if (!"3".equals(pageSegmentationMode()) || remainingTime(started).compareTo(Duration.ofSeconds(1)) <= 0) return original;
+        var regions = OcrTableLineRecovery.prepare(pixels, physical, original,
+                Math.min(started + settings.timeout().toNanos(), System.nanoTime() + 2_000_000_000L));
+        RecognitionResult selected = original;
+        int index = 0;
+        try {
+            for (var region : regions) {
+                if (remainingTime(started).compareTo(Duration.ofSeconds(1)) <= 0) break;
+                Path crop = Files.createTempFile(workDir, "tesseract-table-lines-", ".png");
+                try {
+                    if (!ImageIO.write(region.cleaned(), "png", crop.toFile())) continue;
+                    var candidate = recognizeOnce(crop, workDir, pageNumber, region.box(),
+                            new ImageDimensions(region.width(), region.height()), limits,
+                            "tesseract-table-p%d-r%d".formatted(pageNumber, ++index), remainingTime(started), "6");
+                    var retry = OcrTableLineRecovery.select(region, selected, candidate);
+                    if (retry.wordCount() <= limits.maxEntries()) selected = retry;
+                } catch (ConversionFailureException failure) {
+                    if ("OCR_TIMEOUT".equals(failure.code())) throw failure;
+                } catch (IOException ignored) {
+                    // Optional regional processing cannot break the original usable OCR result.
+                } finally { Files.deleteIfExists(crop); }
+            }
+        } finally { regions.forEach(r -> r.cleaned().flush()); }
+        return selected;
     }
 
     private RecognitionResult retryEnhanced(RecognitionResult original, BufferedImage pixels, Path workDir,
@@ -546,14 +578,21 @@ public final class TesseractOcrConverter implements FileConverter {
             warnings.add(ConversionWarning.of(WarningCode.OCR_RECOGNITION_CONFLICT, scope + conflict, pageNumber));
         }
         if (result.imageEnhanced()) {
+            // Regional line removal is reported separately from contrast enhancement.
             warnings.add(ConversionWarning.of(WarningCode.OCR_IMAGE_ENHANCED,
                     scope + (result.partialRecovery()
                             ? "仅补充了增强候选中严格分离的新行，全部原识别行及原词框保留；混合置信度包括原词，不能证明内容完整。"
                             : "采用了灰底/阴影归一化与对比度增强结果；原图和坐标未改变，仍需人工复核内容完整性。"), pageNumber));
         }
+        if (result.tableLineRecovery()) {
+            warnings.add(ConversionWarning.of(WarningCode.OCR_TABLE_REGION_RECOVERED,
+                    scope + "异常表格区域使用去框线副本重新识别；原扫描未改动，新增字段仍需人工复核。", pageNumber));
+        }
         if (result.possibleTextOmission()) {
             warnings.add(ConversionWarning.of(WarningCode.OCR_POSSIBLE_TEXT_OMISSION,
-                    scope + (result.ruledGridRecovery()
+                    scope + (result.tableLineRecovery()
+                            ? "局部表格去框线识别不能保证字段完整或准确，请对照保留的原扫描复核新增字段及数字。"
+                            : result.ruledGridRecovery()
                             ? "框线内分格识别已恢复部分文字，原跨框低置信候选另有记录；原数字逐字核对，仍可能存在漏字或新误识别，请对照保留的原扫描复核。"
                             : result.partialRecovery()
                             ? "原识别区域保留，未采用其替换候选，仅补充了严格分离的新行；仍可能漏字或保留原误识别，混合置信度不能证明内容完整，请对照原图复核。"
@@ -969,7 +1008,13 @@ public final class TesseractOcrConverter implements FileConverter {
 
     record RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
                              double deskewDegrees, List<String> conflicts, boolean possibleTextOmission, boolean partialRecovery,
-                             boolean ruledGridRecovery) {
+                             boolean ruledGridRecovery, boolean tableLineRecovery) {
+        RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
+                          double deskewDegrees, List<String> conflicts, boolean possibleTextOmission, boolean partialRecovery,
+                          boolean ruledGridRecovery) {
+            this(blocks, confidence, wordCount, imageEnhanced, deskewDegrees, conflicts, possibleTextOmission,
+                    partialRecovery, ruledGridRecovery, false);
+        }
         RecognitionResult(List<TextBlock> blocks, double confidence, int wordCount, boolean imageEnhanced,
                           double deskewDegrees, List<String> conflicts, boolean possibleTextOmission, boolean partialRecovery) {
             this(blocks, confidence, wordCount, imageEnhanced, deskewDegrees, conflicts, possibleTextOmission, partialRecovery, false);

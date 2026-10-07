@@ -17,6 +17,7 @@ final class OcrBackgroundMaskSampler implements AutoCloseable {
     private final Rect background;
     private final double sx, sy;
     private int blankPixelBudget = 250_000;
+    private long rulePixelBudget = 80_000_000L;
 
     private OcrBackgroundMaskSampler(BufferedImage image, Rect background) {
         this.image = image;
@@ -70,11 +71,28 @@ final class OcrBackgroundMaskSampler implements AutoCloseable {
         for (Sample sample : samples) {
             int[] color = sample.color();
             if (Math.abs((color[0] - color[1]) - (median[0] - median[1])) > 24
-                    || Math.abs((color[1] - color[2]) - (median[1] - median[2])) > 24) return List.of();
+                    || Math.abs((color[1] - color[2]) - (median[1] - median[2])) > 24) {
+                int px = (int) Math.floor(x + width * (sample.u() + .5));
+                int py = (int) Math.floor(y + height * (sample.v() + .5));
+                if (!scanFringe(color, px, py)) return List.of();
+            }
         }
         double medianBrightness = brightness(median);
-        List<Sample> paper = samples.stream().filter(sample -> brightness(sample.color()) >= medianBrightness - 40).toList();
-        if (paper.size() < samples.size() * .8) return List.of();
+        if (medianBrightness >= 110 && crossesSourceRule(x, y, width, height)) return List.of();
+        double paperFloor = medianBrightness >= 245 ? medianBrightness - 12 : medianBrightness - 40;
+        List<Sample> paper = samples.stream().filter(sample -> brightness(sample.color()) >= paperFloor)
+                .filter(sample -> paperChroma(sample.color(), median)).toList();
+        if (paper.size() < samples.size() * .8) {
+            // Adjacent bold glyphs can touch the side ring even when both the
+            // top and bottom demonstrate clean white paper. Use those edges
+            // only for a near-white scan, never for shaded or textured paper.
+            List<Sample> horizontalPaper = samples.stream()
+                    .filter(sample -> Math.abs(sample.v()) >= .5d)
+                    .filter(sample -> brightness(sample.color()) >= medianBrightness - 20)
+                    .filter(sample -> paperChroma(sample.color(), median)).toList();
+            if (medianBrightness < 245 || paper.size() < samples.size() * .55
+                    || horizontalPaper.size() < 20) return List.of();
+        }
         double[][] plane = fit(paper);
         if (plane == null) return List.of();
         for (Sample sample : paper) {
@@ -139,6 +157,7 @@ final class OcrBackgroundMaskSampler implements AutoCloseable {
             double u = (px + .5 - x) / width - .5, v = (py + .5 - y) / height - .5;
             int[] paper = {channel(plane[0], u, v), channel(plane[1], u, v), channel(plane[2], u, v)};
             if (range(paper) <= 24 && range(color) <= 24) continue; // Includes light ink on black paper.
+            if (range(paper) <= 24 && brightness(paper) >= 180 && scanFringe(color, px, py)) continue;
             double length = 0, product = 0;
             for (int index = 0; index < 3; index++) { length += paper[index] * paper[index]; product += paper[index] * color[index]; }
             // Neutral ink and antialiased ink on tinted paper scale the paper channels together.
@@ -150,8 +169,88 @@ final class OcrBackgroundMaskSampler implements AutoCloseable {
         return false;
     }
 
+    /** Scanner/JPEG blue and complementary yellow fringes must touch black ink.
+     * Large coloured areas and saturated annotations cannot pass this local check. */
+    private boolean scanFringe(int[] sample, int px, int py) {
+        boolean blue = brightness(sample) < 245 && range(sample) <= 140
+                && sample[0] <= sample[1] + 25 && sample[0] <= sample[2] + 15 && sample[1] <= sample[2] + 15;
+        boolean yellow = Arrays.stream(sample).min().orElse(0) >= 120 && range(sample) <= 80
+                && Math.abs(sample[0] - sample[1]) <= 20 && sample[2] <= Math.min(sample[0], sample[1]);
+        if (!blue && !yellow) return false;
+        for (int y = Math.max(0, py - 5); y <= Math.min(image.getHeight() - 1, py + 5); y++)
+            for (int x = Math.max(0, px - 5); x <= Math.min(image.getWidth() - 1, px + 5); x++) {
+                int[] neighbor = color(x, y);
+                if (Math.max(neighbor[0], Math.max(neighbor[1], neighbor[2])) <= 110
+                        && range(neighbor) <= 110 && neighbor[0] <= neighbor[1] + 25
+                        && neighbor[1] <= neighbor[2] + 15) return true;
+            }
+        return false;
+    }
+
     private static int range(int[] color) {
         return Math.max(color[0], Math.max(color[1], color[2])) - Math.min(color[0], Math.min(color[1], color[2]));
+    }
+
+    private static boolean paperChroma(int[] color, int[] median) {
+        return Math.abs((color[0] - color[1]) - (median[0] - median[1])) <= 24
+                && Math.abs((color[1] - color[2]) - (median[1] - median[2])) <= 24;
+    }
+
+    /** A text cover cannot erase a thin source rule extending beyond the text bounds.
+     * Inspect a local band only; dark paper itself does not establish a thin rule. */
+    private boolean crossesSourceRule(double x, double y, double width, double height) {
+        int left = Math.max(0, (int) Math.floor(x)), top = Math.max(0, (int) Math.floor(y));
+        int right = Math.min(image.getWidth(), (int) Math.ceil(x + width));
+        int bottom = Math.min(image.getHeight(), (int) Math.ceil(y + height));
+        int horizontal = Math.max(32, (int) Math.ceil(Math.max(6 * sx, width + 3)));
+        int vertical = Math.max(32, (int) Math.ceil(Math.max(6 * sy, height + 3)));
+        long checks = (long) (bottom - top) * (Math.min(image.getWidth(), right + horizontal) - Math.max(0, left - horizontal))
+                + (long) (right - left) * (Math.min(image.getHeight(), bottom + vertical) - Math.max(0, top - vertical));
+        // Oversized or numerous boxes fall back to the original scan instead of
+        // allowing this optional refinement to dominate conversion time.
+        if (checks <= 0 || checks > 2_000_000L || checks > rulePixelBudget) return true;
+        rulePixelBudget -= checks;
+        for (int row = top; row < bottom; row++) {
+            int run = 0, gaps = 0;
+            for (int column = Math.max(0, left - horizontal); column < Math.min(image.getWidth(), right + horizontal); column++) {
+                // Text crossing a line can obscure its light side margins.
+                // Require thinness outside the mask, then follow dark ink inside.
+                boolean ink = column >= left && column < right ? dark(column, row) : thinDark(column, row, true);
+                if (ink) { run++; gaps = 0; }
+                else if (run > 0 && ++gaps <= 2) run++;
+                else { run = 0; gaps = 0; }
+                if (run >= horizontal && column >= left && column - run + 1 < right) return true;
+            }
+        }
+        for (int column = left; column < right; column++) {
+            int run = 0, gaps = 0;
+            for (int row = Math.max(0, top - vertical); row < Math.min(image.getHeight(), bottom + vertical); row++) {
+                boolean ink = row >= top && row < bottom ? dark(column, row) : thinDark(column, row, false);
+                if (ink) { run++; gaps = 0; }
+                else if (run > 0 && ++gaps <= 2) run++;
+                else { run = 0; gaps = 0; }
+                if (run >= vertical && row >= top && row - run + 1 < bottom) return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean thinDark(int x, int y, boolean horizontal) {
+        if (!dark(x, y)) return false;
+        int radius = Math.max(3, (int) Math.ceil((horizontal ? sy : sx) * .35));
+        return horizontal ? light(x, y - radius) && light(x, y + radius)
+                : light(x - radius, y) && light(x + radius, y);
+    }
+
+    private boolean dark(int x, int y) {
+        int rgb = image.getRGB(x, y);
+        return ((rgb >> 16) & 255) < 100 && ((rgb >> 8) & 255) < 100 && (rgb & 255) < 140;
+    }
+
+    private boolean light(int x, int y) {
+        if (x < 0 || y < 0 || x >= image.getWidth() || y >= image.getHeight()) return false;
+        int rgb = image.getRGB(x, y);
+        return ((rgb >> 16) & 255) >= 110 && ((rgb >> 8) & 255) >= 110 && (rgb & 255) >= 110;
     }
 
     private void addSample(List<Sample> samples, int px, int py, double x, double y, double width, double height) {
