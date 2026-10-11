@@ -344,14 +344,12 @@ public final class ConversionTaskService implements AutoCloseable {
                 Path merged = record.taskDir.resolve("output/" + (isPdfMerge(record.route) ? "merged.pdf" : "merged-images.pdf"));
                 mergePdfs(outputs, merged);
                 requireTaskOutputFile(merged, isPdfMerge(record.route) ? "PDF 合并" : "图片合并 PDF");
-                int mergedPages = ConversionGuards.requirePdfPageCount(merged, config.parseLimits());
                 int expectedPages = isPdfMerge(record.route)
                         ? results.stream().filter(TaskFileResult::success)
                                 .map(TaskFileResult::pageCount).filter(Objects::nonNull).mapToInt(Integer::intValue).sum()
                         : outputs.size();
-                if (mergedPages != expectedPages) {
-                    throw new IOException("合并 PDF 页数不一致：" + mergedPages + " != " + expectedPages);
-                }
+                ConversionGuards.requireValidPdfOutput(merged, config.parseLimits(),
+                        isPdfMerge(record.route) ? "PDF 合并" : "图片合并 PDF", expectedPages);
                 if (isImageToPdf(record.route) && outputs.size() != record.inputs.size()) {
                     warnings.add(ConversionWarning.of(com.fuyue.formatconverter.model.WarningCode.PARTIAL_BATCH_OUTPUT,
                             "部分图片转换失败；合并 PDF 仅包含成功的 " + outputs.size() + " / "
