@@ -354,7 +354,7 @@
       "licensePath": "backend/licenses/FUYUE-CONVERT-APACHE-2.0.txt"
     },
     "vue": {
-      "version": "3.5.18",
+      "version": "3.5.43",
       "spdx": "MIT",
       "source": "https://github.com/vuejs/core",
       "licensePath": "backend/licenses/VUE-MIT.txt"
