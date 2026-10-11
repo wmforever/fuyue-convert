@@ -10,7 +10,7 @@ Electron 只负责桌面窗口、安全边界和后端生命周期；所有转�
 - macOS 13+ Intel：`Fuyue-Convert-<version>-macOS-Intel.dmg`
 - macOS 13+ M1/M2/M3/M4 等 Apple Silicon：`Fuyue-Convert-<version>-macOS-Apple-Silicon.dmg`
 
-Full 文件名在扩展名前增加 `-Full`，例如 `Fuyue-Convert-0.1.5-win-x64-Full.exe`。
+Full 文件名在扩展名前增加 `-Full`，例如 `Fuyue-Convert-0.1.9-win-x64-Full.exe`。
 
 当前源码支持跨平台 Lite 与 Full；OCR 改动需要重新构建发布后进入安装包：
 
@@ -68,11 +68,11 @@ npm run dist:win
 npm run verify:package -- --public-lite --require-installer
 ```
 
-产物为 `release/Fuyue-Convert-0.1.5-win-x64.exe`。Electron-builder 只生成 `win-unpacked`，仓库自有的最小安装脚本再使用 `nsis@1.2.1` 工具集中的 NSIS 3.12 编译安装器。该脚本只使用 NSIS 内建的 `File`、`CreateShortCut`、`WriteUninstaller` 等指令，采用 zlib 压缩并以当前用户权限安装；不使用 StdUtils、UAC、WinShell、nsProcess、nsis7z 或 `elevate.exe`，也不得回退到旧 NSIS 3.0.4.1。
+产物为 `release/Fuyue-Convert-0.1.9-win-x64.exe`。Electron-builder 只生成 `win-unpacked`，仓库自有的最小安装脚本再使用 `nsis@1.2.1` 工具集中的 NSIS 3.12 编译安装器。该脚本只使用 NSIS 内建的 `File`、`CreateShortCut`、`WriteUninstaller` 等指令，采用 zlib 压缩并以当前用户权限安装；不使用 StdUtils、UAC、WinShell、nsProcess、nsis7z 或 `elevate.exe`，也不得回退到旧 NSIS 3.0.4.1。
 
 官方 Actions 会额外将 NSIS 安装器静默安装到临时目录，对真实安装后资源再执行一次许可、Runtime、禁止依赖、OCR 中英文真实识别和 Poppler 缺席检查，而不只检查 `win-unpacked`。
 
-Full 版执行 `npm run dist:win:full`，产物为 `release/Fuyue-Convert-0.1.5-win-x64-Full.exe`，并额外完成包内 LibreOffice 的真实 DOCX → PDF 转换。
+Full 版执行 `npm run dist:win:full`，产物为 `release/Fuyue-Convert-0.1.9-win-x64-Full.exe`，并额外完成包内 LibreOffice 的真实 DOCX → PDF 转换。
 
 ## 用户引擎配置
 
@@ -94,7 +94,7 @@ export FORMAT_CONVERTER_REQUIRED_RUNTIME_VERSION=17.0.20.1
 npm run dist:mac
 ```
 
-原生 x64 构建输出 `release/Fuyue-Convert-0.1.5-macOS-Intel.dmg`，原生 arm64 构建输出 `release/Fuyue-Convert-0.1.5-macOS-Apple-Silicon.dmg`。流程会在签名后定稿运行时清单、重新进行 ad-hoc 外层签名，再执行 `codesign --deep --strict`、DMG 校验、只读挂载和最终资源对账。当前不做 universal DMG，也不生成公开 ZIP。
+原生 x64 构建输出 `release/Fuyue-Convert-0.1.9-macOS-Intel.dmg`，原生 arm64 构建输出 `release/Fuyue-Convert-0.1.9-macOS-Apple-Silicon.dmg`。流程会在签名后定稿运行时清单、重新进行 ad-hoc 外层签名，再执行 `codesign --deep --strict`、DMG 校验、只读挂载和最终资源对账。当前不做 universal DMG，也不生成公开 ZIP。
 
 Full 版执行 `npm run dist:mac:full`，输出文件名增加 `-Full`，并额外验证包内 LibreOffice 的版本、原生架构、许可证和真实 DOCX → PDF 转换。
 
@@ -111,8 +111,8 @@ Full 版执行 `npm run dist:mac:full`，输出文件名增加 `-Full`，并额�
 ```bash
 gh variable set FORMAT_CONVERTER_BINARY_RELEASE_APPROVED --body true
 gh variable set FORMAT_CONVERTER_BINARY_RELEASE_APPROVED_SHA --body "$(git rev-parse HEAD)"
-git tag v0.1.5
-git push origin v0.1.5
+git tag v0.1.9
+git push origin v0.1.9
 gh variable set FORMAT_CONVERTER_BINARY_RELEASE_APPROVED --body false
 gh variable delete FORMAT_CONVERTER_BINARY_RELEASE_APPROVED_SHA
 ```

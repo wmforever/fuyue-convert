@@ -16,11 +16,11 @@ Fuyue Convert 是一个开源文档格式转换平台，目标是用可审计、
 
 | 系统 | Lite（不带 Office） | Full（内置 Office） |
 | --- | --- | --- |
-| Windows 10/11 x64 | [下载 Lite EXE](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-win-x64.exe) | [下载 Full EXE](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-win-x64-Full.exe) |
-| macOS 13+，Intel 芯片 | [下载 Lite DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Intel.dmg) | [下载 Full DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Intel-Full.dmg) |
-| macOS 13+，Apple M 系列芯片 | [下载 Lite DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Apple-Silicon.dmg) | [下载 Full DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.5/Fuyue-Convert-0.1.5-macOS-Apple-Silicon-Full.dmg) |
+| Windows 10/11 x64 | [下载 Lite EXE](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.9/Fuyue-Convert-0.1.9-win-x64.exe) | [下载 Full EXE](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.9/Fuyue-Convert-0.1.9-win-x64-Full.exe) |
+| macOS 13+，Intel 芯片 | [下载 Lite DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.9/Fuyue-Convert-0.1.9-macOS-Intel.dmg) | [下载 Full DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.9/Fuyue-Convert-0.1.9-macOS-Intel-Full.dmg) |
+| macOS 13+，Apple M 系列芯片 | [下载 Lite DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.9/Fuyue-Convert-0.1.9-macOS-Apple-Silicon.dmg) | [下载 Full DMG](https://github.com/wmforever/fuyue-convert/releases/download/v0.1.9/Fuyue-Convert-0.1.9-macOS-Apple-Silicon-Full.dmg) |
 
-六个安装包均内置 Eclipse Temurin Java Runtime，不需要另外安装 Java。Lite 体积较小，不内置 LibreOffice；Full 内置经过版本与哈希锁定的 LibreOffice 26.2.5.2，Office 引擎路线开箱可用。已发布的 v0.1.5 安装包不内置 OCR/Tesseract 或 Poppler；从当前源码生成的后续 Lite/Full 包默认内置固定版本 OCR 和中英文模型，可离线识别，原有下载包不会自动改变。新版设置页提供 OCR/Office 的本机引擎和语言包选择、实际检测、保存与重启入口，无需绑定账号或云服务密钥。许可证、组件清单和来源记录内置在应用中，SHA-256 写在 [v0.1.5 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.5) 正文。
+六个安装包均内置 Eclipse Temurin Java Runtime，不需要另外安装 Java。Lite 体积较小，不内置 LibreOffice；Full 内置经过版本与哈希锁定的 LibreOffice 26.2.5.2，Office 引擎路线开箱可用。已发布的 v0.1.5 安装包不内置 OCR/Tesseract 或 Poppler；从当前源码生成的后续 Lite/Full 包默认内置固定版本 OCR 和中英文模型，可离线识别，原有下载包不会自动改变。新版设置页提供 OCR/Office 的本机引擎和语言包选择、实际检测、保存与重启入口，无需绑定账号或云服务密钥。许可证、组件清单和来源记录内置在应用中，SHA-256 写在 [v0.1.9 Release](https://github.com/wmforever/fuyue-convert/releases/tag/v0.1.9) 正文。
 
 Lite 的 Office 高保真路线会使用电脑上已有的 LibreOffice；Full 自动使用包内 Office 引擎。Windows 尚未做商业代码签名，可能显示 SmartScreen 或“未知发布者”。macOS 包采用 ad-hoc 签名且尚未经过 Apple 公证，首次打开如被拦截，请前往“系统设置 → 隐私与安全”确认“仍要打开”。
 
