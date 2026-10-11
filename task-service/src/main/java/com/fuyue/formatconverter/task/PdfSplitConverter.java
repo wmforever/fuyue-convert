@@ -76,6 +76,10 @@ final class PdfSplitConverter implements FileConverter {
                             || header[1] != 'P' || header[2] != 'D' || header[3] != 'F' || header[4] != '-') {
                         throw new java.io.IOException("PDF 拆分 ZIP 包含无效 PDF 条目：" + entry.getName());
                     }
+                    // Consume the complete entry so ZipFile verifies its CRC and
+                    // detects truncated/corrupted payloads instead of accepting a
+                    // file whose header happens to look like a PDF.
+                    input.transferTo(OutputStream.nullOutputStream());
                 }
             }
         }
