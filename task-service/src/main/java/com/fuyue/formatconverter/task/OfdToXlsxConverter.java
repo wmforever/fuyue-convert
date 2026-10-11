@@ -223,12 +223,13 @@ public final class OfdToXlsxConverter implements FileConverter {
     }
 
     private String cellText(CellModel cell) {
-        return cell.paragraphs().stream()
+        String value = cell.paragraphs().stream()
                 .map(paragraph -> paragraph.runs().stream()
                         .sorted(Comparator.comparingDouble(block -> block.box().x() + block.textOffsetXmm()))
                         .map(TextBlock::text).reduce("", String::concat).strip())
-                .filter(value -> !value.isEmpty())
+                .filter(text -> !text.isEmpty())
                 .reduce((first, second) -> first + "\n" + second).orElse("");
+        return SpreadsheetValueParser.normalizeCellText(value);
     }
 
     private void writeCellValue(Cell cell, String value, CellStyle textStyle, CellStyle numberStyle,

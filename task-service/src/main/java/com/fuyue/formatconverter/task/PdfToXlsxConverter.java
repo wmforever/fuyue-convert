@@ -332,9 +332,10 @@ public final class PdfToXlsxConverter implements FileConverter {
     }
 
     private String cellText(CellModel cell) {
-        return cell.paragraphs().stream().map(this::paragraphText)
+        String value = cell.paragraphs().stream().map(this::paragraphText)
                 .map(this::cleanRasterGridArtifacts)
-                .filter(value -> !value.isBlank()).reduce((first, second) -> first + "\n" + second).orElse("");
+                .filter(text -> !text.isBlank()).reduce((first, second) -> first + "\n" + second).orElse("");
+        return SpreadsheetValueParser.normalizeCellText(value);
     }
 
     /** Tesseract can read a thin table rule as a pipe at the cell edge. */

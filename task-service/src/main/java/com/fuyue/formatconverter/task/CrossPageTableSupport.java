@@ -106,9 +106,10 @@ final class CrossPageTableSupport {
     }
 
     private static String cellText(CellModel cell) {
-        return cell.paragraphs().stream().flatMap(paragraph -> paragraph.runs().stream())
+        String value = cell.paragraphs().stream().flatMap(paragraph -> paragraph.runs().stream())
                 .sorted(Comparator.comparingDouble(TextBlock::baselineY).thenComparingDouble(block -> block.box().x()))
                 .map(TextBlock::text).reduce("", String::concat).strip();
+        return SpreadsheetValueParser.normalizeCellText(value);
     }
 
     record Continuation(int fromPage, int toPage, boolean repeatedHeader) { }

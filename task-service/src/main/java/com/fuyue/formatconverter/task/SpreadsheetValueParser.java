@@ -25,6 +25,17 @@ final class SpreadsheetValueParser {
 
     private SpreadsheetValueParser() { }
 
+    /**
+     * Fixed-layout engines may wrap a formula-looking cell across visual lines.
+     * Keep ordinary multiline text intact, but remove those layout line breaks
+     * before formula allow-listing and text export.
+     */
+    static String normalizeCellText(String raw) {
+        if (raw == null) return "";
+        String value = raw.strip();
+        return value.startsWith("=") ? value.replace("\r", "").replace("\n", "") : value;
+    }
+
     static ParsedValue parse(String raw) {
         if (raw == null || raw.isBlank() || raw.contains("\n") || raw.contains("\r")) {
             return ParsedValue.text();
