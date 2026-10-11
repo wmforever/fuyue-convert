@@ -4,29 +4,29 @@ import path from 'node:path'
 
 const ELECTRON_LICENSE_SHA256 = '5154e165bd6c2cc0cfbcd8916498c7abab0497923bafcd5cb07673fe8480087d'
 const ELECTRON_RUNTIME_IDENTITIES = new Map([
-  ['44.0.0:win32:x64', Object.freeze({
-    archiveName: 'electron-v44.0.0-win32-x64.zip',
-    archiveSha256: 'e61aa3bcea8152bc0730abd015e47c032d778a0ef10e2a1c78ba3c4ea47942f9',
+  ['44.7.0:win32:x64', Object.freeze({
+    archiveName: 'electron-v44.7.0-win32-x64.zip',
+    archiveSha256: 'eee30dc8fa1f5ea95490e59f44e46ea68dd24c6e93d22facf70fe5c2d4c2665c',
     licenseSha256: ELECTRON_LICENSE_SHA256,
-    chromiumLicensesSha256: 'f2310820377f4d8f2a5f6bc8744b985d6772cef9ee7d8d197b01fdb330db0bb8',
+    chromiumLicensesSha256: 'e6e6b1f9cb0f32235412be113de7716333e88121f9159a0ea0ff3be652021af7',
     licenseBytes: 1_096,
-    chromiumLicensesBytes: 20_472_827
+    chromiumLicensesBytes: 20_477_229
   })],
-  ['44.0.0:darwin:x64', Object.freeze({
-    archiveName: 'electron-v44.0.0-darwin-x64.zip',
-    archiveSha256: '28429e700ad68d9624aaa90b6543ffe891a48c14121fd904cd294e5edcee63ff',
+  ['44.7.0:darwin:x64', Object.freeze({
+    archiveName: 'electron-v44.7.0-darwin-x64.zip',
+    archiveSha256: '4fe494a7159b10a81e2098dab388719582065e99e604c4510bb117e282213566',
     licenseSha256: ELECTRON_LICENSE_SHA256,
-    chromiumLicensesSha256: '4cbde8e3e7b29f451c78a44491fb32e2202884826fef47786a9cda5a36110525',
+    chromiumLicensesSha256: '3375e2a9bd7bc631738fde10be6548a76efe8cf5e4b8826b8140ba8b0c4d6353',
     licenseBytes: 1_096,
-    chromiumLicensesBytes: 20_111_206
+    chromiumLicensesBytes: 20_115_518
   })],
-  ['44.0.0:darwin:arm64', Object.freeze({
-    archiveName: 'electron-v44.0.0-darwin-arm64.zip',
-    archiveSha256: '076d79742986e1b100b69ebecc691cb07368045e54c9087cef631b8622b76a80',
+  ['44.7.0:darwin:arm64', Object.freeze({
+    archiveName: 'electron-v44.7.0-darwin-arm64.zip',
+    archiveSha256: 'e04e411b58a0a14375dd21b0ab4a378fd38930a702e4e20e322fee4849404c0b',
     licenseSha256: ELECTRON_LICENSE_SHA256,
-    chromiumLicensesSha256: '4cbde8e3e7b29f451c78a44491fb32e2202884826fef47786a9cda5a36110525',
+    chromiumLicensesSha256: '3375e2a9bd7bc631738fde10be6548a76efe8cf5e4b8826b8140ba8b0c4d6353',
     licenseBytes: 1_096,
-    chromiumLicensesBytes: 20_111_206
+    chromiumLicensesBytes: 20_115_518
   })]
 ])
 

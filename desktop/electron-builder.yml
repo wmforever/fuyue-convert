@@ -10,11 +10,11 @@ electronDownload:
   force: false
   unsafelyDisableChecksums: false
   checksums:
-    electron-v44.0.0-win32-x64.zip: e61aa3bcea8152bc0730abd015e47c032d778a0ef10e2a1c78ba3c4ea47942f9
-    electron-v44.0.0-darwin-x64.zip: 28429e700ad68d9624aaa90b6543ffe891a48c14121fd904cd294e5edcee63ff
-    electron-v44.0.0-darwin-arm64.zip: 076d79742986e1b100b69ebecc691cb07368045e54c9087cef631b8622b76a80
-    electron-v44.0.0-linux-x64.zip: d65286d812719f2b4c1a1b806a80f288a1058c89c7b058dae1e03ab25e499446
-    electron-v44.0.0-linux-arm64.zip: 74b6f18bc29c0d52cf8e963c45d476800419097c6f3d53b27c5df335207e52bb
+    electron-v44.7.0-win32-x64.zip: eee30dc8fa1f5ea95490e59f44e46ea68dd24c6e93d22facf70fe5c2d4c2665c
+    electron-v44.7.0-darwin-x64.zip: 4fe494a7159b10a81e2098dab388719582065e99e604c4510bb117e282213566
+    electron-v44.7.0-darwin-arm64.zip: e04e411b58a0a14375dd21b0ab4a378fd38930a702e4e20e322fee4849404c0b
+    electron-v44.7.0-linux-x64.zip: 3ae7d5bdad61c664486c6ab61361dd084d064c8c08af8d13a687096e18ce555a
+    electron-v44.7.0-linux-arm64.zip: 9cd736d1f5873839553c3fa6c8c5e57635ec4a399cc2d32e79c82a02d9cd2258
 electronFuses:
   runAsNode: false
   enableNodeOptionsEnvironmentVariable: false

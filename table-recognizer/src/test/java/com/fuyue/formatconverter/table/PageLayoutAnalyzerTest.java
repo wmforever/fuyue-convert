@@ -67,6 +67,53 @@ class PageLayoutAnalyzerTest {
         assertEquals(0, analyzed.paragraphs().size());
     }
 
+    @Test void keepsWideTwoColumnBodyTextOutOfBorderlessTables() {
+        List<TextBlock> blocks = List.of(
+                text("left-1", 15, 20, 92, "正文左栏第一段包含较长的连续说明文字", 25),
+                text("right-1", 125, 20, 70, "正文右栏第一段包含较长的连续说明文字", 25),
+                text("left-2", 15, 35, 92, "正文左栏第二段包含较长的连续说明文字", 40),
+                text("right-2", 125, 35, 70, "正文右栏第二段包含较长的连续说明文字", 40),
+                text("left-3", 15, 50, 92, "正文左栏第三段包含较长的连续说明文字", 55),
+                text("right-3", 125, 50, 70, "正文右栏第三段包含较长的连续说明文字", 55),
+                text("left-4", 15, 65, 92, "正文左栏第四段包含较长的连续说明文字", 70),
+                text("right-4", 125, 65, 70, "正文右栏第四段包含较长的连续说明文字", 70));
+
+        PageModel analyzed = new PageLayoutAnalyzer().analyze(new PageModel(1, new Rect(0, 0, 210, 297),
+                blocks, List.of(), List.of(), List.of(), List.of(), List.of()));
+
+        assertEquals(0, analyzed.tables().size());
+        assertEquals(blocks.size(), analyzed.paragraphs().size());
+    }
+
+    @Test void keepsWideEnglishBodyTextOutOfBorderlessTables() {
+        List<TextBlock> blocks = List.of(
+                text("left-1", 15, 20, 92, "The left column contains a long explanatory sentence", 25),
+                text("right-1", 125, 20, 70, "The right column contains a long explanatory sentence", 25),
+                text("left-2", 15, 35, 92, "Another paragraph continues the explanation in prose", 40),
+                text("right-2", 125, 35, 70, "Another paragraph continues the explanation in prose", 40),
+                text("left-3", 15, 50, 92, "Further details are described across this body text", 55),
+                text("right-3", 125, 50, 70, "Further details are described across this body text", 55));
+
+        PageModel analyzed = new PageLayoutAnalyzer().analyze(new PageModel(1, new Rect(0, 0, 210, 297),
+                blocks, List.of(), List.of(), List.of(), List.of(), List.of()));
+
+        assertEquals(0, analyzed.tables().size());
+    }
+
+    @Test void recognizesWideShortTextTableWithoutNumericValues() {
+        List<TextBlock> blocks = List.of(
+                text("h1", 15, 20, 18, "姓名", 25), text("h2", 125, 20, 18, "部门", 25),
+                text("r1c1", 15, 35, 18, "张三", 40), text("r1c2", 125, 35, 18, "研发", 40),
+                text("r2c1", 15, 50, 18, "李四", 55), text("r2c2", 125, 50, 18, "销售", 55),
+                text("r3c1", 15, 65, 18, "王五", 70), text("r3c2", 125, 65, 18, "财务", 70));
+
+        PageModel analyzed = new PageLayoutAnalyzer().analyze(new PageModel(1, new Rect(0, 0, 210, 297),
+                blocks, List.of(), List.of(), List.of(), List.of(), List.of()));
+
+        assertEquals(1, analyzed.tables().size());
+        assertEquals(4, analyzed.tables().get(0).rowCount());
+    }
+
     @Test void expandsOcrWordsInsideLineBlocksIntoSeparateTableColumns() {
         List<TextBlock> blocks = List.of(
                 ocrLine("Name Amount", 20, 20, 80, 5, 25,

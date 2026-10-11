@@ -87,6 +87,18 @@ public final class AlignedTextTableRecognizer implements BorderlessTableRecogniz
         }
         if (usableRows < 3 || alignmentScore / rows.size() < 0.82d) return null;
 
+        // A pair of widely separated text columns is a common body layout in
+        // reports and papers.  It has the same geometry as a two-column table,
+        // but extracting it as cells would remove the prose from the document
+        // flow.  Keep the broad layout heuristic for narrow gutters and for
+        // tables that contain an explicit numeric/date signal; reject the
+        // ambiguous, prose-only case.
+        if (columns.size() == 2 && rows.stream().allMatch(row -> row.cells().size() == 2)
+                && isWideTwoColumnGutter(page, columns) && !containsNumericSignal(rows)
+                && hasLongProse(rows)) {
+            return null;
+        }
+
         double[] xGrid = xGrid(rows, selectedColumns);
         List<Double> yGrid = yGrid(rows);
         List<CellModel> cells = new ArrayList<>();
@@ -115,6 +127,27 @@ public final class AlignedTextTableRecognizer implements BorderlessTableRecogniz
         double confidence = Math.min(0.97d, 0.84d + 0.13d * alignmentScore / rows.size());
         return new TableModel("p%d-borderless-table-%d".formatted(page.pageNumber(), index), page.pageNumber(),
                 box, toList(xGrid), yGrid, cells, List.of(), confidence, List.of());
+    }
+
+    private boolean isWideTwoColumnGutter(PageModel page, List<Double> columns) {
+        if (page.physicalBox().width() <= 0 || columns.size() != 2) return false;
+        return columns.get(1) - columns.get(0) >= page.physicalBox().width() * 0.32d;
+    }
+
+    private boolean containsNumericSignal(List<RowBand> rows) {
+        return rows.stream().flatMap(row -> row.cells().stream())
+                .map(TextBlock::text)
+                .anyMatch(value -> value.chars().anyMatch(Character::isDigit));
+    }
+
+    private boolean hasLongProse(List<RowBand> rows) {
+        List<String> values = rows.stream().flatMap(row -> row.cells().stream())
+                .map(TextBlock::text).toList();
+        if (values.size() < 6) return false;
+        long longCells = values.stream().filter(value -> value.codePointCount(0, value.length()) >= 12).count();
+        double averageLength = values.stream()
+                .mapToInt(value -> value.codePointCount(0, value.length())).average().orElse(0d);
+        return longCells >= Math.ceil(values.size() * 0.75d) && averageLength >= 12d;
     }
 
     private List<RowBand> rows(List<TextBlock> source) {

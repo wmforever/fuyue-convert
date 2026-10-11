@@ -55,7 +55,7 @@ npm run dev:managed
 
 ## Windows x64 正式打包
 
-在 Windows x64 构建机安装 Maven 3.9+、Node.js 22、CMake、Visual Studio C++ Build Tools 和精确版本的 Eclipse Temurin 17.0.20.1+1，然后执行：
+在 Windows x64 构建机安装 Maven 3.9+、Node.js 22.12+、CMake、Visual Studio C++ Build Tools 和精确版本的 Eclipse Temurin 17.0.20.1+1，然后执行：
 
 ```powershell
 cd desktop
@@ -82,7 +82,7 @@ Full 版执行 `npm run dist:win:full`，产物为 `release/Fuyue-Convert-0.1.5-
 
 ## macOS 原生 Lite 打包
 
-Intel 与 Apple Silicon 必须分别在同架构 Mac 上构建，使用 Maven 3.9+、Node.js 22、CMake、Xcode Command Line Tools 和精确版本 Eclipse Temurin 17.0.20.1+1：
+Intel 与 Apple Silicon 必须分别在同架构 Mac 上构建，使用 Maven 3.9+、Node.js 22.12+、CMake、Xcode Command Line Tools 和精确版本 Eclipse Temurin 17.0.20.1+1：
 
 ```bash
 cd desktop

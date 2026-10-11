@@ -7,6 +7,9 @@
   "description": "Secure Electron shell for Fuyue Convert",
   "author": "Fuyue Convert contributors",
   "license": "Apache-2.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "electron . --dev",
     "dev:managed": "electron . --managed",
@@ -23,7 +26,47 @@
   },
   "devDependencies": {
     "cross-spawn": "7.0.6",
-    "electron": "44.0.0",
+    "electron": "44.7.0",
     "electron-builder": "26.15.3"
+  },
+  "overrides": {
+    "app-builder-lib": {
+      "@electron/get": "5.1.0"
+    },
+    "@electron/asar": {
+      "minimatch": {
+        "brace-expansion": "1.1.21"
+      }
+    },
+    "@electron/universal": {
+      "minimatch": {
+        "brace-expansion": "2.1.7"
+      }
+    },
+    "brace-expansion": "5.0.12",
+    "dir-compare": {
+      "minimatch": {
+        "brace-expansion": "1.1.21"
+      }
+    },
+    "fast-uri": "3.1.8",
+    "filelist": {
+      "minimatch": {
+        "brace-expansion": "2.1.7"
+      }
+    },
+    "glob": {
+      "minimatch": {
+        "brace-expansion": "1.1.21"
+      }
+    },
+    "http-cache-semantics": "4.3.0",
+    "minimatch": {
+      "brace-expansion": "5.0.12"
+    },
+    "undici": "7.30.0",
+    "node-gyp": {
+      "undici": "6.29.0"
+    }
   }
 }

@@ -36,7 +36,7 @@ test('Electron runtime verification requires the exact executable, version, and 
   await mkdir(dist)
   const executablePath = path.join(dist, 'electron.exe')
   await writeFile(executablePath, Buffer.alloc(1_000_000))
-  await writeFile(path.join(dist, 'version'), '44.0.0\n')
+  await writeFile(path.join(dist, 'version'), '44.7.0\n')
   const license = Buffer.alloc(1_096, 1)
   const chromiumLicenses = Buffer.alloc(1_000_000, 2)
   await writeFile(path.join(electronDirectory, 'LICENSE'), license)
@@ -49,28 +49,28 @@ test('Electron runtime verification requires the exact executable, version, and 
   }
 
   const result = await verifyElectronRuntime({
-    electronDirectory, executablePath, platform: 'win32', arch: 'x64', expectedVersion: '44.0.0', identity
+    electronDirectory, executablePath, platform: 'win32', arch: 'x64', expectedVersion: '44.7.0', identity
   })
-  assert.equal(result.version, '44.0.0')
+  assert.equal(result.version, '44.7.0')
   await assert.rejects(() => verifyElectronRuntime({
     electronDirectory,
     executablePath: path.join(electronDirectory, 'outside.exe'),
     platform: 'win32',
     arch: 'x64',
-    expectedVersion: '44.0.0',
+    expectedVersion: '44.7.0',
     identity
   }), /不在受审核 dist 目录/)
 
   await writeFile(path.join(dist, 'LICENSES.chromium.html'), Buffer.alloc(chromiumLicenses.length, 3))
   await assert.rejects(() => verifyElectronRuntime({
-    electronDirectory, executablePath, platform: 'win32', arch: 'x64', expectedVersion: '44.0.0', identity
+    electronDirectory, executablePath, platform: 'win32', arch: 'x64', expectedVersion: '44.7.0', identity
   }), /Chromium 第三方许可证与受审核平台产物不一致/)
 })
 
 test('Windows public runtime and electron-builder pin the reviewed Electron archive', async () => {
-  const identity = electronRuntimeIdentity('44.0.0', 'win32', 'x64')
+  const identity = electronRuntimeIdentity('44.7.0', 'win32', 'x64')
   assert.equal(identity.archiveSha256,
-    'e61aa3bcea8152bc0730abd015e47c032d778a0ef10e2a1c78ba3c4ea47942f9')
+    'eee30dc8fa1f5ea95490e59f44e46ea68dd24c6e93d22facf70fe5c2d4c2665c')
   const builderConfiguration = await readFile(new URL('../electron-builder.yml', import.meta.url), 'utf8')
   assert.match(builderConfiguration, /electronDownload:\s*[\s\S]*?force: false/)
   assert.match(builderConfiguration, /unsafelyDisableChecksums: false/)
@@ -82,11 +82,11 @@ test('Windows public runtime and electron-builder pin the reviewed Electron arch
 test('macOS public runtimes pin both reviewed Electron archives and licenses', async () => {
   const builderConfiguration = await readFile(new URL('../electron-builder.yml', import.meta.url), 'utf8')
   for (const arch of ['x64', 'arm64']) {
-    const identity = electronRuntimeIdentity('44.0.0', 'darwin', arch)
+    const identity = electronRuntimeIdentity('44.7.0', 'darwin', arch)
     assert.match(builderConfiguration, new RegExp(`${identity.archiveName}: ${identity.archiveSha256}`))
     assert.equal(identity.licenseSha256,
       '5154e165bd6c2cc0cfbcd8916498c7abab0497923bafcd5cb07673fe8480087d')
     assert.equal(identity.chromiumLicensesSha256,
-      '4cbde8e3e7b29f451c78a44491fb32e2202884826fef47786a9cda5a36110525')
+      '3375e2a9bd7bc631738fde10be6548a76efe8cf5e4b8826b8140ba8b0c4d6353')
   }
 })

@@ -387,15 +387,15 @@
       "licensePath": "backend/runtime/legal/java.base/LICENSE"
     },
     "electron": {
-      "version": "44.0.0",
+      "version": "44.7.0",
       "spdx": "MIT",
-      "source": "https://github.com/electron/electron/tree/v44.0.0",
+      "source": "https://github.com/electron/electron/tree/v44.7.0",
       "licensePath": "licenses/ELECTRON-LICENSE.txt"
     },
     "chromium-third-party": {
-      "version": "electron-44.0.0",
+      "version": "electron-44.7.0",
       "spdx": "LicenseRef-Chromium-Third-Party",
-      "source": "https://github.com/electron/electron/tree/v44.0.0",
+      "source": "https://github.com/electron/electron/tree/v44.7.0",
       "licensePath": "licenses/LICENSES.chromium.html"
     },
     "nsis": {

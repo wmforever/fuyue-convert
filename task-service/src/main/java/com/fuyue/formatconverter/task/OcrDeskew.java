@@ -38,6 +38,9 @@ final class OcrDeskew {
     static double detect(BufferedImage source, long deadline) {
         if (source.getWidth() < 64 || source.getHeight() < 64 || source.getWidth() > 32768 || source.getHeight() > 32768
                 || System.nanoTime() >= deadline) return 0;
+        // Deskew is an eligibility probe, not the OCR image itself. Keep enough
+        // pixels for small-font scans; the deadline checks below bound the
+        // projection search on very large pages.
         double scale = Math.min(1d, 700d / Math.max(source.getWidth(), source.getHeight()));
         int width = Math.max(1, (int) Math.round(source.getWidth() * scale));
         int height = Math.max(1, (int) Math.round(source.getHeight() * scale));

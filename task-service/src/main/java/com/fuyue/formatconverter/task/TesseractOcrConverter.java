@@ -200,7 +200,14 @@ public final class TesseractOcrConverter implements FileConverter {
         long deadline = started + settings.timeout().toNanos();
         var grid = OcrRuledGrid.detectForRecovery(pixels, physical, original,
                 Math.min(deadline, System.nanoTime() + 500_000_000L));
-        if (!OcrRuledGrid.eligible(grid, original) || !originalGeometryStable(original, pixels, physical, deadline)) return original;
+        if (!OcrRuledGrid.eligible(grid, original)) return original;
+        // Once a complete grid has been accepted, keep the original result if the
+        // optional retry no longer fits. A real OCR subprocess timeout is still
+        // propagated by recognizeOnce/runTesseract below.
+        if (!originalGeometryStable(original, pixels, physical, deadline)) {
+            if (System.nanoTime() >= deadline) throw ocrTimeout(pageNumber);
+            return original;
+        }
         List<RecognitionResult> cells = new ArrayList<>();
         int index = 0;
         for (var cell : grid.cells()) {
@@ -220,6 +227,7 @@ public final class TesseractOcrConverter implements FileConverter {
                 return original;
             } finally { Files.deleteIfExists(crop); }
         }
+        if (System.nanoTime() >= deadline) throw ocrTimeout(pageNumber);
         var selected = OcrRuledGrid.select(grid, original, cells, settings.minimumConfidence(), deadline);
         return selected.wordCount() <= limits.maxEntries() ? selected : original;
     }
@@ -233,7 +241,7 @@ public final class TesseractOcrConverter implements FileConverter {
         int index = 0;
         try {
             for (var region : regions) {
-                if (remainingTime(started).compareTo(Duration.ofSeconds(1)) <= 0) break;
+                if (remainingTime(started).compareTo(Duration.ofSeconds(1)) <= 0) return selected;
                 Path crop = Files.createTempFile(workDir, "tesseract-table-lines-", ".png");
                 try {
                     if (!ImageIO.write(region.cleaned(), "png", crop.toFile())) continue;
@@ -250,6 +258,10 @@ public final class TesseractOcrConverter implements FileConverter {
             }
         } finally { regions.forEach(r -> r.cleaned().flush()); }
         return selected;
+    }
+
+    private ConversionFailureException ocrTimeout(int pageNumber) {
+        return new ConversionFailureException("OCR_TIMEOUT", "Tesseract OCR 第 " + pageNumber + " 页超过页面识别时限");
     }
 
     private RecognitionResult retryEnhanced(RecognitionResult original, BufferedImage pixels, Path workDir,

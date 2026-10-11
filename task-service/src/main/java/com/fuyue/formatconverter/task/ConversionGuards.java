@@ -51,12 +51,14 @@ final class ConversionGuards {
     }
 
     static String runProcess(List<String> command, Map<String, String> environment,
-                             Path logFile, Duration timeout, String label)
+                            Path logFile, Duration timeout, String label)
             throws IOException, InterruptedException {
+        long deadline = System.nanoTime() + timeout.toNanos();
         Files.createDirectories(logFile.getParent());
         ProcessBuilder builder = new ProcessBuilder(command);
         if (environment != null) builder.environment().putAll(environment);
         builder.redirectErrorStream(true);
+        Set<ProcessHandle> observedDescendants = new HashSet<>();
         Process process;
         try {
             process = builder.start();
@@ -65,10 +67,13 @@ final class ConversionGuards {
                     label + "无法启动", e);
         }
         ProcessOutputCapture capture = ProcessOutputCapture.start(process, command, MAX_PROCESS_LOG_BYTES);
-        Set<ProcessHandle> observedDescendants = new HashSet<>();
+        if (System.nanoTime() >= deadline) {
+            terminateProcessTree(process, observedDescendants);
+            throw new ExternalProcessException(ExternalProcessException.Reason.TIMEOUT, null,
+                    label + "超时，输出：" + capture.finish(logFile), null);
+        }
         boolean finished;
         try {
-            long deadline = System.nanoTime() + timeout.toNanos();
             finished = false;
             boolean parentFinished = false;
             while (System.nanoTime() < deadline) {

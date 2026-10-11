@@ -33,6 +33,7 @@ public final class DefaultConverterRegistry {
         converters.add(new TextToDocxConverter());
         converters.add(new DocxToTextConverter());
         converters.add(new TextToPdfConverter());
+        converters.add(new HtmlToTextConverter());
         converters.add(new PdfToTextConverter(new PdfLayoutParser(), analyzer, pdfOcr));
         converters.add(new PdfToDocxConverter(new PdfLayoutParser(), analyzer, renderer, pdfOcr));
         converters.add(new PdfToXlsxConverter(new PdfLayoutParser(), analyzer, pdfOcr));
