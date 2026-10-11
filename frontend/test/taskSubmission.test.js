@@ -52,3 +52,22 @@ test('Excel PDF submission transmits sheet selection and pagination settings', a
     else globalThis.XMLHttpRequest = previous
   }
 })
+
+
+test('result descriptions follow the task file target route', async () => {
+  let state
+  await renderToString(createSSRApp({
+    setup(props, context) {
+      state = component.setup(props, context)
+      return () => null
+    }
+  }))
+  state.conversions.value = [
+    { id: 'ofd-to-docx', sourceFormat: 'ofd', targetFormat: 'docx', targetLabel: 'Word DOCX', status: 'available' },
+    { id: 'pdf-to-pdf-compress', sourceFormat: 'pdf', targetFormat: 'pdf-compress', targetLabel: '优化后 PDF', status: 'available' }
+  ]
+  state.selectedRouteId.value = 'ofd-to-docx'
+  state.task.value = { sourceFormat: 'pdf', targetFormat: 'pdf-compress' }
+
+  assert.equal(state.successDescription({ sourceFormat: 'pdf', targetFormat: 'pdf-compress', pageCount: 1 }), '已转换为 优化后 PDF，共 1 页')
+})

@@ -278,8 +278,12 @@ public final class ConversionTaskService implements AutoCloseable {
                     });
                     checkCancellation(record);
                     parsedPageCount = converted.pageCount();
-                    ConversionGuards.requireOutputFile(converted.path(), config.parseLimits(), "转换");
-                    produced = converted.path();
+                    // A converter is an internal extension point, but its result still
+                    // crosses the task boundary.  Keep downloads and subsequent cleanup
+                    // inside this task's output directory; otherwise a faulty converter
+                    // could publish an arbitrary local file (or make cleanup delete one).
+                    produced = requireTaskOutputPath(record, converted.path());
+                    ConversionGuards.requireOutputFile(produced, config.parseLimits(), "转换");
                     taskOutputBytes = addTaskOutputBytes(taskOutputBytes, Files.size(produced));
                     warnings.addAll(converted.warnings());
                     outputs.add(produced);
@@ -907,6 +911,29 @@ public final class ConversionTaskService implements AutoCloseable {
             throw new ConversionFailureException("TASK_OUTPUT_LIMIT_EXCEEDED",
                     label + "超过单任务输出限制：" + size + " > " + config.maxTaskOutputBytes());
         }
+    }
+
+    private Path requireTaskOutputPath(TaskRecord record, Path candidate) throws IOException {
+        if (candidate == null) {
+            throw new ConversionFailureException("CONVERTER_OUTPUT_INVALID", "转换器未返回输出文件");
+        }
+        Path outputRoot = record.taskDir.resolve("output").toAbsolutePath().normalize();
+        Path normalized = candidate.toAbsolutePath().normalize();
+        if (!normalized.startsWith(outputRoot)
+                || Files.isSymbolicLink(normalized)
+                || !Files.isDirectory(outputRoot, LinkOption.NOFOLLOW_LINKS)) {
+            throw new ConversionFailureException("CONVERTER_OUTPUT_INVALID", "转换器输出路径非法");
+        }
+        try {
+            Path realRoot = outputRoot.toRealPath();
+            Path realOutput = normalized.toRealPath();
+            if (!realOutput.startsWith(realRoot)) {
+                throw new ConversionFailureException("CONVERTER_OUTPUT_INVALID", "转换器输出路径非法");
+            }
+        } catch (NoSuchFileException e) {
+            throw new ConversionFailureException("CONVERTER_OUTPUT_INVALID", "转换器未生成输出文件");
+        }
+        return normalized;
     }
 
     private void deleteArtifactsExcept(List<Path> artifacts, Path retained) {

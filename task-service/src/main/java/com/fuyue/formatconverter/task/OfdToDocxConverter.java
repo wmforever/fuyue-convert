@@ -74,6 +74,7 @@ public final class OfdToDocxConverter implements FileConverter {
                 parsed.sourcePageCount(), pages, warnings);
         progress.update(TaskStage.RENDERING, 70);
         renderer.render(analyzed, outputPath);
+        ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "OFD 转 DOCX");
         return new ConversionOutput(outputPath, outputFileName(input.displayName()), parsed.pages().size(), warnings);
     }
 

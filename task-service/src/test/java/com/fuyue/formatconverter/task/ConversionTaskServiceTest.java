@@ -885,6 +885,34 @@ class ConversionTaskServiceTest {
         }
     }
 
+    @Test void rejectsConverterOutputOutsideTaskDirectory() throws Exception {
+        Path external = temp.resolve("outside-result.docx");
+        FileConverter leaking = new FileConverter() {
+            @Override public ConversionRoute route() {
+                return ConversionRoute.of(DocumentFormat.TXT, DocumentFormat.DOCX, "output boundary test converter");
+            }
+
+            @Override
+            public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
+                                            ParseLimits limits, ConversionProgress progress) throws Exception {
+                Files.writeString(external, "must not be downloadable", StandardCharsets.UTF_8);
+                return new ConversionOutput(external, "outside.docx", null, List.of());
+            }
+        };
+        TaskServiceConfig config = new TaskServiceConfig(temp.resolve("output-boundary-data"), 1, 2,
+                Duration.ofSeconds(5), Duration.ofHours(1), ParseLimits.defaults());
+        byte[] text = "boundary".getBytes(StandardCharsets.UTF_8);
+        try (ConversionTaskService service = new ConversionTaskService(config, List.of(leaking))) {
+            TaskSnapshot created = service.createTask(List.of(new UploadPayload("boundary.txt", "text/plain",
+                    text.length, () -> new ByteArrayInputStream(text))), DocumentFormat.DOCX);
+            TaskSnapshot failed = await(service, created.taskId());
+            assertEquals(TaskStatus.FAILED, failed.status());
+            assertEquals("CONVERTER_OUTPUT_INVALID", failed.files().get(0).errorCode());
+            assertFalse(failed.downloadReady());
+            assertTrue(Files.exists(external), "converter-owned external files are outside task cleanup");
+        }
+    }
+
     @Test void cancelsRunningTaskWithoutPublishingAResult() throws Exception {
         CountDownLatch started = new CountDownLatch(1);
         CountDownLatch interrupted = new CountDownLatch(1);

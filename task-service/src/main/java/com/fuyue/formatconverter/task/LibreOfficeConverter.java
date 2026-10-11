@@ -64,13 +64,23 @@ public final class LibreOfficeConverter implements FileConverter {
         try {
             return convertWithProfile(input, workDir, outputPath, limits, progress, outDir, profileDir);
         } finally {
-            if (windows) {
-                try (var paths = Files.walk(profileDir)) {
-                    for (Path path : paths.sorted(java.util.Comparator.reverseOrder()).toList()) Files.deleteIfExists(path);
-                } catch (IOException error) {
-                    log.warn("Could not clean temporary Office profile; retained inside managed task output");
-                }
-            }
+            // LibreOffice profiles can contain a large extension registry and
+            // are created for every conversion.  They are temporary on every
+            // platform; retaining them on Unix left one profile tree per task
+            // until the outer task directory happened to be collected.
+            deleteTemporaryDirectory(profileDir, "Office profile");
+            // The output directory is also private to this invocation.  It is
+            // usually empty after the result is moved, but a failed or
+            // interrupted engine can leave partial files behind.
+            deleteTemporaryDirectory(outDir, "Office output");
+        }
+    }
+
+    private void deleteTemporaryDirectory(Path directory, String label) {
+        try (var paths = Files.walk(directory)) {
+            for (Path path : paths.sorted(java.util.Comparator.reverseOrder()).toList()) Files.deleteIfExists(path);
+        } catch (IOException error) {
+            log.warn("Could not clean temporary {}; retained inside managed task output", label);
         }
     }
 

@@ -21,7 +21,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /** Exports recognized OFD grid tables as real XLSX cells and merged regions. */
 public final class OfdToXlsxConverter implements FileConverter {
@@ -104,11 +106,9 @@ public final class OfdToXlsxConverter implements FileConverter {
                         target.setCellStyle(wrap);
                         cells++;
                         ConversionGuards.requireSpreadsheetCellCount(cells, limits);
-                        if (cell.rowSpan() > 1 || cell.columnSpan() > 1) {
-                            sheet.addMergedRegion(new CellRangeAddress(rowIndex,
-                                    rowIndex + cell.rowSpan() - 1, cell.column(),
-                                    cell.column() + cell.columnSpan() - 1));
-                        }
+                    }
+                    for (CellRangeAddress region : mergedRegions(table, rowOffset)) {
+                        sheet.addMergedRegion(region);
                     }
                     for (int row = 0; row < table.rowCount(); row++) {
                         Row target = sheet.getRow(rowOffset + row);
@@ -126,6 +126,34 @@ public final class OfdToXlsxConverter implements FileConverter {
             }
             try (var stream = Files.newOutputStream(output)) { workbook.write(stream); }
         }
+    }
+
+    /** Applies recognizer spans and explicit merge metadata without allowing
+     * malformed or overlapping regions to abort an otherwise valid workbook. */
+    static List<CellRangeAddress> mergedRegions(TableModel table, int rowOffset) {
+        Map<String, CellRangeAddress> unique = new LinkedHashMap<>();
+        for (CellModel cell : table.cells()) {
+            addMerge(unique, rowOffset, table, cell.row(), cell.column(), cell.rowSpan(), cell.columnSpan());
+        }
+        for (var merge : table.merges()) {
+            addMerge(unique, rowOffset, table, merge.row(), merge.column(), merge.rowSpan(), merge.columnSpan());
+        }
+        return List.copyOf(unique.values());
+    }
+
+    private static void addMerge(Map<String, CellRangeAddress> unique, int rowOffset, TableModel table,
+                                 int row, int column, int rowSpan, int columnSpan) {
+        if (row < 0 || column < 0 || rowSpan < 1 || columnSpan < 1
+                || rowSpan < 2 && columnSpan < 2
+                || rowSpan > table.rowCount() - row || columnSpan > table.columnCount() - column) return;
+        int firstRow = rowOffset + row;
+        int lastRow = firstRow + rowSpan - 1;
+        int lastColumn = column + columnSpan - 1;
+        String key = firstRow + ":" + lastRow + ":" + column + ":" + lastColumn;
+        if (unique.containsKey(key)) return;
+        CellRangeAddress candidate = new CellRangeAddress(firstRow, lastRow, column, lastColumn);
+        if (unique.values().stream().anyMatch(existing -> existing.intersects(candidate))) return;
+        unique.put(key, candidate);
     }
 
     private String cellText(CellModel cell) {

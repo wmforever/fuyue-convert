@@ -78,6 +78,7 @@ public final class OfdToTextConverter implements FileConverter {
         pages.forEach(page -> warnings.addAll(page.warnings()));
         progress.update(TaskStage.RENDERING, 80);
         Files.writeString(outputPath, text(pages), StandardCharsets.UTF_8);
+        ConversionGuards.requireOutputFile(outputPath, limits, "OFD 转 TXT");
         return new ConversionOutput(outputPath, outputFileName(input.displayName()), parsed.pages().size(), warnings);
     }
 

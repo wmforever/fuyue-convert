@@ -1533,8 +1533,14 @@ async function copyDiagnostics() {
 }
 
 function successDescription(file) {
-  const pages = Number.isInteger(file.pageCount) ? `，共 ${file.pageCount} 页` : ''
-  return `已转换为 ${selectedRoute.value.targetLabel}${pages}`
+  const targetFormat = file?.targetFormat || task.value?.targetFormat
+  const sourceFormat = file?.sourceFormat || task.value?.sourceFormat
+  const route = conversions.value.find(candidate => candidate.targetFormat === targetFormat
+    && (!sourceFormat || candidate.sourceFormat === sourceFormat))
+    || conversions.value.find(candidate => candidate.targetFormat === targetFormat)
+  const targetLabel = route?.targetLabel || selectedRoute.value?.targetLabel || targetFormat?.toUpperCase() || '输出文件'
+  const pages = Number.isInteger(file?.pageCount) ? `，共 ${file.pageCount} 页` : ''
+  return `已转换为 ${targetLabel}${pages}`
 }
 
 watch(watermarkPreviewFile, file => void loadWatermarkPreview(file), { flush: 'post' })

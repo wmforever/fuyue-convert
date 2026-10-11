@@ -58,6 +58,14 @@ class LibreOfficeFailureContractTest {
         assertTrue(error.getMessage().contains("文件结构无效"));
         assertFalse(error.getMessage().contains("source file could not be loaded"));
         assertFalse(error.getMessage().contains("sensitive-path"));
+        try (var files = Files.list(temp.resolve("process-work"))) {
+            assertTrue(files.noneMatch(path -> path.getFileName().toString().startsWith("office-profile-")),
+                    "LibreOffice 临时 profile 应在转换结束后清理");
+        }
+        try (var files = Files.list(temp.resolve("process-work"))) {
+            assertTrue(files.noneMatch(path -> path.getFileName().toString().startsWith("office-output-")),
+                    "LibreOffice 临时输出目录应在转换结束后清理");
+        }
     }
 
     @Test

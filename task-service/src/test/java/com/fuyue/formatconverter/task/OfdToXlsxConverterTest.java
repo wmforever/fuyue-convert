@@ -7,6 +7,7 @@ import com.fuyue.formatconverter.table.PageLayoutAnalyzer;
 import com.fuyue.formatconverter.model.PageModel;
 import com.fuyue.formatconverter.model.Rect;
 import com.fuyue.formatconverter.model.TableModel;
+import com.fuyue.formatconverter.model.MergeCellModel;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
@@ -76,6 +77,18 @@ class OfdToXlsxConverterTest {
 
         assertEquals("NO_TABLE_FOUND", failure.code());
         assertTrue(Files.notExists(temp.resolve("no-table.xlsx")));
+    }
+
+    @Test
+    void filtersInvalidAndOverlappingExplicitMergeMetadata() {
+        TableModel table = new TableModel("invalid-merges", 1, new Rect(0, 0, 30, 20),
+                List.of(0d, 10d, 20d, 30d), List.of(0d, 10d, 20d), List.of(),
+                List.of(new MergeCellModel(0, 0, 1, 2, 0.9d),
+                        new MergeCellModel(0, 1, 1, 2, 0.9d),
+                        new MergeCellModel(0, 2, 0, 2, 0.9d)), 0.9d, List.of());
+
+        assertEquals(List.of(new CellRangeAddress(0, 0, 0, 1)),
+                OfdToXlsxConverter.mergedRegions(table, 0));
     }
 
     @Test
