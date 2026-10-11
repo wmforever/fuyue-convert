@@ -1,6 +1,13 @@
 package com.fuyue.formatconverter.task;
 
 import com.fuyue.formatconverter.parser.ParseLimits;
+import com.fuyue.formatconverter.model.CellModel;
+import com.fuyue.formatconverter.model.MergeCellModel;
+import com.fuyue.formatconverter.model.FontStyle;
+import com.fuyue.formatconverter.model.PageModel;
+import com.fuyue.formatconverter.model.ParagraphModel;
+import com.fuyue.formatconverter.model.Rect;
+import com.fuyue.formatconverter.model.TableModel;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -15,6 +22,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -108,6 +116,64 @@ class PdfToXlsxConverterTest {
             assertEquals(CellType.STRING, row.getCell(5).getCellType());
             assertEquals("=WEBSERVICE(A1)", row.getCell(5).getStringCellValue());
         }
+    }
+
+    @Test
+    void appliesExplicitMergeMetadataWhenCellsAreAtomic() {
+        CellModel left = new CellModel(0, 0, 1, 1, new Rect(0, 0, 10, 10),
+                List.of(), null, null, null, null, null,
+                ParagraphModel.Alignment.LEFT, CellModel.VerticalAlignment.CENTER);
+        CellModel right = new CellModel(0, 1, 1, 1, new Rect(10, 0, 10, 10),
+                List.of(), null, null, null, null, null,
+                ParagraphModel.Alignment.LEFT, CellModel.VerticalAlignment.CENTER);
+        TableModel table = new TableModel("metadata-merge", 1, new Rect(0, 0, 20, 10),
+                List.of(0d, 10d, 20d), List.of(0d, 10d), List.of(left, right),
+                List.of(new MergeCellModel(0, 0, 1, 2, 0.95d)), 0.95d, List.of());
+
+        assertEquals(List.of(new CellRangeAddress(7, 7, 0, 1)),
+                PdfToXlsxConverter.mergedRegions(table, 7));
+    }
+
+    @Test
+    void detectsConservativeCrossPageContinuationAndRepeatedHeader() {
+        PageModel first = pageWithTable(1, 75, "列名");
+        PageModel second = pageWithTable(2, 0, "列名");
+
+        List<PdfToXlsxConverter.TableContinuation> continuations =
+                PdfToXlsxConverter.detectContinuations(List.of(first, second));
+
+        assertEquals(1, continuations.size());
+        assertEquals(1, continuations.get(0).fromPage());
+        assertEquals(2, continuations.get(0).toPage());
+        assertTrue(continuations.get(0).repeatedHeader());
+    }
+
+    private PageModel pageWithTable(int pageNumber, double tableY, String header) {
+        CellModel cell = new CellModel(0, 0, 1, 1, new Rect(10, tableY, 40, 10),
+                List.of(new ParagraphModel(new Rect(10, tableY, 40, 10),
+                        List.of(new com.fuyue.formatconverter.model.TextBlock("header-" + pageNumber,
+                                pageNumber, new Rect(12, tableY + 2, 20, 5), header, tableY + 7,
+                                FontStyle.defaults(), 0)), ParagraphModel.Alignment.LEFT, 0)),
+                null, null, null, null, null, ParagraphModel.Alignment.LEFT,
+                CellModel.VerticalAlignment.CENTER);
+        TableModel table = new TableModel("table-" + pageNumber, pageNumber,
+                new Rect(10, tableY, 80, 25), List.of(10d, 50d, 90d),
+                List.of(tableY, tableY + 10, tableY + 25), List.of(cell), List.of(),
+                0.95d, List.of());
+        return new PageModel(pageNumber, new Rect(0, 0, 100, 100), List.of(), List.of(), List.of(),
+                List.of(), List.of(table), List.of());
+    }
+
+    @Test
+    void ignoresInvalidAndOverlappingMergeMetadata() {
+        TableModel table = new TableModel("invalid-merges", 1, new Rect(0, 0, 30, 20),
+                List.of(0d, 10d, 20d, 30d), List.of(0d, 10d, 20d), List.of(),
+                List.of(new MergeCellModel(0, 0, 1, 2, 0.9d),
+                        new MergeCellModel(0, 1, 1, 2, 0.9d),
+                        new MergeCellModel(0, 2, 0, 2, 0.9d)), 0.9d, List.of());
+
+        assertEquals(List.of(new CellRangeAddress(0, 0, 0, 1)),
+                PdfToXlsxConverter.mergedRegions(table, 0));
     }
 
     private Path tablePdf() throws Exception {

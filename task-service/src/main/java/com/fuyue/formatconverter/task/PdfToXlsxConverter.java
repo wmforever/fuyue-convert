@@ -7,6 +7,7 @@ import com.fuyue.formatconverter.model.PageModel;
 import com.fuyue.formatconverter.model.ParagraphModel;
 import com.fuyue.formatconverter.model.TableModel;
 import com.fuyue.formatconverter.model.TextBlock;
+import com.fuyue.formatconverter.model.WarningCode;
 import com.fuyue.formatconverter.parser.ParseLimits;
 import com.fuyue.formatconverter.table.PageLayoutAnalyzer;
 import org.apache.poi.ss.usermodel.BorderStyle;
@@ -25,7 +26,9 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,7 +65,7 @@ public final class PdfToXlsxConverter implements FileConverter {
                 ocr == null ? List.of() : List.of(ocr.engineName().toLowerCase(java.util.Locale.ROOT)),
                 List.of(ocr == null ? "扫描型 PDF 需要 OCR；无线表格和复杂版式按正文保留"
                                 : "OCR 表格必须人工复核；无线表格按重复文本列保守识别",
-                        "复杂嵌套区域会平铺到二维单元格；仅识别安全公式，歧义值保留为文本"));
+                        "复杂嵌套区域会平铺到二维单元格；跨页续表保留分页工作表并提示；仅识别安全公式，歧义值保留为文本"));
     }
 
     @Override public ConversionRoute route() { return route; }
@@ -83,6 +86,13 @@ public final class PdfToXlsxConverter implements FileConverter {
                 .map(PdfToXlsxConverter::retainReliableTables).toList();
         List<ConversionWarning> warnings = new ArrayList<>(parsed.warnings());
         pages.forEach(page -> warnings.addAll(page.warnings()));
+        for (TableContinuation continuation : detectContinuations(pages)) {
+            String header = continuation.repeatedHeader() ? "检测到重复表头" : "表格列结构连续";
+            warnings.add(ConversionWarning.of(WarningCode.TABLE_CONTINUATION_DETECTED,
+                    "第%d页表格可能是第%d页续表（%s）；当前按页保留工作表，请人工确认是否需要合并。"
+                            .formatted(continuation.toPage(), continuation.fromPage(), header),
+                    continuation.toPage()));
+        }
         progress.update(TaskStage.RENDERING, 75);
         writeWorkbook(pages, outputPath, limits);
         ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "PDF 转 XLSX");
@@ -97,6 +107,72 @@ public final class PdfToXlsxConverter implements FileConverter {
         return new PageModel(page.pageNumber(), page.physicalBox(), page.textBlocks(), page.lines(), page.images(),
                 page.paragraphs(), reliable, page.warnings());
     }
+
+    /**
+     * Finds conservative cross-page table continuations without changing the
+     * existing one-sheet-per-page output contract. A continuation requires
+     * adjacent pages, one table per page, matching columns and table margins
+     * near the page edges. Matching first-row text is reported as a repeated
+     * header but is not required (some PDFs omit the header on continuation
+     * pages).
+     */
+    static List<TableContinuation> detectContinuations(List<PageModel> pages) {
+        List<TableContinuation> result = new ArrayList<>();
+        for (int i = 0; i + 1 < pages.size(); i++) {
+            PageModel from = pages.get(i);
+            PageModel to = pages.get(i + 1);
+            if (to.pageNumber() != from.pageNumber() + 1
+                    || from.tables().size() != 1 || to.tables().size() != 1) continue;
+            TableModel first = from.tables().get(0);
+            TableModel second = to.tables().get(0);
+            if (!matchingColumns(first, second)
+                    || !nearPageBoundary(from, first, false)
+                    || !nearPageBoundary(to, second, true)) continue;
+            result.add(new TableContinuation(from.pageNumber(), to.pageNumber(),
+                    sameFirstRow(first, second)));
+        }
+        return List.copyOf(result);
+    }
+
+    private static boolean matchingColumns(TableModel first, TableModel second) {
+        if (first.columnCount() < 1 || first.columnCount() != second.columnCount()) return false;
+        double firstWidth = Math.max(1d, first.box().width());
+        double secondWidth = Math.max(1d, second.box().width());
+        if (relativeDifference(firstWidth, secondWidth) > 0.08d) return false;
+        for (int column = 0; column < first.columnCount(); column++) {
+            double a = first.xGrid().get(column + 1) - first.xGrid().get(column);
+            double b = second.xGrid().get(column + 1) - second.xGrid().get(column);
+            if (relativeDifference(a, b) > 0.12d) return false;
+        }
+        return true;
+    }
+
+    private static boolean nearPageBoundary(PageModel page, TableModel table, boolean top) {
+        double pageHeight = Math.max(1d, page.physicalBox().height());
+        double gap = top ? table.box().y() - page.physicalBox().y()
+                : page.physicalBox().bottom() - table.box().bottom();
+        return gap >= -1d && gap <= pageHeight * 0.25d;
+    }
+
+    private static double relativeDifference(double first, double second) {
+        return Math.abs(first - second) / Math.max(1d, Math.max(Math.abs(first), Math.abs(second)));
+    }
+
+    private static boolean sameFirstRow(TableModel first, TableModel second) {
+        List<String> left = first.cells().stream().filter(cell -> cell.row() == 0)
+                .sorted(Comparator.comparingInt(CellModel::column)).map(PdfToXlsxConverter::cellTextForDetection).toList();
+        List<String> right = second.cells().stream().filter(cell -> cell.row() == 0)
+                .sorted(Comparator.comparingInt(CellModel::column)).map(PdfToXlsxConverter::cellTextForDetection).toList();
+        return !left.isEmpty() && left.equals(right);
+    }
+
+    private static String cellTextForDetection(CellModel cell) {
+        return cell.paragraphs().stream().flatMap(paragraph -> paragraph.runs().stream())
+                .sorted(Comparator.comparingDouble(TextBlock::baselineY).thenComparingDouble(block -> block.box().x()))
+                .map(TextBlock::text).reduce("", String::concat).strip();
+    }
+
+    record TableContinuation(int fromPage, int toPage, boolean repeatedHeader) { }
 
     private void writeWorkbook(List<PageModel> pages, Path output, ParseLimits limits) throws Exception {
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
@@ -189,10 +265,12 @@ public final class PdfToXlsxConverter implements FileConverter {
             writeCellValue(target, value, style, numberStyle, integerStyle, percentStyle, dateStyle, formulaStyle);
             cells++;
             ConversionGuards.requireSpreadsheetCellCount(cells, limits);
-            if (cell.rowSpan() > 1 || cell.columnSpan() > 1) {
-                sheet.addMergedRegion(new CellRangeAddress(rowIndex, rowIndex + cell.rowSpan() - 1,
-                        cell.column(), cell.column() + cell.columnSpan() - 1));
-            }
+        }
+        // Some recognizers keep merge geometry in TableModel.merges while
+        // emitting atomic CellModel entries.  Apply both sources, de-duping
+        // ranges so POI never sees overlapping duplicate regions.
+        for (CellRangeAddress region : mergedRegions(table, rowOffset)) {
+            sheet.addMergedRegion(region);
         }
         for (int row = 0; row < table.rowCount(); row++) {
             Row target = sheet.getRow(rowOffset + row);
@@ -206,6 +284,40 @@ public final class PdfToXlsxConverter implements FileConverter {
             sheet.setColumnWidth(column, Math.min(255 * 256, Math.max(1, width)));
         }
         return cells;
+    }
+
+    /**
+     * Returns valid merged regions from both cell spans and the recognizer's
+     * explicit merge metadata. Invalid/out-of-bounds metadata is ignored so a
+     * malformed candidate cannot abort an otherwise usable workbook export.
+     */
+    static List<CellRangeAddress> mergedRegions(TableModel table, int rowOffset) {
+        Map<String, CellRangeAddress> unique = new LinkedHashMap<>();
+        for (CellModel cell : table.cells()) {
+            addMerge(unique, rowOffset, table, cell.row(), cell.column(), cell.rowSpan(), cell.columnSpan());
+        }
+        for (var merge : table.merges()) {
+            addMerge(unique, rowOffset, table, merge.row(), merge.column(), merge.rowSpan(), merge.columnSpan());
+        }
+        return List.copyOf(unique.values());
+    }
+
+    private static void addMerge(Map<String, CellRangeAddress> unique, int rowOffset, TableModel table,
+                                 int row, int column, int rowSpan, int columnSpan) {
+        if (row < 0 || column < 0 || rowSpan < 1 || columnSpan < 1
+                || rowSpan < 2 && columnSpan < 2
+                || rowSpan > table.rowCount() - row || columnSpan > table.columnCount() - column) return;
+        int firstRow = rowOffset + row;
+        int lastRow = firstRow + rowSpan - 1;
+        int lastColumn = column + columnSpan - 1;
+        String key = firstRow + ":" + lastRow + ":" + column + ":" + lastColumn;
+        if (unique.containsKey(key)) return;
+        CellRangeAddress candidate = new CellRangeAddress(firstRow, lastRow, column, lastColumn);
+        // POI rejects intersecting merged ranges. Keep the first validated
+        // region and ignore later ambiguous candidates rather than failing the
+        // whole workbook because of one malformed recognizer result.
+        if (unique.values().stream().anyMatch(existing -> existing.intersects(candidate))) return;
+        unique.put(key, candidate);
     }
 
     private void writeCellValue(Cell cell, String value, CellStyle textStyle, CellStyle numberStyle,
