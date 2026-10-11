@@ -271,29 +271,43 @@ public final class TesseractOcrConverter implements FileConverter {
         BufferedImage enhanced = OcrContrastEnhancer.enhance(pixels);
         if (enhanced == null) return original;
         Path temporary = null;
+        String candidateName = "tesseract-enhanced-page-%04d".formatted(pageNumber);
+        boolean retainCandidateArtifacts = false;
         try {
             temporary = Files.createTempFile(workDir, "tesseract-enhanced-%04d-".formatted(pageNumber), ".png");
             if (!ImageIO.write(enhanced, "png", temporary.toFile())) return original;
             Duration remaining = remainingTime(started);
             if (remaining.compareTo(Duration.ofSeconds(1)) <= 0) return original;
             RecognitionResult candidate = recognizeOnce(temporary, workDir, pageNumber, physicalBox, dimensions,
-                    limits, "tesseract-enhanced-page-%04d".formatted(pageNumber), remaining);
+                    limits, candidateName, remaining);
             if (preferEnhanced(original, candidate, settings.minimumConfidence())) {
+                retainCandidateArtifacts = true;
                 return new RecognitionResult(candidate.blocks(), candidate.confidence(), candidate.wordCount(), true);
             }
             long deadline = started + settings.timeout().toNanos();
             var partial = OcrPartialRecovery.select(original, candidate, physicalBox, settings.minimumConfidence(),
                     .05, true, 0, deadline);
-            return partial.partialRecovery() && !originalGeometryStable(original, pixels, physicalBox, deadline)
-                    ? original : partial;
+            if (partial.partialRecovery() && !originalGeometryStable(original, pixels, physicalBox, deadline)) {
+                return original;
+            }
+            retainCandidateArtifacts = partial.partialRecovery();
+            return partial;
         } catch (IOException ignored) {
             // Optional recovery must not turn a usable original recognition into a failed task.
             return original;
         } finally {
             enhanced.flush();
+            if (!retainCandidateArtifacts) cleanupOptionalRecognition(workDir, candidateName);
             if (temporary != null) {
                 try { Files.deleteIfExists(temporary); } catch (IOException ignored) { }
             }
+        }
+    }
+
+    private static void cleanupOptionalRecognition(Path workDir, String name) {
+        for (String suffix : new String[]{".tsv", ".log"}) {
+            try { Files.deleteIfExists(workDir.resolve(name + suffix)); }
+            catch (IOException ignored) { }
         }
     }
 
