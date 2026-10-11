@@ -106,18 +106,21 @@ final class SpreadsheetPdfPreparation {
                     ZipEntry copy = new ZipEntry(entry.getName());
                     if (entry.getTime() >= 0) copy.setTime(entry.getTime());
                     output.putNextEntry(copy);
-                    if (entry.getName().equals("xl/workbook.xml")) {
-                        output.write(workbookBytes);
-                        actualExpanded += workbookSource.length;
-                    } else {
-                        try (var input = bounded(zip.getInputStream(entry), Math.min(limits.maxEntryBytes(), limits.maxExpandedBytes() - actualExpanded))) {
-                            if (fitParts.contains(entry.getName())) fitWorksheet(input, output);
-                            else input.transferTo(output);
-                            actualExpanded += input.bytesRead;
+                    LimitedEntryOutputStream entryOutput = new LimitedEntryOutputStream(output,
+                            limits.maxEntryBytes(), limits.maxExpandedBytes() - actualExpanded);
+                    try {
+                        if (entry.getName().equals("xl/workbook.xml")) {
+                            entryOutput.write(workbookBytes);
+                        } else {
+                            try (var input = bounded(zip.getInputStream(entry), Math.min(limits.maxEntryBytes(), limits.maxExpandedBytes() - actualExpanded))) {
+                                if (fitParts.contains(entry.getName())) fitWorksheet(input, entryOutput);
+                                else input.transferTo(entryOutput);
+                            }
                         }
+                    } finally {
+                        actualExpanded = Math.addExact(actualExpanded, entryOutput.bytesWritten());
+                        output.closeEntry();
                     }
-                    if (actualExpanded > limits.maxExpandedBytes()) throw new IOException("工作簿总展开大小超过限制");
-                    output.closeEntry();
                 }
             } catch (Exception error) {
                 Files.deleteIfExists(destination);
@@ -143,6 +146,46 @@ final class SpreadsheetPdfPreparation {
 
     private static BoundedInput bounded(InputStream source, long limit) {
         return new BoundedInput(source, limit);
+    }
+
+    /** Counts the actual uncompressed payload written after XML rewriting. */
+    private static final class LimitedEntryOutputStream extends OutputStream {
+        private final OutputStream delegate;
+        private final long maxEntryBytes;
+        private final long maxTotalBytes;
+        private long bytesWritten;
+
+        private LimitedEntryOutputStream(OutputStream delegate, long maxEntryBytes, long maxTotalBytes) {
+            this.delegate = delegate;
+            this.maxEntryBytes = maxEntryBytes;
+            this.maxTotalBytes = maxTotalBytes;
+        }
+
+        @Override public void write(int value) throws IOException {
+            check(1);
+            delegate.write(value);
+            bytesWritten++;
+        }
+
+        @Override public void write(byte[] bytes, int offset, int length) throws IOException {
+            if (bytes == null) throw new NullPointerException("bytes");
+            if (offset < 0 || length < 0 || offset > bytes.length - length) throw new IndexOutOfBoundsException();
+            if (length == 0) return;
+            check(length);
+            delegate.write(bytes, offset, length);
+            bytesWritten += length;
+        }
+
+        private void check(long additional) throws IOException {
+            if (additional > maxEntryBytes - bytesWritten) {
+                throw new IOException("工作簿重写条目超过展开大小限制");
+            }
+            if (additional > maxTotalBytes - bytesWritten) {
+                throw new IOException("工作簿重写总展开大小超过限制");
+            }
+        }
+
+        private long bytesWritten() { return bytesWritten; }
     }
 
     private static final class BoundedInput extends FilterInputStream {

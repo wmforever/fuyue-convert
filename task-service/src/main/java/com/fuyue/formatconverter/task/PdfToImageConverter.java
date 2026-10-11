@@ -111,6 +111,8 @@ abstract class PdfToImageConverter implements FileConverter {
         progress.update(TaskStage.PACKAGING, 90);
         if (pages.size() == 1) {
             Files.move(pages.get(0), outputPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            ConversionGuards.requireNonEmptyOutputFile(outputPath, limits,
+                    "PDF 单页 " + targetFormat.label());
             return new ConversionOutput(outputPath, outputName(input.displayName(), plan), 1, List.of());
         }
         return packagePages(input, outputPath, pages, plan.pages(), limits);

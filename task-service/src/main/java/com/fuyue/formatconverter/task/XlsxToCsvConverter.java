@@ -11,15 +11,12 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.BufferedOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public final class XlsxToCsvConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.XLSX, DocumentFormat.CSV,
@@ -114,24 +111,13 @@ public final class XlsxToCsvConverter implements FileConverter {
     }
 
     private void packageSheets(Path zipPath, List<SheetCsv> sheets, ParseLimits limits) throws Exception {
-        long expanded = 0;
-        try (ZipOutputStream zip = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(zipPath)))) {
+        try (LimitedZipOutput zip = LimitedZipOutput.open(zipPath, limits, "XLSX 多工作表 CSV ZIP")) {
             for (SheetCsv sheet : sheets) {
                 byte[] bytes = CsvToXlsxConverter.CsvSupport.write(sheet.rows()).getBytes(StandardCharsets.UTF_8);
-                if (bytes.length > limits.maxEntryBytes()) {
-                    throw new ConversionFailureException("OUTPUT_LIMIT_EXCEEDED",
-                            "工作表 CSV 超过单文件限制：" + bytes.length + " > " + limits.maxEntryBytes());
-                }
-                expanded += bytes.length;
-                if (expanded > limits.maxExpandedBytes()) {
-                    throw new ConversionFailureException("OUTPUT_LIMIT_EXCEEDED",
-                            "多工作表 CSV 总大小超过限制：" + expanded + " > " + limits.maxExpandedBytes());
-                }
-                zip.putNextEntry(new ZipEntry(String.format(Locale.ROOT, "%02d-%s.csv",
-                        sheet.index() + 1, safeSheetName(sheet.name()))));
-                zip.write(bytes);
-                zip.closeEntry();
+                zip.addBytes(String.format(Locale.ROOT, "%02d-%s.csv",
+                        sheet.index() + 1, safeSheetName(sheet.name())), bytes);
             }
+            zip.finish();
         }
     }
 

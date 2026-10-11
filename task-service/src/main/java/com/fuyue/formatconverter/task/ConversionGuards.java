@@ -4,6 +4,7 @@ import com.fuyue.formatconverter.parser.ParseLimits;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -149,6 +150,32 @@ final class ConversionGuards {
     static void requireNonEmptyOutputFile(Path path, ParseLimits limits, String label) throws IOException {
         requireOutputFile(path, limits, label);
         if (Files.size(path) == 0) throw new IOException(label + "未生成有效输出文件");
+    }
+
+    /**
+     * Reopens a generated XLSX after writing it.  ZIP size checks alone do not
+     * catch truncated worksheet XML or a missing workbook relationship, while
+     * callers otherwise only discover those errors when downloading/opening the
+     * result.  The package guard runs first so POI never inflates an unbounded
+     * or path-unsafe output package.
+     */
+    static void requireValidXlsxOutput(Path path, ParseLimits limits, String label) throws IOException {
+        requireNonEmptyOutputFile(path, limits, label);
+        OoxmlPackageGuard.requireSafeOutput(path, limits);
+        try (XSSFWorkbook workbook = new XSSFWorkbook(Files.newInputStream(path))) {
+            if (workbook.getNumberOfSheets() < 1) {
+                throw new IOException(label + "未生成工作表");
+            }
+            for (int index = 0; index < workbook.getNumberOfSheets(); index++) {
+                if (workbook.getSheetAt(index).getSheetName().isBlank()) {
+                    throw new IOException(label + "包含无效工作表名称");
+                }
+            }
+        } catch (IOException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new IOException(label + "生成的 XLSX 文件结构无效", e);
+        }
     }
 
     static void requireTotalSize(List<Path> files, ParseLimits limits, String label) throws IOException {

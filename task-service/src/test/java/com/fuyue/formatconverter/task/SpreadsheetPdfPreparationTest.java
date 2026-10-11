@@ -86,6 +86,23 @@ class SpreadsheetPdfPreparationTest {
         assertFalse(Files.exists(work.resolve("spreadsheet-print.xlsx")));
     }
 
+    @Test void enforcesExpandedLimitOnRewrittenXmlBytes() throws Exception {
+        Path source = workbook();
+        long expanded;
+        try (ZipFile zip = new ZipFile(source.toFile())) {
+            expanded = zip.stream().mapToLong(ZipEntry::getSize).sum();
+        }
+        // The source package is valid under this limit, while XML rewriting adds
+        // enough namespace/print-setting markup to exceed the output budget.
+        long outputLimit = Math.addExact(expanded, 16);
+        ParseLimits bounded = new ParseLimits(Files.size(source) + 1024,
+                outputLimit, outputLimit, 1000, 100, 10);
+        Path work = temp.resolve("rewritten-bounded");
+        assertThrows(Exception.class,
+                () -> SpreadsheetPdfPreparation.prepare(source, work, options("3", true), bounded));
+        assertFalse(Files.exists(work.resolve("spreadsheet-print.xlsx")));
+    }
+
     @Test void rejectsXmlWithExternalEntities() throws Exception {
         Path source = temp.resolve("external.xlsx");
         try (var zip = new ZipOutputStream(Files.newOutputStream(source))) {

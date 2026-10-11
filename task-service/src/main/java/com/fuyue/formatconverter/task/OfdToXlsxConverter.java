@@ -70,7 +70,7 @@ public final class OfdToXlsxConverter implements FileConverter {
         pages.forEach(page -> warnings.addAll(page.warnings()));
         progress.update(TaskStage.RENDERING, 70);
         writeWorkbook(pages, outputPath, limits);
-        ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "OFD 转 XLSX");
+        ConversionGuards.requireValidXlsxOutput(outputPath, limits, "OFD 转 XLSX");
         return new ConversionOutput(outputPath, outputFileName(input.displayName()), parsed.sourcePageCount(), warnings);
     }
 

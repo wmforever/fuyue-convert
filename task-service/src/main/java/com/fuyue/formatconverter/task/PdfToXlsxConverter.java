@@ -95,7 +95,7 @@ public final class PdfToXlsxConverter implements FileConverter {
         }
         progress.update(TaskStage.RENDERING, 75);
         writeWorkbook(pages, outputPath, limits);
-        ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "PDF 转 XLSX");
+        ConversionGuards.requireValidXlsxOutput(outputPath, limits, "PDF 转 XLSX");
         return new ConversionOutput(outputPath, outputFileName(input.displayName()),
                 parsed.sourcePageCount(), warnings);
     }

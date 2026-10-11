@@ -22,14 +22,19 @@ final class OoxmlPackageGuard {
     private OoxmlPackageGuard() { }
 
     static void requireSafe(Path packagePath, ParseLimits limits) throws IOException {
-        requireSafe(packagePath, limits, true);
+        requireSafe(packagePath, limits, true, true);
     }
 
     static void requireSafeOutput(Path packagePath, ParseLimits limits) throws IOException {
-        requireSafe(packagePath, limits, false);
+        // Generated packages are trusted and can legitimately compress much
+        // better than an uploaded package (for example, repeated CSV values
+        // in sharedStrings.xml). Keep size/path checks, but do not reject a
+        // valid result solely because it exceeds the upload ratio heuristic.
+        requireSafe(packagePath, limits, false, false);
     }
 
-    private static void requireSafe(Path packagePath, ParseLimits limits, boolean enforceArchiveLimit) throws IOException {
+    private static void requireSafe(Path packagePath, ParseLimits limits, boolean enforceArchiveLimit,
+                                    boolean enforceCompressionRatio) throws IOException {
         if (packagePath == null || !Files.isRegularFile(packagePath)) {
             throw new IOException("OOXML 文件不存在");
         }
@@ -61,7 +66,7 @@ final class OoxmlPackageGuard {
                     throw new IOException("OOXML ZIP 单个条目超过解压限制：" + name);
                 }
                 long compressed = entry.getCompressedSize();
-                if (declared >= 0 && compressed >= 0) {
+                if (enforceCompressionRatio && declared >= 0 && compressed >= 0) {
                     requireCompressionRatio(name, declared, compressed, limits.maxCompressionRatio());
                 }
 
@@ -80,7 +85,7 @@ final class OoxmlPackageGuard {
                 if (declared >= 0 && actual != declared) {
                     throw new IOException("OOXML ZIP 条目大小声明不一致：" + name);
                 }
-                if (compressed >= 0) {
+                if (enforceCompressionRatio && compressed >= 0) {
                     requireCompressionRatio(name, actual, compressed, limits.maxCompressionRatio());
                 }
             }

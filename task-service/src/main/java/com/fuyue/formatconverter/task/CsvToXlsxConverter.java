@@ -57,7 +57,7 @@ public final class CsvToXlsxConverter implements FileConverter {
         } finally {
             workbook.dispose();
         }
-        ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "CSV 转 XLSX");
+        ConversionGuards.requireValidXlsxOutput(outputPath, limits, "CSV 转 XLSX");
         return new ConversionOutput(outputPath, outputFileName(input.displayName()), null, warnings);
     }
 
