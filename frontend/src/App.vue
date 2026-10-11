@@ -32,6 +32,20 @@ const fallbackConversions = [{
   strategy: 'editable',
   requires: [],
   limitations: ['复杂签章、扫描页和厂商私有扩展需要更多样本验证']
+}, {
+  id: 'pdf-to-xlsx',
+  sourceFormat: 'pdf',
+  targetFormat: 'xlsx',
+  sourceLabel: 'PDF',
+  targetLabel: 'Excel XLSX',
+  inputExtension: '.pdf',
+  outputExtension: '.xlsx',
+  description: '识别 PDF 中的有线表格并导出为 Excel，其他正文按页保留',
+  status: 'available',
+  qualityLevel: 'experimental',
+  strategy: 'data',
+  requires: [],
+  limitations: ['无线表格和扫描表格需要 OCR 或更多样本验证']
 }]
 
 const files = ref([])

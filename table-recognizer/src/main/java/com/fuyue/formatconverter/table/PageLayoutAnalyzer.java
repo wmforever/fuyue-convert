@@ -8,12 +8,26 @@ import java.util.List;
 
 public final class PageLayoutAnalyzer {
     private final GridTableRecognizer tableRecognizer;
+    private final BorderlessTableRecognizer borderlessTableRecognizer;
 
-    public PageLayoutAnalyzer() { this(new GridTableRecognizer(TableRecognitionConfig.defaults())); }
-    public PageLayoutAnalyzer(GridTableRecognizer tableRecognizer) { this.tableRecognizer = tableRecognizer; }
+    public PageLayoutAnalyzer() {
+        this(new GridTableRecognizer(TableRecognitionConfig.defaults()), new AlignedTextTableRecognizer());
+    }
+    public PageLayoutAnalyzer(GridTableRecognizer tableRecognizer) {
+        this(tableRecognizer, new AlignedTextTableRecognizer());
+    }
+    public PageLayoutAnalyzer(GridTableRecognizer tableRecognizer, BorderlessTableRecognizer borderlessTableRecognizer) {
+        this.tableRecognizer = java.util.Objects.requireNonNull(tableRecognizer, "tableRecognizer");
+        this.borderlessTableRecognizer = java.util.Objects.requireNonNull(borderlessTableRecognizer, "borderlessTableRecognizer");
+    }
 
     public PageModel analyze(PageModel page) {
-        List<TableModel> tables = tableRecognizer.recognize(page);
+        List<TableModel> tables = new ArrayList<>(tableRecognizer.recognize(page));
+        for (TableModel candidate : borderlessTableRecognizer.recognize(page)) {
+            boolean overlapsGrid = tables.stream().anyMatch(existing -> overlap(existing.box(), candidate.box()) > 0.2d);
+            if (!overlapsGrid) tables.add(candidate);
+        }
+        tables.sort(Comparator.comparingDouble(table -> table.box().y()));
         List<TextBlock> body = page.textBlocks().stream()
                 .filter(text -> tables.stream().noneMatch(table -> table.box().contains(text.box().center(), 0.2)))
                 .sorted(Comparator.comparingDouble(TextBlock::baselineY).thenComparingDouble(t -> t.box().x()))
@@ -21,6 +35,11 @@ public final class PageLayoutAnalyzer {
         List<ParagraphModel> paragraphs = groupVisualLines(body, page.physicalBox());
         List<ConversionWarning> warnings = tables.stream().flatMap(t -> t.warnings().stream()).toList();
         return page.withLayout(paragraphs, tables, warnings);
+    }
+
+    private double overlap(Rect first, Rect second) {
+        double area = Math.max(0.0001d, Math.min(first.width() * first.height(), second.width() * second.height()));
+        return first.intersectionArea(second) / area;
     }
 
     private List<ParagraphModel> groupVisualLines(List<TextBlock> blocks, Rect page) {

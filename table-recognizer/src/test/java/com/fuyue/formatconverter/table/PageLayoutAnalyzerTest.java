@@ -49,6 +49,24 @@ class PageLayoutAnalyzerTest {
         assertEquals(ParagraphModel.Alignment.LEFT, analyzed.paragraphs().get(1).alignment());
     }
 
+    @Test void recognizesRepeatedAlignedTextAsBorderlessTable() {
+        List<TextBlock> blocks = List.of(
+                text("h1", 20, 20, 20, "Name", 25), text("h2", 80, 20, 18, "Amount", 25),
+                text("r1c1", 20, 35, 24, "Alice", 40), text("r1c2", 80, 35, 18, "12.5", 40),
+                text("r2c1", 20, 50, 22, "Bob", 55), text("r2c2", 80, 50, 18, "9.0", 55),
+                text("r3c1", 20, 65, 26, "Carol", 70), text("r3c2", 80, 65, 18, "7.5", 70));
+
+        PageModel analyzed = new PageLayoutAnalyzer().analyze(new PageModel(1, new Rect(0, 0, 210, 297),
+                blocks, List.of(), List.of(), List.of(), List.of(), List.of()));
+
+        assertEquals(1, analyzed.tables().size());
+        TableModel table = analyzed.tables().get(0);
+        assertEquals(4, table.rowCount());
+        assertEquals(2, table.columnCount());
+        assertEquals(8, table.cells().size());
+        assertEquals(0, analyzed.paragraphs().size());
+    }
+
     private TextBlock text(String id, double x, double y, double width, String value, double baseline) {
         return new TextBlock(id, 1, new Rect(x, y, width, 5.64), value, baseline,
                 new FontStyle("KaiTi", 16, false, false, ColorValue.BLACK), 0);

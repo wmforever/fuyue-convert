@@ -45,6 +45,7 @@ Lite 的 Office 高保真路线会使用电脑上已有的 LibreOffice；Full �
 | --- | --- | --- | --- |
 | OFD -> DOCX/TXT/PDF/PNG/JPG | beta | 结构/版式 | DOCX/TXT 使用结构化解析；含中日韩文字的 DOCX 嵌入已许可的回退字体，避免换机后文字不可见。未启用 OCR 时扫描页严格失败，内置或显式配置的本地 Tesseract 可对扫描区域补充坐标文字，DOCX 同时保留扫描源视觉层。PDF/PNG/JPEG 按源坐标绘制文字、图片、路径和普通图片型签章；嵌套 OFD 签章外观会明确警告并跳过，正文仍保留。图片默认 160 DPI，可按任务选择 36-600 DPI，多页输出 ZIP。 |
 | OFD -> XLSX | experimental | 数据优先 | 将高置信度有线规则表格写成真实单元格、分页工作表和合并区域；未识别到可靠表格返回 `NO_TABLE_FOUND`，扫描页返回 `OCR_REQUIRED`。 |
+| PDF -> XLSX | experimental | 数据优先 | 将高置信度有线和重复文本列无线表格写成真实单元格、分页工作表和合并区域；复杂嵌套区域平铺到二维单元格，安全数字/日期/公式按类型写入，歧义值保留为文本；表格外正文按页保留，扫描页在本地 OCR 可用时补充识别，否则返回 `OCR_REQUIRED`。 |
 | CSV <-> XLSX | stable | 数据优先 | CSV 支持 UTF-8/UTF-16 BOM/GB18030 与逗号、TAB、分号、竖线识别；输入统一写成文本以阻断公式注入。XLSX 公式导出缓存结果，日期按单元格格式输出，多工作表分别导出 CSV ZIP。 |
 | DOCX/XLSX/PPTX -> PDF | beta | 版式优先 | 有 LibreOffice 时使用隔离的 headless profile 转换，校验真实 PDF 页数；Excel 可选工作表范围、所有列放在一页宽度，保留打印区域与纵向分页。本地字体会影响结果。 |
 | TXT -> DOCX/PDF | stable | 内容优先 | 支持 UTF-8、带 BOM 的 UTF-16 和严格 GB18030 解码；换页符生成真实分页，PDF 按字形宽度进行 CJK 换行。DOCX 未显式配置东亚字体时按需嵌入内置许可字体，显式配置时保持指定字体。 |

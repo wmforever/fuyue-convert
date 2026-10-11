@@ -35,6 +35,7 @@ public final class DefaultConverterRegistry {
         converters.add(new TextToPdfConverter());
         converters.add(new PdfToTextConverter(new PdfLayoutParser(), analyzer, pdfOcr));
         converters.add(new PdfToDocxConverter(new PdfLayoutParser(), analyzer, renderer, pdfOcr));
+        converters.add(new PdfToXlsxConverter(new PdfLayoutParser(), analyzer, pdfOcr));
         converters.add(new PdfToOfdConverter());
         converters.add(new PdfToPngConverter());
         converters.add(new PdfToJpgConverter());
