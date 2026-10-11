@@ -27,6 +27,7 @@ public final class XlsxToPdfConverter implements FileConverter {
         List<List<String>> pages = new ArrayList<>();
         if (input.options().spreadsheetFitWidth()) throw new ConversionFailureException("OFFICE_REQUIRED_FOR_FIT_WIDTH",
                 "所有列放在一页宽度需要 LibreOffice；请启用 Office 引擎或选择保留原打印设置。");
+        OoxmlPackageGuard.requireSafe(input.path(), limits);
         boolean[] formulas = {false};
         long cells = 0;
         try (XSSFWorkbook workbook = new XSSFWorkbook(Files.newInputStream(input.path()))) {

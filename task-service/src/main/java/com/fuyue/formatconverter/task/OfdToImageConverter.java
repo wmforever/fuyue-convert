@@ -18,7 +18,6 @@ import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,8 +28,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /** Renders the parsed OFD fixed-layout model to one image per page. */
 abstract class OfdToImageConverter implements FileConverter {
@@ -121,7 +118,7 @@ abstract class OfdToImageConverter implements FileConverter {
         }
         Path zip = outputPath.resolveSibling(outputPath.getFileName().toString()
                 .replaceFirst("\\." + targetFormat.extension() + "$", ".zip"));
-        packagePages(zip, pages);
+        packagePages(zip, pages, limits);
         ConversionGuards.requireNonEmptyOutputFile(zip, limits, "OFD 多页图片 ZIP");
         return new ConversionOutput(zip, input.displayName().replaceFirst("(?i)\\.ofd$", "-pages.zip"),
                 pages.size(), warnings);
@@ -282,13 +279,12 @@ abstract class OfdToImageConverter implements FileConverter {
         return null;
     }
 
-    private void packagePages(Path zip, List<Path> pages) throws IOException {
-        try (ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(zip)))) {
+    private void packagePages(Path zip, List<Path> pages, ParseLimits limits) throws IOException {
+        try (LimitedZipOutput out = LimitedZipOutput.open(zip, limits, "OFD 多页图片 ZIP")) {
             for (int index = 0; index < pages.size(); index++) {
-                out.putNextEntry(new ZipEntry(pageFileName(index + 1)));
-                Files.copy(pages.get(index), out);
-                out.closeEntry();
+                out.addFile(pageFileName(index + 1), pages.get(index));
             }
+            out.finish();
         }
     }
 

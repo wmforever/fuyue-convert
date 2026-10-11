@@ -39,6 +39,7 @@ final class SpreadsheetPdfPreparation {
     }
 
     static Path prepare(Path source, Path workDir, ConversionOptions options, ParseLimits limits) throws Exception {
+        OoxmlPackageGuard.requireSafe(source, limits);
         try (ZipFile zip = new ZipFile(source.toFile())) {
             byte[] workbookSource = readPart(zip, "xl/workbook.xml", limits);
             Document workbook = parse(workbookSource);

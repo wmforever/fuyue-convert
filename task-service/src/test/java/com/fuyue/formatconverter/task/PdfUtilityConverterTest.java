@@ -2,6 +2,7 @@ package com.fuyue.formatconverter.task;
 
 import com.fuyue.formatconverter.parser.ParseLimits;
 import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.pdfparser.PDFStreamParser;
@@ -9,6 +10,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
@@ -79,6 +81,52 @@ class PdfUtilityConverterTest {
             assertTrue(zip.getEntry("page-004.pdf") != null);
             assertTrue(zip.getEntry("page-005.pdf") != null);
             assertTrue(zip.getEntry("page-001.pdf") == null);
+        }
+    }
+
+    @Test
+    void splitCopiesInheritedResourcesAndPageGeometry() throws Exception {
+        Path source = temp.resolve("inherited-resources.pdf");
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage(new PDRectangle(500, 350));
+            page.setCropBox(new PDRectangle(20, 30, 440, 280));
+            page.setRotation(90);
+            document.addPage(page);
+
+            // Put the font on the page tree instead of the page itself. This is valid
+            // PDF and exercises PDFBox's importPage inherited-resource limitation.
+            PDResources inherited = new PDResources();
+            document.getPages().getCOSObject().setItem(COSName.RESOURCES, inherited.getCOSObject());
+            PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+            inherited.add(font);
+            try (PDPageContentStream content = new PDPageContentStream(document, page)) {
+                content.beginText();
+                content.setFont(font, 18);
+                content.newLineAtOffset(60, 120);
+                content.showText("INHERITED-RESOURCE-MARKER");
+                content.endText();
+            }
+            assertFalse(page.getCOSObject().containsKey(COSName.RESOURCES));
+            document.save(source.toFile());
+        }
+
+        Path output = temp.resolve("inherited-resources-pages.zip");
+        new PdfSplitConverter().convert(input(source), temp.resolve("inherited-resources-work"), output,
+                ParseLimits.defaults(), (stage, progress) -> { });
+        try (ZipFile zip = new ZipFile(output.toFile())) {
+            Path split = temp.resolve("inherited-resource-page.pdf");
+            Files.copy(zip.getInputStream(zip.getEntry("page-001.pdf")), split);
+            try (PDDocument document = Loader.loadPDF(split.toFile())) {
+                PDPage page = document.getPage(0);
+                assertEquals(90, page.getRotation());
+                assertEquals(500f, page.getMediaBox().getWidth());
+                assertEquals(350f, page.getMediaBox().getHeight());
+                assertEquals(440f, page.getCropBox().getWidth());
+                assertEquals(280f, page.getCropBox().getHeight());
+                assertTrue(page.getCOSObject().containsKey(COSName.RESOURCES));
+                String text = new PDFTextStripper().getText(document).replaceAll("\\s+", "");
+                assertTrue(text.contains("INHERITED-RESOURCE-MARKER"), text);
+            }
         }
     }
 

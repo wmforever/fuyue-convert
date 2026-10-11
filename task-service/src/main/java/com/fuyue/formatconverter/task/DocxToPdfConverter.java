@@ -21,6 +21,7 @@ public final class DocxToPdfConverter implements FileConverter {
     public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
         progress.update(TaskStage.PARSING, 40);
+        OoxmlPackageGuard.requireSafe(input.path(), limits);
         List<String> lines = new ArrayList<>();
         try (XWPFDocument document = new XWPFDocument(Files.newInputStream(input.path()))) {
             for (var element : document.getBodyElements()) {

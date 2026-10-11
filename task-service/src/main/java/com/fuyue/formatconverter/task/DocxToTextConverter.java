@@ -32,6 +32,7 @@ public final class DocxToTextConverter implements FileConverter {
     public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
         progress.update(TaskStage.PARSING, 35);
+        OoxmlPackageGuard.requireSafe(input.path(), limits);
         StringBuilder text = new StringBuilder();
         try (XWPFDocument document = new XWPFDocument(Files.newInputStream(input.path()))) {
             document.getHeaderList().forEach(header -> appendStory(text, "页眉", header.getBodyElements()));

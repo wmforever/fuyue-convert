@@ -33,6 +33,7 @@ public final class XlsxToCsvConverter implements FileConverter {
     public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
         progress.update(TaskStage.PARSING, 30);
+        OoxmlPackageGuard.requireSafe(input.path(), limits);
         DataFormatter formatter = new DataFormatter(Locale.ROOT);
         List<SheetCsv> sheets = new ArrayList<>();
         boolean[] formulas = {false};

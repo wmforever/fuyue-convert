@@ -14,7 +14,6 @@ import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,8 +23,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 abstract class PdfToImageConverter implements FileConverter {
     private static final String APP_HOME_PROPERTY = "format.converter.app.home";
@@ -116,7 +113,7 @@ abstract class PdfToImageConverter implements FileConverter {
             Files.move(pages.get(0), outputPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             return new ConversionOutput(outputPath, outputName(input.displayName(), plan), 1, List.of());
         }
-        return packagePages(input, outputPath, pages, plan.pages());
+        return packagePages(input, outputPath, pages, plan.pages(), limits);
     }
 
     private ConversionOutput convertWithPdfBox(ConversionInput input, Path workDir, Path outputPath,
@@ -150,7 +147,7 @@ abstract class PdfToImageConverter implements FileConverter {
                 }
                 rendered.add(pageImage);
             }
-            return packagePages(input, outputPath, rendered, plan.pages());
+            return packagePages(input, outputPath, rendered, plan.pages(), limits);
         }
     }
 
@@ -245,16 +242,15 @@ abstract class PdfToImageConverter implements FileConverter {
         }
     }
 
-    private ConversionOutput packagePages(ConversionInput input, Path outputPath, List<Path> pages, List<Integer> sourcePages)
-            throws IOException {
+    private ConversionOutput packagePages(ConversionInput input, Path outputPath, List<Path> pages,
+                                          List<Integer> sourcePages, ParseLimits limits) throws IOException {
         Path zip = outputPath.resolveSibling(outputPath.getFileName().toString()
                 .replaceFirst("\\." + targetFormat.extension() + "$", ".zip"));
-        try (ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(zip)))) {
+        try (LimitedZipOutput out = LimitedZipOutput.open(zip, limits, "PDF 多页图片 ZIP")) {
             for (int i = 0; i < pages.size(); i++) {
-                out.putNextEntry(new ZipEntry(pageFileName(sourcePages.get(i))));
-                Files.copy(pages.get(i), out);
-                out.closeEntry();
+                out.addFile(pageFileName(sourcePages.get(i)), pages.get(i));
             }
+            out.finish();
         }
         return new ConversionOutput(zip, input.displayName().replaceFirst("(?i)\\.pdf$", "-pages.zip"),
                 sourcePages.size(), List.of());

@@ -21,8 +21,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public final class ConversionTaskService implements AutoCloseable {
     private static final Logger log = LoggerFactory.getLogger(ConversionTaskService.class);
@@ -421,23 +419,20 @@ public final class ConversionTaskService implements AutoCloseable {
 
     private void packageZip(Path zip, List<Path> outputs, List<TaskFileResult> results) throws IOException {
         Set<String> used = new HashSet<>();
-        try (ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(zip)))) {
+        try (LimitedZipOutput out = LimitedZipOutput.open(zip, config.parseLimits(), "批量转换 ZIP")) {
             int index = 0;
             for (TaskFileResult result : results) {
                 if (!result.success()) continue;
                 String name = uniqueName(safeArchiveEntryName(result.outputName()), used);
-                out.putNextEntry(new ZipEntry(name));
-                Files.copy(outputs.get(index++), out);
-                out.closeEntry();
+                out.addFile(name, outputs.get(index++));
             }
             String report = results.stream().filter(r -> !r.success())
                     .map(r -> r.fileName() + "\t" + r.errorCode() + "\t" + r.errorMessage())
                     .reduce("", (a, b) -> a + b + "\n");
             if (!report.isBlank()) {
-                out.putNextEntry(new ZipEntry("conversion-report.txt"));
-                out.write(report.getBytes(StandardCharsets.UTF_8));
-                out.closeEntry();
+                out.addBytes("conversion-report.txt", report.getBytes(StandardCharsets.UTF_8));
             }
+            out.finish();
         }
     }
 

@@ -51,7 +51,7 @@ public final class LibreOfficeConverter implements FileConverter {
     @Override
     public ConversionOutput convert(ConversionInput input, Path workDir, Path outputPath,
                                     ParseLimits limits, ConversionProgress progress) throws Exception {
-        validateStandardOfficePackage(input.path());
+        validateStandardOfficePackage(input.path(), limits);
         Files.createDirectories(workDir);
         Path outDir = Files.createTempDirectory(workDir, "office-output-");
         boolean windows = System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
@@ -137,7 +137,7 @@ public final class LibreOfficeConverter implements FileConverter {
         return new ConversionOutput(outputPath, outputFileName(input.displayName()), pageCount, warnings);
     }
 
-    private void validateStandardOfficePackage(Path input) throws ConversionFailureException {
+    private void validateStandardOfficePackage(Path input, ParseLimits limits) throws ConversionFailureException {
         String documentPart = switch (route.sourceFormat()) {
             case DOCX -> "word/document.xml";
             case XLSX -> "xl/workbook.xml";
@@ -146,6 +146,7 @@ public final class LibreOfficeConverter implements FileConverter {
         };
         if (documentPart == null) return;
         try (ZipFile archive = new ZipFile(input.toFile())) {
+            OoxmlPackageGuard.requireSafe(input, limits);
             requirePackagePart(archive, "[Content_Types].xml");
             requirePackagePart(archive, documentPart);
         } catch (IOException error) {
@@ -180,6 +181,9 @@ public final class LibreOfficeConverter implements FileConverter {
 
     private Integer validateOutput(Path output, DocumentFormat target, ParseLimits limits) throws IOException {
         try {
+            if (target == DocumentFormat.DOCX || target == DocumentFormat.XLSX || target == DocumentFormat.PPTX) {
+                OoxmlPackageGuard.requireSafeOutput(output, limits);
+            }
             return switch (target) {
                 case PDF -> {
                     try (var document = Loader.loadPDF(output.toFile())) {
