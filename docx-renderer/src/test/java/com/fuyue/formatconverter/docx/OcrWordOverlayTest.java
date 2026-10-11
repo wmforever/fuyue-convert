@@ -156,7 +156,7 @@ class OcrWordOverlayTest {
         }
     }
 
-    @Test void usesStandardRectTextBoxesAndOneLineFontSizeForWordsAndPunctuation() throws Exception {
+    @Test void usesStandardRectTextBoxesAndKeepsPunctuationFromChangingLineFontSize() throws Exception {
         TextBlock line = ocr(List.of(
                 new TextBlock.OcrWord(new Rect(20, 30, 14, 4), "Service", .95),
                 new TextBlock.OcrWord(new Rect(38, 30, 9, 4), "2026", .95),
@@ -168,9 +168,24 @@ class OcrWordOverlayTest {
             assertEquals(3, textBoxes.size(), "标准v:rect应避免LibreOffice对无类型v:shape额外增加默认内边距");
             assertEquals(1, textBoxes.stream().map(element -> mm(element.getAttribute("style"), "margin-top"))
                     .distinct().count(), "同一行所有词和标点必须共用稳定基线");
-            assertEquals(1, elements(xml, WORD, "sz").stream()
-                    .map(element -> element.getAttributeNS(WORD, "val")).distinct().count(),
-                    "不能根据狭小标点框单独放大或缩小字号");
+            var sizes = elements(xml, WORD, "sz").stream()
+                    .map(element -> Integer.parseInt(element.getAttributeNS(WORD, "val"))).toList();
+            assertEquals(3, sizes.size());
+            assertEquals(Math.max(sizes.get(0), sizes.get(1)), sizes.get(2),
+                    "窄标点框应使用整行字号；正常词仍可为防溢出缩小字号");
+            TextBlock normalPunctuation = ocr(List.of(line.ocrWords().get(0), line.ocrWords().get(1),
+                    new TextBlock.OcrWord(new Rect(50, 30, 4, 4), "/", .95)), line.text());
+            try (XWPFDocument reference = new XWPFDocument(Files.newInputStream(
+                    render(List.of(normalPunctuation), List.of())))) {
+                var referenceXml = xml(reference);
+                assertEquals(sizes, elements(referenceXml, WORD, "sz").stream()
+                        .map(element -> Integer.parseInt(element.getAttributeNS(WORD, "val"))).toList(),
+                        "仅改变标点框尺寸不能改变任何词的字号");
+                assertEquals(textBoxes.stream().map(element -> mm(element.getAttribute("style"), "margin-top")).toList(),
+                        elements(referenceXml, VML, "rect").stream()
+                                .filter(element -> element.getElementsByTagNameNS(WORD, "txbxContent").getLength() > 0)
+                                .map(element -> mm(element.getAttribute("style"), "margin-top")).toList());
+            }
             assertEquals("Service 2026 /", elements(xml, WORD, "t").stream()
                     .map(Element::getTextContent).reduce("", String::concat));
         }
