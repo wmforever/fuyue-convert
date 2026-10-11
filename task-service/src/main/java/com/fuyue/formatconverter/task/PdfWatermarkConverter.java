@@ -194,9 +194,7 @@ final class PdfWatermarkConverter implements FileConverter {
     }
 
     private void validateOutput(Path output, int expectedPages, ParseLimits limits) throws IOException {
-        ConversionGuards.requireNonEmptyOutputFile(output, limits, "PDF 水印");
-        int actualPages = ConversionGuards.requirePdfPageCount(output, limits);
-        if (actualPages != expectedPages) throw new IOException("水印 PDF 页数不一致");
+        ConversionGuards.requireValidPdfOutput(output, limits, "PDF 水印", expectedPages);
     }
 
     private record Point(float x, float y) { }

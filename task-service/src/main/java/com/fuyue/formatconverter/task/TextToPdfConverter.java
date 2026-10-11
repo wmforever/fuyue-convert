@@ -20,7 +20,7 @@ public final class TextToPdfConverter implements FileConverter {
         TextInputReader.DecodedText decoded = TextInputReader.read(input.path(), limits);
         progress.update(TaskStage.RENDERING, 80);
         int pages = PdfSupport.writeTextPdfPages(decoded.pages(), outputPath, limits.maxPages());
-        ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "TXT 转 PDF");
+        ConversionGuards.requireValidPdfOutput(outputPath, limits, "TXT 转 PDF", pages);
         return new ConversionOutput(outputPath, input.displayName().replaceFirst("(?i)\\.txt$", ".pdf"),
                 pages, decoded.warnings());
     }

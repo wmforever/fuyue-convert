@@ -82,7 +82,7 @@ public final class ImageToPdfConverter implements FileConverter {
             }
             document.save(outputPath.toFile());
         }
-        ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "图片转 PDF");
+        ConversionGuards.requireValidPdfOutput(outputPath, limits, "图片转 PDF", 1);
         return new ConversionOutput(outputPath,
                 input.displayName().replaceFirst("(?i)\\.(png|jpe?g)$", ".pdf"), 1, warnings);
     }
