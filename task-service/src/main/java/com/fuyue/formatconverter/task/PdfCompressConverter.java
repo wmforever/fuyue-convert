@@ -59,13 +59,13 @@ final class PdfCompressConverter implements FileConverter {
             document.save(outputPath.toFile(), CompressParameters.DEFAULT_COMPRESSION);
         }
         ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "PDF 压缩");
-        int actualPages = ConversionGuards.requirePdfPageCount(outputPath, limits);
-        if (actualPages != pageCount) throw new IOException("压缩 PDF 页数不一致");
+        ConversionGuards.requireValidPdfOutput(outputPath, limits, "PDF 压缩", pageCount);
 
         long optimizedBytes = Files.size(outputPath);
         List<ConversionWarning> warnings;
         if (optimizedBytes >= sourceBytes) {
             Files.copy(input.path(), outputPath, StandardCopyOption.REPLACE_EXISTING);
+            ConversionGuards.requireValidPdfOutput(outputPath, limits, "PDF 压缩", pageCount);
             warnings = List.of(ConversionWarning.of(WarningCode.PDF_SIZE_NOT_REDUCED,
                     "源 PDF 已较为紧凑，本次优化未减小体积，已保留原文件（" + formatBytes(sourceBytes) + "）。", null));
         } else {

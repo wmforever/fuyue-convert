@@ -53,7 +53,7 @@ public final class TextToDocxConverter implements FileConverter {
             }
             try (var out = Files.newOutputStream(outputPath)) { document.write(out); }
         }
-        ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "TXT 转 DOCX");
+        ConversionGuards.requireValidDocxOutput(outputPath, limits, "TXT 转 DOCX");
         return new ConversionOutput(outputPath, input.displayName().replaceFirst("(?i)\\.txt$", ".docx"),
                 null, decoded.warnings());
     }

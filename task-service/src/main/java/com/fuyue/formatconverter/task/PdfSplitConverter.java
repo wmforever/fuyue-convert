@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.zip.ZipFile;
 
 final class PdfSplitConverter implements FileConverter {
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.PDF, DocumentFormat.PDF_SPLIT,
@@ -56,7 +57,27 @@ final class PdfSplitConverter implements FileConverter {
                 zip.finish();
             }
         }
+        requireSplitArchive(outputPath, limits, selectedPages.size());
         return new ConversionOutput(outputPath, input.displayName().replaceFirst("(?i)\\.pdf$", "-pages.zip"),
                 selectedPages.size(), List.of());
+    }
+
+    private void requireSplitArchive(Path output, ParseLimits limits, int expectedEntries) throws Exception {
+        ConversionGuards.requireNonEmptyOutputFile(output, limits, "PDF 拆分 ZIP");
+        try (ZipFile archive = new ZipFile(output.toFile())) {
+            long entries = archive.stream().filter(entry -> !entry.isDirectory()).count();
+            if (entries != expectedEntries) {
+                throw new java.io.IOException("PDF 拆分 ZIP 条目数不一致：" + entries + " != " + expectedEntries);
+            }
+            for (var entry : archive.stream().filter(item -> !item.isDirectory()).toList()) {
+                try (var input = archive.getInputStream(entry)) {
+                    byte[] header = input.readNBytes(5);
+                    if (header.length < 5 || header[0] != '%'
+                            || header[1] != 'P' || header[2] != 'D' || header[3] != 'F' || header[4] != '-') {
+                        throw new java.io.IOException("PDF 拆分 ZIP 包含无效 PDF 条目：" + entry.getName());
+                    }
+                }
+            }
+        }
     }
 }

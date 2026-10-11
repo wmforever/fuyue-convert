@@ -114,6 +114,7 @@ abstract class OfdToImageConverter implements FileConverter {
         if (pages.size() == 1) {
             Files.move(pages.get(0), outputPath, StandardCopyOption.REPLACE_EXISTING);
             ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "OFD 单页 " + targetFormat.label());
+            ConversionGuards.requireImageBounds(outputPath, limits);
             return new ConversionOutput(outputPath, singleOutputName(input.displayName()), 1, warnings);
         }
         Path zip = outputPath.resolveSibling(outputPath.getFileName().toString()

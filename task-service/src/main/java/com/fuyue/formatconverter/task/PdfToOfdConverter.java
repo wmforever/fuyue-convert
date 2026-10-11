@@ -86,7 +86,7 @@ public final class PdfToOfdConverter implements FileConverter {
                         55 + (int) Math.round((index + 1d) * 35d / model.pages().size()));
             }
         }
-        requireOfdPackage(outputPath, limits);
+        requireOfdPackage(outputPath, limits, model.pages().size());
         List<ConversionWarning> warnings = List.of(ConversionWarning.of(WarningCode.FIDELITY_IMAGE_LAYER,
                 "PDF 页面使用整页图像层保证固定版式；文字型页面同时包含真实 OFD 文字对象层", null));
         return new ConversionOutput(outputPath, outputFileName(input.displayName()),
@@ -183,10 +183,17 @@ public final class PdfToOfdConverter implements FileConverter {
         });
     }
 
-    private void requireOfdPackage(Path output, ParseLimits limits) throws IOException {
+    private void requireOfdPackage(Path output, ParseLimits limits, int expectedPages) throws IOException {
         ConversionGuards.requireNonEmptyOutputFile(output, limits, "PDF 转 OFD");
         try (ZipFile archive = new ZipFile(output.toFile())) {
             if (archive.getEntry("OFD.xml") == null) throw new IOException("PDF 转 OFD 未生成合法 OFD.xml");
+            long contentPages = archive.stream().filter(entry -> !entry.isDirectory())
+                    .map(entry -> entry.getName().replace('\\', '/'))
+                    .filter(name -> name.endsWith("/Content.xml") || name.equals("Content.xml"))
+                    .count();
+            if (contentPages < expectedPages) {
+                throw new IOException("PDF 转 OFD 页面内容不完整：" + contentPages + " < " + expectedPages);
+            }
         }
     }
 

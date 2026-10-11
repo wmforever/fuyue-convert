@@ -39,6 +39,23 @@ class LibreOfficeFailureContractTest {
     }
 
     @Test
+    void rejectsMalformedUofXmlBeforeStartingProcess() throws Exception {
+        Path malformed = temp.resolve("malformed.uof");
+        Files.writeString(malformed, "<!DOCTYPE UOF [<!ENTITY x SYSTEM 'file:///etc/passwd'>]><UOF>&x;</UOF>",
+                StandardCharsets.UTF_8);
+        LibreOfficeConverter converter = new LibreOfficeConverter(DocumentFormat.UOF, DocumentFormat.DOCX,
+                temp.resolve("missing-soffice"), Duration.ofSeconds(5), "test converter");
+
+        ConversionFailureException error = assertThrows(ConversionFailureException.class,
+                () -> converter.convert(new ConversionInput(malformed.getFileName().toString(),
+                                DocumentFormat.UOF.contentType(), Files.size(malformed), malformed),
+                        temp.resolve("malformed-uof-work"), temp.resolve("out.docx"),
+                        ParseLimits.defaults(), (stage, progress) -> { }));
+
+        assertEquals("INVALID_OFFICE_DOCUMENT", error.code());
+    }
+
+    @Test
     void hidesLibreOfficeUnreadableInputLogBehindStableErrorCode() throws Exception {
         assumeFalse(System.getProperty("os.name", "").toLowerCase().contains("win"));
         Path source = temp.resolve("unreadable.pptx");

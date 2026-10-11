@@ -5,6 +5,7 @@ import com.fuyue.formatconverter.parser.ParseLimits;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
@@ -107,8 +108,13 @@ final class OoxmlPackageGuard {
                 throw new IOException("OOXML ZIP 条目包含路径穿越：" + name);
             }
         }
-        if (Path.of(slashName).isAbsolute() || Path.of(slashName).normalize().startsWith("..")) {
-            throw new IOException("OOXML ZIP 条目路径无效：" + name);
+        try {
+            Path path = Path.of(slashName);
+            if (path.isAbsolute() || path.normalize().startsWith("..")) {
+                throw new IOException("OOXML ZIP 条目路径无效：" + name);
+            }
+        } catch (InvalidPathException error) {
+            throw new IOException("OOXML ZIP 条目路径无效：" + name, error);
         }
     }
 

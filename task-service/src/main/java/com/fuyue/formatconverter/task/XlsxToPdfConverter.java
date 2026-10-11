@@ -65,7 +65,7 @@ public final class XlsxToPdfConverter implements FileConverter {
         }
         progress.update(TaskStage.RENDERING, 80);
         int pageCount = PdfSupport.writeTextPdfPages(pages, outputPath, limits.maxPages());
-        ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "XLSX 转 PDF");
+        ConversionGuards.requireValidPdfOutput(outputPath, limits, "XLSX 转 PDF", pageCount);
         List<ConversionWarning> warnings = formulas[0]
                 ? List.of(ConversionWarning.of(WarningCode.FORMULA_RESULT_EXPORTED,
                 "XLSX 公式已导出工作簿中保存的缓存结果，未在服务端重新计算。", null))

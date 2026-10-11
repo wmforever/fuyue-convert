@@ -70,7 +70,7 @@ final class ImageOcrToDocxConverter implements FileConverter {
                 List.of(page), warnings);
         progress.update(TaskStage.RENDERING, 75);
         renderer.render(document, outputPath);
-        ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "图片 OCR 转 DOCX");
+        ConversionGuards.requireValidDocxOutput(outputPath, limits, "图片 OCR 转 DOCX");
         return new ConversionOutput(outputPath,
                 input.displayName().replaceFirst("(?i)\\.(png|jpe?g)$", ".docx"), 1, warnings);
     }

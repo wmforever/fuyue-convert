@@ -37,7 +37,7 @@ public final class OfdToPdfConverter implements FileConverter {
         var parsed = parser.parse(safe, input.displayName(), limits);
         progress.update(TaskStage.RENDERING, 60);
         renderer.render(parsed, outputPath);
-        ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "OFD 转 PDF");
+        ConversionGuards.requireValidPdfOutput(outputPath, limits, "OFD 转 PDF", parsed.pages().size());
         List<ConversionWarning> warnings = new java.util.ArrayList<>();
         parsed.warnings().stream()
                 .filter(warning -> warning.code() != WarningCode.OCR_REQUIRED)

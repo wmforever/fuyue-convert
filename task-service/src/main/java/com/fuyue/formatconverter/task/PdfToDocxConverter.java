@@ -80,7 +80,7 @@ public final class PdfToDocxConverter implements FileConverter {
         analyzed = paragraphs.reconstructAcrossPages(analyzed);
         progress.update(TaskStage.RENDERING, 75);
         renderer.render(analyzed, outputPath);
-        ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "PDF 转 DOCX");
+        ConversionGuards.requireValidDocxOutput(outputPath, limits, "PDF 转 DOCX");
         return new ConversionOutput(outputPath, outputFileName(input.displayName()), parsed.sourcePageCount(), warnings);
     }
 

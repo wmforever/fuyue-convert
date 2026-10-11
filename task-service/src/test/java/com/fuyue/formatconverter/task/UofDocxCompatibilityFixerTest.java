@@ -130,6 +130,30 @@ class UofDocxCompatibilityFixerTest {
         assertFalse(zipEntry(docx, "word/document.xml").contains("w:type=\"page\""));
     }
 
+    @Test
+    void placesEndnotesAfterATableOnANewBodyParagraph() throws Exception {
+        Path docx = temp.resolve("table-endnotes.docx");
+        try (XWPFDocument document = new XWPFDocument()) {
+            var table = document.createTable(1, 1);
+            table.getRow(0).getCell(0).setText("table body");
+            try (var output = Files.newOutputStream(docx)) { document.write(output); }
+        }
+        addEndnotes(docx, """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <w:endnotes xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+                  <w:endnote w:id="0" w:type="separator"><w:p/></w:endnote>
+                  <w:endnote w:id="2"><w:p><w:r><w:t>editable endnote</w:t></w:r></w:p></w:endnote>
+                </w:endnotes>
+                """);
+
+        assertTrue(UofDocxCompatibilityFixer.repair(docx).endnotePageBreak());
+        String documentXml = zipEntry(docx, "word/document.xml");
+        int tableEnd = documentXml.indexOf("</w:tbl>");
+        int pageBreak = documentXml.indexOf("w:type=\"page\"");
+        assertTrue(tableEnd >= 0 && pageBreak > tableEnd, documentXml);
+        assertFalse(UofDocxCompatibilityFixer.repair(docx).changed());
+    }
+
     private CTAbstractNum numbering(BigInteger abstractId, STNumberFormat.Enum format) {
         CTAbstractNum result = CTAbstractNum.Factory.newInstance();
         result.setAbstractNumId(abstractId);

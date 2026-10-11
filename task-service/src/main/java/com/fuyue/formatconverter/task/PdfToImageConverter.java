@@ -113,6 +113,7 @@ abstract class PdfToImageConverter implements FileConverter {
             Files.move(pages.get(0), outputPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             ConversionGuards.requireNonEmptyOutputFile(outputPath, limits,
                     "PDF 单页 " + targetFormat.label());
+            ConversionGuards.requireImageBounds(outputPath, limits);
             return new ConversionOutput(outputPath, outputName(input.displayName(), plan), 1, List.of());
         }
         return packagePages(input, outputPath, pages, plan.pages(), limits);
@@ -132,6 +133,7 @@ abstract class PdfToImageConverter implements FileConverter {
                 progress.update(TaskStage.RENDERING, 70);
                 writePage(renderer, plan.pages().get(0) - 1, outputPath, dpi);
                 ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "PDF 单页 " + targetFormat.label());
+                ConversionGuards.requireImageBounds(outputPath, limits);
                 return new ConversionOutput(outputPath, outputName(input.displayName(), plan), 1, List.of());
             }
             List<Path> rendered = new ArrayList<>();

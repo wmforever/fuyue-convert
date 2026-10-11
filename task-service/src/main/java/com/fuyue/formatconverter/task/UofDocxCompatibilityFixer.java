@@ -89,19 +89,38 @@ final class UofDocxCompatibilityFixer {
         NodeList bodies = document.getElementsByTagNameNS(WORD_NS, "body");
         if (bodies.getLength() != 1) return false;
         Element body = (Element) bodies.item(0);
-        NodeList paragraphs = body.getElementsByTagNameNS(WORD_NS, "p");
-        for (int index = paragraphs.getLength() - 1; index >= 0; index--) {
-            Element paragraph = (Element) paragraphs.item(index);
-            if (!hasVisibleContent(paragraph)) continue;
-            if (hasPageBreak(paragraph)) return false;
-            Element run = document.createElementNS(WORD_NS, "w:r");
-            Element pageBreak = document.createElementNS(WORD_NS, "w:br");
-            pageBreak.setAttributeNS(WORD_NS, "w:type", "page");
-            run.appendChild(pageBreak);
-            paragraph.appendChild(run);
-            return true;
+        // Only inspect direct body blocks.  Looking at every descendant paragraph
+        // can put the break inside the last table cell, which does not force the
+        // following document-level endnotes onto a new page.
+        for (Node node = body.getLastChild(); node != null; node = node.getPreviousSibling()) {
+            if (!(node instanceof Element block) || !WORD_NS.equals(block.getNamespaceURI())) continue;
+            if ("sectPr".equals(block.getLocalName())) continue;
+            if ("p".equals(block.getLocalName())) {
+                if (hasPageBreak(block)) return false;
+                if (!hasVisibleContent(block)) continue;
+                appendPageBreak(document, block);
+                return true;
+            }
+            if ("tbl".equals(block.getLocalName())) {
+                // A table is a block-level body child, but a run appended to its
+                // final cell remains inside the table.  Insert a new body
+                // paragraph before the section properties instead.
+                Element paragraph = document.createElementNS(WORD_NS, "w:p");
+                appendPageBreak(document, paragraph);
+                Node sectionProperties = directChild(body, "sectPr");
+                body.insertBefore(paragraph, sectionProperties);
+                return true;
+            }
         }
         return false;
+    }
+
+    private static void appendPageBreak(Document document, Element paragraph) {
+        Element run = document.createElementNS(WORD_NS, "w:r");
+        Element pageBreak = document.createElementNS(WORD_NS, "w:br");
+        pageBreak.setAttributeNS(WORD_NS, "w:type", "page");
+        run.appendChild(pageBreak);
+        paragraph.appendChild(run);
     }
 
     private static boolean hasVisibleContent(Element paragraph) {

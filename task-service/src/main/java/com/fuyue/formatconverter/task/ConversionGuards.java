@@ -5,6 +5,7 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -153,6 +154,63 @@ final class ConversionGuards {
     }
 
     /**
+     * Reopens a generated DOCX before it is published.  A non-empty file can
+     * still be a truncated OOXML package, so use the same package guard as the
+     * other Office outputs and let POI validate the relationships/document XML.
+     */
+    static void requireValidDocxOutput(Path path, ParseLimits limits, String label) throws IOException {
+        requireNonEmptyOutputFile(path, limits, label);
+        OoxmlPackageGuard.requireSafeOutput(path, limits);
+        try (XWPFDocument document = new XWPFDocument(Files.newInputStream(path))) {
+            if (document.getDocument() == null || document.getDocument().getBody() == null) {
+                throw new IOException(label + "未生成有效文档主体");
+            }
+        } catch (IOException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new IOException(label + "生成的 DOCX 文件结构无效", e);
+        }
+    }
+
+    /** Reopens a generated PDF and verifies its page count and page geometry. */
+    static int requireValidPdfOutput(Path path, ParseLimits limits, String label,
+                                     Integer expectedPages) throws IOException {
+        requireNonEmptyOutputFile(path, limits, label);
+        try (var document = Loader.loadPDF(path.toFile())) {
+            int pages = document.getNumberOfPages();
+            if (pages <= 0) throw new IOException(label + "未生成页面");
+            if (pages > limits.maxPages()) {
+                throw new IOException(label + "页数超过限制：" + pages + " > " + limits.maxPages());
+            }
+            if (expectedPages != null && pages != expectedPages) {
+                throw new IOException(label + "页数不一致：" + pages + " != " + expectedPages);
+            }
+            for (int index = 0; index < pages; index++) {
+                var page = document.getPage(index);
+                var box = page.getCropBox();
+                float userUnit = page.getUserUnit();
+                if (!Float.isFinite(box.getWidth()) || !Float.isFinite(box.getHeight()) ||
+                        box.getWidth() <= 0 || box.getHeight() <= 0) {
+                    throw new IOException(label + "包含无效页面几何：第" + (index + 1) + "页");
+                }
+                // Reading the page's user unit also exercises inherited page
+                // geometry and catches malformed numeric values without
+                // changing the source document's size policy.
+                if (!Float.isFinite(userUnit) || userUnit <= 0) {
+                    throw new IOException(label + "包含无效页面缩放：第" + (index + 1) + "页");
+                }
+            }
+            return pages;
+        } catch (InvalidPasswordException e) {
+            throw new IOException(label + "生成的 PDF 需要密码", e);
+        } catch (IOException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new IOException(label + "生成的 PDF 结构无效", e);
+        }
+    }
+
+    /**
      * Reopens a generated XLSX after writing it.  ZIP size checks alone do not
      * catch truncated worksheet XML or a missing workbook relationship, while
      * callers otherwise only discover those errors when downloading/opening the
@@ -181,6 +239,7 @@ final class ConversionGuards {
     static void requireTotalSize(List<Path> files, ParseLimits limits, String label) throws IOException {
         long total = 0;
         for (Path file : files) {
+            requireImageBounds(file, limits);
             long size = Files.size(file);
             if (size > limits.maxEntryBytes()) {
                 throw new IOException(label + "单页输出超过限制：" + size + " > " + limits.maxEntryBytes());

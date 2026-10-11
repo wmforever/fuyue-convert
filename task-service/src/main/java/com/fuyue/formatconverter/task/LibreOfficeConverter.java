@@ -22,6 +22,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
 
 public final class LibreOfficeConverter implements FileConverter {
     private static final Logger log = LoggerFactory.getLogger(LibreOfficeConverter.class);
@@ -138,6 +139,16 @@ public final class LibreOfficeConverter implements FileConverter {
     }
 
     private void validateStandardOfficePackage(Path input, ParseLimits limits) throws ConversionFailureException {
+        if (route.sourceFormat() == DocumentFormat.UOF) {
+            try {
+                validateUofXml(input, limits.maxArchiveBytes(), "上传的 UOF");
+                return;
+            } catch (IOException error) {
+                log.warn("LibreOffice UOF source validation failed route={} detail={}", route.id(),
+                        ErrorMessageSanitizer.from(error));
+                throw invalidOfficeDocument();
+            }
+        }
         String documentPart = switch (route.sourceFormat()) {
             case DOCX -> "word/document.xml";
             case XLSX -> "xl/workbook.xml";
@@ -219,27 +230,52 @@ public final class LibreOfficeConverter implements FileConverter {
     }
 
     private void validateUof(Path output) throws Exception {
+        validateUofXml(output, Long.MAX_VALUE, "LibreOffice 生成的 UOF");
+    }
+
+    private void validateUofXml(Path path, long maxBytes, String label) throws IOException {
+        if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException(label + "文件不存在");
+        }
+        long size = Files.size(path);
+        if (size <= 0 || size > maxBytes) {
+            throw new IOException(label + "文件为空或超过限制：" + size + " > " + maxBytes);
+        }
         XMLInputFactory factory = XMLInputFactory.newFactory();
         factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
         factory.setProperty("javax.xml.stream.isSupportingExternalEntities", false);
-        try (var input = Files.newInputStream(output)) {
+        try (var input = Files.newInputStream(path)) {
             var reader = factory.createXMLStreamReader(input);
             try {
+                boolean rootSeen = false;
+                int depth = 0;
                 while (reader.hasNext()) {
-                    if (reader.next() == XMLStreamConstants.START_ELEMENT) {
-                        String namespace = reader.getNamespaceURI();
-                        if (!"UOF".equals(reader.getLocalName()) || namespace == null
-                                || !namespace.startsWith("http://schemas.uof.org/")) {
-                            throw new IOException("LibreOffice 生成的 UOF 根元素或命名空间无效");
+                    int event = reader.next();
+                    if (event == XMLStreamConstants.START_ELEMENT) {
+                        if (!rootSeen) {
+                            String namespace = reader.getNamespaceURI();
+                            if (!"UOF".equals(reader.getLocalName()) || namespace == null
+                                    || !namespace.startsWith("http://schemas.uof.org/")) {
+                                throw new IOException(label + "根元素或命名空间无效");
+                            }
+                            rootSeen = true;
                         }
-                        return;
+                        depth++;
+                    } else if (event == XMLStreamConstants.END_ELEMENT) {
+                        depth--;
+                    } else if (event == XMLStreamConstants.DTD
+                            || event == XMLStreamConstants.ENTITY_REFERENCE) {
+                        throw new IOException(label + "不能包含 DTD 或实体引用");
                     }
                 }
+                if (depth != 0) throw new IOException(label + " XML 标签未闭合");
+                if (!rootSeen) throw new IOException(label + "不含文档根元素");
             } finally {
                 reader.close();
             }
+        } catch (XMLStreamException error) {
+            throw new IOException(label + " XML 结构无效", error);
         }
-        throw new IOException("LibreOffice 生成的 UOF 不含文档根元素");
     }
 
     static Path awaitProducedFile(Path outDir, DocumentFormat targetFormat, Duration wait)

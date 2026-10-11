@@ -36,7 +36,7 @@ public final class DocxToPdfConverter implements FileConverter {
         }
         progress.update(TaskStage.RENDERING, 80);
         int pageCount = PdfSupport.writeTextPdfPages(List.of(lines), outputPath, limits.maxPages());
-        ConversionGuards.requireNonEmptyOutputFile(outputPath, limits, "DOCX 转 PDF");
+        ConversionGuards.requireValidPdfOutput(outputPath, limits, "DOCX 转 PDF", pageCount);
         return new ConversionOutput(outputPath, input.displayName().replaceFirst("(?i)\\.docx$", ".pdf"),
                 pageCount, List.of());
     }
