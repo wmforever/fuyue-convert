@@ -131,8 +131,7 @@ public final class GridTableRecognizer {
     private CellModel createCell(PageModel page, List<AxisLine> lines, List<Double> xs, List<Double> ys,
                                  int minRow, int maxRow, int minCol, int maxCol, BorderStyle fallbackBorder) {
         Rect box = rect(xs, ys, minRow, maxRow, minCol, maxCol);
-        List<TextBlock> content = page.textBlocks().stream()
-                .filter(t -> box.contains(t.box().center(), config.axisToleranceMm()))
+        List<TextBlock> content = cellContent(page, box).stream()
                 .sorted(Comparator.comparingDouble(TextBlock::baselineY).thenComparingDouble(t -> t.box().x()))
                 .toList();
         List<ParagraphModel> paragraphs = groupCellLines(content, box);
@@ -143,6 +142,60 @@ public final class GridTableRecognizer {
         BorderStyle right = hasVertical(lines, xs.get(maxCol + 1), ys.get(minRow), ys.get(maxRow + 1)) ? fallbackBorder : BorderStyle.NONE;
         return new CellModel(minRow, minCol, maxRow - minRow + 1, maxCol - minCol + 1, box,
                 paragraphs, top, right, bottom, left, null, horizontal, CellModel.VerticalAlignment.CENTER);
+    }
+
+    /**
+     * Assign OCR lines by their individual word geometry. Tesseract can emit a
+     * single line block whose box spans several grid cells; assigning that block
+     * by its centre silently drops all words except the centre cell. Native text
+     * blocks retain the original centre based assignment.
+     */
+    private List<TextBlock> cellContent(PageModel page, Rect cell) {
+        List<TextBlock> content = new ArrayList<>();
+        for (TextBlock block : page.textBlocks()) {
+            if (block.ocrWords().isEmpty()) {
+                if (cell.contains(block.box().center(), config.axisToleranceMm())) content.add(block);
+                continue;
+            }
+            List<TextBlock.OcrWord> words = block.ocrWords().stream()
+                    .filter(word -> !word.text().isBlank() && cell.contains(word.box().center(), 0d))
+                    .sorted(Comparator.comparingDouble(word -> word.box().x()))
+                    .toList();
+            if (words.isEmpty()) continue;
+            // Keep an intact OCR line when it belongs wholly to this cell so its
+            // original spacing and line text remain available to the exporter.
+            if (words.size() == block.ocrWords().size()
+                    && cell.contains(block.box().center(), config.axisToleranceMm())) {
+                content.add(block);
+                continue;
+            }
+            Rect wordBox = words.stream().map(TextBlock.OcrWord::box).reduce(Rect::union).orElseThrow();
+            String text = joinOcrWords(words);
+            content.add(new TextBlock(block.id() + "-cell-" + words.get(0).text(), block.pageNumber(), wordBox,
+                    text, block.baselineY(), block.style(), block.zOrder(), block.textOffsetXmm(),
+                    block.textOffsetYmm(), List.of(), Transform2D.IDENTITY, words));
+        }
+        return content;
+    }
+
+    private String joinOcrWords(List<TextBlock.OcrWord> words) {
+        StringBuilder result = new StringBuilder();
+        for (TextBlock.OcrWord word : words) {
+            if (!result.isEmpty()) {
+                int left = result.codePointBefore(result.length());
+                int right = word.text().codePointAt(0);
+                if (Character.isLetterOrDigit(left) && Character.isLetterOrDigit(right)
+                        && !isCjk(left) && !isCjk(right)) result.append(' ');
+            }
+            result.append(word.text());
+        }
+        return result.toString();
+    }
+
+    private boolean isCjk(int codePoint) {
+        return (codePoint >= 0x2E80 && codePoint <= 0x9FFF)
+                || (codePoint >= 0xF900 && codePoint <= 0xFAFF)
+                || (codePoint >= 0x20000 && codePoint <= 0x2FA1F);
     }
 
     private List<ParagraphModel> groupCellLines(List<TextBlock> blocks, Rect cell) {

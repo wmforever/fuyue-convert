@@ -110,16 +110,22 @@ final class PdfOcrSupport {
                 var crop = pdfPage.getCropBox();
                 double unit = pdfPage.getUserUnit();
                 if (!Double.isFinite(unit) || unit <= 0) unit = 1d;
+                float dpi = ocrDpiForPage(page.physicalBox());
                 ConversionGuards.requireRenderBounds(crop.getWidth() * unit, crop.getHeight() * unit,
-                        OCR_DPI, limits);
-                ocr.requireRenderedPageWithinOcrLimit(page.physicalBox(), OCR_DPI);
+                        dpi, limits);
+                ocr.requireRenderedPageWithinOcrLimit(page.physicalBox(), dpi);
                 progress.update(TaskStage.RECOGNIZING,
                         30 + (int) ((index + 1) * 35d / Math.max(1, parsed.pages().size())));
                 Path image = workDir.resolve("pdf-ocr-page-%04d.png".formatted(page.pageNumber()));
-                if (!ImageIO.write(renderer.renderImageWithDPI(index, OCR_DPI, ImageType.RGB),
+                var rendered = renderer.renderImageWithDPI(index, dpi, ImageType.RGB);
+                if (!ImageIO.write(rendered,
                         "png", image.toFile())) {
                     throw new java.io.IOException("无法写入 PDF OCR 页面图片");
                 }
+                List<com.fuyue.formatconverter.model.LineElement> rasterLines =
+                        RasterGridDetector.detect(rendered, page.physicalBox(), page.pageNumber(),
+                                System.nanoTime() + ocr.timeout().toNanos());
+                rendered.flush();
                 ConversionGuards.requireTotalSize(List.of(image), limits, "PDF OCR 页面图片");
                 TesseractOcrConverter.RecognitionResult recognized = recognize(
                         image, workDir.resolve("page-%04d".formatted(page.pageNumber())), page.pageNumber(),
@@ -132,12 +138,21 @@ final class PdfOcrSupport {
                         "pdf-p%d-rendered-background".formatted(page.pageNumber()),
                         page.pageNumber(), page.physicalBox(), "image/png", Files.readAllBytes(image),
                         "OCR_PAGE_BACKGROUND", Integer.MIN_VALUE);
-                pages.add(new PageModel(page.pageNumber(), page.physicalBox(), recognized.blocks(), List.of(),
+                pages.add(new PageModel(page.pageNumber(), page.physicalBox(), recognized.blocks(), rasterLines,
                         List.of(renderedPage), List.of(), List.of(), warnings));
             }
         }
         return new DocumentModel(parsed.sourceName(), parsed.parserName() + (ocr == null ? "" : " + " + engineName()),
                 parsed.sourcePageCount(), pages, documentWarnings);
+    }
+
+    /** Keep very long image-only PDF pages on one page while respecting the OCR pixel cap. */
+    private float ocrDpiForPage(com.fuyue.formatconverter.model.Rect page) {
+        double pixelsAtDefault = page.width() * page.height() * OCR_DPI * OCR_DPI / (25.4d * 25.4d);
+        long maximum = ocr.maxImagePixels();
+        if (!Double.isFinite(pixelsAtDefault) || pixelsAtDefault <= maximum) return OCR_DPI;
+        double scaled = OCR_DPI * Math.sqrt(maximum / pixelsAtDefault) * .97d;
+        return (float) Math.max(96d, Math.min(OCR_DPI, scaled));
     }
 
     /** OCRs every image region that the parser classified as required; failure is fatal. */

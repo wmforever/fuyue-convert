@@ -26,6 +26,11 @@ public final class AlignedTextTableRecognizer implements BorderlessTableRecogniz
         List<TextBlock> source = page.textBlocks().stream()
                 .filter(block -> !block.text().isBlank())
                 .filter(block -> Math.abs(block.transform().rotationDegrees()) <= 0.5d)
+                // Tesseract emits one TextBlock per visual line. A line can contain
+                // several table cells, so recover its word geometry before grouping
+                // rows and columns. Native text blocks have no OCR words and pass
+                // through unchanged.
+                .flatMap(this::expandOcrWords)
                 .sorted(Comparator.comparingDouble(TextBlock::baselineY).thenComparingDouble(t -> t.box().x()))
                 .toList();
         List<RowBand> rows = rows(source);
@@ -55,24 +60,45 @@ public final class AlignedTextTableRecognizer implements BorderlessTableRecogniz
                 .flatMap(row -> row.cells().stream())
                 .map(cell -> cell.box().center().x()).sorted().toList();
         List<Double> columns = cluster(centers);
+        boolean leftAnchored = false;
+        // Text centres drift with cell content width. For left-aligned scanned
+        // tables, use the much more stable word left edge when centre clustering
+        // creates more columns than any row can contain.
+        if (columns.size() > maxCells) {
+            List<Double> leftEdges = rows.stream().filter(row -> row.cells().size() == maxCells)
+                    .flatMap(row -> row.cells().stream())
+                    .map(cell -> cell.box().x()).sorted().toList();
+            List<Double> leftColumns = cluster(leftEdges);
+            if (leftColumns.size() >= 2 && leftColumns.size() <= maxCells) {
+                columns = leftColumns;
+                leftAnchored = true;
+            }
+        }
         if (columns.size() < 2 || columns.size() > 64) return null;
+        final List<Double> selectedColumns = columns;
+        final boolean useLeftAnchor = leftAnchored;
         int usableRows = 0;
         double alignmentScore = 0;
         for (RowBand row : rows) {
-            int aligned = (int) row.cells().stream().mapToInt(cell -> nearest(columns, cell.box().center().x())).distinct().count();
+            int aligned = (int) row.cells().stream()
+                    .mapToInt(cell -> nearest(selectedColumns, anchor(cell, useLeftAnchor))).distinct().count();
             if (aligned >= 2) usableRows++;
             alignmentScore += Math.min(1d, aligned / (double) columns.size());
         }
         if (usableRows < 3 || alignmentScore / rows.size() < 0.82d) return null;
 
-        double[] xGrid = xGrid(rows, columns);
+        double[] xGrid = xGrid(rows, selectedColumns);
         List<Double> yGrid = yGrid(rows);
         List<CellModel> cells = new ArrayList<>();
         for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
             for (TextBlock text : rows.get(rowIndex).cells()) {
-                int first = nearest(columns, text.box().center().x());
+                int first = nearest(selectedColumns, anchor(text, useLeftAnchor));
                 int last = first;
-                while (last + 1 < xGrid.length - 1 && text.box().right() > xGrid[last + 1] + 0.5d) last++;
+                // Left-edge columns describe ordinary cells; their text width is
+                // not evidence of a cross-column merge. Keep the conservative
+                // one-cell assignment in this fallback mode.
+                while (!useLeftAnchor && last + 1 < xGrid.length - 1
+                        && text.box().right() > xGrid[last + 1] + 0.5d) last++;
                 int span = Math.max(1, last - first + 1);
                 Rect box = new Rect(xGrid[first], yGrid.get(rowIndex),
                         xGrid[first + span] - xGrid[first], yGrid.get(rowIndex + 1) - yGrid.get(rowIndex));
@@ -121,7 +147,7 @@ public final class AlignedTextTableRecognizer implements BorderlessTableRecogniz
                 if (gap <= Math.max(2.5d, Math.min(6d, previous.box().height() * 1.8d))) {
                     Rect box = previous.box().union(text.box());
                     merged.set(merged.size() - 1, new TextBlock(previous.id(), previous.pageNumber(), box,
-                            previous.text() + text.text(), (previous.baselineY() + text.baselineY()) / 2d,
+                            joinText(previous, text, gap), (previous.baselineY() + text.baselineY()) / 2d,
                             previous.style(), previous.zOrder(), 0, 0, List.of(), Transform2D.IDENTITY));
                     continue;
                 }
@@ -131,13 +157,42 @@ public final class AlignedTextTableRecognizer implements BorderlessTableRecogniz
         return merged;
     }
 
+    private java.util.stream.Stream<TextBlock> expandOcrWords(TextBlock block) {
+        if (block.ocrWords().isEmpty()) return java.util.stream.Stream.of(block);
+        return block.ocrWords().stream()
+                .filter(word -> !word.text().isBlank() && word.box().width() > 0 && word.box().height() > 0)
+                .map(word -> new TextBlock(block.id() + "-ocr-" + word.text(), block.pageNumber(), word.box(),
+                        word.text(), block.baselineY(), block.style(), block.zOrder(), 0, 0, List.of(),
+                        Transform2D.IDENTITY, List.of(word)));
+    }
+
+    private String joinText(TextBlock previous, TextBlock next, double gap) {
+        if (gap <= 0 || previous.text().isBlank() || next.text().isBlank()) {
+            return previous.text() + next.text();
+        }
+        int left = previous.text().codePointBefore(previous.text().length());
+        int right = next.text().codePointAt(0);
+        // OCR words from Latin/numeric cells need their source separator back;
+        // adjacent CJK fragments are conventionally written without a space.
+        boolean latinWords = Character.isLetterOrDigit(left) && Character.isLetterOrDigit(right)
+                && !isCjk(left) && !isCjk(right);
+        return previous.text() + (latinWords ? " " : "") + next.text();
+    }
+
+    private boolean isCjk(int codePoint) {
+        return (codePoint >= 0x2E80 && codePoint <= 0x9FFF)
+                || (codePoint >= 0xF900 && codePoint <= 0xFAFF)
+                || (codePoint >= 0x20000 && codePoint <= 0x2FA1F);
+    }
+
     private int aligned(RowBand first, RowBand second) {
         int matches = 0;
         Set<Integer> used = new HashSet<>();
         for (TextBlock a : first.cells()) {
             for (int index = 0; index < second.cells().size(); index++) {
                 TextBlock b = second.cells().get(index);
-                if (!used.contains(index) && Math.abs(a.box().center().x() - b.box().center().x()) <= COLUMN_TOLERANCE_MM) {
+                if (!used.contains(index) && (Math.abs(a.box().center().x() - b.box().center().x()) <= COLUMN_TOLERANCE_MM
+                        || Math.abs(a.box().x() - b.box().x()) <= COLUMN_TOLERANCE_MM)) {
                     matches++;
                     used.add(index);
                     break;
@@ -145,6 +200,10 @@ public final class AlignedTextTableRecognizer implements BorderlessTableRecogniz
             }
         }
         return matches;
+    }
+
+    private double anchor(TextBlock text, boolean leftAnchored) {
+        return leftAnchored ? text.box().x() : text.box().center().x();
     }
 
     private List<Double> cluster(List<Double> values) {

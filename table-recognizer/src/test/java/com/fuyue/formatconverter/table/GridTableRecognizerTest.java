@@ -23,6 +23,21 @@ class GridTableRecognizerTest {
         assertEquals("姓名", table.cells().get(0).paragraphs().get(0).runs().get(0).text());
     }
 
+    @Test void assignsWordsFromAnOcrLineThatSpansTwoCellsByWordGeometry() {
+        List<TextBlock.OcrWord> words = List.of(
+                new TextBlock.OcrWord(new Rect(5, 5, 15, 5), "LEFT", .98),
+                new TextBlock.OcrWord(new Rect(55, 5, 15, 5), "RIGHT", .98));
+        TextBlock line = new TextBlock("ocr-line", 1, new Rect(5, 5, 65, 5), "LEFT RIGHT", 9,
+                FontStyle.defaults(), 1, 0, 0, List.of(), Transform2D.IDENTITY, words);
+
+        TableModel table = assertSingle(page(grid(true), List.of(line)));
+
+        assertEquals("LEFT", table.cells().stream().filter(cell -> cell.row() == 0 && cell.column() == 0)
+                .findFirst().orElseThrow().paragraphs().get(0).runs().get(0).text());
+        assertEquals("RIGHT", table.cells().stream().filter(cell -> cell.row() == 0 && cell.column() == 1)
+                .findFirst().orElseThrow().paragraphs().get(0).runs().get(0).text());
+    }
+
     @Test void recognizesHorizontalMerge() {
         TableModel table = assertSingle(page(grid(false), List.of()));
         assertEquals(3, table.cells().size());

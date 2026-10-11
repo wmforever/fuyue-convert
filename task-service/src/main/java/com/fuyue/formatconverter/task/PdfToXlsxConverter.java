@@ -113,6 +113,9 @@ public final class PdfToXlsxConverter implements FileConverter {
             CellStyle numberStyle = workbook.createCellStyle();
             numberStyle.cloneStyleFrom(tableStyle);
             numberStyle.setDataFormat(workbook.createDataFormat().getFormat("0.###############"));
+            CellStyle integerStyle = workbook.createCellStyle();
+            integerStyle.cloneStyleFrom(tableStyle);
+            integerStyle.setDataFormat(workbook.createDataFormat().getFormat("0"));
             CellStyle percentStyle = workbook.createCellStyle();
             percentStyle.cloneStyleFrom(tableStyle);
             percentStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00%"));
@@ -126,7 +129,7 @@ public final class PdfToXlsxConverter implements FileConverter {
                 Sheet sheet = workbook.createSheet("第" + page.pageNumber() + "页");
                 int rowOffset = 0;
                 for (TableModel table : page.tables()) {
-                    cells = writeTable(sheet, table, rowOffset, tableStyle, numberStyle, percentStyle,
+                    cells = writeTable(sheet, table, rowOffset, tableStyle, numberStyle, integerStyle, percentStyle,
                             dateStyle, formulaStyle, limits, cells);
                     rowOffset += table.rowCount() + 2;
                 }
@@ -170,7 +173,7 @@ public final class PdfToXlsxConverter implements FileConverter {
     }
 
     private long writeTable(Sheet sheet, TableModel table, int rowOffset, CellStyle style,
-                            CellStyle numberStyle, CellStyle percentStyle, CellStyle dateStyle,
+                            CellStyle numberStyle, CellStyle integerStyle, CellStyle percentStyle, CellStyle dateStyle,
                             CellStyle formulaStyle, ParseLimits limits, long cells) throws Exception {
         for (CellModel cell : table.cells().stream()
                 .sorted(Comparator.comparingInt(CellModel::row).thenComparingInt(CellModel::column)).toList()) {
@@ -183,7 +186,7 @@ public final class PdfToXlsxConverter implements FileConverter {
             if (row == null) row = sheet.createRow(rowIndex);
             var target = row.getCell(cell.column());
             if (target == null) target = row.createCell(cell.column());
-            writeCellValue(target, value, style, numberStyle, percentStyle, dateStyle, formulaStyle);
+            writeCellValue(target, value, style, numberStyle, integerStyle, percentStyle, dateStyle, formulaStyle);
             cells++;
             ConversionGuards.requireSpreadsheetCellCount(cells, limits);
             if (cell.rowSpan() > 1 || cell.columnSpan() > 1) {
@@ -206,7 +209,7 @@ public final class PdfToXlsxConverter implements FileConverter {
     }
 
     private void writeCellValue(Cell cell, String value, CellStyle textStyle, CellStyle numberStyle,
-                                CellStyle percentStyle, CellStyle dateStyle, CellStyle formulaStyle) {
+                                CellStyle integerStyle, CellStyle percentStyle, CellStyle dateStyle, CellStyle formulaStyle) {
         ParsedValue parsed = parseValue(value);
         switch (parsed.kind()) {
             case FORMULA -> {
@@ -215,7 +218,7 @@ public final class PdfToXlsxConverter implements FileConverter {
             }
             case NUMBER -> {
                 cell.setCellValue(parsed.number());
-                cell.setCellStyle(numberStyle);
+                cell.setCellStyle(isInteger(parsed.number()) ? integerStyle : numberStyle);
             }
             case PERCENT -> {
                 cell.setCellValue(parsed.number());
@@ -230,6 +233,10 @@ public final class PdfToXlsxConverter implements FileConverter {
                 cell.setCellStyle(textStyle);
             }
         }
+    }
+
+    private boolean isInteger(double value) {
+        return Double.isFinite(value) && Math.rint(value) == value;
     }
 
     private ParsedValue parseValue(String raw) {
@@ -277,7 +284,19 @@ public final class PdfToXlsxConverter implements FileConverter {
 
     private String cellText(CellModel cell) {
         return cell.paragraphs().stream().map(this::paragraphText)
+                .map(this::cleanRasterGridArtifacts)
                 .filter(value -> !value.isBlank()).reduce((first, second) -> first + "\n" + second).orElse("");
+    }
+
+    /** Tesseract can read a thin table rule as a pipe at the cell edge. */
+    private String cleanRasterGridArtifacts(String value) {
+        if (value == null || value.isBlank()) return "";
+        return value.lines()
+                .map(String::strip)
+                .map(line -> line.replaceFirst("^\\|+\\s*", "")
+                        .replaceFirst("\\s*\\|+$", ""))
+                .filter(line -> !line.isBlank())
+                .reduce((first, second) -> first + "\n" + second).orElse("");
     }
 
     private String paragraphText(ParagraphModel paragraph) {

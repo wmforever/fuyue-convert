@@ -67,6 +67,60 @@ class PageLayoutAnalyzerTest {
         assertEquals(0, analyzed.paragraphs().size());
     }
 
+    @Test void expandsOcrWordsInsideLineBlocksIntoSeparateTableColumns() {
+        List<TextBlock> blocks = List.of(
+                ocrLine("Name Amount", 20, 20, 80, 5, 25,
+                        word("Name", 20, 20, 20), word("Amount", 80, 20, 20)),
+                ocrLine("Alice 12.5", 20, 35, 80, 5, 40,
+                        word("Alice", 20, 35, 25), word("12.5", 80, 35, 18)),
+                ocrLine("Bob 9.0", 20, 50, 80, 5, 55,
+                        word("Bob", 20, 50, 18), word("9.0", 80, 50, 18)),
+                ocrLine("Carol 7.5", 20, 65, 80, 5, 70,
+                        word("Carol", 20, 65, 28), word("7.5", 80, 65, 18)));
+
+        PageModel analyzed = new PageLayoutAnalyzer().analyze(new PageModel(1, new Rect(0, 0, 210, 297),
+                blocks, List.of(), List.of(), List.of(), List.of(), List.of()));
+
+        assertEquals(1, analyzed.tables().size());
+        TableModel table = analyzed.tables().get(0);
+        assertEquals(4, table.rowCount());
+        assertEquals(2, table.columnCount());
+        assertEquals(List.of("Name", "Amount", "Alice", "12.5", "Bob", "9.0", "Carol", "7.5"),
+                table.cells().stream().flatMap(cell -> cell.paragraphs().stream())
+                        .flatMap(paragraph -> paragraph.runs().stream()).map(TextBlock::text).toList());
+    }
+
+    @Test void usesOcrWordLeftEdgesWhenCellWidthsMoveTextCentres() {
+        List<TextBlock> blocks = List.of(
+                ocrLine("Long heading Value", 20, 20, 110, 5, 25,
+                        word("Long", 20, 20, 60), word("heading", 83, 20, 42), word("Value", 150, 20, 25)),
+                ocrLine("A 12", 20, 35, 155, 5, 40,
+                        word("A", 20, 35, 7), word("12", 150, 35, 15)),
+                ocrLine("Longer 9", 20, 50, 155, 5, 55,
+                        word("Longer", 20, 50, 55), word("9", 150, 50, 8)),
+                ocrLine("Medium 7", 20, 65, 155, 5, 70,
+                        word("Medium", 20, 65, 45), word("7", 150, 65, 8)));
+
+        PageModel analyzed = new PageLayoutAnalyzer().analyze(new PageModel(1, new Rect(0, 0, 240, 297),
+                blocks, List.of(), List.of(), List.of(), List.of(), List.of()));
+
+        assertEquals(1, analyzed.tables().size());
+        TableModel table = analyzed.tables().get(0);
+        assertEquals(2, table.columnCount());
+        assertEquals("Long heading", table.cells().get(0).paragraphs().get(0).runs().get(0).text());
+        assertEquals(1, table.cells().get(0).columnSpan());
+    }
+
+    private TextBlock ocrLine(String line, double x, double y, double width, double height,
+                              double baseline, TextBlock.OcrWord... words) {
+        return new TextBlock("ocr-" + line, 1, new Rect(x, y, width, height), line, baseline,
+                FontStyle.defaults(), 0, 0, 0, List.of(), Transform2D.IDENTITY, List.of(words));
+    }
+
+    private TextBlock.OcrWord word(String value, double x, double y, double width) {
+        return new TextBlock.OcrWord(new Rect(x, y, width, 5), value, .98);
+    }
+
     private TextBlock text(String id, double x, double y, double width, String value, double baseline) {
         return new TextBlock(id, 1, new Rect(x, y, width, 5.64), value, baseline,
                 new FontStyle("KaiTi", 16, false, false, ColorValue.BLACK), 0);

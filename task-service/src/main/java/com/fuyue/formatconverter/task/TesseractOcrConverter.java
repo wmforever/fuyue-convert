@@ -496,6 +496,10 @@ public final class TesseractOcrConverter implements FileConverter {
         }
     }
 
+    long maxImagePixels() { return settings.maxImagePixels(); }
+
+    Duration timeout() { return settings.timeout(); }
+
     private RecognitionResult parseTsv(Path tsv, int pageNumber, Rect page,
                                        ImageDimensions dimensions, ParseLimits limits) throws Exception {
         LinkedHashMap<String, OcrLine> lines = new LinkedHashMap<>();
