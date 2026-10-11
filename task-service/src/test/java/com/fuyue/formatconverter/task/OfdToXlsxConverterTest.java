@@ -9,6 +9,7 @@ import com.fuyue.formatconverter.model.Rect;
 import com.fuyue.formatconverter.model.TableModel;
 import com.fuyue.formatconverter.model.MergeCellModel;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -60,6 +61,34 @@ class OfdToXlsxConverterTest {
             assertEquals(1, first.getNumMergedRegions());
             assertEquals(new CellRangeAddress(0, 0, 0, 1), first.getMergedRegion(0));
             assertEquals("第二页数据", workbook.getSheetAt(1).getRow(0).getCell(0).getStringCellValue());
+        }
+    }
+
+    @Test
+    void infersSafeTypesAndKeepsAmbiguousContentAsText() throws Exception {
+        Path source = temp.resolve("typed.ofd");
+        try (OFDDoc document = new OFDDoc(source)) {
+            document.addVPage(typedTablePage());
+        }
+        Path output = temp.resolve("typed.xlsx");
+
+        converter().convert(input(source), temp.resolve("typed-work"), output,
+                ParseLimits.defaults(), (stage, percent) -> { });
+
+        try (XSSFWorkbook workbook = new XSSFWorkbook(Files.newInputStream(output))) {
+            var row = workbook.getSheetAt(0).getRow(0);
+            assertEquals(CellType.STRING, row.getCell(0).getCellType());
+            assertEquals("00042", row.getCell(0).getStringCellValue());
+            assertEquals(CellType.NUMERIC, row.getCell(1).getCellType());
+            assertEquals(12.5, row.getCell(1).getNumericCellValue(), 0.0001);
+            assertEquals(CellType.NUMERIC, row.getCell(2).getCellType());
+            assertTrue(row.getCell(2).getCellStyle().getDataFormatString().contains("yyyy"));
+            assertEquals(CellType.NUMERIC, row.getCell(3).getCellType());
+            assertEquals(0.15, row.getCell(3).getNumericCellValue(), 0.0001);
+            assertEquals(CellType.FORMULA, row.getCell(4).getCellType());
+            assertEquals("B1+1", row.getCell(4).getCellFormula());
+            assertEquals(CellType.STRING, row.getCell(5).getCellType());
+            assertEquals("=WEBSERVICE(A1)", row.getCell(5).getStringCellValue());
         }
     }
 
@@ -203,6 +232,23 @@ class OfdToXlsxConverterTest {
                 .rect(0, 0, 80, 15).stroke());
         grid.setPosition(Position.Absolute).setBox(10d, 10d, 80d, 15d);
         return new VirtualPage(100d, 50d).add(grid).add(paragraph(value, 15, 10, 70, 15));
+    }
+
+    private VirtualPage typedTablePage() {
+        Canvas grid = new Canvas(240d, 20d).setDrawer(context -> context.beginPath()
+                .moveTo(0, 0).lineTo(240, 0).moveTo(0, 20).lineTo(240, 20)
+                .moveTo(0, 0).lineTo(0, 20)
+                .moveTo(40, 0).lineTo(40, 20).moveTo(80, 0).lineTo(80, 20)
+                .moveTo(120, 0).lineTo(120, 20).moveTo(160, 0).lineTo(160, 20)
+                .moveTo(200, 0).lineTo(200, 20).moveTo(240, 0).lineTo(240, 20).stroke());
+        grid.setPosition(Position.Absolute).setBox(5d, 10d, 240d, 20d);
+        return new VirtualPage(260d, 50d).add(grid)
+                .add(paragraph("00042", 7, 10, 36, 20))
+                .add(paragraph("12.50", 47, 10, 36, 20))
+                .add(paragraph("2026-10-11", 87, 10, 36, 20))
+                .add(paragraph("15%", 127, 10, 36, 20))
+                .add(paragraph("=B1+1", 167, 10, 36, 20))
+                .add(paragraph("=WEBSERVICE(A1)", 207, 10, 36, 20));
     }
 
     private Paragraph paragraph(String value, double x, double y, double width, double height) {

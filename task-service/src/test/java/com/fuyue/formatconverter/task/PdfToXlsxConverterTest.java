@@ -148,6 +148,22 @@ class PdfToXlsxConverterTest {
         assertTrue(continuations.get(0).repeatedHeader());
     }
 
+    @Test
+    void buildsCrossPageSummaryChainWithoutGuessingUnrelatedPages() {
+        PageModel first = pageWithTable(1, 75, "列名");
+        PageModel second = pageWithTable(2, 0, "列名");
+        PageModel unrelated = pageWithTable(4, 0, "列名");
+
+        List<CrossPageTableSupport.TableChain> chains = CrossPageTableSupport.chains(
+                List.of(first, second, unrelated));
+
+        assertEquals(1, chains.size());
+        assertEquals(2, chains.get(0).segments().size());
+        assertEquals(1, chains.get(0).firstPage());
+        assertEquals(2, chains.get(0).lastPage());
+        assertTrue(chains.get(0).segments().get(1).repeatedHeader());
+    }
+
     private PageModel pageWithTable(int pageNumber, double tableY, String header) {
         CellModel cell = new CellModel(0, 0, 1, 1, new Rect(10, tableY, 40, 10),
                 List.of(new ParagraphModel(new Rect(10, tableY, 40, 10),

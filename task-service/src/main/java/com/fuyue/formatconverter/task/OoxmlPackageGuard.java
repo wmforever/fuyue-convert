@@ -40,6 +40,7 @@ final class OoxmlPackageGuard {
         }
         long archiveBytes = Files.size(packagePath);
         long archiveLimit = enforceArchiveLimit ? limits.maxArchiveBytes() : limits.maxExpandedBytes();
+        long entryLimit = enforceArchiveLimit ? limits.maxEntryBytes() : limits.maxExpandedBytes();
         if (archiveBytes <= 0 || archiveBytes > archiveLimit) {
             throw new IOException("OOXML 文件为空或超过文件限制：" + archiveBytes + " > "
                     + archiveLimit);
@@ -62,7 +63,7 @@ final class OoxmlPackageGuard {
                 if (entry.isDirectory()) continue;
 
                 long declared = entry.getSize();
-                if (declared > limits.maxEntryBytes()) {
+                if (declared > entryLimit) {
                     throw new IOException("OOXML ZIP 单个条目超过解压限制：" + name);
                 }
                 long compressed = entry.getCompressedSize();
@@ -76,7 +77,7 @@ final class OoxmlPackageGuard {
                     int read;
                     while ((read = input.read(buffer)) != -1) {
                         if (read == 0) continue;
-                        actual = addWithinLimit(actual, read, limits.maxEntryBytes(),
+                        actual = addWithinLimit(actual, read, entryLimit,
                                 "OOXML ZIP 单个条目超过解压限制：" + name);
                         expandedBytes = addWithinLimit(expandedBytes, read, limits.maxExpandedBytes(),
                                 "OOXML ZIP 总解压大小超过限制");
