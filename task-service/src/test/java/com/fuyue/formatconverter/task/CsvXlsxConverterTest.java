@@ -57,6 +57,30 @@ class CsvXlsxConverterTest {
     }
 
     @Test
+    void guardsFormulaLikeTextWhenExportingCsvButPreservesOrdinaryNumbers() throws Exception {
+        Path source = temp.resolve("formula-like-text.xlsx");
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            Row row = workbook.createSheet("data").createRow(0);
+            row.createCell(0).setCellValue("=1+1");
+            row.createCell(1).setCellValue("+1");
+            row.createCell(2).setCellValue("@user");
+            row.createCell(3).setCellValue("-not-a-number");
+            row.createCell(4).setCellValue(-123.45d);
+            row.createCell(5).setCellValue("-001");
+            try (var out = Files.newOutputStream(source)) { workbook.write(out); }
+        }
+
+        Path output = temp.resolve("formula-like-text.csv");
+        ConversionOutput result = new XlsxToCsvConverter().convert(input(source,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+                temp.resolve("work"), output, ParseLimits.defaults(), (stage, percent) -> { });
+
+        String csv = Files.readString(result.path(), StandardCharsets.UTF_8);
+        assertTrue(result.warnings().stream().anyMatch(w -> w.code() == WarningCode.CSV_FORMULA_INJECTION_GUARDED));
+        assertTrue(csv.contains("'=1+1,'+1,'@user,'-not-a-number,-123.45,-001\r\n"), csv);
+    }
+
+    @Test
     void exportsEveryWorksheetToZipAndUsesCachedFormulaAndFormattedDateValues() throws Exception {
         Path source = temp.resolve("multi.xlsx");
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {

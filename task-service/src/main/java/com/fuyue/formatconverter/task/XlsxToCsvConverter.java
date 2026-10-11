@@ -17,12 +17,20 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public final class XlsxToCsvConverter implements FileConverter {
+    /**
+     * A leading minus is safe to preserve only when the complete value is an ordinary number.
+     * Other formula trigger characters are guarded even when the suffix looks numeric because
+     * spreadsheet applications may evaluate +1 and similar text as formulas when opening CSV.
+     */
+    private static final Pattern NEGATIVE_NUMBER = Pattern.compile(
+            "-[0-9]{1,3}(?:,?[0-9]{3})*(?:\\.[0-9]+)?(?:[Ee][+-]?[0-9]+)?%?");
     private final ConversionRoute route = ConversionRoute.of(DocumentFormat.XLSX, DocumentFormat.CSV,
             "将 XLSX 导出为 UTF-8 CSV；多工作表工作簿按表分别导出 ZIP。",
             QualityLevel.STABLE, ConversionStrategy.DATA, List.of(),
-            List.of("不保留单元格样式", "公式导出已保存的缓存结果，不在服务端执行公式"));
+            List.of("不保留单元格样式", "公式导出已保存的缓存结果，不在服务端执行公式", "可能被表格软件解释为公式的文本值会加前导单引号保护"));
 
     @Override public ConversionRoute route() { return route; }
 
@@ -34,12 +42,13 @@ public final class XlsxToCsvConverter implements FileConverter {
         DataFormatter formatter = new DataFormatter(Locale.ROOT);
         List<SheetCsv> sheets = new ArrayList<>();
         boolean[] formulas = {false};
+        boolean[] guardedFormulaLikeValues = {false};
         try (XSSFWorkbook workbook = new XSSFWorkbook(Files.newInputStream(input.path()))) {
             boolean use1904Windowing = uses1904Windowing(workbook);
             for (int index = 0; index < workbook.getNumberOfSheets(); index++) {
                 Sheet sheet = workbook.getSheetAt(index);
                 sheets.add(new SheetCsv(index, sheet.getSheetName(),
-                        extractRows(sheet, formatter, formulas, use1904Windowing, limits)));
+                        extractRows(sheet, formatter, formulas, guardedFormulaLikeValues, use1904Windowing, limits)));
             }
         }
 
@@ -48,6 +57,10 @@ public final class XlsxToCsvConverter implements FileConverter {
         if (formulas[0]) {
             warnings.add(ConversionWarning.of(WarningCode.FORMULA_RESULT_EXPORTED,
                     "XLSX 公式已导出工作簿中保存的缓存结果，未在服务端重新计算。", null));
+        }
+        if (guardedFormulaLikeValues[0]) {
+            warnings.add(ConversionWarning.of(WarningCode.CSV_FORMULA_INJECTION_GUARDED,
+                    "检测到可能被表格软件解释为公式的文本值，已添加前导单引号以保持文本。普通数字和负数未修改。", null));
         }
         if (sheets.size() <= 1) {
             List<List<String>> rows = sheets.isEmpty() ? List.of() : sheets.get(0).rows();
@@ -65,6 +78,7 @@ public final class XlsxToCsvConverter implements FileConverter {
     }
 
     private List<List<String>> extractRows(Sheet sheet, DataFormatter formatter, boolean[] formulas,
+                                           boolean[] guardedFormulaLikeValues,
                                            boolean use1904Windowing,
                                            ParseLimits limits) throws Exception {
         List<List<String>> rows = new ArrayList<>();
@@ -80,6 +94,7 @@ public final class XlsxToCsvConverter implements FileConverter {
                     ConversionGuards.requireSpreadsheetColumn(c);
                     Cell cell = row.getCell(c, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                     String value = cell == null ? "" : cellText(cell, formatter, formulas, use1904Windowing);
+                    value = guardFormulaLikeValue(value, guardedFormulaLikeValues);
                     ConversionGuards.requireCellText(value);
                     values.add(value);
                     ConversionGuards.requireSpreadsheetCellCount(++cells, limits);
@@ -88,6 +103,20 @@ public final class XlsxToCsvConverter implements FileConverter {
             rows.add(values);
         }
         return rows;
+    }
+
+    private String guardFormulaLikeValue(String value, boolean[] guarded) {
+        if (value == null || value.isEmpty()) return value;
+        String candidate = value.stripLeading();
+        if (candidate.isEmpty()) return value;
+        char first = candidate.charAt(0);
+        boolean trigger = first == '=' || first == '+' || first == '@'
+                || (first == '-' && !NEGATIVE_NUMBER.matcher(candidate).matches());
+        if (!trigger) return value;
+        guarded[0] = true;
+        // Excel, LibreOffice and Numbers interpret a leading apostrophe as a text marker.
+        // It is retained in raw CSV readers, so callers are warned that this is a safety guard.
+        return "'" + value;
     }
 
     private String cellText(Cell cell, DataFormatter formatter, boolean[] formulas, boolean use1904Windowing) {
